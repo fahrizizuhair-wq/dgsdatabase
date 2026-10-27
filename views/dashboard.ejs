@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Utama - Warehouse Kiosk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7a1b1b;
+      --primary-dark: #561111;
+      --primary-light: #9e2a2b;
+      --primary-subtle: #fbeeed;
+      --primary-border: rgba(122, 27, 27, 0.15);
+      --accent-gold: #c9933b;
+      --accent-emerald: #0f9f6e;
+      --accent-emerald-bg: #ecfdf5;
+      --accent-blue: #2563eb;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --bg-surface: rgba(255, 255, 255, 0.92);
+      --card-border: rgba(255, 255, 255, 0.85);
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 20px 35px -10px rgba(122, 27, 27, 0.14), 0 10px 15px -5px rgba(0, 0, 0, 0.05);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow-x: hidden; }
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      background-color: #f4f6f9;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Luxury Background */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, rgba(88, 14, 14, 0.90) 0%, rgba(122, 27, 27, 0.45) 35%, rgba(244, 246, 249, 0.96) 80%), 
+                  url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* SIDEBAR OVERLAY */
+    .sidebar-overlay { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100vw; 
+      height: 100vh; 
+      background: rgba(15, 23, 42, 0.55); 
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 999; 
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .sidebar-overlay.active { 
+      display: block; 
+      opacity: 1;
+    }
+
+    /* SIDEBAR */
+    .sidebar { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 280px; 
+      height: 100vh; 
+      background: linear-gradient(180deg, #4d0e0e 0%, #7a1b1b 50%, #3e0b0b 100%);
+      color: white; 
+      padding: 28px 22px; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      z-index: 1000; 
+      transform: translateX(-100%); 
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); 
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25); 
+      overflow-y: auto;
+    }
+    .sidebar.active { transform: translateX(0); }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo-img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 5px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .brand-text h2 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .brand-text span {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+    }
+    .close-sidebar-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .close-sidebar-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+    .sidebar-user-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-avatar-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c9933b 0%, #7a1b1b 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .sidebar-user-info h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+    }
+    .sidebar-user-info span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: #86efac;
+      font-weight: 500;
+    }
+    .sidebar-user-info span::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: rgba(255, 255, 255, 0.5);
+      margin: 10px 0 10px 8px;
+    }
+    .nav-menu { 
+      list-style: none; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+    }
+    .nav-item a { 
+      display: flex; 
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px; 
+      color: rgba(255, 255, 255, 0.82); 
+      text-decoration: none; 
+      border-radius: 10px; 
+      font-weight: 500; 
+      font-size: 13.5px; 
+      transition: all 0.2s ease;
+    }
+    .nav-item a svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.8;
+      transition: transform 0.2s;
+    }
+    .nav-item a:hover { 
+      background-color: rgba(255, 255, 255, 0.12); 
+      color: #ffffff; 
+      transform: translateX(3px);
+    }
+    .nav-item a:hover svg {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    .nav-item.active a { 
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%); 
+      color: #ffffff; 
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border-left: 3px solid #f87171;
+    }
+    .nav-item.active a svg { opacity: 1; }
+
+    /* DROPDOWN SIDEBAR */
+    .nav-item.dropdown { position: relative; }
+    .dropdown-toggle { 
+      display: flex !important; 
+      justify-content: space-between; 
+      align-items: center; 
+      cursor: pointer;
+    }
+    .dropdown-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .dropdown-toggle .arrow { 
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      font-size: 11px; 
+      opacity: 0.8;
+    }
+    .dropdown-menu {
+      list-style: none; 
+      max-height: 0; 
+      overflow: hidden; 
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      background-color: rgba(50, 10, 10, 0.45); 
+      border-radius: 10px; 
+      margin-top: 4px; 
+      padding-left: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .dropdown-menu li a { 
+      padding: 9px 14px; 
+      font-size: 13px; 
+      color: rgba(255, 255, 255, 0.75); 
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dropdown-menu li a:hover { 
+      color: #ffffff; 
+      background-color: rgba(255, 255, 255, 0.08); 
+    }
+    .nav-item.dropdown.active .dropdown-menu { 
+      max-height: 200px; 
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+    .nav-item.dropdown.active .arrow { transform: rotate(180deg); }
+
+    .sidebar-footer { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+      margin-top: 25px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .btn-bottom { 
+      display: flex; 
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%; 
+      padding: 12px; 
+      border-radius: 10px; 
+      text-align: center; 
+      text-decoration: none; 
+      font-size: 13.5px; 
+      font-weight: 600; 
+      background: rgba(255, 255, 255, 0.08); 
+      color: white; 
+      border: 1px solid rgba(255, 255, 255, 0.18); 
+      transition: all 0.2s ease;
+    }
+    .btn-bottom:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    /* MAIN CONTENT */
+    .main-content { 
+      flex: 1; 
+      padding: 24px 36px 50px 36px; 
+      width: 100%; 
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 28px;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .toggle-btn { 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: #ffffff; 
+      color: var(--primary); 
+      border: 1px solid var(--primary-border); 
+      border-radius: 10px; 
+      cursor: pointer; 
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06); 
+      transition: all 0.2s;
+    }
+    .toggle-btn:hover { 
+      background: var(--primary);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .topbar-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-subtle);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--primary-border);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .live-clock-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #f8fafc;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+    }
+    .dot-pulse {
+      width: 8px;
+      height: 8px;
+      background-color: #22c55e;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      animation: pulseGreen 2s infinite;
+    }
+    @keyframes pulseGreen {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    .user-profile-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #ffffff;
+      padding: 4px 12px 4px 5px;
+      border-radius: 30px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+    .profile-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, #ad3232 100%);
+      color: white;
+      font-weight: 700;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile-meta {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .profile-meta .name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    .profile-meta .role {
+      font-size: 10.5px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* HERO BANNER */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.88) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-md);
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+    .hero-banner::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--accent-gold) 100%);
+    }
+    .hero-banner::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      bottom: -40px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(122, 27, 27, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-text h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .role-badge-pill {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: linear-gradient(135deg, #7a1b1b, #9e2a2b);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      vertical-align: middle;
+      box-shadow: 0 2px 6px rgba(122, 27, 27, 0.25);
+    }
+    .hero-text p {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 680px;
+      line-height: 1.6;
+    }
+    .hero-chips {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: var(--text-dark);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .chip svg { width: 14px; height: 14px; color: var(--primary); }
+
+    .hero-action-box {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .btn-hero {
+      background: var(--primary);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(122, 27, 27, 0.25);
+      transition: all 0.2s;
+    }
+    .btn-hero:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(122, 27, 27, 0.35);
+    }
+    .hero-meta-note {
+      font-size: 11.5px;
+      color: var(--text-light);
+    }
+
+    /* STATS CARDS */
+    .cards-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+      gap: 22px; 
+      margin-bottom: 28px; 
+    }
+    .card { 
+      background: var(--bg-surface); 
+      padding: 24px; 
+      border-radius: var(--radius-md); 
+      border: 1px solid var(--card-border); 
+      backdrop-filter: blur(14px); 
+      -webkit-backdrop-filter: blur(14px);
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(122, 27, 27, 0.25);
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card-info { display: flex; flex-direction: column; }
+    .card-title { 
+      font-size: 12px; 
+      color: var(--text-muted); 
+      margin-bottom: 6px; 
+      font-weight: 700; 
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .card-value { 
+      font-size: 28px; 
+      font-weight: 800; 
+      color: var(--primary); 
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+    }
+    .card-sub { 
+      font-size: 12px; 
+      color: var(--accent-emerald); 
+      margin-top: 6px; 
+      font-weight: 600; 
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .card-sub.muted { color: var(--text-muted); font-weight: 500; }
+
+    .card-icon-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--primary-subtle);
+      border: 1px solid var(--primary-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      transition: all 0.3s ease;
+    }
+    .card:hover .card-icon-wrap {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.05) rotate(3deg);
+      box-shadow: 0 6px 16px rgba(122, 27, 27, 0.25);
+    }
+    .card-icon-wrap svg { width: 26px; height: 26px; }
+
+    .icon-gold { background: #fef3c7; color: #b45309; border-color: rgba(180, 83, 9, 0.15); }
+    .card:hover .icon-gold { background: #b45309; color: white; }
+    .icon-emerald { background: #dcfce7; color: #15803d; border-color: rgba(21, 128, 61, 0.15); }
+    .card:hover .icon-emerald { background: #15803d; color: white; }
+    .icon-blue { background: #dbeafe; color: #1d4ed8; border-color: rgba(29, 78, 216, 0.15); }
+    .card:hover .icon-blue { background: #1d4ed8; color: white; }
+
+    /* MIDDLE SECTION */
+    .middle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr; /* Kolom kanan sedikit lebih lebar untuk 2 kolom kartu */
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 30px;
+    }
+    @media (max-width: 960px) { .middle-grid { grid-template-columns: 1fr; } }
+
+    .middle-grid > .panel-box {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .panel-title { 
+      font-size: 16px; 
+      font-weight: 700; 
+      color: var(--primary); 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      letter-spacing: -0.3px;
+    }
+    .panel-title svg { width: 20px; height: 20px; color: var(--primary); }
+    .panel-tag {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: #f1f5f9;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* CHART */
+    .chart-container { 
+      display: flex; 
+      align-items: flex-end; 
+      gap: 18px; 
+      height: 180px; 
+      padding: 25px 12px 10px 12px; 
+      border-bottom: 1px solid #e2e8f0; 
+      position: relative;
+    }
+    .chart-container::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      border-top: 1px dashed #e2e8f0;
+      pointer-events: none;
+    }
+    .bar-group { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 8px; 
+      flex: 1; 
+      height: 100%; 
+      justify-content: flex-end; 
+      position: relative;
+      cursor: pointer;
+    }
+    .bar-value-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      opacity: 0.85;
+      transition: all 0.2s;
+    }
+    .bar { 
+      width: 100%; 
+      max-width: 44px; 
+      border-radius: 8px 8px 3px 3px; 
+      background: linear-gradient(180deg, #a83232 0%, #7a1b1b 100%); 
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+      position: relative;
+      box-shadow: 0 3px 6px rgba(122, 27, 27, 0.2);
+    }
+    .bar-group:hover .bar { 
+      background: linear-gradient(180deg, #d32f2f 0%, #9e2a2b 100%);
+      transform: scaleY(1.04);
+      transform-origin: bottom;
+      box-shadow: 0 6px 14px rgba(122, 27, 27, 0.35);
+    }
+    .bar-group:hover .bar-value-label {
+      transform: translateY(-3px);
+      color: #9e2a2b;
+      font-size: 12px;
+    }
+    .bar-label { 
+      font-size: 12px; 
+      font-weight: 600; 
+      color: var(--text-muted); 
+      margin-top: 6px;
+    }
+
+    .chart-footer-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 12px;
+    }
+    .mini-metric {
+      background: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #f1f5f9;
+      text-align: center;
+    }
+    .mini-metric-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .mini-metric-val {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 2px;
+    }
+
+    /* STATUS BOX */
+    .status-box-inner {
+      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .status-radar-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #ecfdf5;
+      color: #059669;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+    .status-box-text h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    .status-box-text p {
+      font-size: 12px;
+      color: #059669;
+      font-weight: 600;
+    }
+
+    .status-list { 
+      list-style: none; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+    }
+    .status-item { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      font-size: 13px; 
+      color: var(--text-dark); 
+    }
+    .status-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    /* QUICK NAVIGATION */
+    .quick-nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .quick-nav-title { 
+      color: #ffffff; 
+      font-size: 18px; 
+      font-weight: 700; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      letter-spacing: -0.3px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .quick-nav-title svg { width: 20px; height: 20px; color: #fde047; }
+
+    .quick-nav-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* Membuat 2 kolom sejajar */
+      gap: 16px;
+    }
+    .quick-nav-grid .nav-card {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .quick-nav-grid .nav-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+    
+    .nav-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .nav-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fce8e6;
+      color: #7a1b1b;
+    }
+    .nav-card:hover .nav-icon {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.05);
+    }
+    .nav-icon svg { width: 22px; height: 22px; }
+
+    .nav-arrow {
+      color: var(--text-light);
+      transition: all 0.25s ease;
+    }
+    .nav-card:hover .nav-arrow {
+      color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    
+    .nav-card h3 {
+      font-size: 15px;
+      color: #222;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .nav-card p {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.4;
+      margin-bottom: 15px;
+    }
+    .nav-card-footer {
+      font-size: 12px;
+      color: #7a1b1b;
+      font-weight: 600;
+    }
+
+    /* FOOTER */
+    .dashboard-footer {
+      text-align: center;
+      margin-top: 45px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 12.5px;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      .main-content { padding: 18px; }
+      .topbar { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .topbar-right { width: 100%; justify-content: space-between; }
+      .hero-banner { flex-direction: column; align-items: flex-start; }
+      .hero-action-box { align-items: flex-start; margin-top: 12px; }
+      .chart-container { height: 150px; gap: 10px; }
+      .bar { max-width: 30px; }
+    }
+
+    /* ==========================================
+   RESPONSIF MOBILE (Layar di bawah 768px)
+   ========================================== */
+@media (max-width: 768px) {
+  /* 1. Sesuaikan Padding Kontainer Utama */
+  .header-container, 
+  .stats-grid, 
+  .main-box,
+  .middle-grid {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* 2. Kartu Statistik Menjadi 1 Kolom ke Bawah */
+  .stats-grid, 
+  .middle-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* 3. Banner Salam / Top Header */
+  .box-header,
+  .actions-toolbar,
+  .welcome-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .search-input {
+    width: 100% !important;
+  }
+
+  /* 4. Tabel Agar Bisa Di-scroll Horizontal di HP */
+  .main-box {
+    overflow-x: auto !important;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  /* 5. Penyesuaian Ukuran Teks di HP */
+  h1 {
+    font-size: 22px !important;
+  }
+  
+  .stat-value {
+    font-size: 22px !important;
+  }
+}
+/* STYLE FOOTER */
+/* 1. Paksa Body tidak memiliki margin bawaan yang menyisakan celah */
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 2. Footer mengambil lebar 100% layar dan menempel mentok ke samping */
+    .site-footer {
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        background-color: #fffcfc; /* Warna dasar gelap bernuansa marun tua */
+        color: #d1d5db;
+        padding: 50px 40px 20px 40px;
+        margin-top: 60px;
+        border-top: 3px solid #7a1b1b; /* Garis aksen merah marun */
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        box-sizing: border-box;
+    }
+
+    /* 3. Kontainer teks di dalam footer tetap berada di tengah dengan batas rapi */
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+        gap: 30px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer-logo {
+        font-size: 22px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .footer-desc {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #000000;
+        margin-bottom: 20px;
+    }
+
+    .footer-col h4 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #8f1e1e;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        letter-spacing: 0.5px;
+    }
+
+    .footer-col ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-col ul li {
+        margin-bottom: 10px;
+    }
+
+    .footer-col ul li a {
+        color: #000000;
+        text-decoration: none;
+        font-size: 13px;
+        transition: color 0.2s ease;
+    }
+
+    .footer-col ul li a:hover {
+        color: #8f1e1e;
+        text-decoration: underline;
+    }
+
+    /* Tombol Media Sosial / Ikon Lingkaran */
+    .social-icons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .social-btn {
+        width: 34px;
+        height: 34px;
+        background: rgba(122, 27, 27, 0.4);
+        color: #ffffff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .social-btn:hover {
+        background: #7a1b1b;
+        transform: translateY(-2px);
+    }
+
+    .footer-bottom {
+        max-width: 1200px;
+        margin: 20px auto 0 auto;
+        text-align: center;
+        font-size: 12px;
+        color: #000000;
+    }
+
+    .footer-logo {
+      color:#7a1b1b ;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR OVERLAY -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- SIDEBAR NAVIGATION (USER ONLY) -->
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <div class="brand-wrap">
+          <img src="/images/dgs.png" alt="Logo DGS" class="brand-logo-img" onerror="this.style.display='none'">
+          <div class="brand-text">
+            <h2>Dian Giri Saputra</h2>
+            <span>User Database</span>
+          </div>
+        </div>
+        <button class="close-sidebar-btn" onclick="toggleSidebar()" title="Tutup Menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="6"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mini Profile Info -->
+      <div class="sidebar-user-card">
+        <div class="user-avatar-circle">DG</div>
+        <div class="sidebar-user-info">
+          <h4>Dian Giri Saputra</h4>
+          <span>User Operasional</span>
+        </div>
+      </div>
+
+      <div class="nav-label">Menu Navigasi</div>
+      <ul class="nav-menu">
+        <li class="nav-item active">
+          <a href="/dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Dashboard Utama</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Data Vendor</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/harga-dasar-user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </svg>
+            <span>Harga Dasar</span>
+          </a>
+        </li>
+        <li class="nav-item dropdown">
+          <a href="javascript:void(0)" class="dropdown-toggle" onclick="toggleDropdown(this)">
+            <div class="dropdown-toggle-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              <span>Stok & Barang</span>
+            </div>
+            <span class="arrow">&#9662;</span>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="/stok-masuk-user">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12l7 7 7-7"/>
+                </svg>
+                <span>Stok Masuk</span>
+              </a>
+            </li>
+            <li>
+              <a href="/stok-keluar-user">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+                <span>Stok Keluar</span>
+              </a>
+            </li>
+            <li>
+              <a href="/stok-opname-user">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 11l3 3L22 4"/>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                <span>Stok Opname</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="/laporan-user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Laporan</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/data-bahan-kain">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Data kain</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="/" class="btn-bottom">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Keluar / Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <main class="main-content">
+    
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <span class="topbar-badge">
+          <span class="dot-pulse"></span>
+          Master Database User
+        </span>
+      </div>
+
+      <div class="topbar-right">
+        <div class="live-clock-badge" id="liveClockWrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span id="liveClockText">Memuat waktu...</span>
+        </div>
+
+        <div class="user-profile-chip">
+          <div class="profile-avatar">DG</div>
+          <div class="profile-meta">
+            <span class="name">Dian Giri Saputra</span>
+            <span class="role">User Mode</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- HERO WELCOME BANNER -->
+    <section class="hero-banner">
+      <div class="hero-text">
+        <h1 id="greetingHeading">
+          Selamat Datang
+          <span class="role-badge-pill">Akses: User</span>
+        </h1>
+        <p>
+          Anda sedang mengakses <strong>Master Database & Stok Barang</strong>. Pantau mutasi stok, eksplorasi katalog vendor, verifikasi harga material, dan unduh laporan secara terintegrasi.
+        </p>
+        <div class="hero-chips">
+          <span class="chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Hak Akses: Multi-Role User
+          </span>
+          <span class="chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+            </svg>
+            Sinkronisasi: Real-time
+          </span>
+          <span class="chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+            Database:Terhubung
+          </span>
+        </div>
+      </div>
+
+      <div class="hero-action-box">
+        <a href="/stok-masuk-user" class="btn-hero">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Catat Stok Masuk
+        </a>
+        <span class="hero-meta-note">Versi Sistem 2.4 Enterprise</span>
+      </div>
+    </section>
+
+    <!-- KARTU STATISTIK UTAMA -->
+    <section class="cards-grid">
+      <!-- Card 1: Vendor -->
+      <div class="card" onclick="window.location.href='user'" style="cursor: pointer;">
+        <div class="card-info">
+          <span class="card-title">Total Vendor Terdaftar</span>
+          <span class="card-value"><%= totalVendor %></span>
+          <span class="card-sub">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Pembaruan Terakhir Hari Ini
+          </span>
+        </div>
+        <div class="card-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V7l8-4v18"></path>
+            <path d="M19 21V11l-6-4"></path>
+            <line x1="9" y1="9" x2="9" y2="9.01"></line>
+            <line x1="9" y1="13" x2="9" y2="13.01"></line>
+            <line x1="9" y1="17" x2="9" y2="17.01"></line>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 2: Harga Dasar -->
+      <div class="card" onclick="window.location.href='harga-dasar-user'" style="cursor: pointer;">
+        <div class="card-info">
+          <span class="card-title">Item Harga Dasar</span>
+          <span class="card-value"><%= totalHargaDasar %> Item</span>
+          <span class="card-sub">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            Pembaruan Terakhir Hari Ini
+          </span>
+        </div>
+        <div class="card-icon-wrap icon-gold">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 3: Stok Masuk -->
+      <div class="card" onclick="window.location.href='stok-stok-masuk-user'" style="cursor: pointer;">
+        <div class="card-info">
+          <span class="card-title">Total Stok Masuk</span>
+          <span class="card-value"><%= totalStokMasuk.toLocaleString('id-ID') %> <span style="font-size: 16px; font-weight: 600; color: #555;">Unit</span></span>
+          <span class="card-sub">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+            Pembaruan Terakhir Hari Ini
+          </span>
+        </div>
+        <div class="card-icon-wrap icon-emerald">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 4: Transaksi / Log -->
+      <div class="card">
+        <div class="card-info">
+          <span class="card-title">Akurasi & Integritas</span>
+          <span class="card-value">99.8%</span>
+          <span class="card-sub muted">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Status Rekonsiliasi Stabil
+          </span>
+        </div>
+        <div class="card-icon-wrap icon-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL GRAFIK & STATUS -->
+    <!-- Panel Status Sistem -->
+    <section class="middle-grid">
+      <div class="panel-box">
+        <div>
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              Status Sistem & Keamanan
+            </div>
+          </div>
+
+          <div class="status-box-inner">
+            <div class="status-radar-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <div class="status-box-text">
+              <h4>Semua Subsistem Normal</h4>
+              <p>Performa Server: Optimal (14ms)</p>
+            </div>
+          </div>
+
+          <ul class="status-list">
+            <li class="status-item">
+              <div class="status-item-left">
+                <span class="dot-pulse"></span>
+                <span>Database</span>
+              </div>
+              <span class="status-badge">Terhubung</span>
+            </li>
+            <li class="status-item">
+              <div class="status-item-left">
+                <span class="dot-pulse"></span>
+                <span>Sinkronisasi Data</span>
+              </div>
+              <span class="status-badge">Real-time</span>
+            </li>
+            <li class="status-item">
+              <div class="status-item-left">
+                <span class="dot-pulse"></span>
+                <span>Akses Multi-Role</span>
+              </div>
+              <span class="status-badge admin-tag">Mode User Master</span>
+            </li>
+            <li class="status-item">
+              <div class="status-item-left">
+                <span class="dot-pulse"></span>
+                <span>Auto Backup Cloud</span>
+              </div>
+              <span class="status-badge">Aktif 03:00</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+          <section class="quick-nav-grid">
+          <!-- ADMIN CARD 1: Master Vendor -->
+          <a href="/user" class="nav-card">
+            <div class="nav-card-top">
+              <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+              <span class="nav-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </span>
+            </div>
+            <div>
+              <h3>Data Vendor (User)</h3>
+              <p>Kelola registrasi master vendor, verifikasi status, ubah detail profil, dan hapus pemasok.</p>
+            </div>
+            <div class="nav-card-footer">
+              <span>Kelola Master Vendor &rarr;</span>
+            </div>
+          </a>
+
+          <!-- ADMIN CARD 2: Harga Dasar -->
+          <a href="/harga-dasar-user" class="nav-card">
+            <div class="nav-card-top">
+              <div class="nav-icon icon-gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                  <line x1="7" y1="15" x2="7.01" y2="15"></line>
+                  <line x1="12" y1="15" x2="12.01" y2="15"></line>
+                </svg>
+              </div>
+              <span class="nav-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </span>
+            </div>
+            <div>
+              <h3>Harga Dasar (User)</h3>
+              <p>Kelola, tambah, perbarui harga material pokok, kalkulasi final price & spesifikasi teknis.</p>
+            </div>
+            <div class="nav-card-footer">
+              <span>Kelola Harga Dasar &rarr;</span>
+            </div>
+          </a>
+
+          <!--CARD 3: Stok Masuk & Barang -->
+          <a href="/stok-masuk-user" class="nav-card">
+            <div class="nav-card-top">
+              <div class="nav-icon icon-emerald">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+              </div>
+              <span class="nav-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </span>
+            </div>
+            <div>
+              <h3>Stok & Barang (User)</h3>
+              <p>Kontrol penuh arus stok masuk, mutasi barang keluar, dan penyesuaian stok opname gudang.</p>
+            </div>
+            <div class="nav-card-footer">
+              <span>Kelola Stok & Barang &rarr;</span>
+            </div>
+          </a>
+
+          <!-- ADMIN CARD 4: Laporan Master -->
+          <a href="/laporan-user" class="nav-card">
+            <div class="nav-card-top">
+              <div class="nav-icon icon-blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+              </div>
+              <span class="nav-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </span>
+            </div>
+            <div>
+              <h3>Laporan Master (User)</h3>
+              <p>Unggah dokumen laporan baru, rekapitulasi berkas operasional, dan hapus arsip dokumen.</p>
+            </div>
+            <div class="nav-card-footer">
+              <span>Kelola Dokumen Laporan &rarr;</span>
+            </div>
+          </a>
+        </section>
+    </section>
+
+    <!-- FOOTER UTAMA DASHBOARD -->
+  <footer class="site-footer">
+      <div class="footer-container">
+          <!-- Kolom 1: Brand & Deskripsi -->
+          <div class="footer-col brand-col">
+              <h3 class="footer-logo">WAREHOUSE<span style="color: #7a1b1b;">.</span></h3>
+              <p class="footer-desc">Sistem manajemen inventaris, harga dasar, dan vendor terintegrasi dengan pengawasan real-time.</p>
+              <div class="social-icons">
+                  <a href="#" class="social-btn" title="Facebook">f</a>
+                  <a href="#" class="social-btn" title="Twitter">t</a>
+                  <a href="#" class="social-btn" title="Instagram">i</a>
+                  <a href="#" class="social-btn" title="LinkedIn">in</a>
+              </div>
+          </div>
+
+          <!-- Kolom 2: Navigasi Menu -->
+          <div class="footer-col">
+              <h4>Menu Utama</h4>
+              <ul>
+                  <li><a href="/dashboard">Dashboard</a></li>
+                  <li><a href="/user">Data Vendor</a></li>
+                  <li><a href="/harga-dasar-user">Harga Dasar</a></li>
+                  <li><a href="/laporan-user">Laporan</a></li>
+              </ul>
+          </div>
+
+          <!-- Kolom 3: Legal & Kebijakan -->
+          <div class="footer-col">
+              <h4>Legal & Sistem</h4>
+              <ul>
+                  <li><a href="#">Syarat & Ketentuan</a></li>
+                  <li><a href="#">Kebijakan Privasi</a></li>
+                  <li><a href="#">Keamanan Data</a></li>
+                  <li><a href="#">Pusat Bantuan</a></li>
+              </ul>
+          </div>
+
+          <!-- Kolom 4: Informasi Teknis -->
+          <div class="footer-col">
+              <h4>Teknis</h4>
+              <ul>
+                  <li><a href="#">Status Server (Online)</a></li>
+                  <li><a href="#">Catatan Rilis v2.4</a></li>
+                  <li><a href="#">Dokumentasi API</a></li>
+                  <li><a href="#">Backup Otomatis</a></li>
+              </ul>
+          </div>
+
+          <!-- Kolom 5: Lainnya -->
+          <div class="footer-col">
+              <h4>Dukungan</h4>
+              <ul>
+                  <li><a href="#">Kontak Admin</a></li>
+                  <li><a href="#">Panduan Pengguna</a></li>
+                  <li><a href="#">Pengaturan Akun</a></li>
+                  <li><a href="#">Keluar Sistem</a></li>
+              </ul>
+          </div>
+      </div>
+
+      <!-- Copyright Bawah -->
+      <div class="footer-bottom">
+          <p>&copy; 2026 Warehouse & Inventory Management System. Hak Cipta Dilindungi.</p>
+      </div>
+  </footer>
+
+  </main>
+
+  <script>
+    // SIDEBAR TOGGLE
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    // ACCORDION DROPDOWN SIDEBAR
+    function toggleDropdown(element) {
+      const parent = element.closest('.dropdown');
+      parent.classList.toggle('active');
+    }
+
+    // REALTIME INDONESIAN CLOCK & DYNAMIC GREETING
+    function updateClockAndGreeting() {
+      const now = new Date();
+
+      // Indonesian Date Format
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+      
+      const dayName = days[now.getDay()];
+      const dayNum = now.getDate();
+      const monthName = months[now.getMonth()];
+      const year = now.getFullYear();
+
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      const clockEl = document.getElementById('liveClockText');
+      if (clockEl) {
+        clockEl.textContent = `${dayName}, ${dayNum} ${monthName} ${year} • ${hours}:${minutes}:${seconds} WIB`;
+      }
+
+      // Dynamic Greeting based on Hour
+      const currentHour = now.getHours();
+      let greetingText = 'Selamat Datang';
+      if (currentHour >= 4 && currentHour < 11) {
+        greetingText = 'Selamat Pagi';
+      } else if (currentHour >= 11 && currentHour < 15) {
+        greetingText = 'Selamat Siang';
+      } else if (currentHour >= 15 && currentHour < 18) {
+        greetingText = 'Selamat Sore';
+      } else {
+        greetingText = 'Selamat Malam';
+      }
+
+      const greetingEl = document.getElementById('greetingHeading');
+      if (greetingEl) {
+        greetingEl.innerHTML = `${greetingText}, Dian Giri Saputra <span class="role-badge-pill">Akses: User</span>`;
+      }
+    }
+
+    // Initialize Clock immediately and update every 1 second
+    updateClockAndGreeting();
+    setInterval(updateClockAndGreeting, 1000);
+
+    // Close sidebar on ESC key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (sidebar && sidebar.classList.contains('active')) {
+          sidebar.classList.remove('active');
+          overlay.classList.remove('active');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

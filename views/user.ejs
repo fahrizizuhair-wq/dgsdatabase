@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Katalog Vendor - User</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; color: #333; background-color: #f4f6f9; min-height: 100vh; position: relative; }
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.88) 0%, rgba(122, 27, 27, 0.2) 35%, rgba(244, 246, 249, 0.95) 100%), 
+                  url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover; z-index: -1; pointer-events: none;
+    }
+
+    /* Top / Header Section */
+    .header-container { padding: 30px 40px 10px 40px; color: white; }
+    .menu-btn { background: white; border: none; width: 45px; height: 45px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; transition: background 0.2s; }
+    .menu-btn:hover { background: #f0f0f0; }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+    p.subtitle { font-size: 14px; opacity: 0.9; margin-bottom: 25px; }
+
+    /* Statistik Cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 0 40px; margin-bottom: 30px; }
+    .stat-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+    .stat-title { font-size: 13px; color: #666; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; }
+    .stat-value { font-size: 26px; font-weight: 700; }
+    .text-green { color: #137333; }
+    .text-red { color: #c5221f; }
+    .text-dark { color: #222; }
+
+    /* Main Content Box */
+    .main-box { background: white; margin: 0 40px 40px 40px; border-radius: 16px; padding: 30px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    .box-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 25px; 
+    flex-wrap: wrap; 
+    gap: 12px; /* Jarak antar tombol dibuat rapat */
+}
+    .box-title { 
+    font-size: 20px; 
+    font-weight: 700; 
+    color: #7a1b1b; 
+    margin-right: auto; /* Mendorong seluruh elemen setelahnya agar rapat di kanan */
+}
+    
+    .actions-toolbar { 
+    display: flex; 
+    gap: 10px; /* Jarak antar tombol disetting rapat (10px) */
+    align-items: center; 
+    margin-left: auto;
+    }
+
+    .search-input { 
+    padding: 10px 14px; 
+    border: 1px solid #d1d5db; 
+    border-radius: 8px; 
+    width: 220px; 
+    font-size: 14px; 
+    outline: none; 
+    background: white;
+}
+    .search-input:focus { border-color: #7a1b1b; }
+
+    .btn { background-color: #7a1b1b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; font-size: 14px; transition: background 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn:hover { background-color: #5c1313; }
+
+    /* Table Styling */
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+    th, td { padding: 14px 16px; text-align: left; font-size: 14px; border-bottom: 1px solid #eee; }
+    th { background-color: #fafafa; color: #444; font-weight: 700; }
+    tr:hover { background-color: #fcfcfc; }
+
+    .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-active { background-color: #e6f4ea; color: #137333; }
+    .badge-review { background-color: #fef7e0; color: #b06000; }
+    .badge-inactive { background-color: #fce8e6; color: #c5221f; }
+
+    .btn-detail { background-color: #7a1b1b; color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-block; transition: background 0.2s; }
+    .btn-detail:hover { background-color: #c33737; }
+
+    /* Sidebar Styling */
+    .sidebar-overlay { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100vw; 
+      height: 100vh; 
+      background: rgba(15, 23, 42, 0.55); 
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 999; 
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .sidebar-overlay.active { 
+      display: block; 
+      opacity: 1;
+    }
+
+    /* SIDEBAR */
+    .sidebar { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 280px; 
+      height: 100vh; 
+      background: linear-gradient(180deg, #4d0e0e 0%, #7a1b1b 50%, #3e0b0b 100%);
+      color: white; 
+      padding: 28px 22px; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      z-index: 1000; 
+      transform: translateX(-100%); 
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); 
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25); 
+      overflow-y: auto;
+    }
+    .sidebar.active { transform: translateX(0); }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo-img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 5px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .brand-text h2 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .brand-text span {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+    }
+    .close-sidebar-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .close-sidebar-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+    .sidebar-user-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-avatar-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c9933b 0%, #7a1b1b 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .sidebar-user-info h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+    }
+    .sidebar-user-info span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: #86efac;
+      font-weight: 500;
+    }
+    .sidebar-user-info span::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: rgba(255, 255, 255, 0.5);
+      margin: 10px 0 10px 8px;
+    }
+    .nav-menu { 
+      list-style: none; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+    }
+    .nav-item a { 
+      display: flex; 
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px; 
+      color: rgba(255, 255, 255, 0.82); 
+      text-decoration: none; 
+      border-radius: 10px; 
+      font-weight: 500; 
+      font-size: 13.5px; 
+      transition: all 0.2s ease;
+    }
+    .nav-item a svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.8;
+      transition: transform 0.2s;
+    }
+    .nav-item a:hover { 
+      background-color: rgba(255, 255, 255, 0.12); 
+      color: #ffffff; 
+      transform: translateX(3px);
+    }
+    .nav-item a:hover svg {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    .nav-item.active a { 
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%); 
+      color: #ffffff; 
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border-left: 3px solid #f87171;
+    }
+    .nav-item.active a svg { opacity: 1; }
+
+    /* DROPDOWN SIDEBAR */
+    .nav-item.dropdown { position: relative; }
+    .dropdown-toggle { 
+      display: flex !important; 
+      justify-content: space-between; 
+      align-items: center; 
+      cursor: pointer;
+    }
+    .dropdown-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .dropdown-toggle .arrow { 
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      font-size: 11px; 
+      opacity: 0.8;
+    }
+    .dropdown-menu {
+      list-style: none; 
+      max-height: 0; 
+      overflow: hidden; 
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      background-color: rgba(50, 10, 10, 0.45); 
+      border-radius: 10px; 
+      margin-top: 4px; 
+      padding-left: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .dropdown-menu li a { 
+      padding: 9px 14px; 
+      font-size: 13px; 
+      color: rgba(255, 255, 255, 0.75); 
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dropdown-menu li a:hover { 
+      color: #ffffff; 
+      background-color: rgba(255, 255, 255, 0.08); 
+    }
+    .nav-item.dropdown.active .dropdown-menu { 
+      max-height: 200px; 
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+    .nav-item.dropdown.active .arrow { transform: rotate(180deg); }
+
+    .sidebar-footer { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+      margin-top: 25px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .btn-bottom {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .btn-bottom:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    /* Modal Tambah */
+    .modal { display: none; position: fixed; z-index: 1100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+    .modal-content { background: white; padding: 35px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #444; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #7a1b1b; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+    .btn-secondary { background-color: #e0e0e0; color: #333; }
+    .btn-secondary:hover { background-color: #d0d0d0; }
+
+    /* ==========================================
+   RESPONSIF MOBILE (Layar di bawah 768px)
+   ========================================== */
+@media (max-width: 768px) {
+  /* 1. Sesuaikan Padding Kontainer Utama */
+  .header-container, 
+  .stats-grid, 
+  .main-box,
+  .middle-grid {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* 2. Kartu Statistik Menjadi 1 Kolom ke Bawah */
+  .stats-grid, 
+  .middle-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* 3. Banner Salam / Top Header */
+  .box-header,
+  .actions-toolbar,
+  .welcome-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .search-input {
+    width: 100% !important;
+  }
+
+  /* 4. Tabel Agar Bisa Di-scroll Horizontal di HP */
+  .main-box {
+    overflow-x: auto !important;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  /* 5. Penyesuaian Ukuran Teks di HP */
+  h1 {
+    font-size: 22px !important;
+  }
+  
+  .stat-value {
+    font-size: 22px !important;
+  }
+}
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px; /* Memberikan jarak antar tombol angka */
+    margin-top: 20px;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+}
+
+.pagination-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      padding-bottom: 10px;
+}
+.page-btn {
+    padding: 8px 14px;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+.page-btn:hover {
+    background-color: #f3f4f6;
+}
+.page-btn.active {
+    background-color: #7a1b1b;
+    color: #ffffff;
+    border-color: #7a1b1b;
+}
+
+/* Styling untuk Tombol Filter dan Kotak Pencarian */
+.table-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.table-actions input[type="text"] {
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    width: 250px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.table-actions input[type="text"]:focus {
+    border-color: #7a1b1b;
+}
+
+/* Tombol Filter Data */
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover {
+    background-color: #f3f4f6;
+}
+
+/* Dropdown Menu Filter */
+.filter-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    width: 220px;
+    z-index: 100;
+}
+
+.filter-dropdown label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.filter-dropdown select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-family: inherit;
+    outline: none;
+    background-color: #fff;
+}
+
+.filter-dropdown select:focus {
+    border-color: #7a1b1b;
+}
+
+.btn-filter-icon {
+    background: #ffffff;
+    border: 1px solid #dde1e5;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    transition: background 0.2s;
+}
+.btn-filter-icon:hover {
+    background: #f1f3f5;
+
+}  
+
+/* Styling Panel Filter Pop-up ala Admin */
+.filter-panel-right {
+    display: none; 
+    position: absolute !important;
+    right: 0 !important;
+    top: calc(100% + 8px) !important;
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    padding: 20px !important;
+    width: 300px !important;
+    z-index: 9999 !important;
+}
+
+/* Grid form di dalam panel filter */
+.filter-form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.filter-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 14px;
+    outline: none;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.btn-apply {
+    flex: 2;
+    background-color: #7a1b1b;
+    color: white;
+    border: none;
+    padding: 9px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-reset {
+    flex: 1;
+    background-color: #4b5563;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    padding: 9px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: block;
+    font-size: 14px;
+}
+.filter-container {
+    position: relative !important;
+    display: inline-block !important;
+}
+
+.filter-panel-inline {
+    display: none; /* Disembunyikan secara default */
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    margin-bottom: 25px;
+    margin-left: auto; /* Mendorong posisi kotak ke sebelah kanan */
+    width: 100%;
+    max-width: 420px;
+}
+  </style>
+</head>
+<body>
+
+  <!-- Overlay Latar Belakang Gelap untuk Menutup Sidebar -->
+  <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar Navigasi -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top-section">
+      <div class="sidebar-header">
+        <div class="brand-wrap">
+          <img src="/images/dgs.png" alt="Logo DGS" class="brand-logo-img" onerror="this.style.display='none'">
+          <div class="brand-text">
+            <h2>Dian Giri Saputra</h2>
+            <span>User Database</span>
+          </div>
+        </div>
+        <button class="close-sidebar-btn" onclick="toggleSidebar()" title="Tutup Menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="6"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mini Profile Info -->
+      <div class="sidebar-user-card">
+        <div class="user-avatar-circle">DG</div>
+        <div class="sidebar-user-info">
+          <h4>Dian Giri Saputra</h4>
+          <span>User Operasional</span>
+        </div>
+      </div>
+
+      <div class="nav-label">Menu Navigasi</div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="/dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Dashboard Utama</span>
+          </a>
+        </li>
+        <li class="nav-item active">
+          <a href="/user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Data Vendor</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/harga-dasar-user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </svg>
+            <span>Harga Dasar</span>
+          </a>
+        </li>
+        <li class="nav-item dropdown">
+          <a href="javascript:void(0)" class="dropdown-toggle" onclick="toggleDropdown(this)">
+            <div class="dropdown-toggle-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              <span>Stok & Barang</span>
+            </div>
+            <span class="arrow">&#9662;</span>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="/stok-masuk-user">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12l7 7 7-7"/>
+                </svg>
+                <span>Stok Masuk</span>
+              </a>
+            </li>
+            <li>
+              <a href="/stok-keluar-user">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+                <span>Stok Keluar</span>
+              </a>
+            </li>
+            <li>
+              <a href="/stok-opname-user">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 11l3 3L22 4"/>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                <span>Stok Opname</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="/laporan-user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Laporan</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/data-bahan-kain">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Data Kain</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="/" class="btn-bottom">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Keluar / Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="header-container">
+    <button class="menu-btn" onclick="toggleSidebar()">&#9776;</button>
+    <h1>Data Vendor</h1>
+    <p class="subtitle">Kelola dan tambahkan data pemasok serta bahan baku.</p>
+  </div>
+
+  <!-- Statistik Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-title">Total Vendor Aktif</div>
+      <div class="stat-value text-green">
+        <%= locals.totalVendorAktif !== undefined ? totalVendorAktif : vendors.filter(v => v.status === 'Aktif').length %> Vendor
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Total Vendor Tidak Aktif / Review</div>
+      <div class="stat-value text-red">
+        <%= locals.totalVendorTidakAktif !== undefined ? totalVendorTidakAktif : vendors.filter(v => v.status !== 'Aktif').length %> Vendor
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Kategori Bahan Baku</div>
+      <div class="stat-value text-dark">
+        <%= locals.totalKategori !== undefined ? totalKategori : new Set(vendors.map(v => v.kategori)).size %> Kategori
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Box Tabel -->
+  <div class="main-box">
+    <div class="box-header">
+    <div class="box-title">Daftar Vendor</div>
+    
+    <!-- Input pencarian langsung sejajar -->
+    <input type="text" id="searchInput" class="search-input" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari vendor...">
+    
+    <!-- Tombol Tambah Vendor -->
+    <button class="btn" onclick="openAddModal()" style="background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer;">+ Tambah Vendor</button>
+    
+    <!-- Tombol Export Excel -->
+    <a href="/export-vendor-excel" style="padding: 10px 18px; background-color: #1d6f42; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">
+        Export Excel
+    </a>
+    
+    <!-- Tombol & Panel Filter -->
+   <div class="filter-container">
+    <button type="button" id="filter-toggle-btn" class="btn-filter-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+        </svg>
+        <span>Filter Data</span>
+    </button>
+
+    <!-- PANEL FILTER HARUS DI DALAM SINI AGAR MELAYANG -->
+    <div id="filter-panel" class="filter-panel-right">
+        <form id="filter-form" action="/admin" method="GET"> <!-- Sesuaikan action dengan /admin atau /user -->
+            <div class="filter-form-grid">
+                <div class="filter-group">
+                    <label for="kategori">Kategori:</label>
+                    <select name="kategori" id="kategori">
+                        <option value="">Semua Kategori</option>
+                        <option value="ATK">ATK</option>
+                        <option value="Pakaian">Pakaian</option>
+                        <option value="Kain">Kain</option>
+                        <option value="Elektronik">Elektronik</option>
+                        <option value="Packaging">Packaging</option>
+                        <option value="Percetakan">Percetakan</option>
+                        <option value="Merchandise">Merchandise</option>
+                        <option value="Logistik">Logistik</option>
+                        <option value="Voucher">Voucher</option>
+                        <option value="Rental">Rental</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="status">Status Vendor:</label>
+                    <select name="status" id="status">
+                        <option value="">Semua Status</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Review">Review</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="wilayah">Wilayah:</label>
+                    <select name="wilayah" id="wilayah">
+                        <option value="">Semua Wilayah</option>
+                        <option value="Jakarta">Jakarta</option>
+                        <option value="Bogor">Bogor</option>
+                        <option value="Depok">Depok</option>
+                        <option value="Tanggerang">Tanggerang</option>
+                        <option value="Bekasi">Bekasi</option>
+                        <option value="Garut">Garut</option>
+                        <option value="Bandung">Bandung</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-apply">Terapkan</button>
+                    <a href="/admin" class="btn-reset">Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Tabel Data Vendor -->
+    <table>
+      <thead>
+        <tr>
+          <th>ID Vendor</th>
+          <th>Nama Vendor</th>
+          <th>Wilayah</th>
+          <th>Kategori Supply</th>
+          <th>Kontak</th>
+          <th>Rating</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="vendorTableBody">
+        <% if (vendors.length === 0) { %>
+          <tr>
+            <td colspan="8" style="text-align: center; color: #777; padding: 30px;">Belum ada data vendor.</td>
+          </tr>
+        <% } else { %>
+          <% vendors.forEach(v => { %>
+            <tr class="vendor-row">
+              <td><strong><%= v.idVendor %></strong></td>
+              <td><%= v.namaVendor %></td>
+              <td><%= v.wilayah || '-' %></td>
+              <td><%= v.kategori %></td>
+              <td><%= v.kontak %></td>
+              <td>⭐ <%= v.rating %></td>
+              <td>
+                <span class="badge <%= v.status === 'Aktif' ? 'badge-active' : (v.status === 'Review' ? 'badge-review' : 'badge-inactive') %>">
+                  <%= v.status %>
+                </span>
+              </td>
+              <td>
+                <a href="/user/vendor/<%= v._id %>" class="btn-detail">Detail</a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+        <div class="pagination-container">
+            <% for(let i = 1; i <= totalPages; i++) { %>
+                <a href="/user?page=<%= i %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %><%= typeof kategori !== 'undefined' && kategori ? '&kategori=' + kategori : '' %><%= typeof status !== 'undefined' && status ? '&status=' + status : '' %><%= typeof wilayah !== 'undefined' && wilayah ? '&wilayah=' + wilayah : '' %>" 
+                   class="page-btn <%= currentPage === i ? 'active' : '' %>">
+                    <%= i %>
+                </a>
+            <% } %>
+        </div>
+    <% } %>
+  </div>
+
+  <!-- Modal Tambah Vendor -->
+  <div id="addModal" class="modal">
+    <div class="modal-content">
+      <h2 style="margin-bottom: 20px; color: #7a1b1b; font-size: 20px;">Tambah Vendor Baru</h2>
+      <form action="/user/vendor/add" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label>ID Vendor</label>
+          <input type="text" name="idVendor" value="<%= nextIdVendor %>" readonly style="background: #f4f4f4;">
+        </div>
+        <div class="form-group">
+            <label>Nama Vendor</label>
+            <input type="text" name="namaVendor" placeholder="Masukan Nama" required>
+        </div>
+        <div class="form-group">
+          <label>Wilayah</label>
+          <select name="wilayah">
+            <option value="Jakarta">Jakarta</option>
+            <option value="Depok">Depok</option>
+            <option value="Bekasi">Bekasi</option>
+            <option value="Bogor">Bogor</option>
+            <option value="Tangerang">Tangerang</option>
+            <option value="Bandung">Bandung</option>
+            <option value="Semarang">Semarang</option>
+            <option value="Garut">Garut</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Kategori Supply</label>
+          <select name="kategori">
+            <option value="ATK">ATK</option>
+            <option value="Pakaian">Pakaian</option>
+            <option value="Kain">Kain</option>
+            <option value="Elektronik">Elektronik</option>
+            <option value="Packaging">Packaging</option>
+            <option value="Percetakan">Percetakan</option>
+            <option value="Merchandise">Merchandise</option>
+            <option value="Logistik">Logistik</option>
+            <option value="Voucher">Voucher</option>
+            <option value="Rental">Rental</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Kontak & PIC</label>
+          <input type="text" name="kontak" placeholder="Masukan Kontak & PIC" required>
+        </div>
+        <div class="form-group">
+          <label>Rating (1 - 5)</label>
+          <input type="number" name="rating" min="1" max="5" value="5" required>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select name="status">
+            <option value="Aktif">Aktif</option>
+            <option value="Review">Review</option>
+            <option value="Nonaktif">Nonaktif</option>
+          </select>
+        </div>
+        <div class="form-group">
+            <label>Deskripsi Vendor</label>
+            <textarea name="deskripsi" rows="5" class="input-lg"
+            style="width: 100%; min-height: 120px; padding: 10px; border: 1px solid #ccc; 
+                   border-radius: 6px; font-family: inherit; font-size: 14px; resize: vertical;" 
+                   placeholder="Tuliskan catatan/deskripsi..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Foto Vendor / Produk (Opsional, bisa pilih lebih dari satu)</label>
+          <input type="file" name="foto" accept="image/*" multiple>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Batal</button>
+          <button type="submit" class="btn">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // 1. Sidebar & Dropdown Script
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.getElementById('overlay').classList.toggle('active');
+    }
+
+    function toggleDropdown(element) {
+      const parentLi = element.parentElement;
+      parentLi.classList.toggle('active');
+    }
+
+    // 2. Modal Tambah Script
+    const addModal = document.getElementById('addModal');
+    function openAddModal() { addModal.style.display = 'flex'; }
+    function closeAddModal() { addModal.style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == addModal) closeAddModal(); }
+
+    // 3. Toggle Panel Filter Pop-up & Klik di Luar Area
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterToggleBtn = document.getElementById('filter-toggle-btn');
+        const filterPanel = document.getElementById('filter-panel');
+
+        if (filterToggleBtn && filterPanel) {
+            filterToggleBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                filterPanel.style.display = filterPanel.style.display === 'block' ? 'none' : 'block';
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!filterPanel.contains(e.target) && e.target !== filterToggleBtn) {
+                    filterPanel.style.display = 'none';
+                }
+            });
+
+            filterPanel.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+        }
+    });
+    
+
+    // 4. AJAX Live Search Otomatis (Lintas Halaman & Filter)
+    let searchTimeout = null;
+    const searchInput = document.getElementById('searchInput');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value;
+            
+            // Ambil nilai filter kategori, status, dan wilayah yang sedang aktif
+            const kategori = document.getElementById('kategori') ? document.getElementById('kategori').value : '';
+            const status = document.getElementById('status') ? document.getElementById('status').value : '';
+            const wilayah = document.getElementById('wilayah') ? document.getElementById('wilayah').value : '';
+
+            // Beri jeda 300ms agar pencarian terasa mulus saat diketik cepat
+            searchTimeout = setTimeout(() => {
+                let url = `/user?search=${encodeURIComponent(query)}`;
+                if (kategori) url += `&kategori=${encodeURIComponent(kategori)}`;
+                if (status) url += `&status=${encodeURIComponent(status)}`;
+                if (wilayah) url += `&wilayah=${encodeURIComponent(wilayah)}`;
+
+                // Ambil data dari server secara asynchronous
+                fetch(url)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        // Ambil elemen tabel dan pagination baru dari hasil fetch
+                        const newTbody = doc.getElementById('vendorTableBody');
+                        const newPagination = doc.querySelector('.pagination-container');
+                        
+                        // Perbarui isi tabel di halaman saat ini
+                        const currentTbody = document.getElementById('vendorTableBody');
+                        if (newTbody && currentTbody) {
+                            currentTbody.innerHTML = newTbody.innerHTML;
+                        }
+                        
+                        // Perbarui navigasi pagination secara dinamis
+                        const currentPagination = document.querySelector('.pagination-container');
+                        const mainBox = document.querySelector('.main-box');
+
+                        if (newPagination && currentPagination) {
+                            currentPagination.innerHTML = newPagination.innerHTML;
+                        } else if (newPagination && !currentPagination && mainBox) {
+                            mainBox.appendChild(newPagination);
+                        } else if (!newPagination && currentPagination) {
+                            currentPagination.remove();
+                        }
+
+                        // Jaga agar kursor tetap fokus di kotak pencarian
+                        const activeInput = document.getElementById('searchInput');
+                        if (activeInput) {
+                            activeInput.focus();
+                            const val = activeInput.value;
+                            activeInput.value = '';
+                            activeInput.value = val;
+                        }
+                    })
+                    .catch(err => console.error('Gagal memuat data pencarian:', err));
+            }, 300);
+        });
+
+        
+        
+      }
+
+       document.addEventListener('DOMContentLoaded', function () {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('success') === 'true') { // Ubah jadi 'true'
+              Swal.fire({
+                  icon: 'success',
+                  title: 'Berhasil!',
+                  text: 'Data vendor baru berhasil ditambahkan.',
+                  showConfirmButton: false,
+                  timer: 2000,
+                  customClass: {
+                      popup: 'rounded-xl'
+                  }
+              });
+          }
+      });
+    
+  </script>
+</body>
+</html>
+</body>
+</html>

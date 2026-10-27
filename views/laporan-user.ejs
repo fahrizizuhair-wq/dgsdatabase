@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Database - Laporan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html, body {
+      width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden;
+    }
+
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      color: #333; display: flex; min-height: 100vh;
+      position: relative; background-color: #f4f6f9;
+    }
+
+    /* DI SINI TEMPAT GRADASI MERAH DI BACKGROUND */
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%), 
+                  url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover; z-index: -1; pointer-events: none;
+    }
+    
+    /* SIDEBAR STYLING */
+    .sidebar-overlay { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100vw; 
+      height: 100vh; 
+      background: rgba(15, 23, 42, 0.55); 
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 999; 
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .sidebar-overlay.active { 
+      display: block; 
+      opacity: 1;
+    }
+
+    /* SIDEBAR */
+    .sidebar { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 280px; 
+      height: 100vh; 
+      background: linear-gradient(180deg, #4d0e0e 0%, #7a1b1b 50%, #3e0b0b 100%);
+      color: white; 
+      padding: 28px 22px; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      z-index: 1000; 
+      transform: translateX(-100%); 
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); 
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25); 
+      overflow-y: auto;
+    }
+    .sidebar.active { transform: translateX(0); }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo-img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 5px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .brand-text h2 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .brand-text span {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+    }
+    .close-sidebar-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .close-sidebar-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+    .sidebar-user-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-avatar-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c9933b 0%, #7a1b1b 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .sidebar-user-info h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+    }
+    .sidebar-user-info span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: #86efac;
+      font-weight: 500;
+    }
+    .sidebar-user-info span::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: rgba(255, 255, 255, 0.5);
+      margin: 10px 0 10px 8px;
+    }
+    .nav-menu { 
+      list-style: none; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+    }
+    .nav-item a { 
+      display: flex; 
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px; 
+      color: rgba(255, 255, 255, 0.82); 
+      text-decoration: none; 
+      border-radius: 10px; 
+      font-weight: 500; 
+      font-size: 13.5px; 
+      transition: all 0.2s ease;
+    }
+    .nav-item a svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.8;
+      transition: transform 0.2s;
+    }
+    .nav-item a:hover { 
+      background-color: rgba(255, 255, 255, 0.12); 
+      color: #ffffff; 
+      transform: translateX(3px);
+    }
+    .nav-item a:hover svg {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    .nav-item.active a { 
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%); 
+      color: #ffffff; 
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border-left: 3px solid #f87171;
+    }
+    .nav-item.active a svg { opacity: 1; }
+
+    /* DROPDOWN SIDEBAR */
+    .nav-item.dropdown { position: relative; }
+    .dropdown-toggle { 
+      display: flex !important; 
+      justify-content: space-between; 
+      align-items: center; 
+      cursor: pointer;
+    }
+    .dropdown-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .dropdown-toggle .arrow { 
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      font-size: 11px; 
+      opacity: 0.8;
+    }
+    .dropdown-menu {
+      list-style: none; 
+      max-height: 0; 
+      overflow: hidden; 
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      background-color: rgba(50, 10, 10, 0.45); 
+      border-radius: 10px; 
+      margin-top: 4px; 
+      padding-left: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .dropdown-menu li a { 
+      padding: 9px 14px; 
+      font-size: 13px; 
+      color: rgba(255, 255, 255, 0.75); 
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dropdown-menu li a:hover { 
+      color: #ffffff; 
+      background-color: rgba(255, 255, 255, 0.08); 
+    }
+    .nav-item.dropdown.active .dropdown-menu { 
+      max-height: 200px; 
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+    .nav-item.dropdown.active .arrow { transform: rotate(180deg); }
+
+    .sidebar-footer { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+      margin-top: 25px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .btn-bottom {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .btn-bottom:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    /* MAIN CONTENT */
+    .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
+    .header-section h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; color: #ffffff; }
+    .header-section p { color: #ffffff; }
+    
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin: 25px 0; }
+    .card { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 12px; border: 1px solid #eef0f4; backdrop-filter: blur(5px); display: flex; flex-direction: column; justify-content: center; }
+    .card-title { font-size: 14px; color: #666; margin-bottom: 8px; }
+    .card-value { font-size: 26px; font-weight: 700; color: #7a1b1b; }
+
+    /* REPORT CONTAINER */
+    .report-container { background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 24px; border: 1px solid #eef0f4; backdrop-filter: blur(5px); overflow-x: auto; }
+    .report-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .report-header h2 { color: #7a1b1b; margin-right: auto; }
+
+    .btn-action { background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn-action:hover { background-color: #5c1313; }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; min-width: 800px; margin-top: 10px; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid #edf0f2; font-size: 13px; vertical-align: middle; }
+    th { background-color: #f8f9fa; color: #555; }
+
+    /* MODAL */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .btn-cancel { background: #e0e0e0; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+
+    /* TOMBOL GARIS 3 BACKGROUND PUTIH SOLID AGAR TIDAK BLUR */
+    .toggle-btn { 
+      font-size: 20px; 
+      background: #ffffff !important; 
+      color: #000000 !important; 
+      border: none; 
+      padding: 8px 14px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      margin-bottom: 20px; 
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    /* ==========================================
+   RESPONSIF MOBILE (Layar di bawah 768px)
+   ========================================== */
+@media (max-width: 768px) {
+  /* 1. Sesuaikan Padding Kontainer Utama */
+  .header-container, 
+  .stats-grid, 
+  .main-box,
+  .middle-grid {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* 2. Kartu Statistik Menjadi 1 Kolom ke Bawah */
+  .stats-grid, 
+  .middle-grid {
+    grid-template-columns: 1fr !important; /* Bertumpuk vertikal */
+    gap: 12px !important;
+  }
+
+  /* 3. Banner Salam / Top Header */
+  .box-header,
+  .actions-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .search-input {
+    width: 100% !important; /* Input pencarian memenuhi layar */
+  }
+
+  /* 4. Tabel Agar Bisa Di-scroll Horizontal di HP */
+  .main-box {
+    overflow-x: auto !important; /* Mencegah tabel merusak lebar layar */
+  }
+
+  table {
+    min-width: 600px; /* Menjaga ukuran isi tabel tetap terbaca */
+  }
+
+  /* 5. Ukuran Judul & Teks yang Lebih Pas di HP */
+  h1 {
+    font-size: 22px !important;
+  }
+  
+  .stat-value {
+    font-size: 22px !important;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top-section">
+      <div class="sidebar-header">
+        <div class="brand-wrap">
+          <img src="/images/dgs.png" alt="Logo DGS" class="brand-logo-img" onerror="this.style.display='none'">
+          <div class="brand-text">
+            <h2>Dian Giri Saputra</h2>
+            <span>User Database</span>
+          </div>
+        </div>
+        <button class="close-sidebar-btn" onclick="toggleSidebar()" title="Tutup Menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="6"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mini Profile Info -->
+      <div class="sidebar-user-card">
+        <div class="user-avatar-circle">DG</div>
+        <div class="sidebar-user-info">
+          <h4>Dian Giri Saputra</h4>
+          <span>User Operasional</span>
+        </div>
+      </div>
+
+      <div class="nav-label">Menu Navigasi</div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="/dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Dashboard Utama</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Data Vendor</span>
+          </a>
+        </li>
+        <!-- PINDAHKAN CLASS ACTIVE KE SINI -->
+        <li class="nav-item">
+          <a href="/harga-dasar-user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </svg>
+            <span>Harga Dasar</span>
+          </a>
+        </li>
+        <li class="nav-item dropdown">
+          <a href="javascript:void(0)" class="dropdown-toggle" onclick="toggleDropdown(this)">
+            <div class="dropdown-toggle-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              <span>Stok & Barang</span>
+            </div>
+            <span class="arrow">&#9662;</span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="/stok-masuk-user">Stok Masuk</a></li>
+            <li><a href="/stok-keluar-user">Stok Keluar</a></li>
+            <li><a href="/stok-opname-user">Stok Opname</a></li>
+          </ul>
+        </li>
+        <li class="nav-item active">
+          <a href="/laporan-user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Laporan</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/data-bahan-kain">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Data Kain</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="/" class="btn-bottom">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Keluar / Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+    <header class="header-section">
+      <h1>Pusat Laporan & Rekapitulasi</h1>
+      <p>Kelola, unggah, dan cetak dokumen laporan database.</p>
+    </header>
+
+    <section class="cards-grid">
+      <div class="card">
+        <div class="card-title">Total Dokumen Laporan</div>
+        <div class="card-value"><%= typeof listLaporan !== 'undefined' ? listLaporan.length : 0 %> Dokumen</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Status Sistem</div>
+        <div class="card-value" style="color: #137333; font-size: 20px;">Sinkron & Aktif</div>
+      </div>
+    </section>
+
+    <section class="report-container">
+      <div class="report-header">
+        <h2>Daftar Arsip Laporan</h2>
+        <button class="btn-action" onclick="openModal()">+ Tambah Laporan</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Dokumen</th>
+            <th>Jenis Laporan</th>
+            <th>Keterangan</th>
+            <th>Tanggal</th>
+            <th style="text-align: center;">Unduh PDF</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!listLaporan || listLaporan.length === 0) { %>
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 20px; color: #888;">Belum ada arsip laporan.</td>
+            </tr>
+          <% } else { %>
+            <% listLaporan.forEach((lap, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td><strong><%= lap.namaDokumen || lap.judul %></strong></td>
+                <td><%= lap.jenis || lap.kategori %></td>
+                <td><%= lap.keterangan || '-' %></td>
+                <td><%= lap.tanggal ? new Date(lap.tanggal).toLocaleDateString('id-ID') : '-' %></td>
+                <td style="text-align: center;">
+                  <% if (lap.filePath) { %>
+                    <a href="/uploads/<%= lap.filePath %>" target="_blank" class="btn-action" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Unduh PDF</a>
+                  <% } else { %>
+                    <span style="color: #888; font-size: 12px;">Tidak ada file</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- MODAL TAMBAH LAPORAN (KHUSUS USER MENGARAH KE RUTE USER) -->
+  <div class="modal" id="laporanModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 15px; color: #7a1b1b;">Tambah Laporan Baru</h3>
+      <form action="/laporan-user/add" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label>Nama Dokumen</label>
+          <input type="text" name="namaDokumen" placeholder="Contoh: Laporan Keuangan Bulanan" required>
+        </div>
+        <div class="form-group">
+          <label>Jenis Laporan</label>
+          <select name="jenis">
+            <option value="Harga Dasar">Surat Masuk</option>
+            <option value="Master Vendor">Surat Keluar</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Keterangan / Catatan</label>
+          <textarea name="keterangan" rows="3" placeholder="Keterangan singkat laporan..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Unggah File PDF Laporan</label>
+          <input type="file" name="fileLaporan" accept="application/pdf">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+          <button type="submit" class="btn-action">Simpan Laporan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openModal() { document.getElementById('laporanModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('laporanModal').style.display = 'none'; }
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+    function toggleDropdown(element) {
+      const parentLi = element.parentElement;
+      parentLi.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

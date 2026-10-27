@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Vendor - <%= vendor.namaVendor %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; color: #333; padding: 40px; background-color: #f4f6f9; min-height: 100vh; position: relative; }
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%), 
+                  url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover; z-index: -1; pointer-events: none;
+    }
+    .container { max-width: 750px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); padding: 35px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .back-link { display: inline-block; margin-bottom: 20px; color: #7a1b1b; text-decoration: none; font-weight: 600; }
+    .back-link:hover { text-decoration: underline; }
+    h1 { color: #7a1b1b; margin-bottom: 25px; font-size: 24px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    
+    /* STYLING GALERI FOTO DENGAN TOMBOL PANAH */
+    .slider-container { position: relative; max-width: 450px; margin: 0 auto 25px auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #000; }
+    .slide { display: none; text-align: center; }
+    .slide.active { display: block; }
+    .slide img { width: 100%; max-height: 320px; object-fit: contain; display: block; margin: 0 auto; }
+    
+    .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.6); color: white; border: none; width: 40px; height: 40px; cursor: pointer; font-size: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; z-index: 10; }
+    .slider-btn:hover { background: rgba(0, 0, 0, 0.9); }
+    .prev-btn { left: 12px; }
+    .next-btn { right: 12px; }
+
+    /* Layout 2 Kolom */
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .detail-group { margin-bottom: 15px; }
+    .detail-group.full-width { grid-column: span 2; }
+
+    .detail-label { font-size: 12px; color: #666; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+    .detail-value { font-size: 16px; color: #222; font-weight: 500; }
+
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .badge-active { background-color: #e6f4ea; color: #137333; }
+    .badge-review { background-color: #fef7e0; color: #b06000; }
+    .badge-inactive { background-color: #fce8e6; color: #c5221f; }
+
+    /* ==========================================
+   RESPONSIF MOBILE (Layar di bawah 768px)
+   ========================================== */
+@media (max-width: 768px) {
+  /* 1. Sesuaikan Padding Kontainer Utama */
+  .header-container, 
+  .stats-grid, 
+  .main-box,
+  .middle-grid {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* 2. Kartu Statistik Menjadi 1 Kolom ke Bawah */
+  .stats-grid, 
+  .middle-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* 3. Banner Salam / Top Header */
+  .box-header,
+  .actions-toolbar,
+  .welcome-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .search-input {
+    width: 100% !important;
+  }
+
+  /* 4. Tabel Agar Bisa Di-scroll Horizontal di HP */
+  .main-box {
+    overflow-x: auto !important;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  /* 5. Penyesuaian Ukuran Teks di HP */
+  h1 {
+    font-size: 22px !important;
+  }
+  
+  .stat-value {
+    font-size: 22px !important;
+  }
+}
+
+  </style>
+</head>
+<div class="container">
+    <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+      <a href="/admin" class="back-link">&larr; Kembali</a>
+    <% } else { %>
+      <a href="/user" class="back-link">&larr; Kembali</a>
+    <% } %>
+    
+    <h1>Detail Vendor: <%= vendor.namaVendor %></h1>
+
+    <% 
+       let fotoList = [];
+       if (vendor.foto) {
+         if (Array.isArray(vendor.foto)) {
+           fotoList = vendor.foto;
+         } else if (typeof vendor.foto === 'string') {
+           fotoList = [vendor.foto];
+         }
+       }
+    %>
+
+    <% if (fotoList.length > 0) { %>
+      <div class="slider-container">
+        <% fotoList.forEach(function(fotoName, index) { %>
+          <div class="slide <%= index === 0 ? 'active' : '' %>">
+            <img src="/uploads/<%= fotoName %>" alt="Foto <%= vendor.namaVendor %>">
+          </div>
+        <% }); %>
+
+        <% if (fotoList.length > 1) { %>
+          <button class="slider-btn prev-btn" onclick="changeSlide(-1)">&#10094;</button>
+          <button class="slider-btn next-btn" onclick="changeSlide(1)">&#10095;</button>
+        <% } %>
+      </div>
+    <% } %>
+
+    <div class="details-grid">
+      <div class="detail-group">
+        <div class="detail-label">ID Vendor</div>
+        <div class="detail-value"><strong><%= vendor.idVendor %></strong></div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Nama Vendor</div>
+        <div class="detail-value"><%= vendor.namaVendor %></div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Wilayah / Kota</div>
+        <div class="detail-value"><%= vendor.wilayah || '-' %></div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Kategori Supply</div>
+        <div class="detail-value"><%= vendor.kategori %></div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Kontak</div>
+        <div class="detail-value"><%= vendor.kontak %></div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Rating</div>
+        <div class="detail-value">⭐ <%= vendor.rating %></div>
+      </div>
+
+      <div class="detail-group full-width">
+        <div class="detail-label">Status Vendor</div>
+        <div class="detail-value">
+          <span class="badge <%= vendor.status === 'Aktif' ? 'badge-active' : (vendor.status === 'Review' ? 'badge-review' : 'badge-inactive') %>">
+            <%= vendor.status %>
+          </span>
+        </div>
+      </div>
+
+      <div class="detail-group full-width">
+        <div class="detail-label">Deskripsi / Catatan Vendor</div>
+        <div class="detail-value" style="white-space: pre-line; background: #fafafa; padding: 12px; border-radius: 6px; border: 1px solid #eee;"><%= vendor.deskripsi || 'Tidak ada deskripsi.' %></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let slideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+
+    function showSlide(n) {
+      if (slides.length === 0) return;
+      if (n >= slides.length) slideIndex = 0;
+      if (n < 0) slideIndex = slides.length - 1;
+
+      slides.forEach(slide => slide.classList.remove('active'));
+      slides[slideIndex].classList.add('active');
+    }
+
+    function changeSlide(n) {
+      slideIndex += n;
+      showSlide(slideIndex);
+    }
+  </script>
+</body>
+</html>
