@@ -27,9 +27,9 @@ const DataBahanKain = require('./models/DataBahanKain');
 // ============================================================
 //  DATABASE CONNECTION
 // ============================================================
-mongoose.connect('mongodb://localhost:27017/kiosk_sblk_db')
+mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
-    console.log('Berhasil terhubung ke MongoDB (kiosk_sblk_db)');
+    console.log('Berhasil terhubung ke MongoDB Atlas');
     try {
       const adminCount = await Admin.countDocuments();
       if (adminCount === 0) {
