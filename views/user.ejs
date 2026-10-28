@@ -25,30 +25,6 @@
     h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
     p.subtitle { font-size: 14px; opacity: 0.9; margin-bottom: 25px; }
 
-    .header-section,
-.header-container {
-  margin-bottom: 25px;
-}
-
-.header-section h1,
-.header-container h1 {
-  font-size: 32px !important;
-  font-weight: 800 !important;
-  color: #ffffff !important;
-  margin-bottom: 8px !important;
-  letter-spacing: 0.5px !important;
-}
-
-.header-section .subtitle,
-.header-container .subtitle,
-.header-section p {
-  font-size: 14.5px !important;
-  font-weight: 400 !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  line-height: 1.5 !important;
-  margin: 0 !important;
-}
-
     /* Statistik Cards */
     .card-grid {
       display: grid;
@@ -914,13 +890,14 @@
     </div>
   </aside>
 
-  <header class="header-section">
-  <h1>Data Vendor</h1>
-  <p class="subtitle">
-    Kelola dan tambahkan data pemasok serta bahan baku dengan akurasi tinggi, <br>
-    kontrol penilaian kualitas, dan kepatuhan rantai pasok.
-  </p>
-</header>
+  <div class="header-container">
+    <button class="menu-btn" onclick="toggleSidebar()">&#9776;</button>
+    <h1>Data Vendor</h1>
+    <p class="subtitle">
+      Kelola dan tambahkan data pemasok serta bahan baku dengan akurasi tinggi, <br>
+      kontrol penilaian kualitas, dan kepatuhan rantai pasok.
+    </p>
+  </div>
 
   <!-- Statistik Cards -->
   <div class="card-grid">
