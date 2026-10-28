@@ -293,12 +293,12 @@
      /* Statistik Cards */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr); /* Membagi rata menjadi 3 kolom */
+  gap: 20px; /* Jarak antar card */
   width: 100%;
-  max-width: 1200px; /* Sesuaikan dengan lebar maximum tabel Anda */
-  margin: 0 auto 25px auto; /* Membuat posisi card berada di tengah sejajar dengan tabel */
-  padding: 0 15px; /* Memberikan jarak di sisi kiri dan kanan agar tidak mentok */
+  max-width: 1200px; /* Batas lebar maksimum agar sama dengan tabel */
+  margin: 0 auto 25px auto; /* Posisi berada di tengah dengan jarak bawah 25px */
+  padding: 0 15px; /* Padding kiri-kanan agar tidak mentok di layar kecil */
 }
 
 /* Base Card Style */
@@ -313,6 +313,7 @@
   flex-direction: column;
   justify-content: space-between;
   border-top: 5px solid transparent; /* Garis aksen atas */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
@@ -320,10 +321,88 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
-/* Variasi Warna Garis Atas */
+/* Variasi Warna Garis Aksen di Atas Card */
 .card-green { border-top-color: #10b981; }
 .card-red   { border-top-color: #e11d48; }
 .card-blue  { border-top-color: #3b82f6; }
+
+/* Header Card */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.card-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+}
+
+/* Kotak Ikon di Pojok Kanan Atas */
+.icon-wrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-green { background-color: #e6f4ea; color: #10b981; }
+.icon-red   { background-color: #fce8e6; color: #e11d48; }
+.icon-blue  { background-color: #e8f0fe; color: #3b82f6; }
+
+/* Body Card (Bagian Angka Utama) */
+.card-body {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.card-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.card-unit {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+/* Footer Card (Keterangan di Bawah) */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+/* Kelas Pendukung Teks & Link */
+.text-green { color: #10b981; font-weight: 600; }
+.text-orange { color: #d97706; font-weight: 600; }
+
+.footer-link {
+  color: #881337;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
 
 
   
