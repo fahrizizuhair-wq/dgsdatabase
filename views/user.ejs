@@ -27,10 +27,12 @@
     /* Container Grid */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Membagi rata menjadi 3 kolom */
-  gap: 20px; /* Jarak antar card */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
   width: 100%;
-  margin-bottom: 25px;
+  max-width: 1200px; /* Sesuaikan dengan lebar maximum tabel Anda */
+  margin: 0 auto 25px auto; /* Membuat posisi card berada di tengah sejajar dengan tabel */
+  padding: 0 15px; /* Memberikan jarak di sisi kiri dan kanan agar tidak mentok */
 }
 
 /* Base Card Style */
