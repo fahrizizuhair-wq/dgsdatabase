@@ -199,7 +199,6 @@ app.post('/forgot-password', async (req, res) => {
   }
 });
 
-// Reset Password – simpan permanen ke MongoDB
 app.post('/reset-password', async (req, res) => {
   try {
     const { username, newPassword, confirmPassword } = req.body;
@@ -218,20 +217,31 @@ app.post('/reset-password', async (req, res) => {
     if (!admin) {
       admin = await Admin.findOne();
     }
-    
-    // SALIN KODE INI DI SINI (tanpa tanda seru tambahan):
     if (!admin) {
       return res.json({ success: false, message: 'Data admin tidak ditemukan di database!' });
     }
 
     admin.password = await bcrypt.hash(newPassword, 10);
     await admin.save();
-    console.log('[SUCCESS] Password baru untuk admin ' + admin.username + ' berhasil disimpan permanen di MongoDB.');
 
     return res.json({ success: true, message: 'Password berhasil diubah dan disimpan! Silakan login kembali.' });
   } catch (err) {
     console.error('Error saat reset-password:', err);
     return res.status(500).json({ success: false, message: 'Gagal menyimpan password baru ke database.' });
+  }
+});
+
+// Logout
+app.get('/logout', (req, res) => {
+  if (req.session) {
+    req.session.destroy((err) => {
+      if (err) console.error('Gagal menghapus sesi:', err);
+      res.clearCookie('connect.sid', { path: '/' });
+      return res.redirect('/');
+    });
+  } else {
+    res.clearCookie('connect.sid', { path: '/' });
+    return res.redirect('/');
   }
 });
 
