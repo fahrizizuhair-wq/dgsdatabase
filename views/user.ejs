@@ -24,13 +24,117 @@
     p.subtitle { font-size: 14px; opacity: 0.9; margin-bottom: 25px; }
 
     /* Statistik Cards */
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 0 40px; margin-bottom: 30px; }
-    .stat-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
-    .stat-title { font-size: 13px; color: #666; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; }
-    .stat-value { font-size: 26px; font-weight: 700; }
-    .text-green { color: #137333; }
-    .text-red { color: #c5221f; }
-    .text-dark { color: #222; }
+    /* Container Grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 10px;
+}
+
+/* Base Card Style */
+.stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-top: 5px solid transparent; /* Garis aksen atas */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Variasi Warna Garis Atas */
+.card-green { border-top-color: #10b981; }
+.card-red   { border-top-color: #e11d48; }
+.card-blue  { border-top-color: #3b82f6; }
+
+/* Header Card */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.card-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+}
+
+/* Icon Box Style */
+.icon-wrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-green { background-color: #e6f4ea; color: #10b981; }
+.icon-red   { background-color: #fce8e6; color: #e11d48; }
+.icon-blue  { background-color: #e8f0fe; color: #3b82f6; }
+
+/* Body Card (Angka) */
+.card-body {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.card-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.card-unit {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+/* Footer Card */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+/* Teks dan Link Spesifik */
+.text-green { color: #10b981; font-weight: 600; }
+.text-orange { color: #d97706; font-weight: 600; }
+
+.footer-link {
+  color: #881337;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+    
 
     /* Main Content Box */
     .main-box { background: white; margin: 0 40px 40px 40px; border-radius: 16px; padding: 30px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
@@ -791,26 +895,69 @@
   </div>
 
   <!-- Statistik Cards -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-title">Total Vendor Aktif</div>
-      <div class="stat-value text-green">
-        <%= locals.totalVendorAktif !== undefined ? totalVendorAktif : vendors.filter(v => v.status === 'Aktif').length %> Vendor
+<div class="card-grid">
+  
+  <!-- Card 1: Total Vendor Aktif -->
+  <div class="stat-card card-green">
+    <div class="card-header">
+      <span class="card-title">TOTAL VENDOR AKTIF</span>
+      <div class="icon-wrapper icon-green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
       </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-title">Total Vendor Tidak Aktif / Review</div>
-      <div class="stat-value text-red">
-        <%= locals.totalVendorTidakAktif !== undefined ? totalVendorTidakAktif : vendors.filter(v => v.status !== 'Aktif').length %> Vendor
-      </div>
+    <div class="card-body">
+      <span class="card-value">
+        <%= locals.totalVendorAktif !== undefined ? totalVendorAktif : vendors.filter(v => v.status === 'Aktif').length %>
+      </span>
+      <span class="card-unit">Vendor</span>
     </div>
-    <div class="stat-card">
-      <div class="stat-title">Kategori Bahan Baku</div>
-      <div class="stat-value text-dark">
-        <%= locals.totalKategori !== undefined ? totalKategori : new Set(vendors.map(v => v.kategori)).size %> Kategori
-      </div>
+    <div class="card-footer">
+      <span class="text-green">📈 Status Operasional</span>
+      <span class="footer-text">Siap Memenuhi Suplai</span>
     </div>
   </div>
+
+  <!-- Card 2: Total Vendor Tidak Aktif / Review -->
+  <div class="stat-card card-red">
+    <div class="card-header">
+      <span class="card-title">TOTAL VENDOR TIDAK AKTIF / REVIEW</span>
+      <div class="icon-wrapper icon-red">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value">
+        <%= locals.totalVendorTidakAktif !== undefined ? totalVendorTidakAktif : vendors.filter(v => v.status !== 'Aktif').length %>
+      </span>
+      <span class="card-unit">Vendor</span>
+    </div>
+    <div class="card-footer">
+      <span class="text-orange">⚠️ Butuh Review</span>
+      <span class="footer-text">Dalam Peninjauan</span>
+    </div>
+  </div>
+
+  <!-- Card 3: Kategori Bahan Baku -->
+  <div class="stat-card card-blue">
+    <div class="card-header">
+      <span class="card-title">KATEGORI BAHAN BAKU</span>
+      <div class="icon-wrapper icon-blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value">
+        <%= locals.totalKategori !== undefined ? totalKategori : new Set(vendors.map(v => v.kategori)).size %>
+      </span>
+      <span class="card-unit">Kategori</span>
+    </div>
+    <div class="card-footer">
+      <span class="footer-text">Total Jenis Bahan</span>
+      <a href="#katalog" class="footer-link">Lihat Katalog</a>
+    </div>
+  </div>
+
+</div>
 
   <!-- Main Box Tabel -->
   <div class="main-box">
