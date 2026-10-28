@@ -27,9 +27,10 @@
     /* Container Grid */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  padding: 10px;
+  grid-template-columns: repeat(3, 1fr); /* Membagi rata menjadi 3 kolom */
+  gap: 20px; /* Jarak antar card */
+  width: 100%;
+  margin-bottom: 25px;
 }
 
 /* Base Card Style */
@@ -44,7 +45,6 @@
   flex-direction: column;
   justify-content: space-between;
   border-top: 5px solid transparent; /* Garis aksen atas */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
@@ -56,7 +56,6 @@
 .card-green { border-top-color: #10b981; }
 .card-red   { border-top-color: #e11d48; }
 .card-blue  { border-top-color: #3b82f6; }
-
 /* Header Card */
 .card-header {
   display: flex;
