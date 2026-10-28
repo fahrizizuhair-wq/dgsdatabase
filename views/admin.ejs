@@ -408,13 +408,22 @@
         width: 100%;
         min-width: 600px; /* Memaksa tabel memiliki lebar minimum agar bisa digeser horizontal */
       }
-    .table-header { 
-    display: flex; 
-    align-items: center; 
-    margin-bottom: 25px; 
-    flex-wrap: wrap; 
-    gap: 12px; 
-    width: 100%;
+    .table-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.table-header .box-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #7a1b1b !important; /* Warna merah tua */
+  margin-right: auto !important; /* Mendorong semua tombol/search ke sisi kanan */
+  margin-bottom: 0;
 }
 
 .table-header h2,
