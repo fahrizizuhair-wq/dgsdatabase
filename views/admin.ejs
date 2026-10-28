@@ -289,18 +289,44 @@
     .main-content { flex: 1; padding: 30px; width: 100%; }
     .header-section h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; color: #ffffff; }
     .header-section p { color: #ffffff; }
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin: 25px 0; }
-    .card { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 12px; border: 1px solid #eef0f4; backdrop-filter: blur(5px); }
-    .card-title { font-size: 14px; color: #666; margin-bottom: 8px; }
-    .card-value1 { font-size: 26px; font-weight: 700; color: #3ab548; }
-    .card-value2 { font-size: 26px; font-weight: 700; color: #ad4848; }
-    .card-value3 { font-size: 26px; font-weight: 700; color: #000000; }
-    .box-title { 
-    font-size: 20px; 
-    font-weight: 700; 
-    color: #7a1b1b; 
-    margin-right: auto; /* Mendorong seluruh elemen setelahnya agar rapat di kanan */
+
+     /* Statistik Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px; /* Sesuaikan dengan lebar maximum tabel Anda */
+  margin: 0 auto 25px auto; /* Membuat posisi card berada di tengah sejajar dengan tabel */
+  padding: 0 15px; /* Memberikan jarak di sisi kiri dan kanan agar tidak mentok */
 }
+
+/* Base Card Style */
+.stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-top: 5px solid transparent; /* Garis aksen atas */
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Variasi Warna Garis Atas */
+.card-green { border-top-color: #10b981; }
+.card-red   { border-top-color: #e11d48; }
+.card-blue  { border-top-color: #3b82f6; }
+
+
+  
     .table-container {
         width: 100%;
         background: rgba(255, 255, 255, 0.95);
@@ -750,20 +776,70 @@
       <p>Kelola data pemasok dan bahan baku.</p>
     </header>
 
-    <section class="cards-grid">
-      <div class="card">
-        <div class="card-title">Total Vendor Aktif</div>
-        <div class="card-value1"><%= typeof totalVendorAktif !== 'undefined' ? totalVendorAktif : 0 %> Vendor</div>
+     <!-- Statistik Cards -->
+  <div class="card-grid">
+  
+  <!-- Card 1: Total Vendor Aktif -->
+  <div class="stat-card card-green">
+    <div class="card-header">
+      <span class="card-title">TOTAL VENDOR AKTIF</span>
+      <div class="icon-wrapper icon-green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
       </div>
-      <div class="card">
-        <div class="card-title">Total Vendor Tidak Aktif</div>
-        <div class="card-value2" style="color: #c5221f;"><%= typeof totalVendorTidakAktif !== 'undefined' ? totalVendorTidakAktif : 0 %> Vendor</div>
+    </div>
+    <div class="card-body">
+      <span class="card-value">
+        <%= locals.totalVendorAktif !== undefined ? totalVendorAktif : vendors.filter(v => v.status === 'Aktif').length %>
+      </span>
+      <span class="card-unit">Vendor</span>
+    </div>
+    <div class="card-footer">
+      <span class="text-green">📈 Status Operasional</span>
+      <span class="footer-text">Siap Memenuhi Suplai</span>
+    </div>
+  </div>
+
+  <!-- Card 2: Total Vendor Tidak Aktif / Review -->
+  <div class="stat-card card-red">
+    <div class="card-header">
+      <span class="card-title">TOTAL VENDOR TIDAK AKTIF / REVIEW</span>
+      <div class="icon-wrapper icon-red">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
       </div>
-      <div class="card">
-        <div class="card-title">Kategori Bahan Baku</div>
-        <div class="card-value3"><%= typeof totalKategori !== 'undefined' ? totalKategori : 0 %> Kategori</div>
+    </div>
+    <div class="card-body">
+      <span class="card-value">
+        <%= locals.totalVendorTidakAktif !== undefined ? totalVendorTidakAktif : vendors.filter(v => v.status !== 'Aktif').length %>
+      </span>
+      <span class="card-unit">Vendor</span>
+    </div>
+    <div class="card-footer">
+      <span class="text-orange">⚠️ Butuh Review</span>
+      <span class="footer-text">Dalam Peninjauan</span>
+    </div>
+  </div>
+
+  <!-- Card 3: Kategori Bahan Baku -->
+  <div class="stat-card card-blue">
+    <div class="card-header">
+      <span class="card-title">KATEGORI BAHAN BAKU</span>
+      <div class="icon-wrapper icon-blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
       </div>
-    </section>
+    </div>
+    <div class="card-body">
+      <span class="card-value">
+        <%= locals.totalKategori !== undefined ? totalKategori : new Set(vendors.map(v => v.kategori)).size %>
+      </span>
+      <span class="card-unit">Kategori</span>
+    </div>
+    <div class="card-footer">
+      <span class="footer-text">Total Jenis Bahan</span>
+      <a href="#katalog" class="footer-link">Lihat Katalog</a>
+    </div>
+  </div>
+
+</div>
 
     <section class="table-container">
       <div class="table-header">
