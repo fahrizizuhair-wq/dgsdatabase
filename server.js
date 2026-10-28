@@ -947,11 +947,16 @@ app.get('/laporan-user', async (req, res) => {
 
 app.post('/laporan-user/add', upload.single('fileLaporan'), async (req, res) => {
   try {
-    const { namaDokumen, keterangan, jenis } = req.body;
+    // 1. Tambahkan 'tujuan' di dalam destructuring req.body
+    const { namaDokumen, keterangan, jenis, tujuan } = req.body;
     const filePath = req.file ? req.file.filename : '';
 
     const newLaporan = new Laporan({
-      namaDokumen, keterangan, jenis, filePath,
+      namaDokumen, 
+      keterangan, 
+      jenis, 
+      tujuan, // 2. Masukkan 'tujuan' ke sini
+      filePath,
       tanggal: new Date()
     });
 

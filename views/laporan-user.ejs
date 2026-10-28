@@ -547,7 +547,7 @@
         <tbody>
           <% if (!listLaporan || listLaporan.length === 0) { %>
             <tr>
-              <td colspan="6" style="text-align: center; padding: 20px; color: #888;">Belum ada arsip laporan.</td>
+              <td colspan="7" style="text-align: center; padding: 20px; color: #888;">Belum ada arsip laporan.</td>
             </tr>
           <% } else { %>
             <% listLaporan.forEach((lap, index) => { %>
@@ -555,8 +555,17 @@
                 <td><%= index + 1 %></td>
                 <td><strong><%= lap.namaDokumen || lap.judul %></strong></td>
                 <td><%= lap.jenis || lap.kategori %></td>
+                
+                <!-- 1. Kolom Tujuan/Kepada (Sesuaikan nama field database Anda, misal: lap.tujuan atau lap.kepada) -->
+                <td><%= lap.tujuan || lap.kepada || '-' %></td>
+                
+                <!-- 2. Kolom Keterangan (Yang tadinya terlewat) -->
                 <td><%= lap.keterangan || '-' %></td>
+                
+                <!-- 3. Kolom Tanggal -->
                 <td><%= lap.tanggal ? new Date(lap.tanggal).toLocaleDateString('id-ID') : '-' %></td>
+                
+                <!-- 4. Kolom Unduh PDF -->
                 <td style="text-align: center;">
                   <% if (lap.filePath) { %>
                     <a href="/uploads/<%= lap.filePath %>" target="_blank" class="btn-action" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Unduh PDF</a>
