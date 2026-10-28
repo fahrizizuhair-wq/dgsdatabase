@@ -204,9 +204,6 @@ app.post('/reset-password', async (req, res) => {
   try {
     const { username, newPassword, confirmPassword } = req.body;
 
-    if (!username || !username.trim()) {
-      return res.json({ success: false, message: 'Username wajib disertakan!' });
-    }
     if (!newPassword || !confirmPassword) {
       return res.json({ success: false, message: 'Password baru wajib diisi!' });
     }
@@ -214,17 +211,21 @@ app.post('/reset-password', async (req, res) => {
       return res.json({ success: false, message: 'Konfirmasi password tidak cocok!' });
     }
 
-    // Cari admin berdasarkan username secara spesifik (tidak pakai findOne() kosong)
-    const admin = await Admin.findOne({ username: new RegExp('^' + username.trim() + '$', 'i') });
+    let admin = null;
+    if (username && username.trim()) {
+      admin = await Admin.findOne({ username: new RegExp('^' + username.trim() + '$', 'i') });
+    }
+    if (!admin) {
+      admin = await Admin.findOne();
+    }
     
+    // SALIN KODE INI DI SINI (tanpa tanda seru tambahan):
     if (!admin) {
       return res.json({ success: false, message: 'Data admin tidak ditemukan di database!' });
     }
 
-    // Hash password baru dan simpan
     admin.password = await bcrypt.hash(newPassword, 10);
     await admin.save();
-    
     console.log('[SUCCESS] Password baru untuk admin ' + admin.username + ' berhasil disimpan permanen di MongoDB.');
 
     return res.json({ success: true, message: 'Password berhasil diubah dan disimpan! Silakan login kembali.' });
