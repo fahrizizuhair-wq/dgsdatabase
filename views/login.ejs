@@ -82,13 +82,10 @@
             color: #cf3939;
         }
 
-        /* ==========================================
-           RESPONSIF MOBILE (CARD TETAP BERDAMPINGAN)
-           ========================================== */
         @media (max-width: 768px) {
             .container-pilihan {
                 display: grid !important;
-                grid-template-columns: 1fr 1fr !important; /* Memaksa 2 kolom berdampingan */
+                grid-template-columns: 1fr 1fr !important;
                 gap: 10px !important;
                 padding: 0 10px !important;
             }
@@ -96,7 +93,7 @@
             .kartu-pilihan {
                 max-width: 100% !important;
                 min-height: auto !important;
-                padding: 18px 10px !important; /* Padding ramping agar pas */
+                padding: 18px 10px !important;
             }
 
             .kartu-pilihan .icon-box {
@@ -117,7 +114,7 @@
             }
 
             .kartu-pilihan p {
-                font-size: 10.5px !important; /* Ukuran teks pas untuk layar HP sempit */
+                font-size: 10.5px !important;
                 line-height: 1.35 !important;
             }
 
@@ -142,8 +139,8 @@
     <!-- Container Utama Dua Pilihan (Kiri Kanan) -->
     <div class="container-pilihan">
         
-        <!-- KARTU PENGUNJUNG / PEMBELI -->
-        <div class="kartu-pilihan kartu-pembeli-hover" onclick="window.location.href='/dashboard'">
+        <!-- KARTU USER -->
+        <div class="kartu-pilihan kartu-pembeli-hover" onclick="bukaLoginUser()">
             <div class="icon-box" style="background-color: #fcf6f6; width: 60px; height: 60px; border-radius: 15px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7a1b1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -157,8 +154,8 @@
             <div class="teks-hover-rahasia">Masuk User &rarr;</div>
         </div>
 
-        <!-- KARTU KASIR / ADMIN -->
-        <div class="kartu-pilihan kartu-kasir-hover" onclick="bukaLogin()">
+        <!-- KARTU ADMIN -->
+        <div class="kartu-pilihan kartu-kasir-hover" onclick="bukaLoginAdmin()">
             <div class="icon-box" style="background-color: #fcf6f6; width: 60px; height: 60px; border-radius: 15px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -180,9 +177,9 @@
         &copy; 2026 <span style="color: #cc0e0e; font-weight: 600;">Dian Giri Saputra</span>. All Rights Reserved.
     </div>
 
-    <!-- MODAL POP-UP FORM LOGIN & LUPA PASSWORD ADMIN -->
+    <!-- MODAL POP-UP FORM LOGIN & REGISTER -->
     <div id="modalLogin" onclick="tutupLoginLuar(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;">
-        <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); padding: 30px; border-radius: 20px; width: 100%; max-width: 360px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); position: relative;">
+        <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto;">
             <span onclick="tutupLogin()" style="position: absolute; top: 15px; right: 20px; font-size: 22px; cursor: pointer; color: #888; font-weight: bold;">&times;</span>
             
             <% if (typeof error !== 'undefined') { %>
@@ -192,55 +189,154 @@
                 </div>
             <% } %>
 
-            <!-- FORM 1: LOGIN -->
-            <div id="boxLogin">
+            <!-- FORM 1A: LOGIN ADMIN -->
+            <div id="boxLoginAdmin" style="display: none;">
                 <h3 style="margin: 0 0 5px 0; color: #2c2c2c; font-size: 20px; font-weight: 700;">Verifikasi Admin</h3>
-                <p style="margin: 0 0 20px 0; color: #666; font-size: 13px;">Masukkan kredensial bahwa anda adalah admin</p>
+                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan kredensial akun administrator Anda</p>
 
-                <form action="/login" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
-                    <input type="text" name="username" placeholder="Username" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+                <form onsubmit="prosesLogin(event, 'admin')" style="display: flex; flex-direction: column; gap: 14px;">
+                    <input type="text" id="adminLoginUsername" name="username" placeholder="Username Admin" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
                     
                     <div style="position: relative; width: 100%;">
-                        <input type="password" name="password" id="loginPassword" placeholder="Password" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                        <span onclick="togglePassword('loginPassword', 'iconLoginPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                            <i id="iconLoginPass" class="fa-solid fa-eye"></i>
+                        <input type="password" name="password" id="adminPassword" placeholder="Password Admin" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                        <span onclick="togglePassword('adminPassword', 'iconAdminPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                            <i id="iconAdminPass" class="fa-solid fa-eye"></i>
                         </span>
                     </div>
                     
-                    <div style="text-align: right; margin-top: -5px;">
-                        <a href="javascript:void(0)" onclick="tampilLupaPassword()" style="font-size: 13px; color: #7a1b1b; text-decoration: none; font-weight: 600;">Lupa Password?</a>
+                    <div style="text-align: right; margin-top: -4px;">
+                        <a href="javascript:void(0)" onclick="tampilLupaPassword('admin')" style="font-size: 13px; color: #cf3939; text-decoration: none; font-weight: 600;">Lupa Password?</a>
                     </div>
 
-                    <button type="submit" style="padding: 12px; background-color: #cf3939; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Masuk Ke Dashboard</button>
-                </form>
-            </div>
-
-            <!-- FORM 2: LUPA PASSWORD -->
-            <div id="boxLupaPassword" style="display: none;">
-                <h3 style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Lupa Password</h3>
-                <p style="margin: 0 0 20px 0; color: #666; font-size: 13px;">Masukkan username/email Anda untuk verifikasi akun.</p>
-
-                <form onsubmit="prosesVerifikasiUser(event)" style="display: flex; flex-direction: column; gap: 15px;">
-                    <input type="text" id="inputUsernameLupa" placeholder="Username / Email" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+                    <button type="submit" id="btnSubmitAdmin" style="padding: 12px; background-color: #cf3939; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Masuk Sebagai Admin</button>
                     
-                    <button type="submit" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Lanjutkan</button>
-                    
-                    <div style="text-align: center; margin-top: 5px;">
-                        <a href="javascript:void(0)" onclick="tampilFormLogin()" style="font-size: 13px; color: #666; text-decoration: none;">&larr; Kembali ke Login</a>
+                    <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
+                        Belum punya akun admin? <br>
+                        <a href="javascript:void(0)" onclick="bukaRegisterAdmin()" style="color: #cf3939; font-weight: 700; text-decoration: none;">Buat Akun Admin &rarr;</a>
                     </div>
                 </form>
             </div>
 
-            <!-- FORM 3: UBAH PASSWORD BARU -->
-            <div id="boxResetPassword" style="display: none;">
-                <h3 style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Ubah Password</h3>
-                <p style="margin: 0 0 20px 0; color: #666; font-size: 13px;">Buat password baru untuk akun Anda.</p>
+            <!-- FORM 1B: REGISTER ADMIN -->
+            <div id="boxRegisterAdmin" style="display: none;">
+                <h3 style="margin: 0 0 5px 0; color: #cf3939; font-size: 20px; font-weight: 700;">Buat Akun Admin</h3>
+                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Daftarkan akun administrator baru untuk kontrol sistem</p>
 
-                <form onsubmit="prosesResetPassword(event)" style="display: flex; flex-direction: column; gap: 15px;">
-                    <input type="hidden" name="username" id="hiddenUsernameReset">
+                <form onsubmit="prosesRegisterAdmin(event)" style="display: flex; flex-direction: column; gap: 14px;">
+                    <input type="text" id="adminRegUsername" placeholder="Username Admin Baru" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
                     
                     <div style="position: relative; width: 100%;">
-                        <input type="password" name="newPassword" id="newPassword" placeholder="Password Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                        <input type="password" id="adminRegPassword" placeholder="Password Admin Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                        <span onclick="togglePassword('adminRegPassword', 'iconAdminRegPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                            <i id="iconAdminRegPass" class="fa-solid fa-eye"></i>
+                        </span>
+                    </div>
+
+                    <div style="position: relative; width: 100%;">
+                        <input type="password" id="adminRegConfirmPassword" placeholder="Konfirmasi Password Admin" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                        <span onclick="togglePassword('adminRegConfirmPassword', 'iconAdminRegConfirm')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                            <i id="iconAdminRegConfirm" class="fa-solid fa-eye"></i>
+                        </span>
+                    </div>
+
+                    <button type="submit" id="btnRegisterAdmin" style="padding: 12px; background-color: #cf3939; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Daftar Akun Admin</button>
+
+                    <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
+                        Sudah punya akun admin? <br>
+                        <a href="javascript:void(0)" onclick="bukaLoginAdmin()" style="color: #cf3939; font-weight: 700; text-decoration: none;">&larr; Masuk Admin</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- FORM 2A: LOGIN USER -->
+            <div id="boxLoginUser" style="display: none;">
+                <h3 style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Login Akun User</h3>
+                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan username dan password akun user Anda</p>
+
+                <form onsubmit="prosesLogin(event, 'user')" style="display: flex; flex-direction: column; gap: 14px;">
+                    <input type="text" id="userLoginUsername" name="username" placeholder="Username User" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+                    
+                    <div style="position: relative; width: 100%;">
+                        <input type="password" name="password" id="userPassword" placeholder="Password User" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                        <span onclick="togglePassword('userPassword', 'iconUserPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                            <i id="iconUserPass" class="fa-solid fa-eye"></i>
+                        </span>
+                    </div>
+
+                    <div style="text-align: right; margin-top: -4px;">
+                        <a href="javascript:void(0)" onclick="tampilLupaPassword('user')" style="font-size: 13px; color: #7a1b1b; text-decoration: none; font-weight: 600;">Lupa Password?</a>
+                    </div>
+
+                    <button type="submit" id="btnSubmitUser" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Masuk Ke Dashboard</button>
+
+                    <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
+                        Belum punya akun user? <br>
+                        <a href="javascript:void(0)" onclick="bukaRegisterUser()" style="color: #7a1b1b; font-weight: 700; text-decoration: none;">Buat Akun User &rarr;</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- FORM 2B: REGISTER USER -->
+            <div id="boxRegisterUser" style="display: none;">
+                <h3 style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Buat Akun User</h3>
+                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Daftarkan akun user baru untuk akses operasional</p>
+
+                <form onsubmit="prosesRegisterUser(event)" style="display: flex; flex-direction: column; gap: 14px;">
+                    <input type="text" id="userRegNama" placeholder="Nama Lengkap (Opsional)" style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+                    
+                    <input type="text" id="userRegUsername" placeholder="Username User Baru" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+                    
+                    <div style="position: relative; width: 100%;">
+                        <input type="password" id="userRegPassword" placeholder="Password User Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                        <span onclick="togglePassword('userRegPassword', 'iconUserRegPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                            <i id="iconUserRegPass" class="fa-solid fa-eye"></i>
+                        </span>
+                    </div>
+
+                    <div style="position: relative; width: 100%;">
+                        <input type="password" id="userRegConfirmPassword" placeholder="Konfirmasi Password User" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                        <span onclick="togglePassword('userRegConfirmPassword', 'iconUserRegConfirm')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                            <i id="iconUserRegConfirm" class="fa-solid fa-eye"></i>
+                        </span>
+                    </div>
+
+                    <button type="submit" id="btnRegisterUser" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Daftar Akun User</button>
+
+                    <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
+                        Sudah punya akun user? <br>
+                        <a href="javascript:void(0)" onclick="bukaLoginUser()" style="color: #7a1b1b; font-weight: 700; text-decoration: none;">&larr; Masuk User</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- FORM 3: LUPA PASSWORD -->
+            <div id="boxLupaPassword" style="display: none;">
+                <h3 id="judulLupaPassword" style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Lupa Password</h3>
+                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan username Anda untuk verifikasi data akun di database.</p>
+
+                <form onsubmit="prosesVerifikasiUser(event)" style="display: flex; flex-direction: column; gap: 14px;">
+                    <input type="hidden" id="roleLupaPassword" value="admin">
+                    <input type="text" id="inputUsernameLupa" placeholder="Masukkan Username Anda" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+                    
+                    <button type="submit" id="btnVerifLupa" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Lanjutkan & Verifikasi</button>
+                    
+                    <div style="text-align: center; margin-top: 6px;">
+                        <a href="javascript:void(0)" onclick="kembaliKeLoginRole()" style="font-size: 13px; color: #666; text-decoration: none;">&larr; Kembali ke Form Login</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- FORM 4: UBAH PASSWORD BARU -->
+            <div id="boxResetPassword" style="display: none;">
+                <h3 id="judulResetPassword" style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Ubah Password Baru</h3>
+                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Buat password baru. Password akan langsung diperbarui ke database.</p>
+
+                <form onsubmit="prosesResetPassword(event)" style="display: flex; flex-direction: column; gap: 14px;">
+                    <input type="hidden" id="hiddenUsernameReset">
+                    <input type="hidden" id="hiddenRoleReset">
+                    
+                    <div style="position: relative; width: 100%;">
+                        <input type="password" name="newPassword" id="newPassword" placeholder="Password Baru (min. 4 karakter)" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
                         <span onclick="togglePassword('newPassword', 'iconNewPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
                             <i id="iconNewPass" class="fa-solid fa-eye"></i>
                         </span>
@@ -253,10 +349,10 @@
                         </span>
                     </div>
                     
-                    <button type="submit" style="padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Simpan Password Baru</button>
+                    <button type="submit" id="btnSimpanPassBaru" style="padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Simpan Password Baru</button>
                     
-                    <div style="text-align: center; margin-top: 5px;">
-                        <a href="javascript:void(0)" onclick="tampilFormLogin()" style="font-size: 13px; color: #666; text-decoration: none;">Batal</a>
+                    <div style="text-align: center; margin-top: 6px;">
+                        <a href="javascript:void(0)" onclick="kembaliKeLoginRole()" style="font-size: 13px; color: #666; text-decoration: none;">Batal</a>
                     </div>
                 </form>
             </div>
@@ -264,87 +360,345 @@
     </div>
 
     <script>
+    let roleAktif = 'admin'; // 'admin' atau 'user'
+
     document.addEventListener("DOMContentLoaded", function() {
         const urlParams = new URLSearchParams(window.location.search);
         
         if (urlParams.get('error') === 'Unauthorized') {
-            // 1. Bersihkan parameter URL terlebih dahulu agar bersih seketika
             window.history.replaceState({}, document.title, window.location.pathname);
 
-            // 2. Baru tampilkan pop-up peringatan SweetAlert2
             Swal.fire({
                 icon: 'warning',
                 title: 'Akses Ditolak!',
-                text: 'Silakan login terlebih dahulu sebagai admin untuk mengakses dashboard.',
+                text: 'Silakan login terlebih dahulu untuk mengakses dashboard.',
                 confirmButtonColor: '#7a1b1b',
                 confirmButtonText: 'Mengerti'
             });
         }
     });
 
-    function bukaLogin() {
-        document.getElementById('modalLogin').style.display = 'flex';
-        tampilFormLogin();
-    }
-    function tutupLogin() {
-        document.getElementById('modalLogin').style.display = 'none';
-    }
-    function tutupLoginLuar(e) {
-        if (e.target.id === 'modalLogin') tutupLogin();
-    }
-
-    function tampilFormLogin() {
-        document.getElementById('boxLogin').style.display = 'block';
+    function sembunyikanSemuaBox() {
+        document.getElementById('boxLoginAdmin').style.display = 'none';
+        document.getElementById('boxRegisterAdmin').style.display = 'none';
+        document.getElementById('boxLoginUser').style.display = 'none';
+        document.getElementById('boxRegisterUser').style.display = 'none';
         document.getElementById('boxLupaPassword').style.display = 'none';
         document.getElementById('boxResetPassword').style.display = 'none';
     }
 
-    function tampilLupaPassword() {
-        document.getElementById('boxLogin').style.display = 'none';
-        document.getElementById('boxLupaPassword').style.display = 'block';
-        document.getElementById('boxResetPassword').style.display = 'none';
+    function bukaLoginAdmin() {
+        roleAktif = 'admin';
+        document.getElementById('modalLogin').style.display = 'flex';
+        sembunyikanSemuaBox();
+        document.getElementById('boxLoginAdmin').style.display = 'block';
     }
 
-    async function prosesVerifikasiUser(event) {
+    function bukaRegisterAdmin() {
+        roleAktif = 'admin';
+        document.getElementById('modalLogin').style.display = 'flex';
+        sembunyikanSemuaBox();
+        document.getElementById('boxRegisterAdmin').style.display = 'block';
+    }
+
+    function bukaLoginUser() {
+        roleAktif = 'user';
+        document.getElementById('modalLogin').style.display = 'flex';
+        sembunyikanSemuaBox();
+        document.getElementById('boxLoginUser').style.display = 'block';
+    }
+
+    function bukaRegisterUser() {
+        roleAktif = 'user';
+        document.getElementById('modalLogin').style.display = 'flex';
+        sembunyikanSemuaBox();
+        document.getElementById('boxRegisterUser').style.display = 'block';
+    }
+
+    function tutupLogin() {
+        document.getElementById('modalLogin').style.display = 'none';
+    }
+
+    function tutupLoginLuar(e) {
+        if (e.target.id === 'modalLogin') tutupLogin();
+    }
+
+    function tampilLupaPassword(role) {
+        roleAktif = role || 'admin';
+        document.getElementById('modalLogin').style.display = 'flex';
+        sembunyikanSemuaBox();
+        document.getElementById('boxLupaPassword').style.display = 'block';
+        document.getElementById('roleLupaPassword').value = roleAktif;
+
+        const judul = document.getElementById('judulLupaPassword');
+        const btnVerif = document.getElementById('btnVerifLupa');
+        if (roleAktif === 'admin') {
+            judul.textContent = "Lupa Password Admin";
+            judul.style.color = "#cf3939";
+            btnVerif.style.backgroundColor = "#cf3939";
+        } else {
+            judul.textContent = "Lupa Password User";
+            judul.style.color = "#7a1b1b";
+            btnVerif.style.backgroundColor = "#7a1b1b";
+        }
+    }
+
+    function kembaliKeLoginRole() {
+        if (roleAktif === 'user') {
+            bukaLoginUser();
+        } else {
+            bukaLoginAdmin();
+        }
+    }
+
+    // PROSES LOGIN (ADMIN / USER)
+    async function prosesLogin(event, role) {
         event.preventDefault();
-        const valUser = document.getElementById('inputUsernameLupa').value.trim();
-        if (valUser === '') return;
+        const username = event.target.username.value.trim();
+        const password = event.target.password.value;
+
+        if (!username || !password) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Data Belum Lengkap',
+                text: 'Silakan isi username dan password!',
+                confirmButtonColor: '#7a1b1b'
+            });
+            return;
+        }
+
+        const endpoint = (role === 'user') ? '/login-user' : '/login-admin';
+        const btn = (role === 'user') ? document.getElementById('btnSubmitUser') : document.getElementById('btnSubmitAdmin');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+        btn.disabled = true;
 
         try {
-            const response = await fetch('/forgot-password', {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: valUser })
+                body: JSON.stringify({ username, password })
             });
 
             const result = await response.json();
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+
             if (result.success) {
-                document.getElementById('hiddenUsernameReset').value = valUser;
-                document.getElementById('boxLogin').style.display = 'none';
-                document.getElementById('boxLupaPassword').style.display = 'none';
-                document.getElementById('boxResetPassword').style.display = 'block';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Login Berhasil!',
+                    text: 'Selamat datang, mengalihkan ke dashboard...',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = result.redirect;
+                });
             } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Oops...',
-                    text: result.message || "User / Admin tidak ditemukan!",
+                    title: 'Login Gagal',
+                    text: result.message || 'Username atau password salah!',
                     confirmButtonColor: '#dc3545'
                 });
             }
         } catch (err) {
-            console.error("Error:", err);
+            console.error("Login Error:", err);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
             Swal.fire({
                 icon: 'error',
-                title: 'Kesalahan Server',
-                text: "Terjadi kesalahan pada server.",
+                title: 'Kesalahan Sistem',
+                text: 'Terjadi gangguan koneksi ke server.',
                 confirmButtonColor: '#dc3545'
             });
         }
     }
 
+    // PROSES REGISTER ADMIN
+    async function prosesRegisterAdmin(event) {
+        event.preventDefault();
+        const username = document.getElementById('adminRegUsername').value.trim();
+        const password = document.getElementById('adminRegPassword').value;
+        const confirmPassword = document.getElementById('adminRegConfirmPassword').value;
+
+        if (password !== confirmPassword) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian',
+                text: 'Konfirmasi password tidak cocok!',
+                confirmButtonColor: '#ffc107'
+            });
+            return;
+        }
+
+        const btn = document.getElementById('btnRegisterAdmin');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mendaftarkan...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/register-admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, confirmPassword })
+            });
+
+            const result = await response.json();
+            btn.innerHTML = 'Daftar Akun Admin';
+            btn.disabled = false;
+
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pendaftaran Berhasil!',
+                    text: result.message,
+                    confirmButtonColor: '#28a745',
+                    confirmButtonText: 'Masuk Sekarang'
+                }).then(() => {
+                    bukaLoginAdmin();
+                    document.getElementById('adminLoginUsername').value = username;
+                    event.target.reset();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Mendaftar',
+                    text: result.message,
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        } catch (err) {
+            console.error("Register Admin Error:", err);
+            btn.innerHTML = 'Daftar Akun Admin';
+            btn.disabled = false;
+            Swal.fire({
+                icon: 'error',
+                title: 'Kesalahan Sistem',
+                text: 'Terjadi gangguan saat membuat akun admin.',
+                confirmButtonColor: '#dc3545'
+            });
+        }
+    }
+
+    // PROSES REGISTER USER
+    async function prosesRegisterUser(event) {
+        event.preventDefault();
+        const namaLengkap = document.getElementById('userRegNama').value.trim();
+        const username = document.getElementById('userRegUsername').value.trim();
+        const password = document.getElementById('userRegPassword').value;
+        const confirmPassword = document.getElementById('userRegConfirmPassword').value;
+
+        if (password !== confirmPassword) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian',
+                text: 'Konfirmasi password tidak cocok!',
+                confirmButtonColor: '#ffc107'
+            });
+            return;
+        }
+
+        const btn = document.getElementById('btnRegisterUser');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mendaftarkan...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/register-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ namaLengkap, username, password, confirmPassword })
+            });
+
+            const result = await response.json();
+            btn.innerHTML = 'Daftar Akun User';
+            btn.disabled = false;
+
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pendaftaran Berhasil!',
+                    text: result.message,
+                    confirmButtonColor: '#28a745',
+                    confirmButtonText: 'Masuk Sekarang'
+                }).then(() => {
+                    bukaLoginUser();
+                    document.getElementById('userLoginUsername').value = username;
+                    event.target.reset();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Mendaftar',
+                    text: result.message,
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        } catch (err) {
+            console.error("Register User Error:", err);
+            btn.innerHTML = 'Daftar Akun User';
+            btn.disabled = false;
+            Swal.fire({
+                icon: 'error',
+                title: 'Kesalahan Sistem',
+                text: 'Terjadi gangguan saat membuat akun user.',
+                confirmButtonColor: '#dc3545'
+            });
+        }
+    }
+
+    // VERIFIKASI USERNAME LUPA PASSWORD
+    async function prosesVerifikasiUser(event) {
+        event.preventDefault();
+        const valUser = document.getElementById('inputUsernameLupa').value.trim();
+        const role = document.getElementById('roleLupaPassword').value;
+        if (valUser === '') return;
+
+        const btn = document.getElementById('btnVerifLupa');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: valUser, role })
+            });
+
+            const result = await response.json();
+            btn.innerHTML = 'Lanjutkan & Verifikasi';
+            btn.disabled = false;
+
+            if (result.success) {
+                document.getElementById('hiddenUsernameReset').value = result.username || valUser;
+                document.getElementById('hiddenRoleReset').value = result.role || role;
+                sembunyikanSemuaBox();
+                document.getElementById('boxResetPassword').style.display = 'block';
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Akun Tidak Ditemukan',
+                    text: result.message || "Akun tidak terdaftar di database!",
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        } catch (err) {
+            console.error("Error:", err);
+            btn.innerHTML = 'Lanjutkan & Verifikasi';
+            btn.disabled = false;
+            Swal.fire({
+                icon: 'error',
+                title: 'Kesalahan Server',
+                text: "Terjadi kesalahan saat memeriksa akun.",
+                confirmButtonColor: '#dc3545'
+            });
+        }
+    }
+
+    // PROSES RESET PASSWORD BARU
     async function prosesResetPassword(event) {
         event.preventDefault();
         const username = document.getElementById('hiddenUsernameReset').value;
+        const role = document.getElementById('hiddenRoleReset').value;
         const newPassword = event.target.newPassword.value;
         const confirmPassword = event.target.confirmPassword.value;
 
@@ -358,38 +712,44 @@
             return;
         }
 
+        const btn = document.getElementById('btnSimpanPassBaru');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        btn.disabled = true;
+
         try {
             const response = await fetch('/reset-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, newPassword, confirmPassword })
+                body: JSON.stringify({ username, role, newPassword, confirmPassword })
             });
 
             const result = await response.json();
+            btn.innerHTML = 'Simpan Password Baru';
+            btn.disabled = false;
+
             if (result.success) {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Berhasil!',
+                    title: 'Berhasil Diperbarui!',
                     text: result.message,
                     confirmButtonText: 'Masuk Sekarang',
-                    confirmButtonColor: '#28a745',
-                    timer: 4000,
-                    timerProgressBar: true
+                    confirmButtonColor: '#28a745'
                 }).then(() => {
-                    tutupLogin();
-                    tampilFormLogin();
+                    kembaliKeLoginRole();
                     event.target.reset();
                 });
             } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Gagal',
+                    title: 'Gagal Menyimpan',
                     text: result.message,
                     confirmButtonColor: '#dc3545'
                 });
             }
         } catch (err) {
             console.error("Error:", err);
+            btn.innerHTML = 'Simpan Password Baru';
+            btn.disabled = false;
             Swal.fire({
                 icon: 'error',
                 title: 'Kesalahan Server',

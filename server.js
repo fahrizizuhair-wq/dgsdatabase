@@ -1,6 +1,7 @@
 // ============================================================
 //  DEPENDENCIES
 // ============================================================
+require('dotenv').config();
 const express  = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -23,22 +24,36 @@ const StokMasuk     = require('./models/StokMasuk');
 const StokKeluar    = require('./models/StokKeluar');
 const StokOpname    = require('./models/StokOpname');
 const DataBahanKain = require('./models/DataBahanKain');
+const User          = require('./models/User');
 
 // ============================================================
 //  DATABASE CONNECTION
 // ============================================================
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/kiosk_sblk_db')
   .then(async () => {
-    console.log('Berhasil terhubung ke MongoDB Atlas');
+    console.log('Berhasil terhubung ke database MongoDB');
     try {
+      // Inisialisasi default Admin jika belum ada akun
       const adminCount = await Admin.countDocuments();
       if (adminCount === 0) {
         const hashedPassword = await bcrypt.hash('admin123', 10);
         await Admin.create({ username: 'Admin', password: hashedPassword });
-        console.log('Akun default Admin dibuat di database: (username: Admin, password: admin123)');
+        console.log('Akun default Admin dibuat: (username: Admin, password: admin123)');
+      }
+      // Inisialisasi default User jika belum ada akun
+      const userCount = await User.countDocuments();
+      if (userCount === 0) {
+        const hashedUserPass = await bcrypt.hash('user123', 10);
+        await User.create({
+          namaLengkap: 'Dian Giri Saputra',
+          username: 'user',
+          password: hashedUserPass,
+          role: 'user'
+        });
+        console.log('Akun default User dibuat: (username: user, password: user123)');
       }
     } catch (seedErr) {
-      console.error('Error inisialisasi akun admin:', seedErr);
+      console.error('Error inisialisasi akun bawaan:', seedErr);
     }
   })
   .catch(err => console.error('Koneksi MongoDB gagal:', err));
@@ -76,10 +91,18 @@ app.use(session({
   cookie:            { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 24 jam
 }));
 
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  res.locals.isUser = req.session.isUser || false;
+  res.locals.isAdmin = req.session.isAdmin || false;
+  res.locals.adminUser = req.session.adminUser || null;
+  next();
+});
+
 // ============================================================
 //  MIDDLEWARE AUTH
 // ============================================================
-const isAuthenticated = (req, res, next) => {
+const isAdminAuthenticated = (req, res, next) => {
   res.set({
     'Cache-Control': 'no-store, no-cache, must-revalidate, private',
     'Pragma':        'no-cache',
@@ -91,18 +114,25 @@ const isAuthenticated = (req, res, next) => {
   return res.redirect('/?error=Unauthorized');
 };
 
+const isUserAuthenticated = (req, res, next) => {
+  res.set({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+    'Pragma':        'no-cache',
+    'Expires':       '0'
+  });
+  if (req.session && (req.session.isUser || req.session.isAdmin)) {
+    return next();
+  }
+  return res.redirect('/?error=Unauthorized');
+};
+
+const isAuthenticated = isAdminAuthenticated;
+
 // ============================================================
 //  RUTE: PORTAL / LOGIN
 // ============================================================
 app.get('/', async (req, res) => {
   try {
-    // Hapus sesi admin aktif jika ada (untuk mencegah akses balik via tombol Back)
-    if (req.session && req.session.isAdmin) {
-      req.session.isAdmin = false;
-      delete req.session.isAdmin;
-      delete req.session.adminUser;
-      req.session.save();
-    }
     res.set({
       'Cache-Control': 'no-store, no-cache, must-revalidate, private',
       'Pragma':        'no-cache',
@@ -115,9 +145,288 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.post('/login', async (req, res) => {
+// 1. LOGIN ADMIN (AJAX / JSON)
+app.post('/login-admin', async (req, res) => {
   try {
     const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: 'Username dan password admin wajib diisi!' });
+    }
+
+    const trimmedUsername = username.trim();
+    let admin = await Admin.findOne({ username: trimmedUsername });
+
+    // Fallback seed admin jika belum ada
+    if (!admin) {
+      const adminCount = await Admin.countDocuments();
+      if (adminCount === 0 && (trimmedUsername.toLowerCase() === 'admin')) {
+        const hashedPassword = await bcrypt.hash('admin123', 10);
+        admin = await Admin.create({ username: trimmedUsername, password: hashedPassword });
+      }
+    }
+
+    if (!admin) {
+      return res.status(401).json({ success: false, message: 'Username atau password admin salah!' });
+    }
+
+    let isMatch = false;
+    try {
+      isMatch = await bcrypt.compare(password, admin.password);
+    } catch (e) {
+      isMatch = false;
+    }
+
+    if (!isMatch && password === admin.password) {
+      isMatch = true;
+      admin.password = await bcrypt.hash(password, 10);
+      await admin.save();
+    }
+
+    if (!isMatch && password === 'admin123') {
+      isMatch = true;
+      admin.password = await bcrypt.hash('admin123', 10);
+      await admin.save();
+    }
+
+    if (isMatch) {
+      req.session.isAdmin = true;
+      req.session.isUser = false;
+      req.session.adminUser = admin.username;
+      return req.session.save((err) => {
+        if (err) console.error('Gagal menyimpan sesi admin:', err);
+        return res.json({ success: true, redirect: '/dashboard-admin' });
+      });
+    }
+
+    return res.status(401).json({ success: false, message: 'Username atau password admin salah!' });
+  } catch (err) {
+    console.error('Error saat login admin:', err);
+    return res.status(500).json({ success: false, message: 'Terjadi kesalahan sistem saat login admin.' });
+  }
+});
+
+// 2. LOGIN USER (AJAX / JSON)
+app.post('/login-user', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: 'Username dan password user wajib diisi!' });
+    }
+
+    const trimmedUsername = username.trim();
+    let user = await User.findOne({ username: trimmedUsername });
+
+    // Fallback seed user jika belum ada
+    if (!user) {
+      const userCount = await User.countDocuments();
+      if (userCount === 0 && (trimmedUsername.toLowerCase() === 'user')) {
+        const hashedPassword = await bcrypt.hash('user123', 10);
+        user = await User.create({ namaLengkap: 'Dian Giri Saputra', username: trimmedUsername, password: hashedPassword, role: 'user' });
+      }
+    }
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Username atau password user salah!' });
+    }
+
+    let isMatch = false;
+    try {
+      isMatch = await bcrypt.compare(password, user.password);
+    } catch (e) {
+      isMatch = false;
+    }
+
+    if (!isMatch && password === user.password) {
+      isMatch = true;
+      user.password = await bcrypt.hash(password, 10);
+      await user.save();
+    }
+
+    if (isMatch) {
+      req.session.isUser = true;
+      req.session.isAdmin = false;
+      req.session.user = {
+        id: user._id,
+        username: user.username,
+        namaLengkap: user.namaLengkap || user.username,
+        role: 'user'
+      };
+      return req.session.save((err) => {
+        if (err) console.error('Gagal menyimpan sesi user:', err);
+        return res.json({ success: true, redirect: '/dashboard' });
+      });
+    }
+
+    return res.status(401).json({ success: false, message: 'Username atau password user salah!' });
+  } catch (err) {
+    console.error('Error saat login user:', err);
+    return res.status(500).json({ success: false, message: 'Terjadi kesalahan sistem saat login user.' });
+  }
+});
+
+// 3. REGISTER ADMIN (AJAX / JSON)
+app.post('/register-admin', async (req, res) => {
+  try {
+    const { username, password, confirmPassword } = req.body;
+    if (!username || !username.trim() || !password) {
+      return res.status(400).json({ success: false, message: 'Username dan password admin wajib diisi!' });
+    }
+    const trimmedUsername = username.trim();
+    if (password !== confirmPassword) {
+      return res.status(400).json({ success: false, message: 'Konfirmasi password tidak cocok!' });
+    }
+    if (password.length < 4) {
+      return res.status(400).json({ success: false, message: 'Password minimal 4 karakter!' });
+    }
+
+    const existingAdmin = await Admin.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
+    if (existingAdmin) {
+      return res.status(400).json({ success: false, message: 'Username admin sudah terdaftar, silakan gunakan username lain!' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await Admin.create({ username: trimmedUsername, password: hashedPassword });
+
+    return res.json({ success: true, message: 'Akun Admin berhasil dibuat! Silakan masuk dengan kredensial baru Anda.' });
+  } catch (err) {
+    console.error('Error saat register admin:', err);
+    return res.status(500).json({ success: false, message: 'Gagal membuat akun admin: ' + err.message });
+  }
+});
+
+// 4. REGISTER USER (AJAX / JSON)
+app.post('/register-user', async (req, res) => {
+  try {
+    const { namaLengkap, username, password, confirmPassword } = req.body;
+    if (!username || !username.trim() || !password) {
+      return res.status(400).json({ success: false, message: 'Username dan password user wajib diisi!' });
+    }
+    const trimmedUsername = username.trim();
+    if (password !== confirmPassword) {
+      return res.status(400).json({ success: false, message: 'Konfirmasi password tidak cocok!' });
+    }
+    if (password.length < 4) {
+      return res.status(400).json({ success: false, message: 'Password minimal 4 karakter!' });
+    }
+
+    const existingUser = await User.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Username user sudah terdaftar, silakan gunakan username lain!' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.create({
+      namaLengkap: (namaLengkap && namaLengkap.trim()) ? namaLengkap.trim() : trimmedUsername,
+      username: trimmedUsername,
+      password: hashedPassword,
+      role: 'user'
+    });
+
+    return res.json({ success: true, message: 'Akun User berhasil didaftarkan! Silakan masuk dengan akun baru Anda.' });
+  } catch (err) {
+    console.error('Error saat register user:', err);
+    return res.status(500).json({ success: false, message: 'Gagal membuat akun user: ' + err.message });
+  }
+});
+
+// 5. LUPA PASSWORD (Verifikasi username di database)
+app.post('/forgot-password', async (req, res) => {
+  try {
+    const { username, role } = req.body;
+    if (!username || !username.trim()) {
+      return res.json({ success: false, message: 'Username wajib diisi!' });
+    }
+    const trimmedUsername = username.trim();
+
+    if (role === 'admin') {
+      const admin = await Admin.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
+      if (admin) {
+        return res.json({ success: true, message: 'Akun Admin ditemukan', username: admin.username, role: 'admin' });
+      }
+      return res.json({ success: false, message: 'Akun Admin dengan username tersebut tidak ditemukan!' });
+    } else if (role === 'user') {
+      const user = await User.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
+      if (user) {
+        return res.json({ success: true, message: 'Akun User ditemukan', username: user.username, role: 'user' });
+      }
+      return res.json({ success: false, message: 'Akun User dengan username tersebut tidak ditemukan!' });
+    } else {
+      // Periksa kedua tabel jika role tidak ditentukan
+      const admin = await Admin.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
+      if (admin) {
+        return res.json({ success: true, message: 'Akun Admin ditemukan', username: admin.username, role: 'admin' });
+      }
+      const user = await User.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
+      if (user) {
+        return res.json({ success: true, message: 'Akun User ditemukan', username: user.username, role: 'user' });
+      }
+      return res.json({ success: false, message: 'Akun tidak ditemukan di database!' });
+    }
+  } catch (err) {
+    console.error('Error pada /forgot-password:', err);
+    return res.status(500).json({ success: false, message: 'Terjadi kesalahan server saat memverifikasi akun.' });
+  }
+});
+
+// 6. RESET PASSWORD (Simpan password baru ke database)
+app.post('/reset-password', async (req, res) => {
+  try {
+    const { username, role, newPassword, confirmPassword } = req.body;
+
+    if (!newPassword || !confirmPassword) {
+      return res.json({ success: false, message: 'Password baru dan konfirmasi wajib diisi!' });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.json({ success: false, message: 'Konfirmasi password tidak cocok!' });
+    }
+    if (newPassword.length < 4) {
+      return res.json({ success: false, message: 'Password minimal 4 karakter!' });
+    }
+
+    const trimmedUsername = username ? username.trim() : '';
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    if (role === 'admin') {
+      const admin = await Admin.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
+      if (!admin) {
+        return res.json({ success: false, message: 'Data Admin tidak ditemukan di database!' });
+      }
+      admin.password = hashedPassword;
+      await admin.save();
+      return res.json({ success: true, message: 'Password Admin berhasil diperbarui di database! Silakan masuk kembali.' });
+    } else if (role === 'user') {
+      const user = await User.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
+      if (!user) {
+        return res.json({ success: false, message: 'Data User tidak ditemukan di database!' });
+      }
+      user.password = hashedPassword;
+      await user.save();
+      return res.json({ success: true, message: 'Password User berhasil diperbarui di database! Silakan masuk kembali.' });
+    } else {
+      let admin = await Admin.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
+      if (admin) {
+        admin.password = hashedPassword;
+        await admin.save();
+        return res.json({ success: true, message: 'Password Admin berhasil diperbarui! Silakan masuk kembali.' });
+      }
+      let user = await User.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
+      if (user) {
+        user.password = hashedPassword;
+        await user.save();
+        return res.json({ success: true, message: 'Password User berhasil diperbarui! Silakan masuk kembali.' });
+      }
+      return res.json({ success: false, message: 'Data akun tidak ditemukan!' });
+    }
+  } catch (err) {
+    console.error('Error saat reset-password:', err);
+    return res.status(500).json({ success: false, message: 'Gagal menyimpan password baru ke database.' });
+  }
+});
+
+// 7. FALLBACK STANDARD FORM POST /login
+app.post('/login', async (req, res) => {
+  try {
+    const { username, password, role } = req.body;
 
     if (!username || !password) {
       return res.render('login', { error: 'Username dan password wajib diisi!' });
@@ -125,113 +434,42 @@ app.post('/login', async (req, res) => {
 
     const trimmedUsername = username.trim();
 
-    // 1. Cari admin di MongoDB secara Case-Sensitive (harus persis sama huruf besar/kecilnya)
-    let admin = await Admin.findOne({ username: trimmedUsername });
-
-    // 2. Fallback: Buat akun default jika database masih kosong
-    if (!admin) {
-      const adminCount = await Admin.countDocuments();
-      if (adminCount === 0 && trimmedUsername === 'Admin') {
-        const hashedPassword = await bcrypt.hash('admin123', 10);
-        admin = await Admin.create({ username: 'Admin', password: hashedPassword });
+    if (role === 'user') {
+      const user = await User.findOne({ username: trimmedUsername });
+      if (user) {
+        let isMatch = await bcrypt.compare(password, user.password).catch(() => false);
+        if (!isMatch && password === user.password) isMatch = true;
+        if (isMatch) {
+          req.session.isUser = true;
+          req.session.isAdmin = false;
+          req.session.user = { id: user._id, username: user.username, namaLengkap: user.namaLengkap || user.username };
+          return req.session.save(() => res.redirect('/dashboard'));
+        }
       }
+      return res.render('login', { error: 'Username atau password user salah!' });
     }
 
-    // Jika username tidak ditemukan di database
-    if (!admin) {
-      return res.render('login', { error: 'Username atau password salah!' });
-    }
-
-    // 3. Verifikasi Password (Cek bcrypt -> plain text -> fallback admin123)
-    let isMatch = false;
-
-    // Cek password hash bcrypt
-    try {
-      isMatch = await bcrypt.compare(password, admin.password);
-    } catch (e) {
-      isMatch = false;
-    }
-
-    // Cek jika password masih berbentuk plain text di database
-    if (!isMatch && password === admin.password) {
-      isMatch = true;
-    }
-
-    // Fallback jika password awal masih 'admin123'
-    if (!isMatch && password === 'admin123') {
-      isMatch = true;
-      admin.password = await bcrypt.hash('admin123', 10);
-      await admin.save();
-    }
-
-    // 4. Jika password cocok, simpan sesi login
-    if (isMatch) {
-      req.session.isAdmin = true;
-      req.session.adminUser = admin.username;
-      return req.session.save((err) => {
-        if (err) console.error('Gagal menyimpan sesi login:', err);
-        res.redirect('/dashboard-admin');
-      });
+    // Default admin check
+    const admin = await Admin.findOne({ username: trimmedUsername });
+    if (admin) {
+      let isMatch = await bcrypt.compare(password, admin.password).catch(() => false);
+      if (!isMatch && password === admin.password) isMatch = true;
+      if (isMatch) {
+        req.session.isAdmin = true;
+        req.session.isUser = false;
+        req.session.adminUser = admin.username;
+        return req.session.save(() => res.redirect('/dashboard-admin'));
+      }
     }
 
     return res.render('login', { error: 'Username atau password salah!' });
   } catch (err) {
     console.error('Error saat login:', err);
-    return res.render('login', { error: 'Terjadi kesalahan sistem saat verifikasi login.' });
+    return res.render('login', { error: 'Terjadi kesalahan sistem saat login.' });
   }
 });
 
-// Lupa Password – cek username
-app.post('/forgot-password', async (req, res) => {
-  try {
-    const { username } = req.body;
-    if (!username || !username.trim()) {
-      return res.json({ success: false, message: 'Username wajib diisi!' });
-    }
-    const admin = await Admin.findOne({ username: new RegExp('^' + username.trim() + '$', 'i') });
-    if (admin) {
-      return res.json({ success: true, message: 'User ditemukan', username: admin.username });
-    }
-    return res.json({ success: false, message: 'User / Admin tidak ditemukan!' });
-  } catch (err) {
-    console.error('Error pada /forgot-password:', err);
-    return res.status(500).json({ success: false, message: 'Terjadi kesalahan server.' });
-  }
-});
-
-app.post('/reset-password', async (req, res) => {
-  try {
-    const { username, newPassword, confirmPassword } = req.body;
-
-    if (!newPassword || !confirmPassword) {
-      return res.json({ success: false, message: 'Password baru wajib diisi!' });
-    }
-    if (newPassword !== confirmPassword) {
-      return res.json({ success: false, message: 'Konfirmasi password tidak cocok!' });
-    }
-
-    let admin = null;
-    if (username && username.trim()) {
-      admin = await Admin.findOne({ username: new RegExp('^' + username.trim() + '$', 'i') });
-    }
-    if (!admin) {
-      admin = await Admin.findOne();
-    }
-    if (!admin) {
-      return res.json({ success: false, message: 'Data admin tidak ditemukan di database!' });
-    }
-
-    admin.password = await bcrypt.hash(newPassword, 10);
-    await admin.save();
-
-    return res.json({ success: true, message: 'Password berhasil diubah dan disimpan! Silakan login kembali.' });
-  } catch (err) {
-    console.error('Error saat reset-password:', err);
-    return res.status(500).json({ success: false, message: 'Gagal menyimpan password baru ke database.' });
-  }
-});
-
-// Logout
+// 8. LOGOUT UNIVERSAL (ADMIN & USER)
 app.get('/logout', (req, res) => {
   if (req.session) {
     req.session.destroy((err) => {
@@ -246,9 +484,9 @@ app.get('/logout', (req, res) => {
 });
 
 // ============================================================
-//  RUTE: DASHBOARD
+//  RUTE: DASHBOARD (USER)
 // ============================================================
-app.get('/dashboard', async (req, res) => {
+app.get('/dashboard', isUserAuthenticated, async (req, res) => {
   try {
     const totalVendor     = await Vendor.countDocuments();
     const totalHargaDasar = await HargaDasar.countDocuments();
@@ -256,7 +494,7 @@ app.get('/dashboard', async (req, res) => {
     const totalStokMasuk  = stokMasukList.reduce(
       (acc, item) => acc + (Number(item.jumlah) || Number(item.qty) || 0), 0
     );
-    res.render('dashboard', { totalVendor, totalHargaDasar, totalStokMasuk, stokMasukList });
+    res.render('dashboard', { totalVendor, totalHargaDasar, totalStokMasuk, stokMasukList, currentUser: req.session.user });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat dashboard.');
@@ -824,7 +1062,7 @@ app.post('/user/vendor/add', upload.array('foto', 10), async (req, res) => {
   }
 });
 
-app.get('/user/vendor/:id', isAuthenticated, async (req, res) => {
+app.get('/user/vendor/:id', isUserAuthenticated, async (req, res) => {
   try {
     const vendor = await Vendor.findById(req.params.id);
     res.render('vendor-detail', { vendor, isAdmin: false });

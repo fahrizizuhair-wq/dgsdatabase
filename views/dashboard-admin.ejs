@@ -1171,9 +1171,9 @@
 
       <!-- Mini Profile Info Admin -->
       <div class="sidebar-user-card">
-        <div class="user-avatar-circle">AD</div>
+        <div class="user-avatar-circle"><%= (typeof adminUser !== 'undefined' && adminUser) ? adminUser.substring(0,2).toUpperCase() : 'AD' %></div>
         <div class="sidebar-user-info">
-          <h4>Administrator</h4>
+          <h4><%= (typeof adminUser !== 'undefined' && adminUser) ? adminUser : 'Administrator' %></h4>
           <span>Admin Master Control</span>
         </div>
       </div>
@@ -1318,9 +1318,9 @@
         </div>
 
         <div class="user-profile-chip">
-          <div class="profile-avatar">AD</div>
+          <div class="profile-avatar"><%= (typeof adminUser !== 'undefined' && adminUser) ? adminUser.substring(0,2).toUpperCase() : 'AD' %></div>
           <div class="profile-meta">
-            <span class="name">Administrator</span>
+            <span class="name"><%= (typeof adminUser !== 'undefined' && adminUser) ? adminUser : 'Administrator' %></span>
             <span class="role">Admin Master</span>
           </div>
         </div>
@@ -1750,7 +1750,7 @@
 
       const greetingEl = document.getElementById('greetingHeading');
       if (greetingEl) {
-        greetingEl.innerHTML = `${greetingText}, Administrator <span class="role-badge-pill">Akses: Administrator Penuh</span>`;
+        greetingEl.innerHTML = `${greetingText}, <%= (typeof adminUser !== 'undefined' && adminUser) ? adminUser : 'Administrator' %> <span class="role-badge-pill">Akses: Administrator Penuh</span>`;
       }
     }
 
