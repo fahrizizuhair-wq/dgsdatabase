@@ -731,7 +731,7 @@ app.post('/laporan/add', upload.single('fileLaporan'), async (req, res) => {
       namaDokumen, 
       keterangan, 
       jenis, 
-      tujuan, // 2. Sertakan 'tujuan' di sini
+      tujuan,
       filePath,
       tanggal: new Date()
     });
