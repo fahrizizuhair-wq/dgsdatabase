@@ -5,6 +5,7 @@ require('dotenv').config();
 const express  = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo');
 const multer   = require('multer');
 const path     = require('path');
 const fs       = require('fs');
@@ -29,18 +30,17 @@ const User          = require('./models/User');
 // ============================================================
 //  DATABASE CONNECTION
 // ============================================================
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/kiosk_sblk_db')
+const mongoUri = process.env.MONGO_URI || 'mongodb+srv://fahrizizuhair_db_user:PASSWORD_ANDA@cluster0.xp4d3tt.mongodb.net/procurementdgs?retryWrites=true&w=majority';
+mongoose.connect(mongoUri)
   .then(async () => {
     console.log('Berhasil terhubung ke database MongoDB');
     try {
-      // Inisialisasi default Admin jika belum ada akun
       const adminCount = await Admin.countDocuments();
       if (adminCount === 0) {
         const hashedPassword = await bcrypt.hash('admin123', 10);
         await Admin.create({ username: 'Admin', password: hashedPassword });
-        console.log('Akun default Admin dibuat: (username: Admin, password: admin123)');
+        console.log('Akun default Admin dibuat');
       }
-      // Inisialisasi default User jika belum ada akun
       const userCount = await User.countDocuments();
       if (userCount === 0) {
         const hashedUserPass = await bcrypt.hash('user123', 10);
@@ -50,7 +50,7 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/kiosk_sblk_
           password: hashedUserPass,
           role: 'user'
         });
-        console.log('Akun default User dibuat: (username: user, password: user123)');
+        console.log('Akun default User dibuat');
       }
     } catch (seedErr) {
       console.error('Error inisialisasi akun bawaan:', seedErr);
@@ -85,18 +85,21 @@ const uploadMultiple = upload.array('foto',);
 
 // Session
 app.use(session({
-  secret:            'rahasia-negara-perusahaan-dgs',
-  resave:            false,
-  saveUninitialized: false,
-  cookie:            { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 24 jam
+    secret: 'rahasia-negara-perusahaan-dgs',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({ 
+        mongoUrl: mongoUri
+    }),
+    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 24 jam
 }));
 
 app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
-  res.locals.isUser = req.session.isUser || false;
-  res.locals.isAdmin = req.session.isAdmin || false;
-  res.locals.adminUser = req.session.adminUser || null;
-  next();
+    res.locals.user = req.session.user || null;
+    res.locals.isUser = req.session.isUser || false;
+    res.locals.isAdmin = req.session.isAdmin || false;
+    res.locals.adminUser = req.session.adminUser || null;
+    next();
 });
 
 // ============================================================

@@ -568,8 +568,7 @@
                 <!-- 4. Kolom Unduh PDF -->
                 <td style="text-align: center;">
                   <% if (lap.filePath) { %>
-                    <a href="<%= lap.filePath %>" target="_blank" class="btn-action" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Unduh PDF</a>
-                  <% } else { %>
+                   <a href="/uploads/<%= cleanName %>" target="_blank" class="btn-action" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Unduh PDF</a>
                     <span style="color: #888; font-size: 12px;">Tidak ada file</span>
                   <% } %>
                 </td>
