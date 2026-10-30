@@ -125,7 +125,7 @@ const User          = require('./models/User');
 // ============================================================
 //  DATABASE CONNECTION
 // ============================================================
-const mongoUri = process.env.MONGO_URI || 'mongodb+srv://fahrizizuhair_db_user:PASSWORD_ANDA@cluster0.xp4d3tt.mongodb.net/procurementdgs?retryWrites=true&w=majority';
+const mongoUri = process.env.MONGO_URI || 'mongodb+srv://fahrizizuhair_db_user:QTzFx9ErXbkYCf5O@cluster0.xp4d3tt.mongodb.net/procurementdgs?retryWrites=true&w=majority';
 mongoose.connect(mongoUri)
   .then(async () => {
     console.log('Berhasil terhubung ke database MongoDB Atlas');
@@ -286,12 +286,9 @@ const isAuthenticated = isAdminAuthenticated;
 //  RUTE: PORTAL / LOGIN
 // ============================================================
 app.use((req, res, next) => {
-    // Jika Anda mengakses dengan menambah parameter ?owner=rahasia di ujung URL, web akan terbuka normal!
     if (req.query.owner === 'rahasia') {
         return next(); // Lolos, boleh lihat website aslinya
     }
-
-    // Selain itu, orang lain akan melihat halaman pemeliharaan ini
     res.send(`
         <div style="text-align: center; margin-top: 150px; font-family: sans-serif;">
             <h1 style="color: #333;">Website Sedang Dalam Perbaikan</h1>
