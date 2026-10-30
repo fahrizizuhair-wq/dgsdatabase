@@ -1115,20 +1115,23 @@ app.post('/stok-opname/delete/:id', async (req, res) => {
 // ============================================================
 //  RUTE: LAPORAN (ADMIN)
 // ============================================================
-app.get('/laporan', isAuthenticated, async (req, res) => {
+app.get('/laporan', allowGuestView, async (req, res) => {
   try {
     const listLaporan = await Laporan.find().sort({ tanggal: -1 });
-    res.render('laporan', { listLaporan });
+    res.render('laporan', { 
+      listLaporan, 
+      role: req.session.role // <-- Penting agar tombol di EJS bisa disembunyikan untuk guest
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat halaman laporan.');
   }
 });
 
-app.post('/laporan/add', upload.single('fileLaporan'), async (req, res) => {
+// 2. Rute POST Tambah Laporan (Diproteksi preventGuestWrite agar Guest tidak bisa menambah data)
+app.post('/laporan/add', preventGuestWrite, upload.single('fileLaporan'), async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
-    // 1. Tambahkan 'tujuan' di dalam destructuring req.body
     const { namaDokumen, keterangan, jenis, tujuan } = req.body;
     const filePath = req.file ? '/uploads/' + req.file.filename : '';
 
@@ -1149,7 +1152,8 @@ app.post('/laporan/add', upload.single('fileLaporan'), async (req, res) => {
   }
 });
 
-app.post('/laporan/delete/:id', async (req, res) => {
+// 3. Rute POST Hapus Laporan (Diproteksi preventGuestWrite agar Guest tidak bisa menghapus data)
+app.post('/laporan/delete/:id', preventGuestWrite, async (req, res) => {
   try {
     await Laporan.findByIdAndDelete(req.params.id);
     res.redirect('/laporan');
@@ -1187,7 +1191,7 @@ app.get('/user', allowGuestView, async (req, res) => {
 
     const vendors     = await Vendor.find(query).sort({ idVendor: 1 }).skip((page - 1) * perPage).limit(perPage);
     const totalData   = await Vendor.countDocuments(query);
-    const totalPages = Math.ceil(totalData / perPage);
+    const totalPages =  Math.ceil(totalData / perPage);
 
     const totalVendorAktif      = await Vendor.countDocuments({ status: 'Aktif' });
     const totalVendorTidakAktif = await Vendor.countDocuments({ status: { $ne: 'Aktif' } });
