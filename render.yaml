@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: web-database-dgs
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
