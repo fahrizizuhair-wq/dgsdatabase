@@ -285,6 +285,21 @@ const isAuthenticated = isAdminAuthenticated;
 // ============================================================
 //  RUTE: PORTAL / LOGIN
 // ============================================================
+app.use((req, res, next) => {
+    // Jika Anda mengakses dengan menambah parameter ?owner=rahasia di ujung URL, web akan terbuka normal!
+    if (req.query.owner === 'rahasia') {
+        return next(); // Lolos, boleh lihat website aslinya
+    }
+
+    // Selain itu, orang lain akan melihat halaman pemeliharaan ini
+    res.send(`
+        <div style="text-align: center; margin-top: 150px; font-family: sans-serif;">
+            <h1 style="color: #333;">Website Sedang Dalam Perbaikan</h1>
+            <p style="color: #666;">Mohon maaf, situs sedang dalam pemeliharaan rutin.</p>
+        </div>
+    `);
+});
+
 app.get('/', async (req, res) => {
   try {
     res.set({
