@@ -8,7 +8,7 @@ const express  = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const session  = require('express-session');
-const MongoStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo');
 const multer   = require('multer');
 const path     = require('path');
 const fs       = require('fs');
@@ -239,19 +239,11 @@ app.use(session({
     secret: 'rahasia-negara-perusahaan-dgs',
     resave: false,
     saveUninitialized: false,
-    store: new MongoStore({ 
-        url: mongoUri 
+    store: MongoStore.create({ 
+        mongoUrl: mongoUri 
     }),
     cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 24 jam
 }));
-
-app.use((req, res, next) => {
-    res.locals.user = req.session.user || null;
-    res.locals.isUser = req.session.isUser || false;
-    res.locals.isAdmin = req.session.isAdmin || false;
-    res.locals.adminUser = req.session.adminUser || null;
-    next();
-});
 
 // ============================================================
 //  MIDDLEWARE AUTH
