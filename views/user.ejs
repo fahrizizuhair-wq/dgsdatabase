@@ -1109,7 +1109,9 @@
   <!-- Modal Tambah Vendor -->
   <div id="addModal" class="modal">
     <div class="modal-content">
+      <% if (role !== 'guest') { %>
       <h2 style="margin-bottom: 20px; color: #7a1b1b; font-size: 20px;">Tambah Vendor Baru</h2>
+       <% } %>
       <form action="/user/vendor/add" method="POST" enctype="multipart/form-data">
         <div class="form-group">
           <label>ID Vendor</label>
