@@ -125,7 +125,7 @@ const User          = require('./models/User');
 // ============================================================
 //  DATABASE CONNECTION
 // ============================================================
-const mongoUri = process.env.MONGO_URI || 'mongodb+srv://fahrizizuhair_db_user:QTzFx9ErXbkYCf5O@cluster0.xp4d3tt.mongodb.net/procurementdgs?retryWrites=true&w=majority';
+const mongoUri = process.env.MONGO_URI || 'mongodb+srv://fahrizizuhair_db_user:QTzFx9ErXbkYCf5O@cluster0.xp4d3tt.mongodb.net/kiosk_sblk_db?retryWrites=true&w=majority';
 mongoose.connect(mongoUri)
   .then(async () => {
     console.log('Berhasil terhubung ke database MongoDB Atlas');
