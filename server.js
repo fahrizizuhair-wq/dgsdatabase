@@ -2,6 +2,8 @@
 //  DEPENDENCIES
 // ============================================================
 require('dotenv').config();
+const dns      = require('dns');
+try { dns.setServers(['8.8.8.8', '8.8.4.4']); } catch (e) {}
 const express  = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -13,6 +15,99 @@ const bcrypt   = require('bcrypt');
 const ExcelJS  = require('exceljs');
 const session  = require('express-session');
 const PORT = process.env.PORT || 3000;
+
+// ============================================================
+//  GRIDFS CLOUD STORAGE (FILE TETAP AMAN SAAT SERVER RESTART / SLEEP)
+// ============================================================
+let gridfsBucket = null;
+
+const getMimeType = (filename) => {
+  const ext = path.extname(filename).toLowerCase();
+  const mimeTypes = {
+    '.pdf':  'application/pdf',
+    '.jpg':  'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.jfif': 'image/jpeg',
+    '.png':  'image/png',
+    '.webp': 'image/webp',
+    '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    '.xls':  'application/vnd.ms-excel',
+    '.doc':  'application/msword',
+    '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    '.txt':  'text/plain'
+  };
+  return mimeTypes[ext] || 'application/octet-stream';
+};
+
+// Simpan file lokal ke MongoDB Atlas GridFS
+async function saveFileToGridFS(filename, filePath, mimetype) {
+  if (!gridfsBucket || !filePath || !fs.existsSync(filePath)) return;
+  try {
+    const existing = await gridfsBucket.find({ filename }).toArray();
+    if (existing && existing.length > 0) return; // sudah ada di cloud
+
+    return new Promise((resolve, reject) => {
+      const uploadStream = gridfsBucket.openUploadStream(filename, {
+        contentType: mimetype || getMimeType(filename)
+      });
+      const readStream = fs.createReadStream(filePath);
+      readStream.pipe(uploadStream)
+        .on('finish', () => resolve(true))
+        .on('error', (err) => reject(err));
+    });
+  } catch (err) {
+    console.error(`Gagal mencadangkan file ${filename} ke GridFS:`, err.message);
+  }
+}
+
+// Helper auto-sync req.file & req.files
+async function syncReqFilesToGridFS(req) {
+  try {
+    if (req.file) {
+      await saveFileToGridFS(req.file.filename, req.file.path, req.file.mimetype);
+    }
+    if (req.files && Array.isArray(req.files)) {
+      for (const f of req.files) {
+        await saveFileToGridFS(f.filename, f.path, f.mimetype);
+      }
+    }
+  } catch (err) {
+    console.error('Error auto-sync file upload ke cloud:', err.message);
+  }
+}
+
+// Sinkronisasi otomatis file lokal lama ke MongoDB Atlas di background
+async function syncLocalUploadsToMongo() {
+  try {
+    if (!gridfsBucket) return;
+    const uploadDir = path.join(__dirname, 'public/uploads');
+    if (!fs.existsSync(uploadDir)) return;
+
+    const filesOnDisk = fs.readdirSync(uploadDir).filter(f => !f.startsWith('.'));
+    const existingInDb = await gridfsBucket.find({}, { projection: { filename: 1 } }).toArray();
+    const existingSet = new Set(existingInDb.map(d => d.filename));
+
+    let count = 0;
+    for (const filename of filesOnDisk) {
+      if (!existingSet.has(filename)) {
+        const fullPath = path.join(uploadDir, filename);
+        try {
+          const stat = fs.statSync(fullPath);
+          if (stat.isFile()) {
+            await saveFileToGridFS(filename, fullPath);
+            existingSet.add(filename);
+            count++;
+          }
+        } catch (e) {}
+      }
+    }
+    if (count > 0) {
+      console.log(`[Cloud Backup] Berhasil mencadangkan ${count} file lokal ke MongoDB Atlas secara permanen.`);
+    }
+  } catch (err) {
+    console.error('[Cloud Backup Sync Error]', err.message);
+  }
+}
 
 // ============================================================
 //  MODEL IMPORTS
@@ -33,7 +128,13 @@ const User          = require('./models/User');
 const mongoUri = process.env.MONGO_URI || 'mongodb+srv://fahrizizuhair_db_user:PASSWORD_ANDA@cluster0.xp4d3tt.mongodb.net/procurementdgs?retryWrites=true&w=majority';
 mongoose.connect(mongoUri)
   .then(async () => {
-    console.log('Berhasil terhubung ke database MongoDB');
+    console.log('Berhasil terhubung ke database MongoDB Atlas');
+    gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+      bucketName: 'uploads'
+    });
+    console.log('GridFS Cloud Storage aktif: File & foto tersimpan permanen di cloud');
+    setTimeout(syncLocalUploadsToMongo, 3000);
+
     try {
       const adminCount = await Admin.countDocuments();
       if (adminCount === 0) {
@@ -64,6 +165,56 @@ mongoose.connect(mongoUri)
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Rute Pengambilan File Upload (Disk Cache + MongoDB Atlas GridFS Fallback)
+app.get('/uploads/:filename', async (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const localPath = path.join(__dirname, 'public/uploads', filename);
+
+    // 1. Jika file ada di penyimpanan lokal, sajikan langsung
+    if (fs.existsSync(localPath)) {
+      return res.sendFile(localPath);
+    }
+
+    // 2. Jika tidak ada di lokal (setelah server restart / wake up dari sleep / deploy baru),
+    // ambil dari MongoDB Atlas GridFS
+    if (!gridfsBucket) {
+      return res.status(404).send('Layanan database file sedang bersiap...');
+    }
+
+    const files = await gridfsBucket.find({ filename }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).send('File tidak ditemukan di database.');
+    }
+
+    const fileDoc = files[0];
+    const contentType = fileDoc.contentType || getMimeType(filename);
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+
+    // Pastikan folder public/uploads ada untuk caching lokal
+    const uploadDir = path.join(__dirname, 'public/uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const downloadStream = gridfsBucket.openDownloadStreamByName(filename);
+    const writeStream = fs.createWriteStream(localPath);
+
+    downloadStream.pipe(writeStream);
+    downloadStream.pipe(res);
+
+    downloadStream.on('error', (err) => {
+      console.error('Error saat streaming file dari GridFS:', err);
+      if (!res.headersSent) res.status(404).send('Gagal mengunduh file.');
+    });
+  } catch (err) {
+    console.error('Error route /uploads/:filename:', err);
+    if (!res.headersSent) res.status(500).send('Terjadi kesalahan saat memuat file.');
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Multer – konfigurasi penyimpanan file
@@ -590,6 +741,7 @@ app.get('/admin', isAuthenticated, async (req, res) => {
 
 app.post('/admin/vendor/add', upload.array('foto', 10), async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     const { idVendor, namaVendor, wilayah, kategori, kontak, rating, status, deskripsi } = req.body;
     const fotoFiles = req.files ? req.files.map(f => f.filename) : [];
 
@@ -622,6 +774,7 @@ app.get('/admin/vendor/:id', isAuthenticated, async (req, res) => {
 
 app.post('/admin/vendor/edit/:id', upload.array('foto', 10), async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     const { idVendor, namaVendor, wilayah, kategori, kontak, rating, status, deskripsi } = req.body;
 
     const updateData = {
@@ -684,6 +837,7 @@ app.get('/harga-dasar/detail/:id', async (req, res) => {
 
 app.post('/harga-dasar/add', uploadMultiple, async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     const { idBarang, namaBarang, namaMerk, spesifikasi, qty, harga, final, keterangan, status, tanggal } = req.body;
 
     const existing = await HargaDasar.findOne({ idBarang });
@@ -713,6 +867,7 @@ app.post('/harga-dasar/add', uploadMultiple, async (req, res) => {
 
 app.post('/harga-dasar/edit/:id', uploadMultiple, async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     const { idBarang, namaBarang, namaMerk, spesifikasi, qty, harga, final, keterangan, status, tanggal } = req.body;
 
     const updateData = {
@@ -964,6 +1119,7 @@ app.get('/laporan', isAuthenticated, async (req, res) => {
 
 app.post('/laporan/add', upload.single('fileLaporan'), async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     // 1. Tambahkan 'tujuan' di dalam destructuring req.body
     const { namaDokumen, keterangan, jenis, tujuan } = req.body;
     const filePath = req.file ? '/uploads/' + req.file.filename : '';
@@ -1044,6 +1200,7 @@ app.get('/user', async (req, res) => {
 
 app.post('/user/vendor/add', upload.array('foto', 10), async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     const { idVendor, namaVendor, wilayah, kategori, kontak, rating, status, deskripsi } = req.body;
     const fotoFiles = req.files ? req.files.map(f => f.filename) : [];
 
@@ -1193,6 +1350,7 @@ app.get('/laporan-user', async (req, res) => {
 
 app.post('/laporan-user/add', upload.single('fileLaporan'), async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     // 1. Tambahkan 'tujuan' di dalam destructuring req.body
     const { namaDokumen, keterangan, jenis, tujuan } = req.body;
     const filePath = req.file ? req.file.filename : '';
@@ -1381,6 +1539,7 @@ app.get('/data-bahan-kain', async (req, res) => {
 
 app.post('/data-bahan-kain/add', uploadMultiple, async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     const { namaVendor, wilayah, kategoriSupply, kontak, rating, deskripsi } = req.body;
 
     if (!namaVendor) {
@@ -1499,6 +1658,7 @@ app.get('/data-kain-admin', async (req, res) => {
 
 app.post('/data-kain-admin/add', uploadMultiple, async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     const { namaVendor, wilayah, kategoriSupply, kontak, rating, deskripsi, status } = req.body;
 
     if (!namaVendor) {
@@ -1551,6 +1711,7 @@ app.post('/data-kain-admin/add', uploadMultiple, async (req, res) => {
 
 app.post('/data-kain-admin/edit/:id', uploadMultiple, async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     const { namaVendor, wilayah, kategoriSupply, kontak, rating, deskripsi, status } = req.body;
     const vendorIdUpdate = namaVendor
       ? namaVendor.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
