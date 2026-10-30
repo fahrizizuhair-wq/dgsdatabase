@@ -166,6 +166,21 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+const allowGuestView = (req, res, next) => {
+  if (req.session && (req.session.isGuest || req.session.isUser || req.session.isAdmin)) {
+    return next();
+  }
+  return res.redirect('/?error=Unauthorized');
+};
+
+const preventGuestWrite = (req, res, next) => {
+  if (req.session && (req.session.isUser || req.session.isAdmin)) {
+    return next();
+  }
+  return res.redirect('/?error=AccessDeniedForGuest');
+};
+
+
 // Rute Pengambilan File Upload (Disk Cache + MongoDB Atlas GridFS Fallback)
 app.get('/uploads/:filename', async (req, res) => {
   try {
@@ -277,6 +292,7 @@ const isAuthenticated = isAdminAuthenticated;
 // ============================================================
 //  RUTE: PORTAL / LOGIN
 // ============================================================
+
 app.get('/', async (req, res) => {
   try {
     res.set({
@@ -1146,7 +1162,7 @@ app.post('/laporan/delete/:id', async (req, res) => {
 // ============================================================
 //  RUTE: USER – Data Vendor
 // ============================================================
-app.get('/user', async (req, res) => {
+app.get('/user', allowGuestView, async (req, res) => {
   try {
     const perPage  = 20;
     const page     = parseInt(req.query.page) || 1;
@@ -1169,8 +1185,8 @@ app.get('/user', async (req, res) => {
     if (status)   query.status   = status;
     if (wilayah)  query.wilayah  = wilayah;
 
-    const vendors    = await Vendor.find(query).sort({ idVendor: 1 }).skip((page - 1) * perPage).limit(perPage);
-    const totalData  = await Vendor.countDocuments(query);
+    const vendors     = await Vendor.find(query).sort({ idVendor: 1 }).skip((page - 1) * perPage).limit(perPage);
+    const totalData   = await Vendor.countDocuments(query);
     const totalPages = Math.ceil(totalData / perPage);
 
     const totalVendorAktif      = await Vendor.countDocuments({ status: 'Aktif' });
@@ -1182,7 +1198,8 @@ app.get('/user', async (req, res) => {
     res.render('user', {
       vendors, currentPage: page, totalPages,
       totalVendorAktif, totalVendorTidakAktif, totalKategori,
-      nextIdVendor, search, kategori, status, wilayah
+      nextIdVendor, search, kategori, status, wilayah,
+      role: req.session.role
     });
   } catch (err) {
     console.error('Gagal memuat data user:', err);
@@ -1190,7 +1207,7 @@ app.get('/user', async (req, res) => {
   }
 });
 
-app.post('/user/vendor/add', upload.array('foto', 10), async (req, res) => {
+app.post('/user/vendor/add', preventGuestWrite, upload.array('foto', 10), async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
     const { idVendor, namaVendor, wilayah, kategori, kontak, rating, status, deskripsi } = req.body;
@@ -1227,7 +1244,7 @@ app.get('/user/vendor/:id', isUserAuthenticated, async (req, res) => {
 // ============================================================
 //  RUTE: HARGA DASAR – USER
 // ============================================================
-app.get('/harga-dasar-user', async (req, res) => {
+app.get('/harga-dasar-user', allowGuestView, async (req, res) => {
   try {
     const items     = await HargaDasar.find().sort({ createdAt: -1 });
     const totalItem = items.length;
@@ -1238,7 +1255,7 @@ app.get('/harga-dasar-user', async (req, res) => {
   }
 });
 
-app.post('/harga-dasar-user/add', async (req, res) => {
+app.post('/harga-dasar-user/add', preventGuestWrite, async (req, res) => {
   try {
     const newData = new HargaDasar({ ...req.body });
     await newData.save();
@@ -1252,7 +1269,7 @@ app.post('/harga-dasar-user/add', async (req, res) => {
 // ============================================================
 //  RUTE: STOK MASUK – USER
 // ============================================================
-app.get('/stok-masuk-user', async (req, res) => {
+app.get('/stok-masuk-user', allowGuestView, async (req, res) => {
   try {
     const listStokMasuk  = await StokMasuk.find().sort({ createdAt: -1 });
     const totalTransaksi = listStokMasuk.length;
@@ -1264,7 +1281,7 @@ app.get('/stok-masuk-user', async (req, res) => {
   }
 });
 
-app.post('/stok-masuk-user/add', async (req, res) => {
+app.post('/stok-masuk-user/add', preventGuestWrite, async (req, res) => {
   try {
     const newItem = new StokMasuk(req.body);
     await newItem.save();
@@ -1278,7 +1295,7 @@ app.post('/stok-masuk-user/add', async (req, res) => {
 // ============================================================
 //  RUTE: STOK KELUAR – USER
 // ============================================================
-app.get('/stok-keluar-user', async (req, res) => {
+app.get('/stok-keluar-user', allowGuestView, async (req, res) => {
   try {
     const listStokKeluar = await StokKeluar.find().sort({ createdAt: -1 });
     const totalTransaksi = listStokKeluar.length;
@@ -1290,7 +1307,7 @@ app.get('/stok-keluar-user', async (req, res) => {
   }
 });
 
-app.post('/stok-keluar-user/add', async (req, res) => {
+app.post('/stok-keluar-user/add', preventGuestWrite, async (req, res) => {
   try {
     const newItem = new StokKeluar(req.body);
     await newItem.save();
@@ -1304,7 +1321,7 @@ app.post('/stok-keluar-user/add', async (req, res) => {
 // ============================================================
 //  RUTE: STOK OPNAME – USER
 // ============================================================
-app.get('/stok-opname-user', async (req, res) => {
+app.get('/stok-opname-user', allowGuestView, async (req, res) => {
   try {
     const listStokOpname = await StokOpname.find().sort({ createdAt: -1 });
     const totalOpname    = listStokOpname.length;
@@ -1315,7 +1332,7 @@ app.get('/stok-opname-user', async (req, res) => {
   }
 });
 
-app.post('/stok-opname-user/add', async (req, res) => {
+app.post('/stok-opname-user/add', preventGuestWrite, async (req, res) => {
   try {
     const newItem = new StokOpname(req.body);
     await newItem.save();
@@ -1329,7 +1346,7 @@ app.post('/stok-opname-user/add', async (req, res) => {
 // ============================================================
 //  RUTE: LAPORAN – USER
 // ============================================================
-app.get('/laporan-user', async (req, res) => {
+app.get('/laporan-user', allowGuestView, async (req, res) => {
   try {
     const listLaporan  = await Laporan.find().sort({ createdAt: -1 });
     const totalLaporan = listLaporan.length;
@@ -1340,7 +1357,7 @@ app.get('/laporan-user', async (req, res) => {
   }
 });
 
-app.post('/laporan-user/add', upload.single('fileLaporan'), async (req, res) => {
+app.post('/laporan-user/add', preventGuestWrite, upload.single('fileLaporan'), async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
     // 1. Tambahkan 'tujuan' di dalam destructuring req.body
@@ -1369,7 +1386,7 @@ app.post('/laporan-user/add', upload.single('fileLaporan'), async (req, res) => 
 // ============================================================
 
 // Ekspor Vendor
-app.get('/export-vendor-excel', async (req, res) => {
+app.get('/export-vendor-excel', preventGuestWrite, async (req, res) => {
   try {
     const dataVendor = await Vendor.find({});
     const workbook   = new ExcelJS.Workbook();
@@ -1416,7 +1433,7 @@ app.get('/export-vendor-excel', async (req, res) => {
 });
 
 // Ekspor Harga Dasar
-app.get('/export-harga-dasar-excel', async (req, res) => {
+app.get('/export-harga-dasar-excel', preventGuestWrite, async (req, res) => {
   try {
     const dataHargaDasar = await HargaDasar.find({});
     const workbook       = new ExcelJS.Workbook();
@@ -1478,7 +1495,7 @@ app.get('/export-harga-dasar-excel', async (req, res) => {
 // ============================================================
 //  RUTE: VENDORS (API JSON – Filter/Pencarian)
 // ============================================================
-app.get('/vendors', async (req, res) => {
+app.get('/vendors', preventGuestWrite, async (req, res) => {
   try {
     const { search, kategori, status, wilayah } = req.query;
     let query = {};
@@ -1499,7 +1516,7 @@ app.get('/vendors', async (req, res) => {
 // ============================================================
 //  RUTE: DATA BAHAN KAIN – USER
 // ============================================================
-app.get('/data-bahan-kain', async (req, res) => {
+app.get('/data-bahan-kain', allowGuestView, async (req, res) => {
     try {
         // Ambil semua data vendor untuk tabel
         const listVendor = await DataBahanKain.find().sort({ _id: -1 });
@@ -1529,7 +1546,7 @@ app.get('/data-bahan-kain', async (req, res) => {
     }
 });
 
-app.post('/data-bahan-kain/add', uploadMultiple, async (req, res) => {
+app.post('/data-bahan-kain/add', preventGuestWrite, uploadMultiple, async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
     const { namaVendor, wilayah, kategoriSupply, kontak, rating, deskripsi } = req.body;
@@ -1580,7 +1597,7 @@ app.post('/data-bahan-kain/add', uploadMultiple, async (req, res) => {
   }
 });
 
-app.post('/data-bahan-kain/edit/:id', async (req, res) => {
+app.post('/data-bahan-kain/edit/:id', preventGuestWrite, async (req, res) => {
   try {
     const { namaVendor, wilayah, kategoriSupply, kontak, rating } = req.body;
     const vendorId = namaVendor.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -1600,7 +1617,7 @@ app.post('/data-bahan-kain/edit/:id', async (req, res) => {
   }
 });
 
-app.delete('/data-bahan-kain/delete/:id', async (req, res) => {
+app.delete('/data-bahan-kain/delete/:id', preventGuestWrite, async (req, res) => {
   try {
     await DataBahanKain.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Data vendor berhasil dihapus!' });
@@ -1613,7 +1630,7 @@ app.delete('/data-bahan-kain/delete/:id', async (req, res) => {
 // ============================================================
 //  RUTE: KATALOG VENDOR (Detail per vendorId)
 // ============================================================
-app.get('/katalog-vendor/:vendorId', async (req, res) => {
+app.get('/katalog-vendor/:vendorId', preventGuestWrite, async (req, res) => {
   try {
     const vendor = await DataBahanKain.findOne({ vendorId: req.params.vendorId });
     if (!vendor) {

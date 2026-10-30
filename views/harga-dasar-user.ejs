@@ -533,10 +533,14 @@
       <div class="table-header">
         <h2>Daftar Harga Barang</h2>
         <input type="text" id="searchInput" class="search-input" placeholder="Cari barang..." onkeyup="filterItem()">
+        <% if (role !== 'guest') { %>
         <button class="btn-add" onclick="openModal()">+ Tambah Harga Dasar</button>
+         <% } %>
+         <% if (role !== 'guest') { %>
         <a href="/export-harga-dasar-excel" style="padding: 10px 18px; background-color: #1d6f42; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(29, 111, 66, 0.2);">
           <i class="fa-solid fa-file-excel"></i> Export Excel
         </a>
+        <% } %>
       </div>
 
           <table id="itemTable">

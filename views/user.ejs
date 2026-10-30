@@ -973,12 +973,15 @@
     <input type="text" id="searchInput" class="search-input" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari vendor...">
     
     <!-- Tombol Tambah Vendor -->
+     <% if (role !== 'guest') { %>
     <button class="btn" onclick="openAddModal()" style="background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer;">+ Tambah Vendor</button>
-    
+     <% } %>
     <!-- Tombol Export Excel -->
+     <% if (role !== 'guest') { %>
     <a href="/export-vendor-excel" style="padding: 10px 18px; background-color: #1d6f42; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">
         Export Excel
     </a>
+    <% } %>
     
     <!-- Tombol & Panel Filter -->
    <div class="filter-container">
@@ -1080,7 +1083,9 @@
                 </span>
               </td>
               <td>
+                <% if (role !== 'guest') { %>
                 <a href="/user/vendor/<%= v._id %>" class="btn-detail">Detail</a>
+                <% } %>
               </td>
             </tr>
           <% }) %>

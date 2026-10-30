@@ -500,7 +500,11 @@
       <div class="table-header">
         <h2>Daftar Stok Masuk</h2>
         <input type="text" id="searchInput" class="search-input" placeholder="Cari transaksi..." onkeyup="filterTable()">
-        <button class="btn-add" onclick="openModal()">+ Tambah Stok Masuk</button>
+        <% if (role !== 'guest') { %>
+        <button class="btn-add" onclick="openModal()">
+          + Tambah Stok Masuk
+        </button>
+        <% } %>
       </div>
 
       <div class="table-responsive-wrapper">
