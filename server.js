@@ -240,7 +240,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({ 
-        mongoUrl: mongoUri 
+    mongoUrl: mongoUri
+
     }),
     cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 24 jam
 }));
