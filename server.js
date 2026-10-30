@@ -8,7 +8,7 @@ const express  = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const session  = require('express-session');
-const MongoStore = require('connect-mongo');
+const MongoStore = require('connect-mongo')(session); // DIPERBAIKI: Menggunakan format legacy session
 const multer   = require('multer');
 const path     = require('path');
 const fs       = require('fs');
@@ -232,16 +232,15 @@ const storage = multer.diskStorage({
   }
 });
 const upload         = multer({ storage });
-const uploadMultiple = upload.array('foto',);
+const uploadMultiple = upload.array('foto'); // DIPERBAIKI: Koma menggantung dihapus
 
 // Session
 app.use(session({
     secret: 'rahasia-negara-perusahaan-dgs',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ 
-    mongoUrl: mongoUri
-
+    store: new MongoStore({ 
+        url: mongoUri // DIPERBAIKI: Menggunakan properti url dengan mongoUri
     }),
     cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 24 jam
 }));
