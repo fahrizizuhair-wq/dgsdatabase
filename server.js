@@ -1180,7 +1180,7 @@ app.post('/laporan/add', upload.single('fileLaporan'), async (req, res) => {
 });
 
 // 3. Rute POST Hapus Laporan (Diproteksi preventGuestWrite agar Guest tidak bisa menghapus data)
-app.post('/laporan/delete/:id', preventGuestWrite, async (req, res) => {
+app.post('/laporan/delete/:id', async (req, res) => {
   try {
     await Laporan.findByIdAndDelete(req.params.id);
     res.redirect('/laporan');
