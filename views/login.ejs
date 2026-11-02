@@ -25,7 +25,7 @@
   --surface: #ffffff;
 }
 
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
 
@@ -749,182 +749,182 @@ body::before {
                 </div>
             <% } %>
 
-            <!-- FORM 1A: LOGIN ADMIN -->
-            <div id="boxLoginAdmin" style="display: none;">
-                <h3 style="margin: 0 0 5px 0; color: #2c2c2c; font-size: 20px; font-weight: 700;">Verifikasi Admin</h3>
-                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan kredensial akun administrator Anda</p>
+           <div class="auth-container">
+    <!-- FORM 1A: LOGIN ADMIN -->
+    <div id="boxLoginAdmin" style="display: none;">
+        <h3 style="margin: 0 0 5px 0; color: #2c2c2c; font-size: 20px; font-weight: 700;">Verifikasi Admin</h3>
+        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan kredensial akun administrator Anda</p>
 
-                <form onsubmit="prosesLogin(event, 'admin')" style="display: flex; flex-direction: column; gap: 14px;">
-                    <input type="text" id="adminLoginUsername" name="username" placeholder="Username Admin" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-                    
-                    <div style="position: relative; width: 100%;">
-                        <input type="password" name="password" id="adminPassword" placeholder="Password Admin" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                        <span onclick="togglePassword('adminPassword', 'iconAdminPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                            <i id="iconAdminPass" class="fa-solid fa-eye"></i>
-                        </span>
-                    </div>
-                    
-                    <div style="text-align: right; margin-top: -4px;">
-                        <a href="javascript:void(0)" onclick="tampilLupaPassword('admin')" style="font-size: 13px; color: #cf3939; text-decoration: none; font-weight: 600;">Lupa Password?</a>
-                    </div>
-
-                    <button type="submit" id="btnSubmitAdmin" style="padding: 12px; background-color: #cf3939; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Masuk Sebagai Admin</button>
-                    
-                    <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
-                        Belum punya akun admin? <br>
-                        <a href="javascript:void(0)" onclick="bukaRegisterAdmin()" style="color: #cf3939; font-weight: 700; text-decoration: none;">Buat Akun Admin &rarr;</a>
-                    </div>
-                </form>
+        <form onsubmit="prosesLogin(event, 'admin')" style="display: flex; flex-direction: column; gap: 14px;">
+            <input type="text" id="adminLoginUsername" name="username" placeholder="Username Admin" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+            
+            <div style="position: relative; width: 100%;">
+                <input type="password" name="password" id="adminPassword" placeholder="Password Admin" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                <span onclick="togglePassword('adminPassword', 'iconAdminPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                    <i id="iconAdminPass" class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+            
+            <div style="text-align: right; margin-top: -4px;">
+                <a href="javascript:void(0)" onclick="tampilLupaPassword('admin')" style="font-size: 13px; color: #cf3939; text-decoration: none; font-weight: 600;">Lupa Password?</a>
             </div>
 
-            <!-- FORM 1B: REGISTER ADMIN -->
-            <div id="boxRegisterAdmin" style="display: none;">
-                <h3 style="margin: 0 0 5px 0; color: #cf3939; font-size: 20px; font-weight: 700;">Buat Akun Admin</h3>
-                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Daftarkan akun administrator baru untuk kontrol sistem</p>
-
-                <form onsubmit="prosesRegisterAdmin(event)" style="display: flex; flex-direction: column; gap: 14px;">
-                    <input type="text" id="adminRegUsername" placeholder="Username Admin Baru" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-                    
-                    <div style="position: relative; width: 100%;">
-                        <input type="password" id="adminRegPassword" placeholder="Password Admin Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                        <span onclick="togglePassword('adminRegPassword', 'iconAdminRegPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                            <i id="iconAdminRegPass" class="fa-solid fa-eye"></i>
-                        </span>
-                    </div>
-
-                    <div style="position: relative; width: 100%;">
-                        <input type="password" id="adminRegConfirmPassword" placeholder="Konfirmasi Password Admin" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                        <span onclick="togglePassword('adminRegConfirmPassword', 'iconAdminRegConfirm')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                            <i id="iconAdminRegConfirm" class="fa-solid fa-eye"></i>
-                        </span>
-                    </div>
-
-                    <button type="submit" id="btnRegisterAdmin" style="padding: 12px; background-color: #cf3939; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Daftar Akun Admin</button>
-
-                    <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
-                        Sudah punya akun admin? <br>
-                        <a href="javascript:void(0)" onclick="bukaLoginAdmin()" style="color: #cf3939; font-weight: 700; text-decoration: none;">&larr; Masuk Admin</a>
-                    </div>
-                </form>
+            <button type="submit" id="btnSubmitAdmin" style="padding: 12px; background-color: #cf3939; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Masuk Sebagai Admin</button>
+            
+            <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
+                Belum punya akun admin? <br>
+                <a href="javascript:void(0)" onclick="bukaRegisterAdmin()" style="color: #cf3939; font-weight: 700; text-decoration: none;">Buat Akun Admin &rarr;</a>
             </div>
-
-            <!-- FORM 2A: LOGIN USER -->
-            <div id="boxLoginUser" style="display: none;">
-                <h3 style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Login Akun User</h3>
-                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan username dan password akun user Anda</p>
-
-                <form onsubmit="prosesLogin(event, 'user')" style="display: flex; flex-direction: column; gap: 14px;">
-                    <input type="text" id="userLoginUsername" name="username" placeholder="Username User" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-                    
-                    <div style="position: relative; width: 100%;">
-                        <input type="password" name="password" id="userPassword" placeholder="Password User" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                        <span onclick="togglePassword('userPassword', 'iconUserPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                            <i id="iconUserPass" class="fa-solid fa-eye"></i>
-                        </span>
-                    </div>
-
-                    <div style="text-align: right; margin-top: -4px;">
-                        <a href="javascript:void(0)" onclick="tampilLupaPassword('user')" style="font-size: 13px; color: #7a1b1b; text-decoration: none; font-weight: 600;">Lupa Password?</a>
-                    </div>
-
-                    <button type="submit" id="btnSubmitUser" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Masuk Ke Dashboard</button>
-
-                    <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
-                        Belum punya akun user? <br>
-                        <a href="javascript:void(0)" onclick="bukaRegisterUser()" style="color: #7a1b1b; font-weight: 700; text-decoration: none;">Buat Akun User &rarr;</a>
-                    </div>
-                    <!-- === TOMBOL GUEST / TAMU (BARU) === -->
-                    <div style="text-align: center; margin-top: 14px;">
-                        <a href="/dashboard-guest" style="display: block; padding: 10px; background-color: #f1f1f1; color: #444; border: 1px solid #ddd; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; transition: 0.2s;">
-                            <i class="fa-solid fa-eye" style="margin-right: 6px;"></i> Masuk sebagai Guest (Tamu)
-                        </a>
-                    </div>
-                  </div>
-                </form>
-            </div>
-
-            <!-- FORM 2B: REGISTER USER -->
-            <div id="boxRegisterUser" style="display: none;">
-                <h3 style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Buat Akun User</h3>
-                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Daftarkan akun user baru untuk akses operasional</p>
-
-                <form onsubmit="prosesRegisterUser(event)" style="display: flex; flex-direction: column; gap: 14px;">
-                    <input type="text" id="userRegNama" placeholder="Nama Lengkap (Opsional)" style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-                    
-                    <input type="text" id="userRegUsername" placeholder="Username User Baru" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-                    
-                    <div style="position: relative; width: 100%;">
-                        <input type="password" id="userRegPassword" placeholder="Password User Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                        <span onclick="togglePassword('userRegPassword', 'iconUserRegPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                            <i id="iconUserRegPass" class="fa-solid fa-eye"></i>
-                        </span>
-                    </div>
-
-                    <div style="position: relative; width: 100%;">
-                        <input type="password" id="userRegConfirmPassword" placeholder="Konfirmasi Password User" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                        <span onclick="togglePassword('userRegConfirmPassword', 'iconUserRegConfirm')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                            <i id="iconUserRegConfirm" class="fa-solid fa-eye"></i>
-                        </span>
-                    </div>
-
-                    <button type="submit" id="btnRegisterUser" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Daftar Akun User</button>
-
-                    <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
-                        Sudah punya akun user? <br>
-                        <a href="javascript:void(0)" onclick="bukaLoginUser()" style="color: #7a1b1b; font-weight: 700; text-decoration: none;">&larr; Masuk User</a>
-                    </div>
-                </form>
-            </div>
-
-            <!-- FORM 3: LUPA PASSWORD -->
-            <div id="boxLupaPassword" style="display: none;">
-                <h3 id="judulLupaPassword" style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Lupa Password</h3>
-                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan username Anda untuk verifikasi data akun di database.</p>
-
-                <form onsubmit="prosesVerifikasiUser(event)" style="display: flex; flex-direction: column; gap: 14px;">
-                    <input type="hidden" id="roleLupaPassword" value="admin">
-                    <input type="text" id="inputUsernameLupa" placeholder="Masukkan Username Anda" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-                    
-                    <button type="submit" id="btnVerifLupa" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Lanjutkan & Verifikasi</button>
-                    
-                    <div style="text-align: center; margin-top: 6px;">
-                        <a href="javascript:void(0)" onclick="kembaliKeLoginRole()" style="font-size: 13px; color: #666; text-decoration: none;">&larr; Kembali ke Form Login</a>
-                    </div>
-                </form>
-            </div>
-
-            <!-- FORM 4: UBAH PASSWORD BARU -->
-            <div id="boxResetPassword" style="display: none;">
-                <h3 id="judulResetPassword" style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Ubah Password Baru</h3>
-                <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Buat password baru. Password akan langsung diperbarui ke database.</p>
-
-                <form onsubmit="prosesResetPassword(event)" style="display: flex; flex-direction: column; gap: 14px;">
-                    <input type="hidden" id="hiddenUsernameReset">
-                    <input type="hidden" id="hiddenRoleReset">
-                    
-                    <div style="position: relative; width: 100%;">
-                        <input type="password" name="newPassword" id="newPassword" placeholder="Password Baru (min. 4 karakter)" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                        <span onclick="togglePassword('newPassword', 'iconNewPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                            <i id="iconNewPass" class="fa-solid fa-eye"></i>
-                        </span>
-                    </div>
-
-                    <div style="position: relative; width: 100%;">
-                        <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Konfirmasi Password Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                        <span onclick="togglePassword('confirmPassword', 'iconConfirmPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                            <i id="iconConfirmPass" class="fa-solid fa-eye"></i>
-                        </span>
-                    </div>
-                    
-                    <button type="submit" id="btnSimpanPassBaru" style="padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Simpan Password Baru</button>
-                    
-                    <div style="text-align: center; margin-top: 6px;">
-                        <a href="javascript:void(0)" onclick="kembaliKeLoginRole()" style="font-size: 13px; color: #666; text-decoration: none;">Batal</a>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </form>
     </div>
+
+    <!-- FORM 1B: REGISTER ADMIN -->
+    <div id="boxRegisterAdmin" style="display: none;">
+        <h3 style="margin: 0 0 5px 0; color: #cf3939; font-size: 20px; font-weight: 700;">Buat Akun Admin</h3>
+        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Daftarkan akun administrator baru untuk kontrol sistem</p>
+
+        <form onsubmit="prosesRegisterAdmin(event)" style="display: flex; flex-direction: column; gap: 14px;">
+            <input type="text" id="adminRegUsername" placeholder="Username Admin Baru" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+            
+            <div style="position: relative; width: 100%;">
+                <input type="password" id="adminRegPassword" placeholder="Password Admin Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                <span onclick="togglePassword('adminRegPassword', 'iconAdminRegPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                    <i id="iconAdminRegPass" class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+
+            <div style="position: relative; width: 100%;">
+                <input type="password" id="adminRegConfirmPassword" placeholder="Konfirmasi Password Admin" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                <span onclick="togglePassword('adminRegConfirmPassword', 'iconAdminRegConfirm')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                    <i id="iconAdminRegConfirm" class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+
+            <button type="submit" id="btnRegisterAdmin" style="padding: 12px; background-color: #cf3939; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Daftar Akun Admin</button>
+
+            <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
+                Sudah punya akun admin? <br>
+                <a href="javascript:void(0)" onclick="bukaLoginAdmin()" style="color: #cf3939; font-weight: 700; text-decoration: none;">&larr; Masuk Admin</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- FORM 2A: LOGIN USER -->
+    <div id="boxLoginUser" style="display: none;">
+        <h3 style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Login Akun User</h3>
+        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan username dan password akun user Anda</p>
+
+        <form onsubmit="prosesLogin(event, 'user')" style="display: flex; flex-direction: column; gap: 14px;">
+            <input type="text" id="userLoginUsername" name="username" placeholder="Username User" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+            
+            <div style="position: relative; width: 100%;">
+                <input type="password" name="password" id="userPassword" placeholder="Password User" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                <span onclick="togglePassword('userPassword', 'iconUserPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                    <i id="iconUserPass" class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+
+            <div style="text-align: right; margin-top: -4px;">
+                <a href="javascript:void(0)" onclick="tampilLupaPassword('user')" style="font-size: 13px; color: #7a1b1b; text-decoration: none; font-weight: 600;">Lupa Password?</a>
+            </div>
+
+            <button type="submit" id="btnSubmitUser" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Masuk Ke Dashboard</button>
+
+            <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
+                Belum punya akun user? <br>
+                <a href="javascript:void(0)" onclick="bukaRegisterUser()" style="color: #7a1b1b; font-weight: 700; text-decoration: none;">Buat Akun User &rarr;</a>
+            </div>
+
+            <!-- TOMBOL GUEST / TAMU -->
+            <div style="text-align: center; margin-top: 14px;">
+                <a href="/dashboard-guest" style="display: block; padding: 10px; background-color: #f1f1f1; color: #444; border: 1px solid #ddd; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; transition: 0.2s;">
+                    <i class="fa-solid fa-eye" style="margin-right: 6px;"></i> Masuk sebagai Guest (Tamu)
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- FORM 2B: REGISTER USER -->
+    <div id="boxRegisterUser" style="display: none;">
+        <h3 style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Buat Akun User</h3>
+        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Daftarkan akun user baru untuk akses operasional</p>
+
+        <form onsubmit="prosesRegisterUser(event)" style="display: flex; flex-direction: column; gap: 14px;">
+            <input type="text" id="userRegNama" placeholder="Nama Lengkap (Opsional)" style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+            
+            <input type="text" id="userRegUsername" placeholder="Username User Baru" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+            
+            <div style="position: relative; width: 100%;">
+                <input type="password" id="userRegPassword" placeholder="Password User Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                <span onclick="togglePassword('userRegPassword', 'iconUserRegPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                    <i id="iconUserRegPass" class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+
+            <div style="position: relative; width: 100%;">
+                <input type="password" id="userRegConfirmPassword" placeholder="Konfirmasi Password User" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                <span onclick="togglePassword('userRegConfirmPassword', 'iconUserRegConfirm')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                    <i id="iconUserRegConfirm" class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+
+            <button type="submit" id="btnRegisterUser" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Daftar Akun User</button>
+
+            <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
+                Sudah punya akun user? <br>
+                <a href="javascript:void(0)" onclick="bukaLoginUser()" style="color: #7a1b1b; font-weight: 700; text-decoration: none;">&larr; Masuk User</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- FORM 3: LUPA PASSWORD -->
+    <div id="boxLupaPassword" style="display: none;">
+        <h3 id="judulLupaPassword" style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Lupa Password</h3>
+        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan username Anda untuk verifikasi data akun di database.</p>
+
+        <form onsubmit="prosesVerifikasiUser(event)" style="display: flex; flex-direction: column; gap: 14px;">
+            <input type="hidden" id="roleLupaPassword" value="admin">
+            <input type="text" id="inputUsernameLupa" placeholder="Masukkan Username Anda" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
+            
+            <button type="submit" id="btnVerifLupa" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Lanjutkan & Verifikasi</button>
+            
+            <div style="text-align: center; margin-top: 6px;">
+                <a href="javascript:void(0)" onclick="kembaliKeLoginRole()" style="font-size: 13px; color: #666; text-decoration: none;">&larr; Kembali ke Form Login</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- FORM 4: UBAH PASSWORD BARU -->
+    <div id="boxResetPassword" style="display: none;">
+        <h3 id="judulResetPassword" style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Ubah Password Baru</h3>
+        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Buat password baru. Password akan langsung diperbarui ke database.</p>
+
+        <form onsubmit="prosesResetPassword(event)" style="display: flex; flex-direction: column; gap: 14px;">
+            <input type="hidden" id="hiddenUsernameReset">
+            <input type="hidden" id="hiddenRoleReset">
+            
+            <div style="position: relative; width: 100%;">
+                <input type="password" name="newPassword" id="newPassword" placeholder="Password Baru (min. 4 karakter)" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                <span onclick="togglePassword('newPassword', 'iconNewPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                    <i id="iconNewPass" class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+
+            <div style="position: relative; width: 100%;">
+                <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Konfirmasi Password Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                <span onclick="togglePassword('confirmPassword', 'iconConfirmPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
+                    <i id="iconConfirmPass" class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+            
+            <button type="submit" id="btnSimpanPassBaru" style="padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Simpan Password Baru</button>
+            
+            <div style="text-align: center; margin-top: 6px;">
+                <a href="javascript:void(0)" onclick="kembaliKeLoginRole()" style="font-size: 13px; color: #666; text-decoration: none;">Batal</a>
+            </div>
+        </form>
+    </div>
+</div>
 
     <script>
     let roleAktif = 'admin'; // 'admin' atau 'user'
