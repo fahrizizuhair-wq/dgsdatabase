@@ -1427,11 +1427,16 @@ app.post('/stok-opname-user/add', preventGuestWrite, async (req, res) => {
 // ============================================================
 app.get('/laporan-user', allowGuestView, async (req, res) => {
   try {
-    const listLaporan  = await Laporan.find().sort({ _id: -1 });
+    const listLaporan = await Laporan.find().sort({ _id: -1 });
     const totalLaporan = listLaporan.length;
-    
+    const processedLaporan = listLaporan.map(item => {
+      const obj = item.toObject();
+      obj.cleanName = obj.filePath ? obj.filePath.replace(/^.*[\\\/]/, '') : '';
+      return obj;
+    });
+
     res.render('laporan-user', { 
-      listLaporan, 
+      listLaporan: processedLaporan, 
       totalLaporan, 
       role: req.session.role || 'guest' 
     });
