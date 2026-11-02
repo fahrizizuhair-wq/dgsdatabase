@@ -1285,9 +1285,18 @@ app.get('/user/vendor/:id', isUserAuthenticated, async (req, res) => {
 // ============================================================
 app.get('/harga-dasar-user', async (req, res) => {
   try {
-    const items = await HargaDasar.find().sort({ _id: -1 });
+    const items = await HargaDasar.find().sort({ tanggal: -1, _id: -1 }).lean();
     const totalItem = items.length;
-    res.render('harga-dasar-user', { items, totalItem });
+    const totalReady = items.filter(i => i.status === 'Ready').length;
+    const totalPending = items.filter(i => i.status === 'Pending').length;
+    
+    // Kirim semua variabel yang dibutuhkan oleh view EJS
+    res.render('harga-dasar-user', { 
+      items, 
+      totalItem, 
+      totalReady, 
+      totalPending 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat data harga dasar: ' + err.message);
