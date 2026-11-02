@@ -1,24 +1,79 @@
 <%- include('partials/guest-header', {
   pageTitle: 'Laporan',
-  pageSubtitle: 'Daftar arsip laporan resmi. Anda hanya dapat melihat dan membuka berkas laporan.',
-  active: 'laporan',
-  totalCount: listLaporan.length
+  pageSubtitle: 'Lihat arsip laporan resmi dan buka berkas yang tersedia. Mode guest tidak memiliki akses untuk menambah, mengubah, atau menghapus laporan.',
+  active: 'laporan'
 }) %>
 
-<section class="panel">
-  <div class="panel-head">
-    <div>
-      <h2>Arsip Laporan</h2>
-      <p>Mode guest tidak memiliki akses untuk menambah, mengubah, atau menghapus laporan.</p>
+<section class="card-grid">
+  <div class="stat-card card-blue">
+    <div class="card-header">
+      <span class="card-title">Total Laporan</span>
+      <div class="icon-wrapper icon-blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+      </div>
     </div>
-    <div class="search-box">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-      <input type="search" placeholder="Cari laporan..." aria-label="Cari laporan"
-             data-table-search="#laporanTable" data-empty="laporanEmpty">
+    <div class="card-body">
+      <span class="card-value"><%= totalLaporan || 0 %></span>
+      <span class="card-unit">Dokumen</span>
     </div>
+    <div class="card-footer">
+      <span class="text-blue">Arsip Tersedia</span>
+      <span>Laporan Resmi</span>
+    </div>
+  </div>
+
+  <div class="stat-card card-green">
+    <div class="card-header">
+      <span class="card-title">Berkas Tersedia</span>
+      <div class="icon-wrapper icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value"><%= totalBerkas || 0 %></span>
+      <span class="card-unit">Berkas</span>
+    </div>
+    <div class="card-footer">
+      <span class="text-green">Dapat Dibuka</span>
+      <span>Siap Diunduh</span>
+    </div>
+  </div>
+
+  <div class="stat-card card-red">
+    <div class="card-header">
+      <span class="card-title">Tanpa Berkas</span>
+      <div class="icon-wrapper icon-red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value"><%= totalTanpaBerkas || 0 %></span>
+      <span class="card-unit">Dokumen</span>
+    </div>
+    <div class="card-footer">
+      <span class="text-orange">Perlu Dilengkapi</span>
+      <span>Belum Ada File</span>
+    </div>
+  </div>
+</section>
+
+<section class="main-box">
+  <div class="box-header">
+    <div class="box-title">Arsip Laporan</div>
+    <input type="search" class="search-input" placeholder="Cari laporan..." aria-label="Cari laporan"
+           data-table-search="#laporanTable" data-empty="laporanEmpty">
   </div>
 
   <div class="table-wrap">

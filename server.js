@@ -1826,7 +1826,20 @@ function normalizeFotoUrls(foto) {
 app.get('/guest/vendor', async (req, res) => {
   try {
     const vendors = await Vendor.find().sort({ idVendor: 1 }).lean();
-    res.render('guest-vendor', { vendors });
+    const totalVendor = vendors.length;
+    const totalVendorAktif = vendors.filter(v => v.status === 'Aktif').length;
+    const totalVendorTidakAktif = vendors.filter(v => v.status && v.status !== 'Aktif').length;
+    const totalKategori = new Set(
+      vendors.map(v => (v.kategori || '').trim()).filter(Boolean)
+    ).size;
+
+    res.render('guest-vendor', {
+      vendors,
+      totalVendor,
+      totalVendorAktif,
+      totalVendorTidakAktif,
+      totalKategori
+    });
   } catch (err) {
     console.error('Gagal memuat data vendor guest:', err);
     res.status(500).send('Gagal memuat data vendor: ' + err.message);
@@ -1857,7 +1870,16 @@ app.get('/guest/vendor/:id', async (req, res) => {
 app.get('/guest/harga-dasar', async (req, res) => {
   try {
     const items = await HargaDasar.find().sort({ tanggal: -1, _id: -1 }).lean();
-    res.render('guest-harga-dasar', { items });
+    const totalItem = items.length;
+    const totalReady = items.filter(i => i.status === 'Ready').length;
+    const totalPending = items.filter(i => i.status === 'Pending').length;
+
+    res.render('guest-harga-dasar', {
+      items,
+      totalItem,
+      totalReady,
+      totalPending
+    });
   } catch (err) {
     console.error('Gagal memuat harga dasar guest:', err);
     res.status(500).send('Gagal memuat data harga dasar: ' + err.message);
@@ -1867,7 +1889,16 @@ app.get('/guest/harga-dasar', async (req, res) => {
 app.get('/guest/data-kain', async (req, res) => {
   try {
     const items = await DataBahanKain.find().sort({ _id: -1 }).lean();
-    res.render('guest-data-kain', { items });
+    const totalDataKain = items.length;
+    const totalAktif = items.filter(i => i.status === 'Aktif').length;
+    const totalReview = items.filter(i => i.status === 'Review').length;
+
+    res.render('guest-data-kain', {
+      items,
+      totalDataKain,
+      totalAktif,
+      totalReview
+    });
   } catch (err) {
     console.error('Gagal memuat data kain guest:', err);
     res.status(500).send('Gagal memuat data kain: ' + err.message);
@@ -1881,8 +1912,16 @@ app.get('/guest/laporan', async (req, res) => {
       ...item,
       cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
     }));
+    const totalLaporan = listLaporan.length;
+    const totalBerkas = listLaporan.filter(item => item.filePath).length;
+    const totalTanpaBerkas = totalLaporan - totalBerkas;
 
-    res.render('guest-laporan', { listLaporan });
+    res.render('guest-laporan', {
+      listLaporan,
+      totalLaporan,
+      totalBerkas,
+      totalTanpaBerkas
+    });
   } catch (err) {
     console.error('Gagal memuat laporan guest:', err);
     res.status(500).send('Gagal memuat data laporan: ' + err.message);

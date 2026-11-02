@@ -100,35 +100,24 @@
   </aside>
 
   <div class="guest-main">
-    <header class="guest-topbar">
-      <button type="button" class="sidebar-toggle" onclick="toggleGuestSidebar()" aria-label="Buka menu navigasi">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <header class="header-container">
+      <button type="button" class="menu-btn" onclick="toggleGuestSidebar()" aria-label="Buka menu navigasi" title="Buka Sidebar">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="12" x2="21" y2="12"></line>
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
       </button>
 
-      <div class="topbar-copy">
-        <span>Guest Portal</span>
-        <strong><%= pageTitle %></strong>
-      </div>
-
-      <div class="topbar-actions">
+      <div class="header-copy">
+        <div>
+          <h1><%= pageTitle %></h1>
+          <% if (typeof pageSubtitle !== 'undefined' && pageSubtitle) { %>
+            <p class="subtitle"><%= pageSubtitle %></p>
+          <% } %>
+        </div>
         <span class="readonly-pill"><span class="dot"></span>Read-Only</span>
-        <a href="/dashboard-guest" class="topbar-link">Dashboard</a>
       </div>
     </header>
 
     <main class="guest-content">
-      <% if (typeof showHeading === 'undefined' || showHeading) { %>
-      <section class="page-heading">
-        <div>
-          <h1><%= pageTitle %></h1>
-          <p><%= pageSubtitle %></p>
-        </div>
-        <% if (typeof totalCount !== 'undefined') { %>
-          <span class="count-pill"><%= totalCount %> Data</span>
-        <% } %>
-      </section>
-      <% } %>

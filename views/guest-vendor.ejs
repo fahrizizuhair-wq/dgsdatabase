@@ -1,24 +1,76 @@
 <%- include('partials/guest-header', {
   pageTitle: 'Data Vendor',
-  pageSubtitle: 'Daftar vendor yang terdaftar. Anda hanya dapat melihat data dan membuka detail vendor.',
-  active: 'vendor',
-  totalCount: vendors.length
+  pageSubtitle: 'Kelola informasi pemasok dalam mode tinjau. Anda dapat melihat data vendor dan membuka detailnya, tanpa hak menambah, mengubah, atau menghapus data.',
+  active: 'vendor'
 }) %>
 
-<section class="panel">
-  <div class="panel-head">
-    <div>
-      <h2>Daftar Vendor</h2>
-      <p>Kolom yang ditampilkan: ID Vendor, Nama Vendor, Wilayah, dan Kategori Supply.</p>
+<section class="card-grid">
+  <div class="stat-card card-green">
+    <div class="card-header">
+      <span class="card-title">Total Vendor Aktif</span>
+      <div class="icon-wrapper icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
     </div>
-    <div class="search-box">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-      <input type="search" placeholder="Cari vendor..." aria-label="Cari vendor"
-             data-table-search="#vendorTable" data-empty="vendorEmpty">
+    <div class="card-body">
+      <span class="card-value"><%= totalVendorAktif || 0 %></span>
+      <span class="card-unit">Vendor</span>
     </div>
+    <div class="card-footer">
+      <span class="text-green">Status Operasional</span>
+      <span>Siap Memenuhi Suplai</span>
+    </div>
+  </div>
+
+  <div class="stat-card card-red">
+    <div class="card-header">
+      <span class="card-title">Total Vendor Tidak Aktif / Review</span>
+      <div class="icon-wrapper icon-red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value"><%= totalVendorTidakAktif || 0 %></span>
+      <span class="card-unit">Vendor</span>
+    </div>
+    <div class="card-footer">
+      <span class="text-orange">Butuh Review</span>
+      <span>Dalam Peninjauan</span>
+    </div>
+  </div>
+
+  <div class="stat-card card-blue">
+    <div class="card-header">
+      <span class="card-title">Kategori Bahan Baku</span>
+      <div class="icon-wrapper icon-blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value"><%= totalKategori || 0 %></span>
+      <span class="card-unit">Kategori</span>
+    </div>
+    <div class="card-footer">
+      <span>Total Jenis Bahan</span>
+      <span><%= totalVendor || 0 %> Vendor</span>
+    </div>
+  </div>
+</section>
+
+<section class="main-box">
+  <div class="box-header">
+    <div class="box-title">Daftar Vendor</div>
+    <input type="search" class="search-input" placeholder="Cari vendor..." aria-label="Cari vendor"
+           data-table-search="#vendorTable" data-empty="vendorEmpty">
   </div>
 
   <div class="table-wrap">

@@ -1,24 +1,77 @@
 <%- include('partials/guest-header', {
   pageTitle: 'Data Kain',
-  pageSubtitle: 'Daftar data bahan kain. Anda hanya dapat melihat data yang sudah tersedia.',
-  active: 'kain',
-  totalCount: items.length
+  pageSubtitle: 'Lihat daftar data bahan kain beserta vendor, wilayah, kategori supply, dan statusnya. Guest hanya dapat melihat data yang sudah tersedia.',
+  active: 'kain'
 }) %>
 
-<section class="panel">
-  <div class="panel-head">
-    <div>
-      <h2>Daftar Data Kain</h2>
-      <p>Kolom yang ditampilkan: ID Vendor, Nama Vendor, Wilayah, Kategori Supply, dan Status.</p>
+<section class="card-grid">
+  <div class="stat-card card-blue">
+    <div class="card-header">
+      <span class="card-title">Total Data Kain</span>
+      <div class="icon-wrapper icon-blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+      </div>
     </div>
-    <div class="search-box">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-      <input type="search" placeholder="Cari data kain..." aria-label="Cari data kain"
-             data-table-search="#kainTable" data-empty="kainEmpty">
+    <div class="card-body">
+      <span class="card-value"><%= totalDataKain || 0 %></span>
+      <span class="card-unit">Data</span>
     </div>
+    <div class="card-footer">
+      <span class="text-blue">Data Tersinkronisasi</span>
+      <span>Bahan Kain</span>
+    </div>
+  </div>
+
+  <div class="stat-card card-green">
+    <div class="card-header">
+      <span class="card-title">Data Aktif</span>
+      <div class="icon-wrapper icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value"><%= totalAktif || 0 %></span>
+      <span class="card-unit">Data</span>
+    </div>
+    <div class="card-footer">
+      <span class="text-green">Status Aktif</span>
+      <span>Siap Digunakan</span>
+    </div>
+  </div>
+
+  <div class="stat-card card-red">
+    <div class="card-header">
+      <span class="card-title">Data Review</span>
+      <div class="icon-wrapper icon-red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value"><%= totalReview || 0 %></span>
+      <span class="card-unit">Data</span>
+    </div>
+    <div class="card-footer">
+      <span class="text-orange">Butuh Review</span>
+      <span>Dalam Peninjauan</span>
+    </div>
+  </div>
+</section>
+
+<section class="main-box">
+  <div class="box-header">
+    <div class="box-title">Daftar Data Kain</div>
+    <input type="search" class="search-input" placeholder="Cari data kain..." aria-label="Cari data kain"
+           data-table-search="#kainTable" data-empty="kainEmpty">
   </div>
 
   <div class="table-wrap">
