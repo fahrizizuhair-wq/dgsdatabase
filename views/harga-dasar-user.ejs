@@ -156,102 +156,6 @@
       box-shadow: 0 0 6px #22c55e;
     }
 
-    .card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-  width: 100%;
-  margin: 22px 0 25px;
-    }
-
-    .stat-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 20px 24px;
-  border-top: 5px solid transparent;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}   
-    .card-blue { border-top-color: #3b82f6; }
-    .card-green { border-top-color: #10b981; }
-    .card-gold { border-top-color: #c9933b; }
-
-    .stat-card .card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.stat-card .card-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  flex-shrink: 0;
-}
-
-.icon-wrapper svg { width: 20px; height: 20px; }
-.icon-green { background-color: #e6f4ea; color: #10b981; }
-.icon-red { background-color: #fce8e6; color: #e11d48; }
-.icon-blue { background-color: #e8f0fe; color: #3b82f6; }
-.icon-gold { background-color: #fdf3e2; color: #b07a21; }
-
-.stat-card .card-body {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin: 15px 0;
-}
-
-.stat-card .card-value {
-  font-size: 2.2rem;
-  font-weight: 800;
-  line-height: 1;
-  color: #1e293b;
-}
-
-.stat-card .card-unit {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #334155;
-}
-
-.stat-card .card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding-top: 12px;
-  border-top: 1px solid #f1f5f9;
-  font-size: 0.82rem;
-  color: #64748b;
-}
-
-.text-green { color: #10b981; font-weight: 600; }
-.text-orange { color: #d97706; font-weight: 600; }
-.text-blue { color: #3b82f6; font-weight: 600; }
-
     .nav-label {
       font-size: 11px;
       font-weight: 700;
@@ -607,74 +511,22 @@
   </aside>
 
   <main class="main-content">
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
     <header class="header-section">
-      <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-      </button>
       <h1>Katalog Harga Dasar</h1>
       <p>Lihat dan tambahkan kalkulasi harga barang serta material dasar.</p>
     </header>
 
     <section class="cards-grid">
-      <div class="stat-card card-blue">
-    <div class="card-header">
-      <span class="card-title">Total Item Harga Dasar</span>
-      <div class="icon-wrapper icon-blue">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-          <line x1="2" y1="10" x2="22" y2="10"></line>
-          <line x1="7" y1="15" x2="7.01" y2="15"></line>
-          <line x1="12" y1="15" x2="12.01" y2="15"></line>
-        </svg>
+      <div class="card">
+        <div class="card-title">Total Item Harga Dasar</div>
+        <div class="card-value"><%= typeof totalItem !== 'undefined' ? totalItem : 0 %> Item</div>
       </div>
-    </div>
-    <div class="card-body">
-      <span class="card-value"><%= totalItem || 0 %></span>
-      <span class="card-unit">Item</span>
-    </div>
-    <div class="card-footer">
-      <span class="text-blue">Data Terbaru</span>
-      <span>Harga Material</span>
-    </div>
-  </div>
-  <div class="stat-card card-green">
-    <div class="card-header">
-      <span class="card-title">Status Ready</span>
-      <div class="icon-wrapper icon-green">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
+      <div class="card">
+        <div class="card-title">Status Data</div>
+        <div class="card-value1">Sinkron</div>
       </div>
-    </div>
-    <div class="card-body">
-      <span class="card-value"><%= totalReady || 0 %></span>
-      <span class="card-unit">Item</span>
-    </div>
-    <div class="card-footer">
-      <span class="text-green">Siap Digunakan</span>
-      <span>Status Valid</span>
-    </div>
-  </div>
-  <div class="stat-card card-gold">
-    <div class="card-header">
-      <span class="card-title">Status Pending</span>
-      <div class="icon-wrapper icon-gold">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-      </div>
-    </div>
-    <div class="card-body">
-      <span class="card-value"><%= totalPending || 0 %></span>
-      <span class="card-unit">Item</span>
-    </div>
-    <div class="card-footer">
-      <span class="text-orange">Menunggu Review</span>
-      <span>Dalam Peninjauan</span>
-    </div>
-  </div>
     </section>
 
     <section class="table-container">
