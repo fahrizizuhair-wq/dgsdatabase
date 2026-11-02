@@ -160,25 +160,54 @@ mongoose.connect(mongoUri)
   .catch(err => console.error('Koneksi MongoDB gagal:', err));
 
 // ============================================================
-//  MIDDLEWARE
+//  MIDDLEWARE (DIPERBARUI AGAR AMAN & KONSISTEN)
 // ============================================================
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const allowGuestView = (req, res, next) => {
-  if (req.session && (req.session.isGuest || req.session.isUser || req.session.isAdmin)) {
+  if (req.session && (req.session.isGuest || req.session.role === 'guest' || req.session.isUser || req.session.isAdmin)) {
     return next();
   }
   return res.redirect('/?error=Unauthorized');
 };
 
 const preventGuestWrite = (req, res, next) => {
+  // Jika terdeteksi sebagai guest, tolak akses tulis/hapus
+  if (req.session && (req.session.isGuest || req.session.role === 'guest')) {
+    return res.status(403).send('Akses ditolak: Akun Guest bersifat Read-Only.');
+  }
+  // Izinkan jika User atau Admin
   if (req.session && (req.session.isUser || req.session.isAdmin)) {
     return next();
   }
   return res.redirect('/?error=AccessDeniedForGuest');
 };
+
+// ============================================================
+//  MAINTENANCE MODE (DENGAN RES.RENDER)
+// ============================================================
+const IS_MAINTENANCE = true; // Ubah jadi false jika maintenance sudah selesai
+
+const maintenanceMiddleware = (req, res, next) => {
+  if (IS_MAINTENANCE) {
+    // Pengecualian: Biarkan akses ke file statis, halaman utama/login, dan jika admin sudah login
+    if (req.path.startsWith('/public') || req.path.startsWith('/uploads') || req.path === '/' || req.path === '/login-admin') {
+      return next();
+    }
+    if (req.session && (req.session.isAdmin || req.session.adminUser)) {
+      return next();
+    }
+    
+    // Render ke file tampilan ejs khusus maintenance
+    return res.status(503).render('maintenance');
+  }
+  next();
+};
+
+// Pasang middleware secara global
+app.use(maintenanceMiddleware);
 
 
 // Rute Pengambilan File Upload (Disk Cache + MongoDB Atlas GridFS Fallback)
