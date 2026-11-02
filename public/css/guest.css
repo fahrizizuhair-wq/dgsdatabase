@@ -1012,7 +1012,7 @@ a { color: inherit; }
 .card-green { border-top-color: #10b981; }
 .card-red { border-top-color: #e11d48; }
 .card-blue { border-top-color: #3b82f6; }
-.card-gold { border-top-color: #c9933b; }
+.card-gold { border-top-color: #ffa600; }
 
 .stat-card .card-header {
   display: flex;
