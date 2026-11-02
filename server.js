@@ -1156,7 +1156,7 @@ app.get('/laporan', async (req, res) => {
 });
 
 // 2. Rute POST Tambah Laporan (Diproteksi preventGuestWrite agar Guest tidak bisa menambah data)
-app.post('/laporan/add', preventGuestWrite, upload.single('fileLaporan'), async (req, res) => {
+app.post('/laporan/add', upload.single('fileLaporan'), async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
     const { namaDokumen, keterangan, jenis, tujuan } = req.body;
