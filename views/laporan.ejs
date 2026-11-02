@@ -574,7 +574,7 @@
                 <td><%= lap.tanggal ? new Date(lap.tanggal).toLocaleDateString('id-ID') : '-' %></td>
                 <td style="text-align: center;">
                   <% if (lap.filePath) { %>
-                    <a href="/uploads/<%= cleanName %>" target="_blank" class="btn-action" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Unduh PDF</a>
+                    <a href="/uploads/<%= lap.cleanName %>" target="_blank" class="btn-action" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Unduh PDF</a>
                   <% } else { %>
                     <span style="color: #949494; font-size: 12px;">Tidak ada file</span>
                   <% } %>

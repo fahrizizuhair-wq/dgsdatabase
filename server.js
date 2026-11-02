@@ -1163,16 +1163,24 @@ app.post('/stok-opname/delete/:id', async (req, res) => {
 // ============================================================
 //  RUTE: LAPORAN (ADMIN)
 // ============================================================
-app.get('/laporan', allowGuestView, async (req, res) => {
+app.get('/laporan', async (req, res) => {
   try {
-    const listLaporan = await Laporan.find().sort({ tanggal: -1 });
+    const rawListLaporan = await Laporan.find().sort({ _id: -1 }).lean();
+    const totalLaporan = rawListLaporan.length;
+
+    const listLaporan = rawListLaporan.map(item => ({
+      ...item,
+      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
+    }));
+
     res.render('laporan', { 
       listLaporan, 
-      role: req.session.role // <-- Penting agar tombol di EJS bisa disembunyikan untuk guest
+      totalLaporan, 
+      role: req.session.role || 'admin' 
     });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Gagal memuat halaman laporan.');
+    res.status(500).send('Gagal memuat data laporan: ' + err.message);
   }
 });
 
