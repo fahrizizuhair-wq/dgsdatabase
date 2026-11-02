@@ -1298,7 +1298,12 @@ app.get('/user/vendor/:id', isUserAuthenticated, async (req, res) => {
 // ============================================================
 app.get('/harga-dasar-user', allowGuestView, async (req, res) => {
   try {
-    const items     = await HargaDasar.find().sort({ createdAt: -1 });
+    // Pastikan HargaDasar tidak undefined
+    if (typeof HargaDasar === 'undefined') {
+      throw new Error("Model HargaDasar belum di-require/didefinisikan di server.js!");
+    }
+    
+    const items = await HargaDasar.find().sort({ _id: -1 }); // Menggunakan _id lebih aman daripada createdAt
     const totalItem = items.length;
     res.render('harga-dasar-user', { items, totalItem });
   } catch (err) {
@@ -1309,6 +1314,10 @@ app.get('/harga-dasar-user', allowGuestView, async (req, res) => {
 
 app.post('/harga-dasar-user/add', preventGuestWrite, async (req, res) => {
   try {
+    if (typeof HargaDasar === 'undefined') {
+      throw new Error("Model HargaDasar belum di-require/didefinisikan di server.js!");
+    }
+    
     const newData = new HargaDasar({ ...req.body });
     await newData.save();
     res.redirect('/harga-dasar-user');
@@ -1318,18 +1327,20 @@ app.post('/harga-dasar-user/add', preventGuestWrite, async (req, res) => {
   }
 });
 
-// ============================================================
-//  RUTE: STOK MASUK – USER
-// ============================================================
-app.get('/stok-masuk-user', allowGuestView, async (req, res) => {
+  // ============================================================
+  //  RUTE: STOK MASUK – USER
+  // ============================================================
+  app.get('/stok-masuk-user', allowGuestView, async (req, res) => {
   try {
-    const listStokMasuk  = await StokMasuk.find().sort({ createdAt: -1 });
+    // Menggunakan _id untuk sorting agar lebih aman dan tidak crash
+    const listStokMasuk  = await StokMasuk.find().sort({ _id: -1 });
     const totalTransaksi = listStokMasuk.length;
     const totalQtyMasuk  = listStokMasuk.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
+    
     res.render('stok-masuk-user', { listStokMasuk, totalTransaksi, totalQtyMasuk });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Gagal memuat data stok masuk.');
+    res.status(500).send('Gagal memuat data stok masuk: ' + err.message);
   }
 });
 
@@ -1344,18 +1355,20 @@ app.post('/stok-masuk-user/add', preventGuestWrite, async (req, res) => {
   }
 });
 
-// ============================================================
-//  RUTE: STOK KELUAR – USER
-// ============================================================
-app.get('/stok-keluar-user', allowGuestView, async (req, res) => {
+  // ============================================================
+  //  RUTE: STOK KELUAR – USER
+  // ============================================================
+  app.get('/stok-keluar-user', allowGuestView, async (req, res) => {
   try {
-    const listStokKeluar = await StokKeluar.find().sort({ createdAt: -1 });
+    // Menggunakan _id untuk sorting agar lebih aman dari error
+    const listStokKeluar = await StokKeluar.find().sort({ _id: -1 });
     const totalTransaksi = listStokKeluar.length;
     const totalQtyKeluar = listStokKeluar.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
+    
     res.render('stok-keluar-user', { listStokKeluar, totalTransaksi, totalQtyKeluar });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Gagal memuat data stok keluar.');
+    res.status(500).send('Gagal memuat data stok keluar: ' + err.message);
   }
 });
 
@@ -1370,17 +1383,19 @@ app.post('/stok-keluar-user/add', preventGuestWrite, async (req, res) => {
   }
 });
 
-// ============================================================
-//  RUTE: STOK OPNAME – USER
-// ============================================================
+  // ============================================================
+  //  RUTE: STOK OPNAME – USER
+  // ============================================================
 app.get('/stok-opname-user', allowGuestView, async (req, res) => {
   try {
-    const listStokOpname = await StokOpname.find().sort({ createdAt: -1 });
+    // Menggunakan _id untuk sorting agar lebih aman dari error
+    const listStokOpname = await StokOpname.find().sort({ _id: -1 });
     const totalOpname    = listStokOpname.length;
+    
     res.render('stok-opname-user', { listStokOpname, totalOpname });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Gagal memuat data stok opname.');
+    res.status(500).send('Gagal memuat data stok opname: ' + err.message);
   }
 });
 
@@ -1395,24 +1410,24 @@ app.post('/stok-opname-user/add', preventGuestWrite, async (req, res) => {
   }
 });
 
-// ============================================================
+  // ============================================================
 //  RUTE: LAPORAN – USER
 // ============================================================
 app.get('/laporan-user', allowGuestView, async (req, res) => {
   try {
-    const listLaporan  = await Laporan.find().sort({ createdAt: -1 });
+    // Menggunakan _id untuk sorting agar lebih aman dari error
+    const listLaporan  = await Laporan.find().sort({ _id: -1 });
     const totalLaporan = listLaporan.length;
     res.render('laporan-user', { listLaporan, totalLaporan });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Gagal memuat data laporan user.');
+    res.status(500).send('Gagal memuat data laporan user: ' + err.message);
   }
 });
 
 app.post('/laporan-user/add', preventGuestWrite, upload.single('fileLaporan'), async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
-    // 1. Tambahkan 'tujuan' di dalam destructuring req.body
     const { namaDokumen, keterangan, jenis, tujuan } = req.body;
     const filePath = req.file ? req.file.filename : '';
 
@@ -1420,7 +1435,7 @@ app.post('/laporan-user/add', preventGuestWrite, upload.single('fileLaporan'), a
       namaDokumen, 
       keterangan, 
       jenis, 
-      tujuan, // 2. Masukkan 'tujuan' ke sini
+      tujuan, 
       filePath,
       tanggal: new Date()
     });
@@ -1429,7 +1444,7 @@ app.post('/laporan-user/add', preventGuestWrite, upload.single('fileLaporan'), a
     res.redirect('/laporan-user');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Gagal menambah laporan.');
+    res.status(500).send('Gagal menambah laporan: ' + err.message);
   }
 });
 
