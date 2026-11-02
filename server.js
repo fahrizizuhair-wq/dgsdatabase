@@ -17,6 +17,14 @@ const ExcelJS  = require('exceljs');
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
+// 1. SETUP UTAMA & VIEW ENGINE (HARUS DI PALING ATAS)
+// ============================================================
+app.set('view engine', 'ejs');
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static('public'));
+
+// ============================================================
 //  GRIDFS CLOUD STORAGE (FILE TETAP AMAN SAAT SERVER RESTART / SLEEP)
 // ============================================================
 let gridfsBucket = null;
