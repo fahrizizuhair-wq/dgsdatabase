@@ -1298,14 +1298,15 @@ app.get('/user/vendor/:id', isUserAuthenticated, async (req, res) => {
 // ============================================================
 app.get('/harga-dasar-user', allowGuestView, async (req, res) => {
   try {
-    // Pastikan HargaDasar tidak undefined
-    if (typeof HargaDasar === 'undefined') {
-      throw new Error("Model HargaDasar belum di-require/didefinisikan di server.js!");
-    }
-    
-    const items = await HargaDasar.find().sort({ _id: -1 }); // Menggunakan _id lebih aman daripada createdAt
+    const items = await HargaDasar.find().sort({ _id: -1 });
     const totalItem = items.length;
-    res.render('harga-dasar-user', { items, totalItem });
+    
+    // Pastikan 'role' ikut dikirim ke EJS
+    res.render('harga-dasar-user', { 
+      items, 
+      totalItem, 
+      role: req.session.role || 'guest' // Sesuaikan dengan session yang biasa dipakai
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat data harga dasar: ' + err.message);
@@ -1332,12 +1333,16 @@ app.post('/harga-dasar-user/add', preventGuestWrite, async (req, res) => {
   // ============================================================
   app.get('/stok-masuk-user', allowGuestView, async (req, res) => {
   try {
-    // Menggunakan _id untuk sorting agar lebih aman dan tidak crash
     const listStokMasuk  = await StokMasuk.find().sort({ _id: -1 });
     const totalTransaksi = listStokMasuk.length;
     const totalQtyMasuk  = listStokMasuk.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
     
-    res.render('stok-masuk-user', { listStokMasuk, totalTransaksi, totalQtyMasuk });
+    res.render('stok-masuk-user', { 
+      listStokMasuk, 
+      totalTransaksi, 
+      totalQtyMasuk, 
+      role: req.session.role || 'guest' 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat data stok masuk: ' + err.message);
@@ -1360,12 +1365,16 @@ app.post('/stok-masuk-user/add', preventGuestWrite, async (req, res) => {
   // ============================================================
   app.get('/stok-keluar-user', allowGuestView, async (req, res) => {
   try {
-    // Menggunakan _id untuk sorting agar lebih aman dari error
     const listStokKeluar = await StokKeluar.find().sort({ _id: -1 });
     const totalTransaksi = listStokKeluar.length;
     const totalQtyKeluar = listStokKeluar.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
     
-    res.render('stok-keluar-user', { listStokKeluar, totalTransaksi, totalQtyKeluar });
+    res.render('stok-keluar-user', { 
+      listStokKeluar, 
+      totalTransaksi, 
+      totalQtyKeluar, 
+      role: req.session.role || 'guest' 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat data stok keluar: ' + err.message);
@@ -1383,16 +1392,19 @@ app.post('/stok-keluar-user/add', preventGuestWrite, async (req, res) => {
   }
 });
 
-  // ============================================================
-  //  RUTE: STOK OPNAME – USER
-  // ============================================================
+// ============================================================
+//  3. RUTE: STOK OPNAME – USER
+// ============================================================
 app.get('/stok-opname-user', allowGuestView, async (req, res) => {
   try {
-    // Menggunakan _id untuk sorting agar lebih aman dari error
     const listStokOpname = await StokOpname.find().sort({ _id: -1 });
     const totalOpname    = listStokOpname.length;
     
-    res.render('stok-opname-user', { listStokOpname, totalOpname });
+    res.render('stok-opname-user', { 
+      listStokOpname, 
+      totalOpname, 
+      role: req.session.role || 'guest' 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat data stok opname: ' + err.message);
@@ -1415,10 +1427,14 @@ app.post('/stok-opname-user/add', preventGuestWrite, async (req, res) => {
 // ============================================================
 app.get('/laporan-user', allowGuestView, async (req, res) => {
   try {
-    // Menggunakan _id untuk sorting agar lebih aman dari error
     const listLaporan  = await Laporan.find().sort({ _id: -1 });
     const totalLaporan = listLaporan.length;
-    res.render('laporan-user', { listLaporan, totalLaporan });
+    
+    res.render('laporan-user', { 
+      listLaporan, 
+      totalLaporan, 
+      role: req.session.role || 'guest' 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat data laporan user: ' + err.message);
