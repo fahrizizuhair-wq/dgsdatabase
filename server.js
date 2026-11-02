@@ -1425,7 +1425,7 @@ app.post('/laporan-user/add', upload.single('fileLaporan'), async (req, res) => 
 // ============================================================
 
 // Ekspor Vendor
-app.get('/export-vendor-excel', preventGuestWrite, async (req, res) => {
+app.get('/export-vendor-excel', async (req, res) => {
   try {
     const dataVendor = await Vendor.find({});
     const workbook   = new ExcelJS.Workbook();
@@ -1472,7 +1472,7 @@ app.get('/export-vendor-excel', preventGuestWrite, async (req, res) => {
 });
 
 // Ekspor Harga Dasar
-app.get('/export-harga-dasar-excel', preventGuestWrite, async (req, res) => {
+app.get('/export-harga-dasar-excel', async (req, res) => {
   try {
     const dataHargaDasar = await HargaDasar.find({});
     const workbook       = new ExcelJS.Workbook();
@@ -1534,7 +1534,7 @@ app.get('/export-harga-dasar-excel', preventGuestWrite, async (req, res) => {
 // ============================================================
 //  RUTE: VENDORS (API JSON – Filter/Pencarian)
 // ============================================================
-app.get('/vendors', preventGuestWrite, async (req, res) => {
+app.get('/vendors', async (req, res) => {
   try {
     const { search, kategori, status, wilayah } = req.query;
     let query = {};
@@ -1555,7 +1555,7 @@ app.get('/vendors', preventGuestWrite, async (req, res) => {
 // ============================================================
 //  RUTE: DATA BAHAN KAIN – USER
 // ============================================================
-app.get('/data-bahan-kain', allowGuestView, async (req, res) => {
+app.get('/data-bahan-kain', async (req, res) => {
     try {
         // Ambil semua data vendor untuk tabel
         const listVendor = await DataBahanKain.find().sort({ _id: -1 });
@@ -1585,7 +1585,7 @@ app.get('/data-bahan-kain', allowGuestView, async (req, res) => {
     }
 });
 
-app.post('/data-bahan-kain/add', preventGuestWrite, uploadMultiple, async (req, res) => {
+app.post('/data-bahan-kain/add', uploadMultiple, async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
     const { namaVendor, wilayah, kategoriSupply, kontak, rating, deskripsi } = req.body;
@@ -1636,7 +1636,7 @@ app.post('/data-bahan-kain/add', preventGuestWrite, uploadMultiple, async (req, 
   }
 });
 
-app.post('/data-bahan-kain/edit/:id', preventGuestWrite, async (req, res) => {
+app.post('/data-bahan-kain/edit/:id', async (req, res) => {
   try {
     const { namaVendor, wilayah, kategoriSupply, kontak, rating } = req.body;
     const vendorId = namaVendor.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -1656,7 +1656,7 @@ app.post('/data-bahan-kain/edit/:id', preventGuestWrite, async (req, res) => {
   }
 });
 
-app.delete('/data-bahan-kain/delete/:id', preventGuestWrite, async (req, res) => {
+app.delete('/data-bahan-kain/delete/:id', async (req, res) => {
   try {
     await DataBahanKain.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Data vendor berhasil dihapus!' });
@@ -1669,7 +1669,7 @@ app.delete('/data-bahan-kain/delete/:id', preventGuestWrite, async (req, res) =>
 // ============================================================
 //  RUTE: KATALOG VENDOR (Detail per vendorId)
 // ============================================================
-app.get('/katalog-vendor/:vendorId', preventGuestWrite, async (req, res) => {
+app.get('/katalog-vendor/:vendorId', async (req, res) => {
   try {
     const vendor = await DataBahanKain.findOne({ vendorId: req.params.vendorId });
     if (!vendor) {
