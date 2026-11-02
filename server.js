@@ -1805,6 +1805,15 @@ app.get('/data-kain-admin/delete/:id', async (req, res) => {
   }
 });
 
+app.get('/guest', async (req, res) => {
+  try {
+    res.render('dashboard-guest');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal memuat halaman guest: ' + err.message);
+  }
+});
+
 
 // ============================================================
 //  START SERVER
