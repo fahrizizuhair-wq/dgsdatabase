@@ -185,6 +185,42 @@ const preventGuestWrite = (req, res, next) => {
   return res.redirect('/?error=AccessDeniedForGuest');
 };
 
+// ============================================================
+//  MAINTENANCE MODE (DENGAN SECRET TOKEN URL)
+// ============================================================
+const IS_MAINTENANCE = true; // true = aktif, false = normal semua
+
+const maintenanceMiddleware = (req, res, next) => {
+  if (IS_MAINTENANCE) {
+    // 1. Jika Anda sudah login sebagai admin, izinkan masuk normal
+    if (req.session && (req.session.isAdmin || req.session.adminUser)) {
+      return next();
+    }
+
+    // 2. KUNCI RAHASIA: 
+    // Jika ada parameter ?token=admin123 di URL, simpan izin di sesi browser Anda
+    if (req.query.token === 'admin123') {
+      req.session.isBypassed = true;
+    }
+
+    // Jika browser Anda sudah mengantongi izin token, loloskan ke tampilan normal
+    if (req.session && req.session.isBypassed) {
+      return next();
+    }
+
+    // 3. Biarkan file aset statis (CSS/gambar/upload) tetap dimuat agar tampilan maintenance rapi
+    if (req.path.startsWith('/public') || req.path.startsWith('/uploads')) {
+      return next();
+    }
+
+    // 4. Selain itu (pengunjung umum), tampilkan halaman maintenance
+    return res.status(503).render('maintenance');
+  }
+  next();
+};
+
+app.use(maintenanceMiddleware);
+
 
 // Rute Pengambilan File Upload (Disk Cache + MongoDB Atlas GridFS Fallback)
 app.get('/uploads/:filename', async (req, res) => {
