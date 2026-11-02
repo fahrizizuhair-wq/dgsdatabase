@@ -185,30 +185,6 @@ const preventGuestWrite = (req, res, next) => {
   return res.redirect('/?error=AccessDeniedForGuest');
 };
 
-// ============================================================
-//  MAINTENANCE MODE (DENGAN RES.RENDER)
-// ============================================================
-const IS_MAINTENANCE = true; // Ubah jadi false jika maintenance sudah selesai
-
-const maintenanceMiddleware = (req, res, next) => {
-  if (IS_MAINTENANCE) {
-    // Pengecualian: Biarkan akses ke file statis, halaman utama/login, dan jika admin sudah login
-    if (req.path.startsWith('/public') || req.path.startsWith('/uploads') || req.path === '/' || req.path === '/login-admin') {
-      return next();
-    }
-    if (req.session && (req.session.isAdmin || req.session.adminUser)) {
-      return next();
-    }
-    
-    // Render ke file tampilan ejs khusus maintenance
-    return res.status(503).render('maintenance');
-  }
-  next();
-};
-
-// Pasang middleware secara global
-app.use(maintenanceMiddleware);
-
 
 // Rute Pengambilan File Upload (Disk Cache + MongoDB Atlas GridFS Fallback)
 app.get('/uploads/:filename', async (req, res) => {
