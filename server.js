@@ -1425,18 +1425,18 @@ app.post('/stok-opname-user/add', preventGuestWrite, async (req, res) => {
   // ============================================================
 //  RUTE: LAPORAN – USER
 // ============================================================
-app.get('/laporan-user', allowGuestView, async (req, res) => {
+app.get('/laporan-user', async (req, res) => {
   try {
-    const listLaporan = await Laporan.find().sort({ _id: -1 });
-    const totalLaporan = listLaporan.length;
-    const processedLaporan = listLaporan.map(item => {
-      const obj = item.toObject();
-      obj.cleanName = obj.filePath ? obj.filePath.replace(/^.*[\\\/]/, '') : '';
-      return obj;
-    });
+    const rawListLaporan = await Laporan.find().sort({ _id: -1 }).lean();
+    const totalLaporan = rawListLaporan.length;
+
+    const listLaporan = rawListLaporan.map(item => ({
+      ...item,
+      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
+    }));
 
     res.render('laporan-user', { 
-      listLaporan: processedLaporan, 
+      listLaporan, 
       totalLaporan, 
       role: req.session.role || 'guest' 
     });
@@ -1446,7 +1446,7 @@ app.get('/laporan-user', allowGuestView, async (req, res) => {
   }
 });
 
-app.post('/laporan-user/add', preventGuestWrite, upload.single('fileLaporan'), async (req, res) => {
+app.post('/laporan-user/add', upload.single('fileLaporan'), async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
     const { namaDokumen, keterangan, jenis, tujuan } = req.body;
