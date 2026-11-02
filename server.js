@@ -1805,7 +1805,7 @@ app.get('/data-kain-admin/delete/:id', async (req, res) => {
   }
 });
 
-app.get('/guest', async (req, res) => {
+app.get('/dashboard-guest', async (req, res) => {
   try {
     res.render('dashboard-guest');
   } catch (err) {
