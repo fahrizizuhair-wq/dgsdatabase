@@ -1,0 +1,65 @@
+<%- include('partials/guest-header', {
+  pageTitle: 'Harga Dasar',
+  pageSubtitle: 'Daftar harga dasar. Hanya menampilkan tanggal, ID barang, nama barang, merk, spesifikasi, dan status.',
+  active: 'harga',
+  totalCount: items.length
+}) %>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Daftar Harga Dasar</h2>
+      <p>Tabel read-only sesuai kebutuhan guest.</p>
+    </div>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="search" placeholder="Cari barang..." aria-label="Cari harga dasar"
+             data-table-search="#hargaTable" data-empty="hargaEmpty">
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table" id="hargaTable">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>ID Barang</th>
+          <th>Nama Barang</th>
+          <th>Merk</th>
+          <th>Spesifikasi</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!items || items.length === 0) { %>
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">Belum ada data harga dasar yang ditambahkan.</div>
+            </td>
+          </tr>
+        <% } else { %>
+          <% items.forEach(function (item) { %>
+            <tr data-row>
+              <td><%= item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-' %></td>
+              <td><span class="code-chip"><%= item.idBarang || '-' %></span></td>
+              <td class="strong"><%= item.namaBarang || '-' %></td>
+              <td><%= item.namaMerk || '-' %></td>
+              <td><%= item.spesifikasi || '-' %></td>
+              <td>
+                <span class="badge <%= item.status === 'Ready' ? 'badge-ready' : (item.status === 'Pending' ? 'badge-pending' : 'badge-nonaktif') %>">
+                  <%= item.status || 'Pending' %>
+                </span>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+    <div class="empty-state filter-empty" id="hargaEmpty">Tidak ada data yang cocok dengan pencarian.</div>
+  </div>
+</section>
+
+<%- include('partials/guest-footer') %>

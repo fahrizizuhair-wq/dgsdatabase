@@ -1805,9 +1805,105 @@ app.get('/data-kain-admin/delete/:id', async (req, res) => {
   }
 });
 
+// ============================================================
+//  RUTE: GUEST (READ-ONLY)
+// ============================================================
+function normalizeFotoUrls(foto) {
+  if (!foto) return [];
+  const list = Array.isArray(foto) ? foto : [foto];
+
+  return list
+    .filter(Boolean)
+    .map(item => {
+      const value = String(item).trim();
+      if (!value) return null;
+      if (/^https?:\/\//i.test(value) || value.startsWith('/')) return value;
+      return '/uploads/' + value;
+    })
+    .filter(Boolean);
+}
+
+app.get('/guest/vendor', async (req, res) => {
+  try {
+    const vendors = await Vendor.find().sort({ idVendor: 1 }).lean();
+    res.render('guest-vendor', { vendors });
+  } catch (err) {
+    console.error('Gagal memuat data vendor guest:', err);
+    res.status(500).send('Gagal memuat data vendor: ' + err.message);
+  }
+});
+
+app.get('/guest/vendor/:id', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).send('Vendor tidak ditemukan.');
+    }
+
+    const vendor = await Vendor.findById(req.params.id).lean();
+    if (!vendor) {
+      return res.status(404).send('Vendor tidak ditemukan.');
+    }
+
+    res.render('guest-vendor-detail', {
+      vendor,
+      fotoUrls: normalizeFotoUrls(vendor.foto)
+    });
+  } catch (err) {
+    console.error('Gagal memuat detail vendor guest:', err);
+    res.status(500).send('Gagal memuat detail vendor: ' + err.message);
+  }
+});
+
+app.get('/guest/harga-dasar', async (req, res) => {
+  try {
+    const items = await HargaDasar.find().sort({ tanggal: -1, _id: -1 }).lean();
+    res.render('guest-harga-dasar', { items });
+  } catch (err) {
+    console.error('Gagal memuat harga dasar guest:', err);
+    res.status(500).send('Gagal memuat data harga dasar: ' + err.message);
+  }
+});
+
+app.get('/guest/data-kain', async (req, res) => {
+  try {
+    const items = await DataBahanKain.find().sort({ _id: -1 }).lean();
+    res.render('guest-data-kain', { items });
+  } catch (err) {
+    console.error('Gagal memuat data kain guest:', err);
+    res.status(500).send('Gagal memuat data kain: ' + err.message);
+  }
+});
+
+app.get('/guest/laporan', async (req, res) => {
+  try {
+    const rawListLaporan = await Laporan.find().sort({ _id: -1 }).lean();
+    const listLaporan = rawListLaporan.map(item => ({
+      ...item,
+      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
+    }));
+
+    res.render('guest-laporan', { listLaporan });
+  } catch (err) {
+    console.error('Gagal memuat laporan guest:', err);
+    res.status(500).send('Gagal memuat data laporan: ' + err.message);
+  }
+});
+
 app.get('/dashboard-guest', async (req, res) => {
   try {
-    res.render('dashboard-guest');
+    const [totalVendor, totalHargaDasar, totalDataKain, totalLaporan] = await Promise.all([
+      Vendor.countDocuments(),
+      HargaDasar.countDocuments(),
+      DataBahanKain.countDocuments(),
+      Laporan.countDocuments()
+    ]);
+
+    res.render('dashboard-guest', {
+      totalVendor,
+      totalHargaDasar,
+      totalDataKain,
+      totalLaporan
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat halaman guest: ' + err.message);

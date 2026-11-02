@@ -1,0 +1,51 @@
+    </main>
+
+    <footer class="guest-footer">
+      <span>&copy; 2026 <strong>Dian Giri Saputra</strong>. All Rights Reserved.</span>
+      <span class="dot-sep">&bull;</span>
+      <span>Guest Portal &mdash; Mode Read-Only</span>
+    </footer>
+  </div>
+
+  <script>
+    function toggleGuestSidebar(force) {
+      const sidebar = document.getElementById('guestSidebar');
+      const overlay = document.getElementById('guestOverlay');
+      if (!sidebar) return;
+
+      const shouldOpen = (typeof force === 'boolean') ? force : !sidebar.classList.contains('open');
+      sidebar.classList.toggle('open', shouldOpen);
+      if (overlay) overlay.classList.toggle('active', shouldOpen);
+    }
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') toggleGuestSidebar(false);
+    });
+
+    /* Pencarian tabel read-only */
+    (function () {
+      document.querySelectorAll('input[data-table-search]').forEach(function (input) {
+        const table = document.querySelector(input.getAttribute('data-table-search'));
+        if (!table) return;
+
+        const emptyId = input.getAttribute('data-empty');
+        const emptyBox = emptyId ? document.getElementById(emptyId) : null;
+
+        input.addEventListener('input', function () {
+          const keyword = input.value.toLowerCase().trim();
+          const rows = table.querySelectorAll('tbody tr[data-row]');
+          let visible = 0;
+
+          rows.forEach(function (row) {
+            const cocok = row.innerText.toLowerCase().indexOf(keyword) !== -1;
+            row.style.display = cocok ? '' : 'none';
+            if (cocok) visible++;
+          });
+
+          if (emptyBox) emptyBox.style.display = (visible === 0 && rows.length > 0) ? 'block' : 'none';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

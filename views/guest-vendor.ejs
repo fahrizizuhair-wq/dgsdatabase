@@ -1,0 +1,67 @@
+<%- include('partials/guest-header', {
+  pageTitle: 'Data Vendor',
+  pageSubtitle: 'Daftar vendor yang terdaftar. Anda hanya dapat melihat data dan membuka detail vendor.',
+  active: 'vendor',
+  totalCount: vendors.length
+}) %>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Daftar Vendor</h2>
+      <p>Kolom yang ditampilkan: ID Vendor, Nama Vendor, Wilayah, dan Kategori Supply.</p>
+    </div>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="search" placeholder="Cari vendor..." aria-label="Cari vendor"
+             data-table-search="#vendorTable" data-empty="vendorEmpty">
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table" id="vendorTable">
+      <thead>
+        <tr>
+          <th>ID Vendor</th>
+          <th>Nama Vendor</th>
+          <th>Wilayah</th>
+          <th>Kategori Supply</th>
+          <th class="col-action">Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!vendors || vendors.length === 0) { %>
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">Belum ada data vendor yang ditambahkan.</div>
+            </td>
+          </tr>
+        <% } else { %>
+          <% vendors.forEach(function (vendor) { %>
+            <tr data-row>
+              <td><span class="code-chip"><%= vendor.idVendor || '-' %></span></td>
+              <td class="strong"><%= vendor.namaVendor || '-' %></td>
+              <td><%= vendor.wilayah || '-' %></td>
+              <td><span class="tag"><%= vendor.kategori || '-' %></span></td>
+              <td class="col-action">
+                <a class="btn-view" href="/guest/vendor/<%= vendor._id %>">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  Lihat Detail
+                </a>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+    <div class="empty-state filter-empty" id="vendorEmpty">Tidak ada vendor yang cocok dengan pencarian.</div>
+  </div>
+</section>
+
+<%- include('partials/guest-footer') %>

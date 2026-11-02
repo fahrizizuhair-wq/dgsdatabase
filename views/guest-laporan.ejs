@@ -1,0 +1,75 @@
+<%- include('partials/guest-header', {
+  pageTitle: 'Laporan',
+  pageSubtitle: 'Daftar arsip laporan resmi. Anda hanya dapat melihat dan membuka berkas laporan.',
+  active: 'laporan',
+  totalCount: listLaporan.length
+}) %>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Arsip Laporan</h2>
+      <p>Mode guest tidak memiliki akses untuk menambah, mengubah, atau menghapus laporan.</p>
+    </div>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="search" placeholder="Cari laporan..." aria-label="Cari laporan"
+             data-table-search="#laporanTable" data-empty="laporanEmpty">
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table" id="laporanTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Dokumen</th>
+          <th>Jenis</th>
+          <th>Tujuan</th>
+          <th>Keterangan</th>
+          <th>Tanggal</th>
+          <th class="col-action">Berkas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!listLaporan || listLaporan.length === 0) { %>
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">Belum ada laporan yang ditambahkan.</div>
+            </td>
+          </tr>
+        <% } else { %>
+          <% listLaporan.forEach(function (lap, index) { %>
+            <tr data-row>
+              <td><%= index + 1 %></td>
+              <td class="strong"><%= lap.namaDokumen || lap.judul || '-' %></td>
+              <td><span class="tag"><%= lap.jenis || lap.kategori || 'Umum' %></span></td>
+              <td><%= lap.tujuan || lap.kepada || '-' %></td>
+              <td><%= lap.keterangan || '-' %></td>
+              <td><%= lap.tanggal ? new Date(lap.tanggal).toLocaleDateString('id-ID') : '-' %></td>
+              <td class="col-action">
+                <% if (lap.filePath) { %>
+                  <a class="btn-view" href="<%= lap.filePath %>" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Lihat
+                  </a>
+                <% } else { %>
+                  <span style="color:#a89898;font-size:11px;">Tidak ada</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+    <div class="empty-state filter-empty" id="laporanEmpty">Tidak ada laporan yang cocok dengan pencarian.</div>
+  </div>
+</section>
+
+<%- include('partials/guest-footer') %>
