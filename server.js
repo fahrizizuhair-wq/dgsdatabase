@@ -160,35 +160,6 @@ mongoose.connect(mongoUri)
   .catch(err => console.error('Koneksi MongoDB gagal:', err));
 
 // ============================================================
-//  MIDDLEWARE (DIPERBARUI AGAR AMAN & KONSISTEN)
-// ============================================================
-app.set('view engine', 'ejs');
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-const allowGuestView = (req, res, next) => {
-  if (req.session && (req.session.isGuest || req.session.role === 'guest' || req.session.isUser || req.session.isAdmin)) {
-    return next();
-  }
-  return res.redirect('/?error=Unauthorized');
-};
-
-const preventGuestWrite = (req, res, next) => {
-  // Jika terdeteksi sebagai guest, tolak akses tulis/hapus
-  if (req.session && (req.session.isGuest || req.session.role === 'guest')) {
-    return res.status(403).send('Akses ditolak: Akun Guest bersifat Read-Only.');
-  }
-  // Izinkan jika User atau Admin
-  if (req.session && (req.session.isUser || req.session.isAdmin)) {
-    return next();
-  }
-  return res.redirect('/?error=AccessDeniedForGuest');
-};
-
-// ============================================================
-//  MAINTENANCE MODE (DENGAN SECRET TOKEN URL)
-// ============================================================
-// ============================================================
 //  MAINTENANCE MODE (PALING SIMPEL TANPA COOKIE-PARSER)
 // ============================================================
 const IS_MAINTENANCE = true; // true = aktif, false = normal semua
