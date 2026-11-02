@@ -201,6 +201,79 @@
       border-left: 3px solid #f87171;
     }
 
+    /* DROPDOWN SIDEBAR */
+    .nav-item.dropdown { position: relative; }
+    .dropdown-toggle { 
+      display: flex !important; 
+      justify-content: space-between; 
+      align-items: center; 
+      cursor: pointer;
+    }
+    .dropdown-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .dropdown-toggle .arrow { 
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      font-size: 11px; 
+      opacity: 0.8;
+    }
+    .dropdown-menu {
+      list-style: none; 
+      max-height: 0; 
+      overflow: hidden; 
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      background-color: rgba(50, 10, 10, 0.45); 
+      border-radius: 10px; 
+      margin-top: 4px; 
+      padding-left: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .dropdown-menu li a { 
+      padding: 9px 14px; 
+      font-size: 13px; 
+      color: rgba(255, 255, 255, 0.75); 
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dropdown-menu li a:hover { 
+      color: #ffffff; 
+      background-color: rgba(255, 255, 255, 0.08); 
+    }
+    .nav-item.dropdown.active .dropdown-menu { 
+      max-height: 200px; 
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+    .nav-item.dropdown.active .arrow { transform: rotate(180deg); }
+
+    .sidebar-footer { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+      margin-top: 25px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .btn-bottom {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .btn-bottom:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
     /* MAIN CONTENT */
     .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
     .header-section h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; color: #ffffff; }
@@ -304,6 +377,8 @@
     .table-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
     .table-header h2 { color: #7a1b1b; margin-right: auto; }
     .search-input { padding: 10px 14px; border: 1px solid #dde1e5; border-radius: 8px; font-size: 14px; outline: none; width: 260px; background: white; }
+    .btn-add { background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-add:hover { background-color: #5c1313; }
 
     table { width: 100%; border-collapse: collapse; text-align: left; min-width: 900px; }
     th, td { padding: 12px 14px; border-bottom: 1px solid #edf0f2; font-size: 13px; vertical-align: top; }
@@ -311,10 +386,27 @@
 
     .item-row { transition: background-color 0.2s ease; }
     .item-row:hover { background-color: #f8eded; }
+    .col-keterangan { max-width: 150px; white-space: normal; word-wrap: break-word; overflow-wrap: break-word; }
 
     /* BADGES STATUS */
     .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-setuju { background-color: #e6f4ea; color: #137333; }
+    .badge-pending { background-color: #fef7e0; color: #b06000; }
     .badge-tidak { background-color: #fce8e6; color: #c5221f; }
+
+    /* MODAL FORM TAMBAH (DIPERBAIKI: DISIMPAN SECARA DEFAULT) */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+    
+    textarea.input-lg { width: 100%; min-height: 100px; padding: 10px; font-size: 13px; font-family: inherit; border: 1.5px solid #ccc; border-radius: 8px; box-sizing: border-box; resize: vertical; }
+    textarea.input-lg:focus { border-color: #7a1b1b; outline: none; }
+
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .btn-cancel { background: #e0e0e0; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .btn-cancel:hover { background: #d0d0d0; }
 
     .toggle-btn { font-size: 20px; background: #ffffff; color: rgb(0, 0, 0); border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
@@ -330,7 +422,7 @@
 
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-   <!-- Sidebar Navigasi -->
+  <!-- Sidebar Navigasi -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-top-section">
       <div class="sidebar-header">
@@ -382,7 +474,6 @@
             <span>Data Vendor</span>
           </a>
         </li>
-        <!-- PINDAHKAN CLASS ACTIVE KE SINI -->
         <li class="nav-item active">
           <a href="/harga-dasar-user">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -453,59 +544,59 @@
     <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
     <header class="header-section">
-      <h1>KHarga Dasar</h1>
+      <h1>Harga Dasar</h1>
       <p>Lihat dan tambahkan kalkulasi harga barang serta material dasar.</p>
     </header>
 
+    <!-- KARTU STATISTIK MODERN DENGAN IKON SVG -->
     <section class="cards-grid">
-      <div class="stats-grid">
-    <!-- Card 1 -->
-    <div class="stat-card">
-        <div class="stat-header">
-            <span class="stat-title">TOTAL ITEM HARGA DASAR</span>
-            <div class="stat-icon blue">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-            </div>
+      <!-- Card 1 -->
+      <div class="card">
+        <div class="card-header-top">
+          <span class="card-title">TOTAL ITEM HARGA DASAR</span>
+          <div class="card-icon-box blue">
+            <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          </div>
         </div>
-        <div class="stat-value"><%= totalItem || 0 %><span class="stat-unit">Item</span></div>
-        <div class="stat-footer">
-            <span class="text-success">Data Terbaru</span>
-            <span class="text-muted">Harga Material</span>
+        <div class="card-value"><%= totalItem || 0 %><span class="card-unit">Item</span></div>
+        <div class="card-footer-info">
+          <span class="text-success">Data Terbaru</span>
+          <span class="text-muted">Harga Material</span>
         </div>
-    </div>
+      </div>
 
-    <!-- Card 2 -->
-    <div class="stat-card">
-        <div class="stat-header">
-            <span class="stat-title">STATUS READY</span>
-            <div class="stat-icon green">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            </div>
+      <!-- Card 2 -->
+      <div class="card">
+        <div class="card-header-top">
+          <span class="card-title">STATUS READY</span>
+          <div class="card-icon-box green">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
         </div>
-        <div class="stat-value"><%= totalReady || 0 %><span class="stat-unit">Item</span></div>
-        <div class="stat-footer">
-            <span class="text-success">Siap Digunakan</span>
-            <span class="text-muted">Status Valid</span>
+        <div class="card-value"><%= totalReady || 0 %><span class="card-unit">Item</span></div>
+        <div class="card-footer-info">
+          <span class="text-success">Siap Digunakan</span>
+          <span class="text-muted">Status Valid</span>
         </div>
-    </div>
+      </div>
 
-    <!-- Card 3 -->
-    <div class="stat-card">
-        <div class="stat-header">
-            <span class="stat-title">STATUS PENDING</span>
-            <div class="stat-icon orange">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            </div>
+      <!-- Card 3 -->
+      <div class="card">
+        <div class="card-header-top">
+          <span class="card-title">STATUS PENDING</span>
+          <div class="card-icon-box orange">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
         </div>
-        <div class="stat-value"><%= totalPending || 0 %><span class="stat-unit">Item</span></div>
-        <div class="stat-footer">
-            <span class="text-orange">Menunggu Review</span>
-            <span class="text-muted">Dalam Peninjauan</span>
+        <div class="card-value"><%= totalPending || 0 %><span class="card-unit">Item</span></div>
+        <div class="card-footer-info">
+          <span class="text-orange">Menunggu Review</span>
+          <span class="text-muted">Dalam Peninjauan</span>
         </div>
-    </div>
-</div>
+      </div>
     </section>
 
+    <!-- TABEL DATA -->
     <section class="table-container">
       <div class="table-header">
         <h2>Daftar Harga Barang</h2>
@@ -516,52 +607,50 @@
         </a>
       </div>
 
-          <table id="itemTable">
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>ID Barang</th>
-                <th>Nama Barang</th>
-                <th>Merk</th>
-                <th>Spesifikasi</th>
-                <th>Stok</th>
-                <th>Harga Satuan</th>
-                <th>Final Price</th>
-                <th>Waktu Produksi</th>
-                <th>Status</th>
+      <table id="itemTable">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>ID Barang</th>
+            <th>Nama Barang</th>
+            <th>Merk</th>
+            <th>Spesifikasi</th>
+            <th>Stok</th>
+            <th>Harga Satuan</th>
+            <th>Final Price</th>
+            <th>Waktu Produksi</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!items || items.length === 0) { %>
+            <tr>
+              <td colspan="10" style="text-align: center; padding: 20px; color: #888;">Belum ada data harga dasar.</td>
+            </tr>
+          <% } else { %>
+            <% items.forEach(function(item) { %>
+              <tr class="item-row" onclick="window.location.href='/harga-dasar/detail/<%= item._id %>'" style="cursor: pointer;" title="Klik untuk melihat detail barang">
+                <td><%= item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-' %></td>
+                <td><strong><%= item.idBarang %></strong></td>
+                <td>
+                  <span style="color: #7a1b1b; font-weight: 600;"><%= item.namaBarang %></span>
+                </td>
+                <td><%= item.namaMerk || '-' %></td>
+                <td><%= item.spesifikasi || '-' %></td>
+                <td><%= item.qty %></td>
+                <td><strong>Rp <%= Number(item.harga || 0).toLocaleString('id-ID') %></strong></td>
+                <td><strong style="color: #7a1b1b;">Rp <%= Number(item.final || 0).toLocaleString('id-ID') %></strong></td>
+                <td class="col-keterangan"><%= item.keterangan || '-' %></td>
+                <td>
+                  <span class="badge <%= item.status === 'Ready' ? 'badge-setuju' : (item.status === 'Pending' ? 'badge-pending' : 'badge-tidak') %>">
+                    <%= item.status || 'Pending' %>
+                  </span>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              <% if (!items || items.length === 0) { %>
-                <tr>
-                  <td colspan="10" style="text-align: center; padding: 20px; color: #888;">Belum ada data harga dasar.</td>
-                </tr>
-              <% } else { %>
-                <% items.forEach(function(item) { %>
-                  <!-- Tambahkan onclick, cursor pointer, dan efek hover tipis jika mau -->
-                  <tr class="item-row" onclick="window.location.href='/harga-dasar/detail/<%= item._id %>'" style="cursor: pointer;" title="Klik untuk melihat detail barang">
-                    <td><%= item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-' %></td>
-                    <td><strong><%= item.idBarang %></strong></td>
-                    <td>
-                      <!-- Atau jika ingin link khusus di nama barang saja tanpa seluruh baris diklik: -->
-                      <span style="color: #7a1b1b; font-weight: 600;"><%= item.namaBarang %></span>
-                    </td>
-                    <td><%= item.namaMerk || '-' %></td>
-                    <td><%= item.spesifikasi || '-' %></td>
-                    <td><%= item.qty %></td>
-                    <td><strong>Rp <%= Number(item.harga || 0).toLocaleString('id-ID') %></strong></td>
-                    <td><strong style="color: #7a1b1b;">Rp <%= Number(item.final || 0).toLocaleString('id-ID') %></strong></td>
-                    <td class="col-keterangan"><%= item.keterangan || '-' %></td>
-                    <td>
-                      <span class="badge <%= item.status === 'Ready' ? 'badge-setuju' : (item.status === 'Pending' ? 'badge-pending' : 'badge-tidak') %>">
-                        <%= item.status || 'Pending' %>
-                      </span>
-                    </td>
-                  </tr>
-                <% }); %>
-              <% } %>
-            </tbody>
-          </table>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
     </section>
   </main>
 
