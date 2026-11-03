@@ -247,6 +247,7 @@
       h1 { font-size: 22px !important; }
     }
 </style>
+  <link rel="stylesheet" href="/css/stat-cards.css">
 </head>
 <body>
 
@@ -371,57 +372,62 @@
   </aside>
 
   <main class="main-content">
-    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-
     <header class="header-section">
+      <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
       <h1>Harga Dasar</h1>
       <p>Lihat dan tambahkan kalkulasi harga barang serta material dasar.</p>
     </header>
 
     <!-- KARTU STATISTIK DENGAN GARIS AKSEN WARNA DI ATAS CARD -->
-    <section class="cards-grid">
-      <!-- Card 1 (Aksen Biru) -->
-      <div class="card card-blue">
-        <div class="card-header-top">
-          <span class="card-title">TOTAL ITEM HARGA DASAR</span>
-          <div class="card-icon-box blue">
-            <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+    <section class="card-grid">
+      <div class="stat-card card-blue">
+        <div class="card-header">
+          <span class="card-title">Total Item Harga Dasar</span>
+          <div class="icon-wrapper icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
           </div>
         </div>
-        <div class="card-value"><%= totalItem || 0 %><span class="card-unit">Item</span></div>
-        <div class="card-footer-info">
-          <span class="text-success">Data Terbaru</span>
-          <span class="text-muted">Harga Material</span>
+        <div class="card-body">
+          <span class="card-value"><%= typeof totalItem !== 'undefined' ? totalItem : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-blue">Data Terbaru</span>
+          <span>Harga Material</span>
         </div>
       </div>
-
-      <!-- Card 2 (Aksen Hijau) -->
-      <div class="card card-green">
-        <div class="card-header-top">
-          <span class="card-title">STATUS READY</span>
-          <div class="card-icon-box green">
-            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+      <div class="stat-card card-green">
+        <div class="card-header">
+          <span class="card-title">Status Ready</span>
+          <div class="icon-wrapper icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
           </div>
         </div>
-        <div class="card-value"><%= totalReady || 0 %><span class="card-unit">Item</span></div>
-        <div class="card-footer-info">
-          <span class="text-success">Siap Digunakan</span>
-          <span class="text-muted">Status Valid</span>
+        <div class="card-body">
+          <span class="card-value"><%= typeof totalReady !== 'undefined' ? totalReady : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-green">Siap Digunakan</span>
+          <span>Status Valid</span>
         </div>
       </div>
-
-      <!-- Card 3 (Aksen Orange) -->
-      <div class="card card-orange">
-        <div class="card-header-top">
-          <span class="card-title">STATUS PENDING</span>
-          <div class="card-icon-box orange">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      <div class="stat-card card-red">
+        <div class="card-header">
+          <span class="card-title">Status Pending</span>
+          <div class="icon-wrapper icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           </div>
         </div>
-        <div class="card-value"><%= totalPending || 0 %><span class="card-unit">Item</span></div>
-        <div class="card-footer-info">
-          <span class="text-orange">Menunggu Review</span>
-          <span class="text-muted">Dalam Peninjauan</span>
+        <div class="card-body">
+          <span class="card-value"><%= typeof totalPending !== 'undefined' ? totalPending : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-red">Menunggu Review</span>
+          <span>Dalam Peninjauan</span>
         </div>
       </div>
     </section>

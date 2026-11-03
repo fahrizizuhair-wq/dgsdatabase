@@ -356,6 +356,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/css/stat-cards.css">
 </head>
 <body>
 
@@ -486,14 +487,58 @@
       <p>Lihat pencatatan barang masuk dan pasokan inventaris.</p>
     </header>
 
-    <section class="cards-grid">
-      <div class="card">
-        <div class="card-title">Total Item Masuk</div>
-        <div class="card-value"><%= typeof totalTransaksi !== 'undefined' ? totalTransaksi : 0 %> Item</div>
+    <%
+  var _stokMasukList = (typeof listStokMasuk !== 'undefined' && listStokMasuk) ? listStokMasuk : [];
+  var _stokMasukBelum = _stokMasukList.filter(function (i) { return i.status === 'Proses' || i.status === 'Pending'; }).length;
+%>
+<section class="card-grid">
+      <div class="stat-card card-blue">
+        <div class="card-header">
+          <span class="card-title">Total Item Masuk</span>
+          <div class="icon-wrapper icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof totalTransaksi !== 'undefined' ? totalTransaksi : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-blue">Transaksi Tercatat</span>
+          <span>Stok Masuk</span>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-title">Total Qty Barang</div>
-        <div class="card-value"><%= typeof totalQtyMasuk !== 'undefined' ? totalQtyMasuk : 0 %> Pcs</div>
+      <div class="stat-card card-green">
+        <div class="card-header">
+          <span class="card-title">Total Qty Barang</span>
+          <div class="icon-wrapper icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof totalQtyMasuk !== 'undefined' ? totalQtyMasuk : 0 %></span>
+          <span class="card-unit">Pcs</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-green">Jumlah Masuk</span>
+          <span>Siap Digunakan</span>
+        </div>
+      </div>
+      <div class="stat-card card-red">
+        <div class="card-header">
+          <span class="card-title">Belum Selesai</span>
+          <div class="icon-wrapper icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof _stokMasukBelum !== 'undefined' ? _stokMasukBelum : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-red">Perlu Ditindaklanjuti</span>
+          <span>Status Proses</span>
+        </div>
       </div>
     </section>
 

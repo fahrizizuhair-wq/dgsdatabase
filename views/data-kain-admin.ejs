@@ -164,6 +164,7 @@
     .btn-delete { background-color: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; }
 
   </style>
+  <link rel="stylesheet" href="/css/stat-cards.css">
 </head>
 <body>
 
@@ -318,18 +319,60 @@
       <p>Kelola data vendor, edit detail, serta kontrol hak akses penuh.</p>
     </header>
 
-    <section class="cards-grid">
-      <div class="card">
-        <div class="card-title">Total Vendor Kain</div>
-        <div class="card-value1"><%= typeof vendors !== 'undefined' ? vendors.length : 0 %> Vendor</div>
+    <%
+  var _vendorKain = (typeof vendors !== 'undefined' && vendors) ? vendors : [];
+  var _vendorKainTotal = _vendorKain.length;
+  var _vendorKainAktif = _vendorKain.filter(function (v) { return v.status === 'Aktif'; }).length;
+  var _vendorKainNonAktif = _vendorKain.filter(function (v) { return v.status && v.status !== 'Aktif'; }).length;
+%>
+<section class="card-grid">
+      <div class="stat-card card-blue">
+        <div class="card-header">
+          <span class="card-title">Total Vendor Kain</span>
+          <div class="icon-wrapper icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof _vendorKainTotal !== 'undefined' ? _vendorKainTotal : 0 %></span>
+          <span class="card-unit">Vendor</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-blue">Data Vendor</span>
+          <span>Bahan Kain</span>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-title">Total Kategori</div>
-        <div class="card-value2"><%= typeof totalKategori !== 'undefined' ? totalKategori : 0 %> Kategori</div>
+      <div class="stat-card card-green">
+        <div class="card-header">
+          <span class="card-title">Vendor Aktif</span>
+          <div class="icon-wrapper icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof _vendorKainAktif !== 'undefined' ? _vendorKainAktif : 0 %></span>
+          <span class="card-unit">Vendor</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-green">Status Aktif</span>
+          <span>Siap Supply</span>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-title">Kategori Utama</div>
-        <div class="card-value3">Bahan Kain</div>
+      <div class="stat-card card-red">
+        <div class="card-header">
+          <span class="card-title">Tidak Aktif / Review</span>
+          <div class="icon-wrapper icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof _vendorKainNonAktif !== 'undefined' ? _vendorKainNonAktif : 0 %></span>
+          <span class="card-unit">Vendor</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-red">Perlu Review</span>
+          <span>Dalam Peninjauan</span>
+        </div>
       </div>
     </section>
 

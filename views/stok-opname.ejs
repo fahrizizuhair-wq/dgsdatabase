@@ -358,6 +358,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/css/stat-cards.css">
 </head>
 <body>
 
@@ -511,10 +512,59 @@
       <p>Audit fisik dan kalkulasi ketersediaan stok barang.</p>
     </header>
 
-    <section class="cards-grid">
-      <div class="card">
-        <div class="card-title">Total Jenis Barang Opname</div>
-        <div class="card-value"><%= typeof totalOpname !== 'undefined' ? totalOpname : 0 %> Item</div>
+    <%
+  var _opnameList = (typeof listStokOpname !== 'undefined' && listStokOpname) ? listStokOpname : [];
+  var _opnameMasuk = _opnameList.reduce(function (a, i) { return a + (Number(i.stokMasuk) || 0); }, 0);
+  var _opnameKeluar = _opnameList.reduce(function (a, i) { return a + (Number(i.stokKeluar) || 0); }, 0);
+%>
+<section class="card-grid">
+      <div class="stat-card card-blue">
+        <div class="card-header">
+          <span class="card-title">Total Jenis Barang</span>
+          <div class="icon-wrapper icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof totalOpname !== 'undefined' ? totalOpname : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-blue">Data Opname</span>
+          <span>Seluruh Barang</span>
+        </div>
+      </div>
+      <div class="stat-card card-green">
+        <div class="card-header">
+          <span class="card-title">Total Stok Masuk</span>
+          <div class="icon-wrapper icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof _opnameMasuk !== 'undefined' ? _opnameMasuk : 0 %></span>
+          <span class="card-unit">Pcs</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-green">Penambahan Stok</span>
+          <span>Barang Masuk</span>
+        </div>
+      </div>
+      <div class="stat-card card-red">
+        <div class="card-header">
+          <span class="card-title">Total Stok Keluar</span>
+          <div class="icon-wrapper icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof _opnameKeluar !== 'undefined' ? _opnameKeluar : 0 %></span>
+          <span class="card-unit">Pcs</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-red">Pengurangan Stok</span>
+          <span>Barang Keluar</span>
+        </div>
       </div>
     </section>
 

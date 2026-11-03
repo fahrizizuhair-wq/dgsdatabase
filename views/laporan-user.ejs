@@ -384,6 +384,7 @@
 }
 
   </style>
+  <link rel="stylesheet" href="/css/stat-cards.css">
 </head>
 <body>
 
@@ -516,14 +517,59 @@
       <p>Kelola, unggah, dan cetak dokumen laporan database.</p>
     </header>
 
-    <section class="cards-grid">
-      <div class="card">
-        <div class="card-title">Total Dokumen Laporan</div>
-        <div class="card-value"><%= typeof listLaporan !== 'undefined' ? listLaporan.length : 0 %> Dokumen</div>
+    <%
+  var _lapList = (typeof listLaporan !== 'undefined' && listLaporan) ? listLaporan : [];
+  var _lapBerkas = _lapList.filter(function (i) { return !!i.filePath; }).length;
+  var _lapTanpa = _lapList.length - _lapBerkas;
+%>
+<section class="card-grid">
+      <div class="stat-card card-blue">
+        <div class="card-header">
+          <span class="card-title">Total Dokumen Laporan</span>
+          <div class="icon-wrapper icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof totalLaporan !== 'undefined' ? totalLaporan : 0 %></span>
+          <span class="card-unit">Dokumen</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-blue">Arsip Tersedia</span>
+          <span>Laporan Resmi</span>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-title">Status Sistem</div>
-        <div class="card-value" style="color: #137333; font-size: 20px;">Sinkron & Aktif</div>
+      <div class="stat-card card-green">
+        <div class="card-header">
+          <span class="card-title">Berkas Tersedia</span>
+          <div class="icon-wrapper icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof _lapBerkas !== 'undefined' ? _lapBerkas : 0 %></span>
+          <span class="card-unit">Berkas</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-green">Dapat Dibuka</span>
+          <span>Siap Diunduh</span>
+        </div>
+      </div>
+      <div class="stat-card card-red">
+        <div class="card-header">
+          <span class="card-title">Tanpa Berkas</span>
+          <div class="icon-wrapper icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof _lapTanpa !== 'undefined' ? _lapTanpa : 0 %></span>
+          <span class="card-unit">Dokumen</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-red">Perlu Dilengkapi</span>
+          <span>Belum Ada File</span>
+        </div>
       </div>
     </section>
 

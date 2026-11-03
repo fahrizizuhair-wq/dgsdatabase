@@ -394,6 +394,7 @@
 }
 
   </style>
+  <link rel="stylesheet" href="/css/stat-cards.css">
 </head>
 <body>
 
@@ -547,14 +548,59 @@
       <p>Kelola kalkulasi harga barang dan material dasar.</p>
     </header>
 
-    <section class="cards-grid">
-      <div class="card">
-        <div class="card-title">Total Item Harga Dasar</div>
-        <div class="card-value"><%= typeof totalItem !== 'undefined' ? totalItem : 0 %> Item</div>
+    <%
+  var _hargaItems = (typeof items !== 'undefined' && items) ? items : [];
+  var _hargaReady = _hargaItems.filter(function (i) { return i.status === 'Ready'; }).length;
+  var _hargaPending = _hargaItems.filter(function (i) { return i.status === 'Pending'; }).length;
+%>
+<section class="card-grid">
+      <div class="stat-card card-blue">
+        <div class="card-header">
+          <span class="card-title">Total Item Harga Dasar</span>
+          <div class="icon-wrapper icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof totalItem !== 'undefined' ? totalItem : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-blue">Data Terbaru</span>
+          <span>Harga Material</span>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-title">Status Data</div>
-        <div class="card-value1">Sinkron</div>
+      <div class="stat-card card-green">
+        <div class="card-header">
+          <span class="card-title">Status Ready</span>
+          <div class="icon-wrapper icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof _hargaReady !== 'undefined' ? _hargaReady : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-green">Siap Digunakan</span>
+          <span>Status Valid</span>
+        </div>
+      </div>
+      <div class="stat-card card-red">
+        <div class="card-header">
+          <span class="card-title">Status Pending</span>
+          <div class="icon-wrapper icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof _hargaPending !== 'undefined' ? _hargaPending : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-red">Menunggu Review</span>
+          <span>Dalam Peninjauan</span>
+        </div>
       </div>
     </section>
 
