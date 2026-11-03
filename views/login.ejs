@@ -869,7 +869,7 @@ body::before {
             </div>
 
             <div style="position: relative; width: 100%;">
-                <input type="text" name="kodeRahasia" placeholder="Masukkan Kode Verifikasi Pendaftaran" required style="width: 100%; padding: 12px; background: #fffdfd; border: 2px dashed #7a1b1b; border-radius: 8px; font-size: 14px; outline: none; font-weight: bold; color: #7a1b1b; box-sizing: border-box;">
+              <input type="text" id="userRegKodeRahasia" name="kodeRahasia" placeholder="Masukkan Kode Verifikasi Pendaftaran" required style="width: 100%; padding: 12px; background: #fffdfd; border: 2px dashed #7a1b1b; border-radius: 8px; font-size: 14px; outline: none; font-weight: bold; color: #7a1b1b; box-sizing: border-box;">
             </div>
 
             <button type="submit" id="btnRegisterUser" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Daftar Akun User</button>
@@ -1153,69 +1153,42 @@ body::before {
 
     // PROSES REGISTER USER
     async function prosesRegisterUser(event) {
-        event.preventDefault();
-        const namaLengkap = document.getElementById('userRegNama').value.trim();
-        const username = document.getElementById('userRegUsername').value.trim();
-        const password = document.getElementById('userRegPassword').value;
-        const confirmPassword = document.getElementById('userRegConfirmPassword').value;
+    event.preventDefault();
 
-        if (password !== confirmPassword) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Perhatian',
-                text: 'Konfirmasi password tidak cocok!',
-                confirmButtonColor: '#ffc107'
-            });
-            return;
+    const namaLengkap = document.getElementById('userRegNama').value;
+    const username = document.getElementById('userRegUsername').value;
+    const password = document.getElementById('userRegPassword').value;
+    const confirmPassword = document.getElementById('userRegConfirmPassword').value;
+    
+    // Ambil nilai dari input yang baru diberi ID di atas
+    const kodeRahasia = document.getElementById('userRegKodeRahasia').value;
+
+    try {
+        const response = await fetch('/register-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                namaLengkap,
+                username,
+                password,
+                confirmPassword,
+                kodeRahasia // Sekarang variabel ini terkirim dengan benar ke server!
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            alert(result.message);
+            bukaLoginUser(); // Kembali ke form login
+        } else {
+            alert(result.message || 'Gagal mendaftarkan akun.');
         }
-
-        const btn = document.getElementById('btnRegisterUser');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mendaftarkan...';
-        btn.disabled = true;
-
-        try {
-            const response = await fetch('/register-user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ namaLengkap, username, password, confirmPassword })
-            });
-
-            const result = await response.json();
-            btn.innerHTML = 'Daftar Akun User';
-            btn.disabled = false;
-
-            if (result.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Pendaftaran Berhasil!',
-                    text: result.message,
-                    confirmButtonColor: '#28a745',
-                    confirmButtonText: 'Masuk Sekarang'
-                }).then(() => {
-                    bukaLoginUser();
-                    document.getElementById('userLoginUsername').value = username;
-                    event.target.reset();
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Mendaftar',
-                    text: result.message,
-                    confirmButtonColor: '#dc3545'
-                });
-            }
-        } catch (err) {
-            console.error("Register User Error:", err);
-            btn.innerHTML = 'Daftar Akun User';
-            btn.disabled = false;
-            Swal.fire({
-                icon: 'error',
-                title: 'Kesalahan Sistem',
-                text: 'Terjadi gangguan saat membuat akun user.',
-                confirmButtonColor: '#dc3545'
-            });
-        }
+    } catch (err) {
+        console.error('Error:', err);
+        alert('Terjadi kesalahan koneksi ke server.');
     }
+}
 
     // VERIFIKASI USERNAME LUPA PASSWORD
     async function prosesVerifikasiUser(event) {
