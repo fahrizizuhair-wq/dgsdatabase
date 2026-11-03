@@ -200,14 +200,14 @@ body::before {
 /* Copyright diposisikan di tengah-tengah area background web sebelah kiri */
 .copyright {
   position: fixed;
-  left: calc((100vw - 460px) / 2); /* Mengambil titik tengah dari sisa ruang sebelah kiri */
+  left: calc((100vw - 460px) / 2);
   bottom: 20px;
   transform: translateX(-50%);
   margin: 0; 
   text-align: center; 
   font-size: 11px; 
   color: #fff; /* Diubah jadi putih agar kontras dengan background gelap foto */
-  background: rgba(0, 0, 0, 0.4); /* Efek glassmorphism gelap */
+  background: rgba(240, 240, 240, 0.4); /* Efek glassmorphism gelap */
   border: 1px solid rgba(255, 255, 255, 0.2); 
   padding: 6px 16px; 
   border-radius: 999px; 
@@ -215,7 +215,9 @@ body::before {
   white-space: nowrap;
   z-index: 10;
 }
-.copyright strong { color: var(--gold); } /* Warna emas agar elegan di atas foto */
+.copyright strong {
+  color: rgb(190, 41, 41);
+} /* Warna emas agar elegan di atas foto */
 
 /* Responsive */
 @media (max-width: 768px) {
