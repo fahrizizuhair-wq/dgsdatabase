@@ -4,7 +4,8 @@ const userSchema = new mongoose.Schema({
   namaLengkap: { type: String, default: '' }, // Untuk sapaan & nama di sidebar/dashboard
   username: { type: String, required: true, unique: true }, // Untuk login unik
   password: { type: String, required: true }, // Password akun (bcrypt hash)
-  role: { type: String, default: 'user' }     // Pembeda hak akses ('admin' atau 'user')
+  role: { type: String, default: 'user' },    // Pembeda hak akses ('admin' atau 'user')
+  recoveryCode: { type: String, default: '' } // Kode pemulihan 4 digit (bcrypt hash)
 }, { timestamps: true, collection: 'users' });
 
 module.exports = mongoose.model('User', userSchema);

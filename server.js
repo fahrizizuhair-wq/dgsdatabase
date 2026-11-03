@@ -12,6 +12,7 @@ const { MongoStore } = require('connect-mongo');
 const multer   = require('multer');
 const path     = require('path');
 const fs       = require('fs');
+const crypto   = require('crypto');
 const bcrypt   = require('bcrypt');
 const ExcelJS  = require('exceljs');
 const PORT = process.env.PORT || 3000;
@@ -453,12 +454,66 @@ app.post('/login-user', async (req, res) => {
   }
 });
 
-// 3. REGISTER ADMIN (AJAX / JSON)
+// ============================================================
+//  KODE VERIFIKASI PENDAFTARAN & KODE PEMULIHAN 4 DIGIT
+// ============================================================
+const KODE_VERIFIKASI_PENDAFTARAN = process.env.KODE_VERIFIKASI_PENDAFTARAN || 'DGS2026';
+
+// Membuat 4 angka acak, contoh: "4821"
+function buatKodePemulihan() {
+  return String(crypto.randomInt(1000, 10000));
+}
+
+// Menyimpan kode pemulihan dalam bentuk hash, lalu mengembalikan kode aslinya
+async function simpanKodePemulihan(akun) {
+  const kode = buatKodePemulihan();
+  akun.recoveryCode = await bcrypt.hash(kode, 10);
+  await akun.save();
+  return kode;
+}
+
+function normalisasiKode(kode) {
+  return String(kode || '').replace(/\s+/g, '');
+}
+
+async function cekKodePemulihan(akun, kode) {
+  if (!akun || !akun.recoveryCode) return false;
+  const bersih = normalisasiKode(kode);
+  if (!/^\d{4}$/.test(bersih)) return false;
+  try {
+    return await bcrypt.compare(bersih, akun.recoveryCode);
+  } catch (err) {
+    return false;
+  }
+}
+
+// Mencari akun admin/user berdasarkan username & role
+async function cariAkunByRole(username, role) {
+  const pola = new RegExp('^' + String(username).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i');
+  if (role === 'admin') {
+    const akun = await Admin.findOne({ username: pola });
+    return akun ? { akun, role: 'admin' } : null;
+  }
+  if (role === 'user') {
+    const akun = await User.findOne({ username: pola });
+    return akun ? { akun, role: 'user' } : null;
+  }
+  const admin = await Admin.findOne({ username: pola });
+  if (admin) return { akun: admin, role: 'admin' };
+  const user = await User.findOne({ username: pola });
+  if (user) return { akun: user, role: 'user' };
+  return null;
+}
+
+// 3. REGISTER ADMIN (AJAX / JSON) DENGAN KODE VERIFIKASI
 app.post('/register-admin', async (req, res) => {
   try {
-    const { username, password, confirmPassword } = req.body;
+    const { username, password, confirmPassword, kodeRahasia } = req.body;
     if (!username || !username.trim() || !password) {
       return res.status(400).json({ success: false, message: 'Username dan password admin wajib diisi!' });
+    }
+    if (!kodeRahasia || kodeRahasia.trim() !== KODE_VERIFIKASI_PENDAFTARAN) {
+      return res.status(400).json({ success: false, message: 'Kode verifikasi pendaftaran salah! Silakan periksa kembali.' });
     }
     const trimmedUsername = username.trim();
     if (password !== confirmPassword) {
@@ -474,9 +529,16 @@ app.post('/register-admin', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await Admin.create({ username: trimmedUsername, password: hashedPassword });
+    const admin = await Admin.create({ username: trimmedUsername, password: hashedPassword });
+    const recoveryCode = await simpanKodePemulihan(admin);
 
-    return res.json({ success: true, message: 'Akun Admin berhasil dibuat! Silakan masuk dengan kredensial baru Anda.' });
+    return res.json({
+      success: true,
+      message: 'Akun Admin berhasil dibuat! Silakan masuk dengan kredensial baru Anda.',
+      username: admin.username,
+      role: 'admin',
+      recoveryCode
+    });
   } catch (err) {
     console.error('Error saat register admin:', err);
     return res.status(500).json({ success: false, message: 'Gagal membuat akun admin: ' + err.message });
@@ -488,16 +550,13 @@ app.post('/register-admin', async (req, res) => {
 app.post('/register-user', async (req, res) => {
   try {
     const { namaLengkap, username, password, confirmPassword, kodeRahasia } = req.body;
-    
-    // Tentukan kode verifikasi yang sah (bisa disesuaikan atau ditaruh di environment variable .env)
-    const KODE_VERIFIKASI_VALID = "DGS2026";
 
     if (!username || !username.trim() || !password) {
       return res.status(400).json({ success: false, message: 'Username dan password user wajib diisi!' });
     }
 
     // Cek apakah kode verifikasi diisi dan sesuai
-    if (!kodeRahasia || kodeRahasia.trim() !== KODE_VERIFIKASI_VALID) {
+    if (!kodeRahasia || kodeRahasia.trim() !== KODE_VERIFIKASI_PENDAFTARAN) {
       return res.status(400).json({ success: false, message: 'Kode verifikasi pendaftaran salah! Silakan periksa kembali.' });
     }
 
@@ -515,63 +574,77 @@ app.post('/register-user', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await User.create({
+    const user = await User.create({
       namaLengkap: (namaLengkap && namaLengkap.trim()) ? namaLengkap.trim() : trimmedUsername,
       username: trimmedUsername,
       password: hashedPassword,
       role: 'user'
     });
+    const recoveryCode = await simpanKodePemulihan(user);
 
-    return res.json({ success: true, message: 'Akun User berhasil didaftarkan! Silakan masuk dengan akun baru Anda.' });
+    return res.json({
+      success: true,
+      message: 'Akun User berhasil didaftarkan! Silakan masuk dengan akun baru Anda.',
+      username: user.username,
+      role: 'user',
+      recoveryCode
+    });
   } catch (err) {
     console.error('Error saat register user:', err);
     return res.status(500).json({ success: false, message: 'Gagal membuat akun user: ' + err.message });
   }
 });
 
-// 5. LUPA PASSWORD (Verifikasi username di database)
+// 5. LUPA PASSWORD (Verifikasi username + kode pemulihan 4 digit)
 app.post('/forgot-password', async (req, res) => {
   try {
-    const { username, role } = req.body;
+    const { username, role, recoveryCode } = req.body;
     if (!username || !username.trim()) {
       return res.json({ success: false, message: 'Username wajib diisi!' });
     }
-    const trimmedUsername = username.trim();
 
-    if (role === 'admin') {
-      const admin = await Admin.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
-      if (admin) {
-        return res.json({ success: true, message: 'Akun Admin ditemukan', username: admin.username, role: 'admin' });
-      }
-      return res.json({ success: false, message: 'Akun Admin dengan username tersebut tidak ditemukan!' });
-    } else if (role === 'user') {
-      const user = await User.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
-      if (user) {
-        return res.json({ success: true, message: 'Akun User ditemukan', username: user.username, role: 'user' });
-      }
-      return res.json({ success: false, message: 'Akun User dengan username tersebut tidak ditemukan!' });
-    } else {
-      // Periksa kedua tabel jika role tidak ditentukan
-      const admin = await Admin.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
-      if (admin) {
-        return res.json({ success: true, message: 'Akun Admin ditemukan', username: admin.username, role: 'admin' });
-      }
-      const user = await User.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
-      if (user) {
-        return res.json({ success: true, message: 'Akun User ditemukan', username: user.username, role: 'user' });
-      }
-      return res.json({ success: false, message: 'Akun tidak ditemukan di database!' });
+    const hasil = await cariAkunByRole(username.trim(), role);
+    if (!hasil) {
+      return res.json({ success: false, message: 'Akun dengan username tersebut tidak ditemukan!' });
     }
+
+    const { akun, role: roleAkun } = hasil;
+
+    // Akun lama (belum punya kode pemulihan): buatkan kode baru sekali, lalu minta disimpan
+    if (!akun.recoveryCode) {
+      const kodeBaru = await simpanKodePemulihan(akun);
+      return res.json({
+        success: true,
+        legacy: true,
+        recoveryCode: kodeBaru,
+        message: 'Akun ini belum memiliki kode pemulihan. Kode baru telah dibuat, mohon simpan.',
+        username: akun.username,
+        role: roleAkun
+      });
+    }
+
+    // Wajib menyertakan kode pemulihan yang benar
+    const cocok = await cekKodePemulihan(akun, recoveryCode);
+    if (!cocok) {
+      return res.json({ success: false, message: 'Kode pemulihan 4 digit salah! Silakan periksa kembali.' });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Akun ditemukan dan kode pemulihan valid.',
+      username: akun.username,
+      role: roleAkun
+    });
   } catch (err) {
     console.error('Error pada /forgot-password:', err);
     return res.status(500).json({ success: false, message: 'Terjadi kesalahan server saat memverifikasi akun.' });
   }
 });
 
-// 6. RESET PASSWORD (Simpan password baru ke database)
+// 6. RESET PASSWORD (Wajib verifikasi kode pemulihan, lalu simpan password baru)
 app.post('/reset-password', async (req, res) => {
   try {
-    const { username, role, newPassword, confirmPassword } = req.body;
+    const { username, role, recoveryCode, newPassword, confirmPassword } = req.body;
 
     if (!newPassword || !confirmPassword) {
       return res.json({ success: false, message: 'Password baru dan konfirmasi wajib diisi!' });
@@ -584,39 +657,26 @@ app.post('/reset-password', async (req, res) => {
     }
 
     const trimmedUsername = username ? username.trim() : '';
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    if (!trimmedUsername) {
+      return res.json({ success: false, message: 'Username tidak valid. Silakan ulangi dari form lupa password.' });
+    }
 
-    if (role === 'admin') {
-      const admin = await Admin.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
-      if (!admin) {
-        return res.json({ success: false, message: 'Data Admin tidak ditemukan di database!' });
-      }
-      admin.password = hashedPassword;
-      await admin.save();
-      return res.json({ success: true, message: 'Password Admin berhasil diperbarui di database! Silakan masuk kembali.' });
-    } else if (role === 'user') {
-      const user = await User.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
-      if (!user) {
-        return res.json({ success: false, message: 'Data User tidak ditemukan di database!' });
-      }
-      user.password = hashedPassword;
-      await user.save();
-      return res.json({ success: true, message: 'Password User berhasil diperbarui di database! Silakan masuk kembali.' });
-    } else {
-      let admin = await Admin.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
-      if (admin) {
-        admin.password = hashedPassword;
-        await admin.save();
-        return res.json({ success: true, message: 'Password Admin berhasil diperbarui! Silakan masuk kembali.' });
-      }
-      let user = await User.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
-      if (user) {
-        user.password = hashedPassword;
-        await user.save();
-        return res.json({ success: true, message: 'Password User berhasil diperbarui! Silakan masuk kembali.' });
-      }
+    const hasil = await cariAkunByRole(trimmedUsername, role);
+    if (!hasil) {
       return res.json({ success: false, message: 'Data akun tidak ditemukan!' });
     }
+
+    const { akun, role: roleAkun } = hasil;
+    const cocok = await cekKodePemulihan(akun, recoveryCode);
+    if (!cocok) {
+      return res.json({ success: false, message: 'Kode pemulihan 4 digit salah! Password tidak diubah.' });
+    }
+
+    akun.password = await bcrypt.hash(newPassword, 10);
+    await akun.save();
+
+    const label = roleAkun === 'admin' ? 'Admin' : 'User';
+    return res.json({ success: true, message: `Password ${label} berhasil diperbarui! Silakan masuk kembali.` });
   } catch (err) {
     console.error('Error saat reset-password:', err);
     return res.status(500).json({ success: false, message: 'Gagal menyimpan password baru ke database.' });
