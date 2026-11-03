@@ -10,7 +10,7 @@
     
    <style>
 /* ============================================================
-   LOGIN — RIGHT FULL HEIGHT LAYOUT (NO SCROLL)
+   LOGIN — RIGHT FULL HEIGHT & MAXIMUM FILL (NO SCROLL)
    ============================================================ */
 :root {
   --maroon-900: #4d0e0e;
@@ -35,10 +35,10 @@ html, body {
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   margin: 0;
-  padding: 16px 32px; /* Jarak pas dari tepi kanan */
+  padding: 8px 32px 8px 8px; /* Padding sangat tipis agar kartu bisa mentok atas-bawah */
   display: flex;
   align-items: center; 
-  justify-content: flex-end; /* Menggeser posisi form ke sebelah kanan */
+  justify-content: flex-end; /* Posisi form di sebelah kanan */
   background-color: #f4f6f9;
   color: var(--ink);
   position: relative;
@@ -75,21 +75,21 @@ body::before {
 /* Layout di kanan */
 .auth-page {
   width: 100%;
-  max-width: 450px; /* Sedikit dibesarkan agar lebih proporsional */
+  max-width: 460px; /* Ukuran dilebarkan sedikit agar sangat proporsional */
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Posisikan secara vertikal di tengah area kanan */
-  gap: 10px;
+  justify-content: center; 
+  gap: 8px;
   position: relative;
   z-index: 1;
 }
 
-/* Kartu utama */
+/* Kartu utama mentok atas-bawah */
 .auth-card {
   width: 100%;
   position: relative;
-  padding: 20px 28px 18px; /* Ukuran padding sedikit ditambah agar lebih lega tapi tetap muat */
+  padding: 22px 30px 20px; /* Padding lega karena footer sudah dipisah ke bawah layar */
   border-radius: 24px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 100%);
   border: 1px solid rgba(255, 255, 255, 0.95);
@@ -140,7 +140,7 @@ body::before {
 
 /* Intro */
 .auth-intro { margin-bottom: 12px; }
-.auth-intro h2 { font-size: 20px; font-weight: 800; line-height: 1.15; color: #2a1212; }
+.auth-intro h2 { font-size: 20.5px; font-weight: 800; line-height: 1.15; color: #2a1212; }
 .auth-intro h2 span { background: linear-gradient(120deg, var(--maroon-700) 0%, var(--maroon-500) 60%, var(--gold) 120%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 .auth-intro p { margin-top: 3px; font-size: 12px; line-height: 1.4; color: var(--muted); }
 
@@ -197,17 +197,23 @@ body::before {
 .auth-foot { margin-top: 10px; text-align: center; font-size: 11.5px; color: var(--muted); }
 .auth-foot a { color: var(--maroon-700); font-weight: 800; text-decoration: none; }
 
-/* Copyright dipindah dan disatukan rapi di bagian bawah auth-page */
+/* Copyright diposisikan melayang pas di tengah bawah layar secara absolut */
 .copyright {
-  margin-top: 4px; 
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0; 
   text-align: center; 
   font-size: 11px; 
   color: #5b4a4a; 
-  background: rgba(255, 255, 255, 0.75); 
-  border: 1px solid rgba(255, 255, 255, 0.9); 
-  padding: 6px 14px; 
+  background: rgba(255, 255, 255, 0.85); 
+  border: 1px solid rgba(255, 255, 255, 0.95); 
+  padding: 5px 16px; 
   border-radius: 999px; 
   backdrop-filter: blur(8px);
+  white-space: nowrap;
+  z-index: 10;
 }
 .copyright strong { color: var(--maroon-700); }
 
@@ -216,6 +222,7 @@ body::before {
   body { padding: 8px 12px; justify-content: center; }
   .auth-card { padding: 16px 18px; }
   .head-badge { display: none; }
+  .copyright { font-size: 10px; padding: 4px 12px; }
 }
 </style>
 </head>
