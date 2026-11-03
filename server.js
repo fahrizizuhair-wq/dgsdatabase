@@ -694,7 +694,15 @@ app.get('/dashboard', isUserAuthenticated, async (req, res) => {
     const totalStokMasuk  = stokMasukList.reduce(
       (acc, item) => acc + (Number(item.jumlah) || Number(item.qty) || 0), 0
     );
-    res.render('dashboard', { totalVendor, totalHargaDasar, totalStokMasuk, stokMasukList, currentUser: req.session.user });
+    
+    res.render('dashboard', { 
+      totalVendor, 
+      totalHargaDasar, 
+      totalStokMasuk, 
+      stokMasukList, 
+      currentUser: req.session.user,
+      user: req.session.user // <-- Tambahin baris ini supaya EJS yang pakai 'user' langsung terbaca tanpa ubah kode ejs!
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat dashboard.');
@@ -730,7 +738,9 @@ app.get('/dashboard-admin', isAuthenticated, async (req, res) => {
       totalStokMasuk,
       statistikPerBulan,
       totalVolumeSemester,
-      rataRataBulan
+      rataRataBulan,
+      currentUser: req.session.user,
+      user: req.session.user // <-- Tambahkan baris ini agar profil/sapaan admin di sidebar ikut tampil normal
     });
   } catch (err) {
     console.error(err);

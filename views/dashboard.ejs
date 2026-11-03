@@ -1176,12 +1176,14 @@
       </div>
 
       <!-- Mini Profile Info -->
-      <div class="sidebar-user-card">
-        <div class="user-avatar-circle"><%= (typeof user !== 'undefined' && user && user.username) ? user.username.substring(0,2).toUpperCase() : 'DG' %></div>
-        <div class="sidebar-user-info">
-          <h4><%= (typeof user !== 'undefined' && user && (user.namaLengkap || user.username)) ? (user.namaLengkap || user.username) : 'Dian Giri Saputra' %></h4>
-          <span>User Operasional</span>
-        </div>
+     <div class="sidebar-user-card">
+          <div class="user-avatar-circle">
+              <%= (user && user.username) ? user.username.substring(0,2).toUpperCase() : 'DG' %>
+          </div>
+          <div class="sidebar-user-info">
+              <h4><%= (user && (user.namaLengkap || user.username)) ? (user.namaLengkap || user.username) : 'User' %></h4>
+              <span>User Operasional</span>
+          </div>
       </div>
 
       <div class="nav-label">Menu Navigasi</div>
