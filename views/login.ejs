@@ -322,6 +322,33 @@ body::before {
   color: rgb(151, 44, 44);
 } 
 
+.hero-text {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  align-self: center;
+  margin-top: 50px;
+  color: #ffffff;
+  z-index: 2;
+}
+
+.hero-text h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.hero-text p {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
 /* Responsive: di bawah 820px navbar & form ditumpuk (tidak muat berdampingan) */
 @media (max-width: 820px) {
   .login-shell {
@@ -378,6 +405,11 @@ body::before {
         <li><a href="/https://diangirisaputra.com/">Contact Us</a></li>
       </ul>
     </nav>
+
+    <div class="hero-text">
+      <h2>Selamat Datang Kembali</h2>
+      <p>Portal Internal Management System</p>
+    </div>
 
     <main class="auth-page">
 
