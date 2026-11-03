@@ -357,6 +357,253 @@ body::before {
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
 }
 
+/* ============================================================
+   MODAL AUTH — Buat Akun Admin/User, Lupa Password, Reset
+   ============================================================ */
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modalPopIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#modalLogin {
+  animation: modalFadeIn 0.18s ease both;
+}
+
+.modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 28px 28px 24px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 30px 70px -20px rgba(35, 10, 10, 0.55);
+  animation: modalPopIn 0.22s ease both;
+  scrollbar-width: thin;
+  scrollbar-color: #d9c7c7 transparent;
+}
+.modal-card::-webkit-scrollbar { width: 8px; }
+.modal-card::-webkit-scrollbar-thumb { background: #d9c7c7; border-radius: 999px; }
+.modal-card::-webkit-scrollbar-track { background: transparent; }
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #f6eeee;
+  color: #8a6a6a;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+  z-index: 3;
+}
+.modal-close:hover { background: #f0dede; color: #7a1b1b; }
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 2px 0 20px;
+  padding-right: 30px;
+}
+
+.modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  flex: 0 0 auto;
+}
+.modal-icon svg { width: 22px; height: 22px; }
+.icon-admin { background: #fdeaea; color: #cf3939; }
+.icon-user  { background: #f7eeee; color: #7a1b1b; }
+.icon-lupa  { background: #fdf3e2; color: #b07a21; }
+.icon-reset { background: #e9f7ee; color: #1f9d55; }
+
+.modal-head h3 {
+  margin: 0 0 4px;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #2a1212;
+}
+.modal-head p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #7a6a6a;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.modal-field label {
+  display: block;
+  margin: 0 0 5px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #6b5a5a;
+}
+
+.modal-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #fbf8f8;
+  border: 1px solid #e8dede;
+  border-radius: 11px;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.modal-input-wrap:focus-within {
+  background: #ffffff;
+  border-color: rgba(122, 27, 27, 0.45);
+  box-shadow: 0 0 0 3px rgba(122, 27, 27, 0.08);
+}
+.modal-input-wrap > svg {
+  width: 16px;
+  height: 16px;
+  margin-left: 12px;
+  flex: 0 0 auto;
+  color: #b09c9c;
+  pointer-events: none;
+}
+.modal-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 13.5px;
+  color: #2a1212;
+  outline: none;
+}
+.modal-input-wrap input::placeholder { color: #b5a5a5; }
+.modal-input-wrap.is-code {
+  background: #fffdfd;
+  border: 1.5px dashed #c9a3a3;
+}
+.modal-input-wrap.is-code:focus-within {
+  border-style: solid;
+  border-color: #7a1b1b;
+}
+
+.modal-eye {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: #a89494;
+  cursor: pointer;
+}
+.modal-eye:hover { color: #7a1b1b; }
+
+.modal-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -4px;
+}
+
+.modal-link {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #7a1b1b;
+  text-decoration: none;
+}
+.modal-link:hover { text-decoration: underline; }
+.modal-link.is-admin { color: #cf3939; }
+
+.modal-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 5px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 11px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter 0.18s ease, transform 0.12s ease;
+}
+.modal-submit:hover { filter: brightness(1.06); }
+.modal-submit:active { transform: translateY(1px); }
+.modal-submit:disabled { opacity: 0.65; cursor: progress; }
+.btn-admin { background: #cf3939; }
+.btn-user  { background: #7a1b1b; }
+.btn-lupa  { background: #b07a21; }
+.btn-reset { background: #1f9d55; }
+
+.modal-switch {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #7a6a6a;
+}
+.modal-switch a {
+  color: #7a1b1b;
+  font-weight: 800;
+  text-decoration: none;
+}
+.modal-switch a:hover { text-decoration: underline; }
+.modal-switch.is-admin a { color: #cf3939; }
+
+.modal-guest {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #e8dede;
+  border-radius: 11px;
+  background: #faf7f7;
+  color: #5b4a4a;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.18s ease;
+}
+.modal-guest:hover { background: #f4ecec; }
+
+@media (max-width: 560px) {
+  .modal-card {
+    max-height: calc(100vh - 24px);
+    padding: 24px 18px 20px;
+    border-radius: 18px;
+  }
+  .modal-head { gap: 10px; padding-right: 26px; }
+  .modal-head h3 { font-size: 17px; }
+  .modal-head p { font-size: 12px; }
+}
+
 /* Responsive: di bawah 820px navbar & form ditumpuk (tidak muat berdampingan) */
 @media (max-width: 820px) {
   .login-shell {
@@ -538,7 +785,7 @@ body::before {
     <!-- MODAL POP-UP FORM LOGIN & REGISTER -->
     <div id="modalLogin" onclick="tutupLoginLuar(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;">
         <div class="modal-card">
-            <span onclick="tutupLogin()" style="position: absolute; top: 15px; right: 20px; font-size: 22px; cursor: pointer; color: #888; font-weight: bold;">&times;</span>
+            <button type="button" class="modal-close" onclick="tutupLogin()" aria-label="Tutup formulir">&times;</button>
             
             <% if (typeof error !== 'undefined') { %>
                 <script>setTimeout(() => { document.getElementById('modalLogin').style.display = 'flex'; }, 100);</script>
@@ -549,181 +796,346 @@ body::before {
 
            <div class="auth-container">
     <!-- FORM 1A: LOGIN ADMIN -->
-    <div id="boxLoginAdmin" style="display: none;">
-        <h3 style="margin: 0 0 5px 0; color: #2c2c2c; font-size: 20px; font-weight: 700;">Verifikasi Admin</h3>
-        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan kredensial akun administrator Anda</p>
+    <div id="boxLoginAdmin" class="modal-box" style="display: none;">
+        <header class="modal-head">
+            <div class="modal-icon icon-admin">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="M9 12l2 2 4-4"></path>
+                </svg>
+            </div>
+            <div>
+                <h3>Verifikasi Admin</h3>
+                <p>Masukkan kredensial akun administrator Anda.</p>
+            </div>
+        </header>
 
-        <form onsubmit="prosesLogin(event, 'admin')" style="display: flex; flex-direction: column; gap: 14px;">
-            <input type="text" id="adminLoginUsername" name="username" placeholder="Username Admin" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-            
-            <div style="position: relative; width: 100%;">
-                <input type="password" name="password" id="adminPassword" placeholder="Password Admin" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                <span onclick="togglePassword('adminPassword', 'iconAdminPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                    <i id="iconAdminPass" class="fa-solid fa-eye"></i>
-                </span>
-            </div>
-            
-            <div style="text-align: right; margin-top: -4px;">
-                <a href="javascript:void(0)" onclick="tampilLupaPassword('admin')" style="font-size: 13px; color: #cf3939; text-decoration: none; font-weight: 600;">Lupa Password?</a>
+        <form class="modal-form" onsubmit="prosesLogin(event, 'admin')">
+            <div class="modal-field">
+                <label for="adminLoginUsername">Username Admin</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <input type="text" id="adminLoginUsername" name="username" placeholder="Masukkan username admin" autocomplete="username" required>
+                </div>
             </div>
 
-            <button type="submit" id="btnSubmitAdmin" style="padding: 12px; background-color: #cf3939; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Masuk Sebagai Admin</button>
-            
-            <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
-                Belum punya akun admin? <br>
-                <a href="javascript:void(0)" onclick="bukaRegisterAdmin()" style="color: #cf3939; font-weight: 700; text-decoration: none;">Buat Akun Admin &rarr;</a>
+            <div class="modal-field">
+                <label for="adminPassword">Password</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" id="adminPassword" name="password" placeholder="Masukkan password admin" autocomplete="current-password" required>
+                    <button type="button" class="modal-eye" onclick="togglePassword('adminPassword', 'iconAdminPass')" aria-label="Tampilkan password">
+                        <i id="iconAdminPass" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
+
+            <div class="modal-row">
+                <a href="javascript:void(0)" class="modal-link is-admin" onclick="tampilLupaPassword('admin')">Lupa Password?</a>
+            </div>
+
+            <button type="submit" id="btnSubmitAdmin" class="modal-submit btn-admin">Masuk Sebagai Admin</button>
+
+            <p class="modal-switch is-admin">Belum punya akun admin? <a href="javascript:void(0)" onclick="bukaRegisterAdmin()">Buat Akun Admin &rarr;</a></p>
         </form>
     </div>
 
     <!-- FORM 1B: REGISTER ADMIN -->
-    <div id="boxRegisterAdmin" style="display: none;">
-        <h3 style="margin: 0 0 5px 0; color: #cf3939; font-size: 20px; font-weight: 700;">Buat Akun Admin</h3>
-        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Daftarkan akun administrator baru untuk kontrol sistem</p>
+    <div id="boxRegisterAdmin" class="modal-box" style="display: none;">
+        <header class="modal-head">
+            <div class="modal-icon icon-admin">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <line x1="19" y1="8" x2="19" y2="14"></line>
+                    <line x1="22" y1="11" x2="16" y2="11"></line>
+                </svg>
+            </div>
+            <div>
+                <h3>Buat Akun Admin</h3>
+                <p>Daftarkan akun administrator baru untuk kontrol sistem.</p>
+            </div>
+        </header>
 
-        <form onsubmit="prosesRegisterAdmin(event)" style="display: flex; flex-direction: column; gap: 14px;">
-            <input type="text" id="adminRegUsername" placeholder="Username Admin Baru" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-            
-            <div style="position: relative; width: 100%;">
-                <input type="password" id="adminRegPassword" placeholder="Password Admin Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                <span onclick="togglePassword('adminRegPassword', 'iconAdminRegPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                    <i id="iconAdminRegPass" class="fa-solid fa-eye"></i>
-                </span>
+        <form class="modal-form" onsubmit="prosesRegisterAdmin(event)">
+            <div class="modal-field">
+                <label for="adminRegUsername">Username Admin</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <input type="text" id="adminRegUsername" placeholder="Masukkan username admin baru" autocomplete="username" required>
+                </div>
             </div>
 
-            <div style="position: relative; width: 100%;">
-                <input type="password" id="adminRegConfirmPassword" placeholder="Konfirmasi Password Admin" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                <span onclick="togglePassword('adminRegConfirmPassword', 'iconAdminRegConfirm')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                    <i id="iconAdminRegConfirm" class="fa-solid fa-eye"></i>
-                </span>
+            <div class="modal-field">
+                <label for="adminRegPassword">Password Admin</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" id="adminRegPassword" placeholder="Buat password admin baru" autocomplete="new-password" required>
+                    <button type="button" class="modal-eye" onclick="togglePassword('adminRegPassword', 'iconAdminRegPass')" aria-label="Tampilkan password">
+                        <i id="iconAdminRegPass" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
 
-            <button type="submit" id="btnRegisterAdmin" style="padding: 12px; background-color: #cf3939; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Daftar Akun Admin</button>
-
-            <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
-                Sudah punya akun admin? <br>
-                <a href="javascript:void(0)" onclick="bukaLoginAdmin()" style="color: #cf3939; font-weight: 700; text-decoration: none;">&larr; Masuk Admin</a>
+            <div class="modal-field">
+                <label for="adminRegConfirmPassword">Konfirmasi Password</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" id="adminRegConfirmPassword" placeholder="Ulangi password admin" autocomplete="new-password" required>
+                    <button type="button" class="modal-eye" onclick="togglePassword('adminRegConfirmPassword', 'iconAdminRegConfirm')" aria-label="Tampilkan konfirmasi password">
+                        <i id="iconAdminRegConfirm" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
+
+            <button type="submit" id="btnRegisterAdmin" class="modal-submit btn-admin">Daftar Akun Admin</button>
+
+            <p class="modal-switch is-admin">Sudah punya akun admin? <a href="javascript:void(0)" onclick="bukaLoginAdmin()">&larr; Masuk Admin</a></p>
         </form>
     </div>
 
     <!-- FORM 2A: LOGIN USER -->
-    <div id="boxLoginUser" style="display: none;">
-        <h3 style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Login Akun User</h3>
-        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan username dan password akun user Anda</p>
+    <div id="boxLoginUser" class="modal-box" style="display: none;">
+        <header class="modal-head">
+            <div class="modal-icon icon-user">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </div>
+            <div>
+                <h3>Login Akun User</h3>
+                <p>Masukkan username dan password akun user Anda.</p>
+            </div>
+        </header>
 
-        <form onsubmit="prosesLogin(event, 'user')" style="display: flex; flex-direction: column; gap: 14px;">
-            <input type="text" id="userLoginUsername" name="username" placeholder="Username User" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-            
-            <div style="position: relative; width: 100%;">
-                <input type="password" name="password" id="userPassword" placeholder="Password User" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                <span onclick="togglePassword('userPassword', 'iconUserPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                    <i id="iconUserPass" class="fa-solid fa-eye"></i>
-                </span>
+        <form class="modal-form" onsubmit="prosesLogin(event, 'user')">
+            <div class="modal-field">
+                <label for="userLoginUsername">Username User</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <input type="text" id="userLoginUsername" name="username" placeholder="Masukkan username user" autocomplete="username" required>
+                </div>
             </div>
 
-            <div style="text-align: right; margin-top: -4px;">
-                <a href="javascript:void(0)" onclick="tampilLupaPassword('user')" style="font-size: 13px; color: #7a1b1b; text-decoration: none; font-weight: 600;">Lupa Password?</a>
+            <div class="modal-field">
+                <label for="userPassword">Password</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" id="userPassword" name="password" placeholder="Masukkan password user" autocomplete="current-password" required>
+                    <button type="button" class="modal-eye" onclick="togglePassword('userPassword', 'iconUserPass')" aria-label="Tampilkan password">
+                        <i id="iconUserPass" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
 
-            <button type="submit" id="btnSubmitUser" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Masuk Ke Dashboard</button>
-
-            <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
-                Belum punya akun user? <br>
-                <a href="javascript:void(0)" onclick="bukaRegisterUser()" style="color: #7a1b1b; font-weight: 700; text-decoration: none;">Buat Akun User &rarr;</a>
+            <div class="modal-row">
+                <a href="javascript:void(0)" class="modal-link" onclick="tampilLupaPassword('user')">Lupa Password?</a>
             </div>
 
-            <!-- TOMBOL GUEST / TAMU -->
-            <div style="text-align: center; margin-top: 14px;">
-                <a href="/dashboard-guest" style="display: block; padding: 10px; background-color: #f1f1f1; color: #444; border: 1px solid #ddd; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; transition: 0.2s;">
-                    <i class="fa-solid fa-eye" style="margin-right: 6px;"></i> Masuk sebagai Guest (Tamu)
-                </a>
-            </div>
+            <button type="submit" id="btnSubmitUser" class="modal-submit btn-user">Masuk Ke Dashboard</button>
+
+            <p class="modal-switch">Belum punya akun user? <a href="javascript:void(0)" onclick="bukaRegisterUser()">Buat Akun User &rarr;</a></p>
         </form>
+
+        <a href="/dashboard-guest" class="modal-guest">
+            <i class="fa-solid fa-eye"></i>
+            <span>Masuk sebagai Guest (Tamu)</span>
+        </a>
     </div>
 
     <!-- FORM 2B: REGISTER USER -->
-    <div id="boxRegisterUser" style="display: none;">
-        <h3 style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Buat Akun User</h3>
-        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Daftarkan akun user baru untuk akses operasional</p>
+    <div id="boxRegisterUser" class="modal-box" style="display: none;">
+        <header class="modal-head">
+            <div class="modal-icon icon-user">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <line x1="19" y1="8" x2="19" y2="14"></line>
+                    <line x1="22" y1="11" x2="16" y2="11"></line>
+                </svg>
+            </div>
+            <div>
+                <h3>Buat Akun User</h3>
+                <p>Daftarkan akun user baru untuk akses operasional.</p>
+            </div>
+        </header>
 
-        <form onsubmit="prosesRegisterUser(event)" style="display: flex; flex-direction: column; gap: 14px;">
-            <input type="text" id="userRegNama" placeholder="Nama Lengkap (Opsional)" style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-            
-            <input type="text" id="userRegUsername" placeholder="Username User Baru" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-            
-            <div style="position: relative; width: 100%;">
-                <input type="password" id="userRegPassword" placeholder="Password User Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                <span onclick="togglePassword('userRegPassword', 'iconUserRegPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                    <i id="iconUserRegPass" class="fa-solid fa-eye"></i>
-                </span>
+        <form class="modal-form" onsubmit="prosesRegisterUser(event)">
+            <div class="modal-field">
+                <label for="userRegNama">Nama Lengkap <span style="font-weight:600; text-transform:none; letter-spacing:0;">(opsional)</span></label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <input type="text" id="userRegNama" placeholder="Masukkan nama lengkap" autocomplete="name">
+                </div>
             </div>
 
-            <div style="position: relative; width: 100%;">
-                <input type="password" id="userRegConfirmPassword" placeholder="Konfirmasi Password User" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                <span onclick="togglePassword('userRegConfirmPassword', 'iconUserRegConfirm')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                    <i id="iconUserRegConfirm" class="fa-solid fa-eye"></i>
-                </span>
+            <div class="modal-field">
+                <label for="userRegUsername">Username User</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <input type="text" id="userRegUsername" placeholder="Masukkan username user baru" autocomplete="username" required>
+                </div>
             </div>
 
-            <div style="position: relative; width: 100%;">
-              <input type="text" id="userRegKodeRahasia" name="kodeRahasia" placeholder="Masukkan Kode Verifikasi Pendaftaran" required style="width: 100%; padding: 12px; background: #fffdfd; border: 2px dashed #7a1b1b; border-radius: 8px; font-size: 14px; outline: none; font-weight: bold; color: #7a1b1b; box-sizing: border-box;">
+            <div class="modal-field">
+                <label for="userRegPassword">Password User</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" id="userRegPassword" placeholder="Buat password user baru" autocomplete="new-password" required>
+                    <button type="button" class="modal-eye" onclick="togglePassword('userRegPassword', 'iconUserRegPass')" aria-label="Tampilkan password">
+                        <i id="iconUserRegPass" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
 
-            <button type="submit" id="btnRegisterUser" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Daftar Akun User</button>
-
-            <div style="text-align: center; margin-top: 10px; font-size: 13px; color: #555;">
-                Sudah punya akun user? <br>
-                <a href="javascript:void(0)" onclick="bukaLoginUser()" style="color: #7a1b1b; font-weight: 700; text-decoration: none;">&larr; Masuk User</a>
+            <div class="modal-field">
+                <label for="userRegConfirmPassword">Konfirmasi Password</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" id="userRegConfirmPassword" placeholder="Ulangi password user" autocomplete="new-password" required>
+                    <button type="button" class="modal-eye" onclick="togglePassword('userRegConfirmPassword', 'iconUserRegConfirm')" aria-label="Tampilkan konfirmasi password">
+                        <i id="iconUserRegConfirm" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
+
+            <div class="modal-field">
+                <label for="userRegKodeRahasia">Kode Verifikasi</label>
+                <div class="modal-input-wrap is-code">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                    </svg>
+                    <input type="text" id="userRegKodeRahasia" name="kodeRahasia" placeholder="Masukkan kode verifikasi pendaftaran" required>
+                </div>
+            </div>
+
+            <button type="submit" id="btnRegisterUser" class="modal-submit btn-user">Daftar Akun User</button>
+
+            <p class="modal-switch">Sudah punya akun user? <a href="javascript:void(0)" onclick="bukaLoginUser()">&larr; Masuk User</a></p>
         </form>
     </div>
 
     <!-- FORM 3: LUPA PASSWORD -->
-    <div id="boxLupaPassword" style="display: none;">
-        <h3 id="judulLupaPassword" style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Lupa Password</h3>
-        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Masukkan username Anda untuk verifikasi data akun di database.</p>
-
-        <form onsubmit="prosesVerifikasiUser(event)" style="display: flex; flex-direction: column; gap: 14px;">
-            <input type="hidden" id="roleLupaPassword" value="admin">
-            <input type="text" id="inputUsernameLupa" placeholder="Masukkan Username Anda" required style="padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none;">
-            
-            <button type="submit" id="btnVerifLupa" style="padding: 12px; background-color: #7a1b1b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Lanjutkan & Verifikasi</button>
-            
-            <div style="text-align: center; margin-top: 6px;">
-                <a href="javascript:void(0)" onclick="kembaliKeLoginRole()" style="font-size: 13px; color: #666; text-decoration: none;">&larr; Kembali ke Form Login</a>
+    <div id="boxLupaPassword" class="modal-box" style="display: none;">
+        <header class="modal-head">
+            <div class="modal-icon icon-lupa">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="7.5" cy="15.5" r="5.5"></circle>
+                    <path d="M11.5 11.5L20 3"></path>
+                    <path d="M17 6l3 3"></path>
+                    <path d="M15 8l3 3"></path>
+                </svg>
             </div>
+            <div>
+                <h3 id="judulLupaPassword">Lupa Password</h3>
+                <p>Masukkan username Anda untuk verifikasi data akun di database.</p>
+            </div>
+        </header>
+
+        <form class="modal-form" onsubmit="prosesVerifikasiUser(event)">
+            <input type="hidden" id="roleLupaPassword" value="admin">
+
+            <div class="modal-field">
+                <label for="inputUsernameLupa">Username</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <input type="text" id="inputUsernameLupa" placeholder="Masukkan username Anda" autocomplete="username" required>
+                </div>
+            </div>
+
+            <button type="submit" id="btnVerifLupa" class="modal-submit btn-lupa">Lanjutkan &amp; Verifikasi</button>
+
+            <p class="modal-switch"><a href="javascript:void(0)" onclick="kembaliKeLoginRole()">&larr; Kembali ke Form Login</a></p>
         </form>
     </div>
 
     <!-- FORM 4: UBAH PASSWORD BARU -->
-    <div id="boxResetPassword" style="display: none;">
-        <h3 id="judulResetPassword" style="margin: 0 0 5px 0; color: #7a1b1b; font-size: 20px; font-weight: 700;">Ubah Password Baru</h3>
-        <p style="margin: 0 0 18px 0; color: #666; font-size: 13px;">Buat password baru. Password akan langsung diperbarui ke database.</p>
+    <div id="boxResetPassword" class="modal-box" style="display: none;">
+        <header class="modal-head">
+            <div class="modal-icon icon-reset">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <div>
+                <h3 id="judulResetPassword">Ubah Password Baru</h3>
+                <p>Buat password baru. Password akan langsung diperbarui ke database.</p>
+            </div>
+        </header>
 
-        <form onsubmit="prosesResetPassword(event)" style="display: flex; flex-direction: column; gap: 14px;">
+        <form class="modal-form" onsubmit="prosesResetPassword(event)">
             <input type="hidden" id="hiddenUsernameReset">
             <input type="hidden" id="hiddenRoleReset">
-            
-            <div style="position: relative; width: 100%;">
-                <input type="password" name="newPassword" id="newPassword" placeholder="Password Baru (min. 4 karakter)" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                <span onclick="togglePassword('newPassword', 'iconNewPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                    <i id="iconNewPass" class="fa-solid fa-eye"></i>
-                </span>
+
+            <div class="modal-field">
+                <label for="newPassword">Password Baru</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" name="newPassword" id="newPassword" placeholder="Minimal 4 karakter" autocomplete="new-password" required>
+                    <button type="button" class="modal-eye" onclick="togglePassword('newPassword', 'iconNewPass')" aria-label="Tampilkan password baru">
+                        <i id="iconNewPass" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
 
-            <div style="position: relative; width: 100%;">
-                <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Konfirmasi Password Baru" required style="width: 100%; padding: 12px; padding-right: 40px; background: rgba(255,255,255,0.9); border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
-                <span onclick="togglePassword('confirmPassword', 'iconConfirmPass')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;">
-                    <i id="iconConfirmPass" class="fa-solid fa-eye"></i>
-                </span>
+            <div class="modal-field">
+                <label for="confirmPassword">Konfirmasi Password Baru</label>
+                <div class="modal-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Ulangi password baru" autocomplete="new-password" required>
+                    <button type="button" class="modal-eye" onclick="togglePassword('confirmPassword', 'iconConfirmPass')" aria-label="Tampilkan konfirmasi password">
+                        <i id="iconConfirmPass" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
-            
-            <button type="submit" id="btnSimpanPassBaru" style="padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 5px;">Simpan Password Baru</button>
-            
-            <div style="text-align: center; margin-top: 6px;">
-                <a href="javascript:void(0)" onclick="kembaliKeLoginRole()" style="font-size: 13px; color: #666; text-decoration: none;">Batal</a>
-            </div>
+
+            <button type="submit" id="btnSimpanPassBaru" class="modal-submit btn-reset">Simpan Password Baru</button>
+
+            <p class="modal-switch"><a href="javascript:void(0)" onclick="kembaliKeLoginRole()">Batal</a></p>
         </form>
     </div>
 </div>
