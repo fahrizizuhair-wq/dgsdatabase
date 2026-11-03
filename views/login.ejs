@@ -10,7 +10,7 @@
     
    <style>
 /* ============================================================
-   LOGIN — RIGHT FULL HEIGHT & MAXIMUM FILL (NO SCROLL)
+   LOGIN — RIGHT FORM & CENTERED COPYRIGHT ON LEFT BACKGROUND
    ============================================================ */
 :root {
   --maroon-900: #4d0e0e;
@@ -35,10 +35,10 @@ html, body {
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   margin: 0;
-  padding: 8px 32px 8px 8px; /* Padding sangat tipis agar kartu bisa mentok atas-bawah */
+  padding: 8px 24px 8px 8px; 
   display: flex;
   align-items: center; 
-  justify-content: flex-end; /* Posisi form di sebelah kanan */
+  justify-content: flex-end; /* Posisi form di sebelah kanan mentok */
   background-color: #f4f6f9;
   color: var(--ink);
   position: relative;
@@ -54,7 +54,7 @@ body::before {
   width: 100vw;
   height: 100vh;
   background: linear-gradient(to left, rgba(122, 27, 27, 0.9) 0%, rgba(122, 27, 27, 0.4) 50%, rgba(244, 246, 249, 0.88) 100%),
-              url('/images/BGLOGIN.png') no-repeat center center fixed;
+              url('/images/background.jpg') no-repeat center center fixed;
   background-size: cover;
   z-index: -1;
   pointer-events: none;
@@ -75,7 +75,7 @@ body::before {
 /* Layout di kanan */
 .auth-page {
   width: 100%;
-  max-width: 460px; /* Ukuran dilebarkan sedikit agar sangat proporsional */
+  max-width: 460px; 
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -89,7 +89,7 @@ body::before {
 .auth-card {
   width: 100%;
   position: relative;
-  padding: 22px 30px 20px; /* Padding lega karena footer sudah dipisah ke bawah layar */
+  padding: 22px 30px 20px; 
   border-radius: 24px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 100%);
   border: 1px solid rgba(255, 255, 255, 0.95);
@@ -197,32 +197,30 @@ body::before {
 .auth-foot { margin-top: 10px; text-align: center; font-size: 11.5px; color: var(--muted); }
 .auth-foot a { color: var(--maroon-700); font-weight: 800; text-decoration: none; }
 
-/* Copyright diposisikan melayang pas di tengah bawah layar secara absolut */
+/* Copyright diposisikan di tengah-tengah area background web sebelah kiri */
 .copyright {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
+  position: fixed;
+  left: calc((100vw - 460px) / 2); /* Mengambil titik tengah dari sisa ruang sebelah kiri */
+  bottom: 20px;
   transform: translateX(-50%);
   margin: 0; 
   text-align: center; 
   font-size: 11px; 
-  color: #5b4a4a; 
-  background: rgba(255, 255, 255, 0.85); 
-  border: 1px solid rgba(255, 255, 255, 0.95); 
-  padding: 5px 16px; 
+  color: #fff; /* Diubah jadi putih agar kontras dengan background gelap foto */
+  background: rgba(0, 0, 0, 0.4); /* Efek glassmorphism gelap */
+  border: 1px solid rgba(255, 255, 255, 0.2); 
+  padding: 6px 16px; 
   border-radius: 999px; 
   backdrop-filter: blur(8px);
   white-space: nowrap;
   z-index: 10;
 }
-.copyright strong { color: var(--maroon-700); }
+.copyright strong { color: var(--gold); } /* Warna emas agar elegan di atas foto */
 
 /* Responsive */
-@media (max-width: 520px) {
-  body { padding: 8px 12px; justify-content: center; }
-  .auth-card { padding: 16px 18px; }
-  .head-badge { display: none; }
-  .copyright { font-size: 10px; padding: 4px 12px; }
+@media (max-width: 768px) {
+  body { justify-content: center; padding: 8px 12px; }
+  .copyright { position: relative; left: auto; transform: none; bottom: auto; margin-top: 8px; color: #5b4a4a; background: rgba(255, 255, 255, 0.85); }
 }
 </style>
 </head>
