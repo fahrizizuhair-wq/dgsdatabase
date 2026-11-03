@@ -29,7 +29,8 @@
 
 html, body {
   height: 100vh;
-  overflow: hidden; /* Mencegah halaman agar tidak bisa di-scroll sama sekali */
+  overflow-x: hidden;
+  overflow-y: auto; 
 }
 
 body {
@@ -197,17 +198,17 @@ body::before {
 .auth-foot { margin-top: 10px; text-align: center; font-size: 11.5px; color: var(--muted); }
 .auth-foot a { color: var(--maroon-700); font-weight: 800; text-decoration: none; }
 
-/* Copyright diposisikan di tengah-tengah area background web sebelah kiri */
+
 .copyright {
-  position: fixed;
-  left: calc((100vw - 460px) / 2);
-  bottom: 20px;
+  position: absolute;
+  left: calc((100vw - 460px) / 2); 
+  bottom: 16px;
   transform: translateX(-50%);
   margin: 0; 
   text-align: center; 
   font-size: 11px; 
-  color: #fff; /* Diubah jadi putih agar kontras dengan background gelap foto */
-  background: rgba(240, 240, 240, 0.4); /* Efek glassmorphism gelap */
+  color: #fff; 
+  background: rgba(0, 0, 0, 0.4); 
   border: 1px solid rgba(255, 255, 255, 0.2); 
   padding: 6px 16px; 
   border-radius: 999px; 
@@ -217,7 +218,7 @@ body::before {
 }
 .copyright strong {
   color: rgb(190, 41, 41);
-} /* Warna emas agar elegan di atas foto */
+} 
 
 /* Responsive */
 @media (max-width: 768px) {
