@@ -220,19 +220,17 @@ body::before {
   justify-self: start;
   align-self: start;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 20px;
-  max-width: 100%;
-  padding: 9px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 14px 34px -22px rgba(35, 10, 10, 0.55);
+  
+  /* Padding tipis atas-bawah agar pas rapat dengan teks, renggang di samping */
+  padding: 5px 6px; 
+  
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12); /* Semi transparan gelap/terang */
+  border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   z-index: 2;
-  /* Tanpa margin-top tambahan agar berada di titik paling atas padding */
 }
 
 .nav-brand {
@@ -277,7 +275,7 @@ body::before {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 45px;
+  gap: 70px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -286,19 +284,26 @@ body::before {
 .nav-links a {
   display: inline-flex;
   align-items: center;
-  padding: 7px 11px;
-  border-radius: 9px;
+  padding: 6px 14px; /* Padding rapat atas-bawah, lebar ke samping */
+  border-radius: 999px;
   font-size: 11.5px;
-  font-weight: 700;
-  color: #5b4a4a;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85); /* Sesuaikan warna teks jika background gelap */
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .nav-links a:hover {
-  background: #f7eeee;
-  color: var(--maroon-700);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-links a.active {
+  background: rgba(255, 255, 255, 2); /* Background pill kecil di dalam navbar */
+  color: #1e293b;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .copyright {
@@ -374,9 +379,9 @@ body::before {
   <div class="login-shell">
     <nav class="login-nav" aria-label="Navigasi utama">
       <ul class="nav-links">
-        <li><a href="/https://diangirisaputra.com/">Home</a></li>
-        <li><a href="/https://diangirisaputra.com/">About Us</a></li>
-        <li><a href="/https://diangirisaputra.com/">Contact Us</a></li>
+        <li><a href="/https://diangirisaputra.com/" class="active">Home</a></li>
+        <li><a href="/https://diangirisaputra.com/" class="active">About Us</a></li>
+        <li><a href="/https://diangirisaputra.com/" class="active">Contact Us</a></li>
       </ul>
     </nav>
 
