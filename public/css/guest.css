@@ -43,8 +43,9 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
+  content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background:
-    linear-gradient(135deg, rgba(88, 14, 14, 0.92) 0%, rgba(122, 27, 27, 0.45) 34%, rgba(244, 246, 249, 0.96) 78%),
+    linear-gradient(to bottom, rgba(122, 27, 27, 0.88) 0%, rgba(122, 27, 27, 0.2) 35%, rgba(244, 246, 249, 0.95) 100%),
     url('/images/background.jpg') no-repeat center top fixed;
   background-size: cover;
   z-index: -1;
