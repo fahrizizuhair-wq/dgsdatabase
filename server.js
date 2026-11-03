@@ -483,13 +483,24 @@ app.post('/register-admin', async (req, res) => {
   }
 });
 
-// 4. REGISTER USER (AJAX / JSON)
+
+  // 4. REGISTER USER (AJAX / JSON) DENGAN KODE VERIFIKASI
 app.post('/register-user', async (req, res) => {
   try {
-    const { namaLengkap, username, password, confirmPassword } = req.body;
+    const { namaLengkap, username, password, confirmPassword, kodeRahasia } = req.body;
+    
+    // Tentukan kode verifikasi yang sah (bisa disesuaikan atau ditaruh di environment variable .env)
+    const KODE_VERIFIKASI_VALID = "DGS2026";
+
     if (!username || !username.trim() || !password) {
       return res.status(400).json({ success: false, message: 'Username dan password user wajib diisi!' });
     }
+
+    // Cek apakah kode verifikasi diisi dan sesuai
+    if (!kodeRahasia || kodeRahasia.trim() !== KODE_VERIFIKASI_VALID) {
+      return res.status(400).json({ success: false, message: 'Kode verifikasi pendaftaran salah! Silakan periksa kembali.' });
+    }
+
     const trimmedUsername = username.trim();
     if (password !== confirmPassword) {
       return res.status(400).json({ success: false, message: 'Konfirmasi password tidak cocok!' });
