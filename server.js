@@ -318,6 +318,18 @@ const isUserAuthenticated = (req, res, next) => {
 const isAuthenticated = isAdminAuthenticated;
 
 // ============================================================
+//  HELPER: Nama penginput otomatis dari sesi login
+// ============================================================
+const getNamaPenginput = (req) => {
+  if (req.session) {
+    if (req.session.isAdmin && req.session.adminUser) return req.session.adminUser;
+    if (req.session.user) return req.session.user.namaLengkap || req.session.user.username || 'User';
+    if (req.session.adminUser) return req.session.adminUser;
+  }
+  return 'Guest';
+};
+
+// ============================================================
 //  RUTE: PORTAL / LOGIN
 // ============================================================
 
@@ -867,6 +879,7 @@ app.post('/admin/vendor/add', upload.array('foto', 10), async (req, res) => {
       wilayah:    wilayah    || '',
       kategori, kontak, rating, status,
       deskripsi:  deskripsi  || '',
+      diinputOleh: getNamaPenginput(req),
       foto:       fotoFiles
     });
 
@@ -970,6 +983,7 @@ app.post('/harga-dasar/add', uploadMultiple, async (req, res) => {
       keterangan,
       status:  status  || 'Pending',
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
+      diinputOleh: getNamaPenginput(req),
       gambar:  fotoBarang
     });
 
@@ -1049,7 +1063,8 @@ app.post('/stok-masuk/add', upload.array('foto', 10), async (req, res) => {
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
       status:  status  || 'Selesai',
       keterangan,
-      foto: req.files ? req.files.map(f => f.filename) : []
+      foto: req.files ? req.files.map(f => f.filename) : [],
+      diinputOleh: getNamaPenginput(req)
     });
 
     await newItem.save();
@@ -1149,7 +1164,8 @@ app.post('/stok-keluar/add', upload.array('foto', 10), async (req, res) => {
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
       status:  status  || 'Selesai',
       keterangan,
-      foto: req.files ? req.files.map(f => f.filename) : []
+      foto: req.files ? req.files.map(f => f.filename) : [],
+      diinputOleh: getNamaPenginput(req)
     });
 
     await newItem.save();
@@ -1239,7 +1255,8 @@ app.post('/stok-opname/add', async (req, res) => {
       namaBarang, kategori,
       stokAwal:   Number(stokAwal)   || 0,
       stokMasuk:  Number(stokMasuk)  || 0,
-      stokKeluar: Number(stokKeluar) || 0
+      stokKeluar: Number(stokKeluar) || 0,
+      diinputOleh: getNamaPenginput(req)
     });
 
     await newItem.save();
@@ -1315,7 +1332,8 @@ app.post('/laporan/add', upload.single('fileLaporan'), async (req, res) => {
       jenis, 
       tujuan,
       filePath,
-      tanggal: new Date()
+      tanggal: new Date(),
+      diinputOleh: getNamaPenginput(req)
     });
 
     await newLaporan.save();
@@ -1444,7 +1462,7 @@ app.get('/harga-dasar-user', async (req, res) => {
 
 app.post('/harga-dasar-user/add', async (req, res) => {
   try {
-    const newItem = new HargaDasar(req.body);
+    const newItem = new HargaDasar({ ...req.body, diinputOleh: getNamaPenginput(req) });
     await newItem.save();
     res.redirect('/harga-dasar-user');
   } catch (err) {
@@ -1486,7 +1504,8 @@ app.post('/stok-masuk-user/add', upload.array('foto', 10), async (req, res) => {
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
       status:  status  || 'Selesai',
       keterangan,
-      foto: req.files ? req.files.map(f => f.filename) : []
+      foto: req.files ? req.files.map(f => f.filename) : [],
+      diinputOleh: getNamaPenginput(req)
     });
 
     await newItem.save();
@@ -1530,7 +1549,8 @@ app.post('/stok-keluar-user/add', upload.array('foto', 10), async (req, res) => 
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
       status:  status  || 'Selesai',
       keterangan,
-      foto: req.files ? req.files.map(f => f.filename) : []
+      foto: req.files ? req.files.map(f => f.filename) : [],
+      diinputOleh: getNamaPenginput(req)
     });
 
     await newItem.save();
@@ -1558,7 +1578,7 @@ app.get('/stok-opname-user', async (req, res) => {
 
 app.post('/stok-opname-user/add', async (req, res) => {
   try {
-    const newItem = new StokOpname(req.body);
+    const newItem = new StokOpname({ ...req.body, diinputOleh: getNamaPenginput(req) });
     await newItem.save();
     res.redirect('/stok-opname-user');
   } catch (err) {
@@ -1599,7 +1619,8 @@ app.post('/laporan-user/add', upload.single('fileLaporan'), async (req, res) => 
       jenis, 
       tujuan, 
       filePath,
-      tanggal: new Date()
+      tanggal: new Date(),
+      diinputOleh: getNamaPenginput(req)
     });
 
     await newLaporan.save();
@@ -1815,7 +1836,8 @@ app.post('/data-bahan-kain/add', uploadMultiple, async (req, res) => {
       rating:          rating          ? parseFloat(rating) : 5,
       deskripsi:       deskripsi       || 'Belum ada deskripsi untuk vendor ini.',
       foto:            fotoPaths,
-      status:          'Aktif'
+      status:          'Aktif',
+      diinputOleh:     getNamaPenginput(req)
     });
 
     await vendorBaru.save();
@@ -1936,7 +1958,8 @@ app.post('/data-kain-admin/add', uploadMultiple, async (req, res) => {
       rating:         rating         ? parseFloat(rating) : 5,
       deskripsi:      deskripsi      || 'Belum ada deskripsi untuk vendor ini.',
       foto:           fotoPaths,
-      status:         status         || 'Aktif'
+      status:         status         || 'Aktif',
+      diinputOleh:    getNamaPenginput(req)
     });
 
     await vendorBaru.save();

@@ -6,7 +6,8 @@ const laporanSchema = new mongoose.Schema({
   jenis: { type: String, default: 'Umum' },
   tujuan: { type: String, default: '' }, // <-- Tambahkan baris ini di sini!
   filePath: { type: String, default: '' },
-  tanggal: { type: Date, default: Date.now }
+  tanggal: { type: Date, default: Date.now },
+  diinputOleh: { type: String, default: '' }
 }, { timestamps: true, collection: 'laporan' });
 
 module.exports = mongoose.model('Laporan', laporanSchema);

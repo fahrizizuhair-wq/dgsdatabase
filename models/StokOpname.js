@@ -5,7 +5,8 @@ const stokOpnameSchema = new mongoose.Schema({
   kategori: { type: String, required: true },
   stokAwal: { type: Number, required: true, default: 0 },
   stokMasuk: { type: Number, required: true, default: 0 },
-  stokKeluar: { type: Number, required: true, default: 0 }
+  stokKeluar: { type: Number, required: true, default: 0 },
+  diinputOleh: { type: String, default: '' }
 }, { 
   timestamps: true,
   collection: 'stok_opname'

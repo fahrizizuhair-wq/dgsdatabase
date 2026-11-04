@@ -10,7 +10,8 @@ const DataBahanKainSchema = new mongoose.Schema({
     rating: { type: Number, default: 5 },
     deskripsi: { type: String, default: '-' },
     foto: [{ type: String }], // Menyimpan array path file foto
-    status: { type: String, default: 'Aktif' }
+    status: { type: String, default: 'Aktif' },
+    diinputOleh: { type: String, default: '' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('DataBahanKain', DataBahanKainSchema);

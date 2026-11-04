@@ -87,13 +87,14 @@
           <th>Tujuan</th>
           <th>Keterangan</th>
           <th>Tanggal</th>
+          <th>Diinput Oleh</th>
           <th class="col-action">Berkas</th>
         </tr>
       </thead>
       <tbody>
         <% if (!listLaporan || listLaporan.length === 0) { %>
           <tr>
-            <td colspan="7">
+            <td colspan="8">
               <div class="empty-state">Belum ada laporan yang ditambahkan.</div>
             </td>
           </tr>
@@ -106,6 +107,7 @@
               <td><%= lap.tujuan || lap.kepada || '-' %></td>
               <td><%= lap.keterangan || '-' %></td>
               <td><%= lap.tanggal ? new Date(lap.tanggal).toLocaleDateString('id-ID') : '-' %></td>
+              <td><%= lap.diinputOleh || '-' %></td>
               <td class="col-action">
                 <% if (lap.filePath) { %>
                   <a class="btn-view" href="<%= lap.filePath %>" target="_blank" rel="noopener">

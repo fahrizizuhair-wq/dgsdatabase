@@ -136,7 +136,7 @@
       <div class="detail-group full-width">
         <div class="detail-label">Status</div>
         <div class="detail-value">
-          <span class="badge <%= item.status === 'Selesai' || item.status === 'Diterima' || item.status === 'Terkirim' ? 'badge-active' : (item.status === 'Proses' ? 'badge-review' : 'badge-inactive') %>">
+          <span class="badge <%= ['Selesai','Diterima','Terkirim'].includes((item.status || '').trim()) ? 'badge-active' : (['Proses','Pending'].includes((item.status || '').trim()) ? 'badge-review' : 'badge-inactive') %>">
             <%= item.status || '-' %>
           </span>
         </div>
@@ -145,6 +145,11 @@
       <div class="detail-group full-width">
         <div class="detail-label">Keterangan</div>
         <div class="detail-value" style="white-space: pre-line; background: #fafafa; padding: 12px; border-radius: 6px; border: 1px solid #eee;"><%= item.keterangan || 'Tidak ada keterangan.' %></div>
+      </div>
+
+      <div class="detail-group full-width">
+        <div class="detail-label">Diinput Oleh</div>
+        <div class="detail-value"><%= item.diinputOleh || '-' %></div>
       </div>
 
       <div class="detail-group full-width">

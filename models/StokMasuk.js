@@ -9,7 +9,8 @@ const stokMasukSchema = new mongoose.Schema({
   tanggal: { type: Date, required: true }, // <-- Diubah jadi wajib diisi dari input manual
   status: { type: String, default: 'Selesai' },
   keterangan: { type: String, default: '' },
-  foto: { type: [String], default: [] }
+  foto: { type: [String], default: [] },
+  diinputOleh: { type: String, default: '' }
 }, { timestamps: true, collection: 'stok_masuk' });
 
 module.exports = mongoose.model('StokMasuk', stokMasukSchema);

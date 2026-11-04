@@ -131,6 +131,11 @@
       </div>
 
       <div class="detail-group full-width">
+        <div class="detail-label">Diinput Oleh</div>
+        <div class="detail-value"><%= barang.diinputOleh || '-' %></div>
+      </div>
+
+      <div class="detail-group full-width">
         <div class="detail-label">Status</div>
         <div class="detail-value">
           <span class="badge <%= barang.status === 'Ready' ? 'badge-ready' : (barang.status === 'Pending' ? 'badge-pending' : 'badge-tidak') %>">

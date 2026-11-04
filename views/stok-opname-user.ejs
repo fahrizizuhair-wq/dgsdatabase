@@ -558,12 +558,13 @@
               <th>Stok Masuk</th>
               <th>Stok Keluar</th>
               <th>Stok Akhir</th>
+              <th>Diinput Oleh</th>
             </tr>
           </thead>
           <tbody>
             <% if (!listStokOpname || listStokOpname.length === 0) { %>
               <tr>
-                <td colspan="6" style="text-align: center; padding: 20px; color: #888;">Belum ada data stok opname.</td>
+                <td colspan="7" style="text-align: center; padding: 20px; color: #888;">Belum ada data stok opname.</td>
               </tr>
             <% } else { %>
               <% listStokOpname.forEach(function(item) { %>
@@ -581,6 +582,7 @@
                   <td class="text-success">+<%= stokMasuk %></td>
                   <td class="text-danger">-<%= stokKeluar %></td>
                   <td class="<%= kelasWarna %>"><%= totalAkhir %></td>
+                  <td><%= item.diinputOleh || '-' %></td>
                 </tr>
               <% }); %>
             <% } %>

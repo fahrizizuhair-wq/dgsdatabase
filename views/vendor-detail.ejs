@@ -173,6 +173,11 @@
       </div>
 
       <div class="detail-group full-width">
+        <div class="detail-label">Diinput Oleh</div>
+        <div class="detail-value"><%= vendor.diinputOleh || '-' %></div>
+      </div>
+
+      <div class="detail-group full-width">
         <div class="detail-label">Status Vendor</div>
         <div class="detail-value">
           <span class="badge <%= vendor.status === 'Aktif' ? 'badge-active' : (vendor.status === 'Review' ? 'badge-review' : 'badge-inactive') %>">

@@ -9,6 +9,7 @@ const VendorSchema = new mongoose.Schema({
   rating: Number,
   status: String,
   deskripsi: String,
+  diinputOleh: { type: String, default: '' },
   foto: mongoose.Schema.Types.Mixed
 }, { 
   timestamps: true,

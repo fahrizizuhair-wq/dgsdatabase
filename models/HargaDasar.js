@@ -11,6 +11,7 @@
     keterangan: { type: String, default: '' },
     status: { type: String, default: 'Pending' },
     tanggal: { type: Date, default: Date.now },
+    diinputOleh: { type: String, default: '' },
     gambar: [String] // <-- TAMBAHKAN BARIS INI (Array untuk menyimpan banyak nama file foto)
   }, { timestamps: true, collection: 'harga_dasar' });
 
