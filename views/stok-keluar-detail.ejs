@@ -24,16 +24,12 @@
     .slider-container { position: relative; max-width: 450px; margin: 0 auto 12px auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #000; }
     .slide { display: none; text-align: center; }
     .slide.active { display: block; }
-    .slide img { width: 100%; max-height: 320px; object-fit: contain; display: block; margin: 0 auto; }
+    .slide img { width: 100%; max-height: 320px; object-fit: contain; display: block; margin: 0 auto; cursor: pointer; }
     .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.6); color: white; border: none; width: 40px; height: 40px; cursor: pointer; font-size: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; z-index: 10; }
     .slider-btn:hover { background: rgba(0, 0, 0, 0.9); }
     .prev-btn { left: 12px; }
     .next-btn { right: 12px; }
     .slider-counter { text-align: center; font-size: 12px; font-weight: 600; color: #7a6a6a; margin-bottom: 22px; }
-    .foto-strip { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
-    .foto-strip button { width: 62px; height: 62px; padding: 0; border: 2px solid transparent; border-radius: 8px; overflow: hidden; cursor: pointer; background: #000; }
-    .foto-strip button.active { border-color: #7a1b1b; }
-    .foto-strip img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .foto-empty { text-align: center; padding: 28px; margin-bottom: 24px; border: 1px dashed #d9c7c7; border-radius: 10px; background: #faf7f7; color: #8a7a7a; font-size: 13px; }
 
     /* Layout 2 Kolom */
@@ -77,7 +73,9 @@
       <div class="slider-container">
         <% fotoList.forEach(function(fotoName, index) { %>
           <div class="slide <%= index === 0 ? 'active' : '' %>">
-            <img src="<%= fotoUrl(fotoName) %>" alt="Foto stok keluar <%= item.namaBarang %> <%= index + 1 %>">
+            <a href="<%= fotoUrl(fotoName) %>" target="_blank" title="Klik untuk melihat foto ukuran asli">
+              <img src="<%= fotoUrl(fotoName) %>" alt="Foto stok keluar <%= item.namaBarang %> <%= index + 1 %>">
+            </a>
           </div>
         <% }); %>
 
@@ -87,17 +85,9 @@
         <% } %>
       </div>
 
-      <div class="slider-counter"><span id="slideNow">1</span> / <%= fotoCount %> foto</div>
-
-      <% if (fotoCount > 1) { %>
-        <div class="foto-strip">
-          <% fotoList.forEach(function(fotoName, index) { %>
-            <button type="button" class="<%= index === 0 ? 'active' : '' %>" onclick="showSlide(<%= index %>)" aria-label="Lihat foto <%= index + 1 %>">
-              <img src="<%= fotoUrl(fotoName) %>" alt="Thumbnail <%= index + 1 %>">
-            </button>
-          <% }); %>
-        </div>
-      <% } %>
+      <div class="slider-counter">
+        <span id="slideNow">1</span> / <%= fotoCount %> foto <span style="font-weight: normal; color: #999;">(Klik foto untuk ukuran asli)</span>
+      </div>
     <% } else { %>
       <div class="foto-empty">Belum ada foto dokumentasi untuk transaksi ini.</div>
     <% } %>
@@ -162,7 +152,6 @@
   <script>
     let slideIndex = 0;
     const slides = document.querySelectorAll('.slide');
-    const thumbs = document.querySelectorAll('.foto-strip button');
     const slideNow = document.getElementById('slideNow');
 
     function showSlide(n) {
@@ -173,7 +162,6 @@
 
       slides.forEach(slide => slide.classList.remove('active'));
       slides[slideIndex].classList.add('active');
-      thumbs.forEach((thumb, i) => thumb.classList.toggle('active', i === slideIndex));
       if (slideNow) slideNow.textContent = slideIndex + 1;
     }
 
@@ -183,4 +171,3 @@
   </script>
 </body>
 </html>
-
