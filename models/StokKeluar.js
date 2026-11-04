@@ -6,7 +6,7 @@ const stokKeluarSchema = new mongoose.Schema({
   namaMerk: { type: String, required: true },
   jumlah: { type: Number, required: true },
   tujuan: { type: String, required: true },
-  tanggal: { type: Date, default: Date.now },
+  tanggal: { type: Date, required: true },
   status: { type: String, default: 'Selesai' },
   keterangan: { type: String, default: '' }
 }, { timestamps: true, collection: 'stok_keluar' });

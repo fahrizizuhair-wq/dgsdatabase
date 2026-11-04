@@ -6,7 +6,7 @@ const stokMasukSchema = new mongoose.Schema({
   namaMerk: { type: String, required: true },
   jumlah: { type: Number, required: true },
   supplier: { type: String, required: true },
-  tanggal: { type: Date, default: Date.now },
+  tanggal: { type: Date, required: true }, // <-- Diubah jadi wajib diisi dari input manual
   status: { type: String, default: 'Selesai' },
   keterangan: { type: String, default: '' }
 }, { timestamps: true, collection: 'stok_masuk' });
