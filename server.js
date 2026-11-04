@@ -1036,7 +1036,8 @@ app.post('/harga-dasar/delete/:id', async (req, res) => {
 // ============================================================
 app.get('/stok-masuk', isAuthenticated, async (req, res) => {
   try {
-    const listStokMasuk  = await StokMasuk.find().sort({ tanggal: -1 });
+    // Urutkan berdasarkan data yang paling baru diinput ke database
+    const listStokMasuk  = await StokMasuk.find().sort({ createdAt: -1 });
     const totalTransaksi = listStokMasuk.length;
     const totalQtyMasuk  = listStokMasuk.reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
     res.render('stok-masuk', { listStokMasuk, totalTransaksi, totalQtyMasuk });
@@ -1476,8 +1477,8 @@ app.post('/harga-dasar-user/add', async (req, res) => {
 // ============================================================
 app.get('/stok-masuk-user', async (req, res) => {
   try {
-    // Ubah sort-nya agar sama persis dengan admin
-    const listStokMasuk  = await StokMasuk.find().sort({ tanggal: -1 });
+    // Urutkan juga untuk halaman user agar sama persis
+    const listStokMasuk  = await StokMasuk.find().sort({ createdAt: -1 });
     const totalTransaksi = listStokMasuk.length;
     const totalQtyMasuk  = listStokMasuk.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
     
