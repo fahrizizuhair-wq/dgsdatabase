@@ -1046,34 +1046,34 @@ app.get('/stok-masuk', isAuthenticated, async (req, res) => {
   }
 });
 
-app.post('/stok-masuk/add', upload.array('foto', 10), async (req, res) => {
-  try {
-    await syncReqFilesToGridFS(req);
-    const { idTransaksi, namaBarang, namaMerk, jumlah, supplier, tanggal, status, keterangan } = req.body;
+  app.post('/stok-masuk/add', upload.array('foto', 10), async (req, res) => {
+    try {
+      await syncReqFilesToGridFS(req);
+      const { idTransaksi, namaBarang, namaMerk, jumlah, supplier, tanggal, status, keterangan } = req.body;
 
-    const existing = await StokMasuk.findOne({ idTransaksi });
-    if (existing) {
-      return res.status(400).send(`<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`);
+      const existing = await StokMasuk.findOne({ idTransaksi });
+      if (existing) {
+        return res.status(400).send(`<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`);
+      }
+
+      const newItem = new StokMasuk({
+        idTransaksi, namaBarang, namaMerk,
+        jumlah:  Number(jumlah) || 0,
+        supplier,
+        tanggal: tanggal ? new Date(tanggal) : Date.now(),
+        status:  status  || 'Selesai',
+        keterangan,
+        foto: req.files ? req.files.map(f => f.filename) : [],
+        diinputOleh: getNamaPenginput(req)
+      });
+
+      await newItem.save();
+      res.redirect('/stok-masuk');
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Gagal menambah data stok masuk.');
     }
-
-    const newItem = new StokMasuk({
-      idTransaksi, namaBarang, namaMerk,
-      jumlah:  Number(jumlah) || 0,
-      supplier,
-      tanggal: tanggal ? new Date(tanggal) : Date.now(),
-      status:  status  || 'Selesai',
-      keterangan,
-      foto: req.files ? req.files.map(f => f.filename) : [],
-      diinputOleh: getNamaPenginput(req)
-    });
-
-    await newItem.save();
-    res.redirect('/stok-masuk');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Gagal menambah data stok masuk.');
-  }
-});
+  });
 
 app.get('/stok-masuk/detail/:id', isUserAuthenticated, async (req, res) => {
   try {
@@ -1471,12 +1471,13 @@ app.post('/harga-dasar-user/add', async (req, res) => {
   }
 });
 
-  // ============================================================
-  //  RUTE: STOK MASUK – USER
-  // ============================================================
-  app.get('/stok-masuk-user', async (req, res) => {
+// ============================================================
+//  RUTE: STOK MASUK – USER
+// ============================================================
+app.get('/stok-masuk-user', async (req, res) => {
   try {
-    const listStokMasuk  = await StokMasuk.find().sort({ _id: -1 });
+    // Ubah sort-nya agar sama persis dengan admin
+    const listStokMasuk  = await StokMasuk.find().sort({ tanggal: -1 });
     const totalTransaksi = listStokMasuk.length;
     const totalQtyMasuk  = listStokMasuk.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
     
