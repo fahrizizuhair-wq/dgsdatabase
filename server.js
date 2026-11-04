@@ -1032,8 +1032,9 @@ app.get('/stok-masuk', isAuthenticated, async (req, res) => {
   }
 });
 
-app.post('/stok-masuk/add', async (req, res) => {
+app.post('/stok-masuk/add', upload.array('foto', 10), async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     const { idTransaksi, namaBarang, namaMerk, jumlah, supplier, tanggal, status, keterangan } = req.body;
 
     const existing = await StokMasuk.findOne({ idTransaksi });
@@ -1047,7 +1048,8 @@ app.post('/stok-masuk/add', async (req, res) => {
       supplier,
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
       status:  status  || 'Selesai',
-      keterangan
+      keterangan,
+      foto: req.files ? req.files.map(f => f.filename) : []
     });
 
     await newItem.save();
@@ -1058,9 +1060,35 @@ app.post('/stok-masuk/add', async (req, res) => {
   }
 });
 
-app.post('/stok-masuk/edit/:id', async (req, res) => {
+app.get('/stok-masuk/detail/:id', isUserAuthenticated, async (req, res) => {
   try {
+    const item = await StokMasuk.findById(req.params.id);
+    if (!item) {
+      return res.status(404).send('Data stok masuk tidak ditemukan.');
+    }
+    const backUrl = req.query.back || req.headers.referer || '/stok-masuk';
+    res.render('stok-masuk-detail', { item, backUrl });
+  } catch (err) {
+    console.error('Gagal memuat detail stok masuk:', err);
+    res.status(500).send('Gagal memuat detail stok masuk: ' + err.message);
+  }
+});
+
+app.post('/stok-masuk/edit/:id', upload.array('foto', 10), async (req, res) => {
+  try {
+    await syncReqFilesToGridFS(req);
     const { idTransaksi, namaBarang, namaMerk, jumlah, supplier, tanggal, status, keterangan } = req.body;
+
+    const existing = await StokMasuk.findById(req.params.id);
+    if (!existing) {
+      return res.status(404).send('Data stok masuk tidak ditemukan.');
+    }
+
+    const hapusFoto = [].concat(req.body.hapusFoto || []);
+    let foto = (existing.foto || []).filter(f => !hapusFoto.includes(f));
+    if (req.files && req.files.length > 0) {
+      foto = foto.concat(req.files.map(f => f.filename));
+    }
 
     await StokMasuk.findByIdAndUpdate(req.params.id, {
       idTransaksi, namaBarang, namaMerk,
@@ -1068,7 +1096,8 @@ app.post('/stok-masuk/edit/:id', async (req, res) => {
       supplier,
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
       status:  status  || 'Selesai',
-      keterangan
+      keterangan,
+      foto
     });
 
     res.redirect('/stok-masuk');
@@ -1103,8 +1132,9 @@ app.get('/stok-keluar', isAuthenticated, async (req, res) => {
   }
 });
 
-app.post('/stok-keluar/add', async (req, res) => {
+app.post('/stok-keluar/add', upload.array('foto', 10), async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
     const { idTransaksi, namaBarang, namaMerk, jumlah, tujuan, tanggal, status, keterangan } = req.body;
 
     const existing = await StokKeluar.findOne({ idTransaksi });
@@ -1118,7 +1148,8 @@ app.post('/stok-keluar/add', async (req, res) => {
       tujuan,
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
       status:  status  || 'Selesai',
-      keterangan
+      keterangan,
+      foto: req.files ? req.files.map(f => f.filename) : []
     });
 
     await newItem.save();
@@ -1129,9 +1160,35 @@ app.post('/stok-keluar/add', async (req, res) => {
   }
 });
 
-app.post('/stok-keluar/edit/:id', async (req, res) => {
+app.get('/stok-keluar/detail/:id', isUserAuthenticated, async (req, res) => {
   try {
+    const item = await StokKeluar.findById(req.params.id);
+    if (!item) {
+      return res.status(404).send('Data stok keluar tidak ditemukan.');
+    }
+    const backUrl = req.query.back || req.headers.referer || '/stok-keluar';
+    res.render('stok-keluar-detail', { item, backUrl });
+  } catch (err) {
+    console.error('Gagal memuat detail stok keluar:', err);
+    res.status(500).send('Gagal memuat detail stok keluar: ' + err.message);
+  }
+});
+
+app.post('/stok-keluar/edit/:id', upload.array('foto', 10), async (req, res) => {
+  try {
+    await syncReqFilesToGridFS(req);
     const { idTransaksi, namaBarang, namaMerk, jumlah, tujuan, tanggal, status, keterangan } = req.body;
+
+    const existing = await StokKeluar.findById(req.params.id);
+    if (!existing) {
+      return res.status(404).send('Data stok keluar tidak ditemukan.');
+    }
+
+    const hapusFoto = [].concat(req.body.hapusFoto || []);
+    let foto = (existing.foto || []).filter(f => !hapusFoto.includes(f));
+    if (req.files && req.files.length > 0) {
+      foto = foto.concat(req.files.map(f => f.filename));
+    }
 
     await StokKeluar.findByIdAndUpdate(req.params.id, {
       idTransaksi, namaBarang, namaMerk,
@@ -1139,7 +1196,8 @@ app.post('/stok-keluar/edit/:id', async (req, res) => {
       tujuan,
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
       status:  status  || 'Selesai',
-      keterangan
+      keterangan,
+      foto
     });
 
     res.redirect('/stok-keluar');
@@ -1411,9 +1469,26 @@ app.post('/harga-dasar-user/add', async (req, res) => {
   }
 });
 
-app.post('/stok-masuk-user/add', async (req, res) => {
+app.post('/stok-masuk-user/add', upload.array('foto', 10), async (req, res) => {
   try {
-    const newItem = new StokMasuk(req.body);
+    await syncReqFilesToGridFS(req);
+    const { idTransaksi, namaBarang, namaMerk, jumlah, supplier, tanggal, status, keterangan } = req.body;
+
+    const existing = await StokMasuk.findOne({ idTransaksi });
+    if (existing) {
+      return res.status(400).send(`<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`);
+    }
+
+    const newItem = new StokMasuk({
+      idTransaksi, namaBarang, namaMerk,
+      jumlah:  Number(jumlah) || 0,
+      supplier,
+      tanggal: tanggal ? new Date(tanggal) : Date.now(),
+      status:  status  || 'Selesai',
+      keterangan,
+      foto: req.files ? req.files.map(f => f.filename) : []
+    });
+
     await newItem.save();
     res.redirect('/stok-masuk-user');
   } catch (err) {
@@ -1438,16 +1513,33 @@ app.post('/stok-masuk-user/add', async (req, res) => {
   }
 });
 
-app.post('/stok-keluar-user/add', async (req, res) => {
+app.post('/stok-keluar-user/add', upload.array('foto', 10), async (req, res) => {
   try {
-    const newItem = new StokKeluar(req.body);
+    await syncReqFilesToGridFS(req);
+    const { idTransaksi, namaBarang, namaMerk, jumlah, tujuan, tanggal, status, keterangan } = req.body;
+
+    const existing = await StokKeluar.findOne({ idTransaksi });
+    if (existing) {
+      return res.status(400).send(`<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`);
+    }
+
+    const newItem = new StokKeluar({
+      idTransaksi, namaBarang, namaMerk,
+      jumlah:  Number(jumlah) || 0,
+      tujuan,
+      tanggal: tanggal ? new Date(tanggal) : Date.now(),
+      status:  status  || 'Selesai',
+      keterangan,
+      foto: req.files ? req.files.map(f => f.filename) : []
+    });
+
     await newItem.save();
     res.redirect('/stok-keluar-user');
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menambah stok keluar: ' + err.message);
   }
-}); 
+});
 
 // ============================================================
 //  3. RUTE: STOK OPNAME – USER

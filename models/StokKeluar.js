@@ -8,7 +8,8 @@ const stokKeluarSchema = new mongoose.Schema({
   tujuan: { type: String, required: true },
   tanggal: { type: Date, required: true },
   status: { type: String, default: 'Selesai' },
-  keterangan: { type: String, default: '' }
+  keterangan: { type: String, default: '' },
+  foto: { type: [String], default: [] }
 }, { timestamps: true, collection: 'stok_keluar' });
 
 module.exports = mongoose.model('StokKeluar', stokKeluarSchema);

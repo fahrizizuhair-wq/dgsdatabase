@@ -321,6 +321,16 @@
     .badge-review { background-color: #fef7e0; color: #b06000; }
     .badge-inactive { background-color: #fce8e6; color: #c5221f; }
 
+    .btn-detail { display: inline-block; background-color: #7a1b1b; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .btn-detail:hover { background-color: #5c1313; }
+
+    /* FOTO / DOKUMENTASI */
+    .foto-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .foto-item { position: relative; width: 76px; height: 76px; border-radius: 8px; overflow: hidden; border: 1px solid #e3d7d7; background: #faf7f7; flex: 0 0 auto; }
+    .foto-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .file-input { width: 100%; padding: 10px; border: 1.5px dashed #c9a3a3; border-radius: 8px; background: #fffdfd; font-size: 13px; font-family: inherit; }
+    .foto-hint { font-size: 11.5px; color: #8a7a7a; margin-top: 5px; line-height: 1.4; }
+
     /* MODAL */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
     .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
@@ -561,12 +571,13 @@
               <th>Tujuan / Unit</th>
               <th>Tanggal Terkirim</th>
               <th>Status</th>
+              <th style="text-align: center;">Aksi</th>
             </tr>
           </thead>
           <tbody>
             <% if (!listStokKeluar || listStokKeluar.length === 0) { %>
               <tr>
-                <td colspan="7" style="text-align: center; padding: 20px; color: #888;">Belum ada data stok keluar.</td>
+                <td colspan="8" style="text-align: center; padding: 20px; color: #888;">Belum ada data stok keluar.</td>
               </tr>
             <% } else { %>
               <% listStokKeluar.forEach((item) => { %>
@@ -578,9 +589,12 @@
                   <td><%= item.tujuan %></td>
                   <td><%= item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-' %></td>
                   <td>
-                    <span class="badge <%= item.status === 'Selesai' ? 'badge-active' : (item.status === 'Proses' ? 'badge-review' : 'badge-inactive') %>">
+                    <span class="badge <%= item.status === 'Selesai' || item.status === 'Terkirim' ? 'badge-active' : (item.status === 'Proses' ? 'badge-review' : 'badge-inactive') %>">
                       <%= item.status %>
                     </span>
+                  </td>
+                  <td style="text-align: center; white-space: nowrap;">
+                    <a href="/stok-keluar/detail/<%= item._id %>?back=/stok-keluar-user" class="btn-detail">Detail</a>
                   </td>
                 </tr>
               <% }); %>
@@ -595,12 +609,16 @@
   <div class="modal" id="addModal">
     <div class="modal-content">
       <h3 style="margin-bottom: 15px; color: #7a1b1b;">Tambah Stok Keluar</h3>
-      <form action="/stok-keluar-user/add" method="POST">
+      <form action="/stok-keluar-user/add" method="POST" enctype="multipart/form-data">
         <div class="form-group"><label>ID Barang</label><input type="text" name="idTransaksi" placeholder="ID Barang" required></div>
         <div class="form-group"><label>Nama Barang</label><input type="text" name="namaBarang" placeholder="Nama Barang" required></div>
         <div class="form-group"><label>Merk Barang</label><input type="text" name="namaMerk" placeholder="Merk Barang" required></div>
         <div class="form-group"><label>Jumlah Qty</label><input type="number" name="jumlah" min="1" value="1" required></div>
         <div class="form-group"><label>Tujuan / Unit</label><input type="text" name="tujuan" placeholder="Tujuan Pengeluaran" required></div>
+        <div class="form-group">
+          <label>Tanggal Terkirim</label>
+          <input type="date" name="tanggal" required>
+        </div>
         <div class="form-group"><label>Status</label>
           <select name="status">
             <option value="Terkirim">Terkirim</option>
@@ -609,6 +627,12 @@
           </select>
         </div>
         <div class="form-group"><label>Keterangan</label><textarea name="keterangan" class="input-lg" placeholder="Catatan tambahan..."></textarea></div>
+        <div class="form-group">
+          <label>Foto Dokumentasi (Bisa pilih lebih dari satu)</label>
+          <input type="file" name="foto" accept="image/*" multiple class="file-input" onchange="previewFotoBaru(this, 'addFotoPreview')">
+          <div class="foto-hint">Maksimal 10 foto. Format gambar (JPG, PNG, WEBP, dll).</div>
+          <div class="foto-grid" id="addFotoPreview"></div>
+        </div>
         <div class="modal-actions">
           <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
           <button type="submit" class="btn-add">Simpan</button>
@@ -618,8 +642,32 @@
   </div>
 
   <script>
-    function openModal() { document.getElementById('addModal').style.display = 'flex'; }
+    function openModal() {
+      document.getElementById('addFotoPreview').innerHTML = '';
+      document.getElementById('addModal').style.display = 'flex';
+    }
     function closeModal() { document.getElementById('addModal').style.display = 'none'; }
+
+    function fotoUrl(f) {
+      if (/^https?:\/\//i.test(f)) return f;
+      return f.charAt(0) === '/' ? f : '/uploads/' + f;
+    }
+
+    function previewFotoBaru(input, previewId) {
+      const box = document.getElementById(previewId);
+      if (!box) return;
+      box.innerHTML = '';
+      Array.from(input.files || []).slice(0, 10).forEach(function (file) {
+        if (!file.type || file.type.indexOf('image/') !== 0) return;
+        const item = document.createElement('div');
+        item.className = 'foto-item';
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.onload = function () { URL.revokeObjectURL(img.src); };
+        item.appendChild(img);
+        box.appendChild(item);
+      });
+    }
 
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('active');

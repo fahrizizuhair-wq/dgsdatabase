@@ -325,6 +325,18 @@
     .btn-edit:hover { background-color: #333; }
     .btn-delete { background-color: #912d2d; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
     .btn-delete:hover { background-color: #7a2222; }
+    .btn-detail { display: inline-block; background-color: #7a1b1b; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 4px; text-decoration: none; }
+    .btn-detail:hover { background-color: #5c1313; }
+
+    /* FOTO / DOKUMENTASI */
+    .foto-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .foto-item { position: relative; width: 76px; height: 76px; border-radius: 8px; overflow: hidden; border: 1px solid #e3d7d7; background: #faf7f7; flex: 0 0 auto; }
+    .foto-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .foto-item .foto-del { position: absolute; top: 3px; right: 3px; display: flex; align-items: center; gap: 3px; padding: 2px 5px; border-radius: 999px; background: rgba(0,0,0,0.65); color: #fff; font-size: 9px; font-weight: 700; cursor: pointer; }
+    .foto-item .foto-del input { width: auto; margin: 0; accent-color: #b3261e; }
+    .foto-item.is-removed { opacity: 0.45; border-color: #b3261e; }
+    .file-input { width: 100%; padding: 10px; border: 1.5px dashed #c9a3a3; border-radius: 8px; background: #fffdfd; font-size: 13px; font-family: inherit; }
+    .foto-hint { font-size: 11.5px; color: #8a7a7a; margin-top: 5px; line-height: 1.4; }
 
     /* MODAL */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
@@ -607,11 +619,12 @@
                   <td><%= item.supplier %></td>
                   <td><%= item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-' %></td>
                   <td>
-                    <span class="badge <%= item.status === 'Selesai' ? 'badge-active' : (item.status === 'Proses' ? 'badge-review' : 'badge-inactive') %>">
+                    <span class="badge <%= item.status === 'Selesai' || item.status === 'Diterima' ? 'badge-active' : (item.status === 'Proses' ? 'badge-review' : 'badge-inactive') %>">
                       <%= item.status %>
                     </span>
                   </td>
                   <td style="text-align: center; white-space: nowrap;">
+                    <a href="/stok-masuk/detail/<%= item._id %>?back=/stok-masuk" class="btn-detail">Detail</a>
                     <button type="button" class="btn-edit" 
                             data-id="<%= item._id %>"
                             data-idtransaksi="<%= item.idTransaksi %>"
@@ -619,8 +632,10 @@
                             data-namamerk="<%= item.namaMerk %>"
                             data-jumlah="<%= item.jumlah %>"
                             data-supplier="<%= item.supplier %>"
+                            data-tanggal="<%= item.tanggal ? new Date(item.tanggal).toISOString().slice(0,10) : '' %>"
                             data-status="<%= item.status %>"
                             data-keterangan="<%= item.keterangan || '' %>"
+                            data-foto='<%- JSON.stringify(item.foto || []) %>'
                             onclick="openEditModalFromBtn(this)">Edit</button>
                     <form action="/stok-masuk/delete/<%= item._id %>" method="POST" style="display: inline;" onsubmit="return confirm('Hapus transaksi <%= item.idTransaksi %>?');">
                       <button type="submit" class="btn-delete">Hapus</button>
@@ -639,12 +654,13 @@
   <div class="modal" id="addModal">
     <div class="modal-content">
       <h3 style="margin-bottom: 15px; color: #7a1b1b;">Tambah Stok Masuk</h3>
-      <form action="/stok-masuk/add" method="POST">
+      <form action="/stok-masuk/add" method="POST" enctype="multipart/form-data">
         <div class="form-group"><label>No</label><input type="text" name="idTransaksi" placeholder="No" required></div>
         <div class="form-group"><label>Nama Barang</label><input type="text" name="namaBarang" placeholder="Nama Barang" required></div>
         <div class="form-group"><label>Nama Merk</label><input type="text" name="namaMerk" placeholder="Merk Barang" required></div>
         <div class="form-group"><label>Jumlah Barang</label><input type="number" name="jumlah" min="1" value="1" required></div>
         <div class="form-group"><label>Supplier / Sumber</label><input type="text" name="supplier" placeholder="Nama Supplier" required></div>
+        <div class="form-group"><label>Tanggal Diterima</label><input type="date" name="tanggal" value="<%= new Date().toISOString().slice(0,10) %>" required></div>
         <div class="form-group"><label>Status</label>
           <select name="status">
             <option value="Diterima">Diterima</option>
@@ -652,6 +668,12 @@
           </select>
         </div>
         <div class="form-group"><label>Keterangan</label><textarea name="keterangan" class="input-lg" placeholder="Catatan tambahan..."></textarea></div>
+        <div class="form-group">
+          <label>Foto Dokumentasi (Bisa pilih lebih dari satu)</label>
+          <input type="file" name="foto" accept="image/*" multiple class="file-input" onchange="previewFotoBaru(this, 'addFotoPreview')">
+          <div class="foto-hint">Maksimal 10 foto. Format gambar (JPG, PNG, WEBP, dll).</div>
+          <div class="foto-grid" id="addFotoPreview"></div>
+        </div>
         <div class="modal-actions">
           <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
           <button type="submit" class="btn-add">Simpan</button>
@@ -664,12 +686,13 @@
   <div class="modal" id="editModal">
     <div class="modal-content">
       <h3 style="margin-bottom: 15px; color: #7a1b1b;">Edit Stok Masuk</h3>
-      <form id="editForm" method="POST">
+      <form id="editForm" method="POST" enctype="multipart/form-data">
         <div class="form-group"><label>No</label><input type="text" id="editIdTransaksi" name="idTransaksi" required></div>
         <div class="form-group"><label>Nama Barang</label><input type="text" id="editNamaBarang" name="namaBarang" required></div>
         <div class="form-group"><label>Nama Merk</label><input type="text" id="editNamaMerk" name="namaMerk" required></div>
         <div class="form-group"><label>Jumlah Qty</label><input type="number" id="editJumlah" name="jumlah" min="1" required></div>
         <div class="form-group"><label>Supplier / Sumber</label><input type="text" id="editSupplier" name="supplier" required></div>
+        <div class="form-group"><label>Tanggal Diterima</label><input type="date" id="editTanggal" name="tanggal" required></div>
         <div class="form-group"><label>Status</label>
           <select id="editStatus" name="status">
             <option value="Diterima">Diterima</option>
@@ -677,6 +700,17 @@
           </select>
         </div>
         <div class="form-group"><label>Keterangan</label><textarea id="editKeterangan" name="keterangan" class="input-lg"></textarea></div>
+        <div class="form-group">
+          <label>Foto Saat Ini</label>
+          <div class="foto-grid" id="editFotoLama"></div>
+          <div class="foto-hint">Centang "Hapus" pada foto yang ingin dihilangkan.</div>
+        </div>
+        <div class="form-group">
+          <label>Tambah Foto Baru (Bisa pilih lebih dari satu)</label>
+          <input type="file" name="foto" accept="image/*" multiple class="file-input" onchange="previewFotoBaru(this, 'editFotoPreview')">
+          <div class="foto-hint">Maksimal 10 foto per transaksi.</div>
+          <div class="foto-grid" id="editFotoPreview"></div>
+        </div>
         <div class="modal-actions">
           <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
           <button type="submit" class="btn-add">Perbarui</button>
@@ -686,8 +720,65 @@
   </div>
 
   <script>
-    function openModal() { document.getElementById('addModal').style.display = 'flex'; }
+    function openModal() {
+      document.getElementById('addFotoPreview').innerHTML = '';
+      document.getElementById('addModal').style.display = 'flex';
+    }
     function closeModal() { document.getElementById('addModal').style.display = 'none'; }
+
+    function fotoUrl(f) {
+      if (/^https?:\/\//i.test(f)) return f;
+      return f.charAt(0) === '/' ? f : '/uploads/' + f;
+    }
+
+    function previewFotoBaru(input, previewId) {
+      const box = document.getElementById(previewId);
+      if (!box) return;
+      box.innerHTML = '';
+      Array.from(input.files || []).slice(0, 10).forEach(function (file) {
+        if (!file.type || file.type.indexOf('image/') !== 0) return;
+        const item = document.createElement('div');
+        item.className = 'foto-item';
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.onload = function () { URL.revokeObjectURL(img.src); };
+        item.appendChild(img);
+        box.appendChild(item);
+      });
+    }
+
+    function renderFotoLama(fotoList) {
+      const box = document.getElementById('editFotoLama');
+      box.innerHTML = '';
+      if (!fotoList || fotoList.length === 0) {
+        box.innerHTML = '<span class="foto-hint">Belum ada foto dokumentasi.</span>';
+        return;
+      }
+      fotoList.forEach(function (name) {
+        const label = document.createElement('label');
+        label.className = 'foto-item';
+
+        const img = document.createElement('img');
+        img.src = fotoUrl(name);
+        img.alt = 'Foto dokumentasi';
+
+        const del = document.createElement('span');
+        del.className = 'foto-del';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.name = 'hapusFoto';
+        cb.value = name;
+        cb.addEventListener('change', function () {
+          label.classList.toggle('is-removed', cb.checked);
+        });
+        del.appendChild(cb);
+        del.appendChild(document.createTextNode('Hapus'));
+
+        label.appendChild(img);
+        label.appendChild(del);
+        box.appendChild(label);
+      });
+    }
 
     function openEditModalFromBtn(btn) {
       const id = btn.getAttribute('data-id');
@@ -697,8 +788,20 @@
       document.getElementById('editNamaMerk').value = btn.getAttribute('data-namamerk');
       document.getElementById('editJumlah').value = btn.getAttribute('data-jumlah');
       document.getElementById('editSupplier').value = btn.getAttribute('data-supplier');
+      document.getElementById('editTanggal').value = btn.getAttribute('data-tanggal') || '';
       document.getElementById('editStatus').value = btn.getAttribute('data-status');
       document.getElementById('editKeterangan').value = btn.getAttribute('data-keterangan');
+
+      let fotoList = [];
+      try { fotoList = JSON.parse(btn.getAttribute('data-foto') || '[]'); } catch (e) { fotoList = []; }
+      if (!Array.isArray(fotoList)) fotoList = fotoList ? [fotoList] : [];
+      renderFotoLama(fotoList);
+
+      const preview = document.getElementById('editFotoPreview');
+      if (preview) preview.innerHTML = '';
+      const fileInput = document.querySelector('#editForm input[type="file"]');
+      if (fileInput) fileInput.value = '';
+
       document.getElementById('editModal').style.display = 'flex';
     }
     function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }

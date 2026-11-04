@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('partials/head') %>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Stok Keluar - <%= item.idTransaksi %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; color: #333; padding: 40px; background-color: #f4f6f9; min-height: 100vh; position: relative; }
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%),
+                  url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover; z-index: -1; pointer-events: none;
+    }
+    .container { max-width: 750px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); padding: 35px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .back-link { display: inline-block; margin-bottom: 20px; color: #7a1b1b; text-decoration: none; font-weight: 600; }
+    .back-link:hover { text-decoration: underline; }
+    h1 { color: #7a1b1b; margin-bottom: 25px; font-size: 24px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+
+    /* GALERI FOTO */
+    .slider-container { position: relative; max-width: 450px; margin: 0 auto 12px auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #000; }
+    .slide { display: none; text-align: center; }
+    .slide.active { display: block; }
+    .slide img { width: 100%; max-height: 320px; object-fit: contain; display: block; margin: 0 auto; }
+    .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.6); color: white; border: none; width: 40px; height: 40px; cursor: pointer; font-size: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; z-index: 10; }
+    .slider-btn:hover { background: rgba(0, 0, 0, 0.9); }
+    .prev-btn { left: 12px; }
+    .next-btn { right: 12px; }
+    .slider-counter { text-align: center; font-size: 12px; font-weight: 600; color: #7a6a6a; margin-bottom: 22px; }
+    .foto-strip { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+    .foto-strip button { width: 62px; height: 62px; padding: 0; border: 2px solid transparent; border-radius: 8px; overflow: hidden; cursor: pointer; background: #000; }
+    .foto-strip button.active { border-color: #7a1b1b; }
+    .foto-strip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .foto-empty { text-align: center; padding: 28px; margin-bottom: 24px; border: 1px dashed #d9c7c7; border-radius: 10px; background: #faf7f7; color: #8a7a7a; font-size: 13px; }
+
+    /* Layout 2 Kolom */
+    .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .detail-group { margin-bottom: 15px; }
+    .detail-group.full-width { grid-column: span 2; }
+    .detail-label { font-size: 12px; color: #666; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+    .detail-value { font-size: 16px; color: #222; font-weight: 500; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .badge-active { background-color: #e6f4ea; color: #137333; }
+    .badge-review { background-color: #fef7e0; color: #b06000; }
+    .badge-inactive { background-color: #fce8e6; color: #c5221f; }
+
+    @media (max-width: 768px) {
+      body { padding: 20px 14px; }
+      .container { padding: 22px 18px; }
+      .details-grid { grid-template-columns: 1fr; }
+      .detail-group.full-width { grid-column: span 1; }
+      h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="<%= backUrl %>" class="back-link">&larr; Kembali</a>
+
+    <h1>Detail Stok Keluar: <%= item.idTransaksi %></h1>
+
+    <%
+      let fotoList = [];
+      if (Array.isArray(item.foto)) {
+        fotoList = item.foto.filter(Boolean);
+      } else if (typeof item.foto === 'string' && item.foto) {
+        fotoList = [item.foto];
+      }
+      const fotoUrl = (f) => /^https?:\/\//i.test(f) ? f : (f.charAt(0) === '/' ? f : '/uploads/' + f);
+      const fotoCount = fotoList.length;
+    %>
+
+    <% if (fotoCount > 0) { %>
+      <div class="slider-container">
+        <% fotoList.forEach(function(fotoName, index) { %>
+          <div class="slide <%= index === 0 ? 'active' : '' %>">
+            <img src="<%= fotoUrl(fotoName) %>" alt="Foto stok keluar <%= item.namaBarang %> <%= index + 1 %>">
+          </div>
+        <% }); %>
+
+        <% if (fotoCount > 1) { %>
+          <button type="button" class="slider-btn prev-btn" onclick="changeSlide(-1)" aria-label="Foto sebelumnya">&#10094;</button>
+          <button type="button" class="slider-btn next-btn" onclick="changeSlide(1)" aria-label="Foto berikutnya">&#10095;</button>
+        <% } %>
+      </div>
+
+      <div class="slider-counter"><span id="slideNow">1</span> / <%= fotoCount %> foto</div>
+
+      <% if (fotoCount > 1) { %>
+        <div class="foto-strip">
+          <% fotoList.forEach(function(fotoName, index) { %>
+            <button type="button" class="<%= index === 0 ? 'active' : '' %>" onclick="showSlide(<%= index %>)" aria-label="Lihat foto <%= index + 1 %>">
+              <img src="<%= fotoUrl(fotoName) %>" alt="Thumbnail <%= index + 1 %>">
+            </button>
+          <% }); %>
+        </div>
+      <% } %>
+    <% } else { %>
+      <div class="foto-empty">Belum ada foto dokumentasi untuk transaksi ini.</div>
+    <% } %>
+
+    <div class="details-grid">
+      <div class="detail-group">
+        <div class="detail-label">No / ID Transaksi</div>
+        <div class="detail-value"><strong><%= item.idTransaksi %></strong></div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Nama Barang</div>
+        <div class="detail-value"><%= item.namaBarang %></div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Nama Merk</div>
+        <div class="detail-value"><%= item.namaMerk || '-' %></div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Jumlah Keluar</div>
+        <div class="detail-value"><%= item.jumlah %> unit</div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Tujuan / Unit</div>
+        <div class="detail-value"><%= item.tujuan || '-' %></div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Tanggal Terkirim</div>
+        <div class="detail-value"><%= item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : '-' %></div>
+      </div>
+
+      <div class="detail-group full-width">
+        <div class="detail-label">Status</div>
+        <div class="detail-value">
+          <span class="badge <%= item.status === 'Selesai' || item.status === 'Diterima' || item.status === 'Terkirim' ? 'badge-active' : (item.status === 'Proses' ? 'badge-review' : 'badge-inactive') %>">
+            <%= item.status || '-' %>
+          </span>
+        </div>
+      </div>
+
+      <div class="detail-group full-width">
+        <div class="detail-label">Keterangan</div>
+        <div class="detail-value" style="white-space: pre-line; background: #fafafa; padding: 12px; border-radius: 6px; border: 1px solid #eee;"><%= item.keterangan || 'Tidak ada keterangan.' %></div>
+      </div>
+
+      <div class="detail-group full-width">
+        <div class="detail-label">Dokumentasi Foto</div>
+        <div class="detail-value"><%= fotoCount %> foto terlampir</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let slideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const thumbs = document.querySelectorAll('.foto-strip button');
+    const slideNow = document.getElementById('slideNow');
+
+    function showSlide(n) {
+      if (slides.length === 0) return;
+      if (n >= slides.length) slideIndex = 0;
+      else if (n < 0) slideIndex = slides.length - 1;
+      else slideIndex = n;
+
+      slides.forEach(slide => slide.classList.remove('active'));
+      slides[slideIndex].classList.add('active');
+      thumbs.forEach((thumb, i) => thumb.classList.toggle('active', i === slideIndex));
+      if (slideNow) slideNow.textContent = slideIndex + 1;
+    }
+
+    function changeSlide(n) {
+      showSlide(slideIndex + n);
+    }
+  </script>
+</body>
+</html>
+
