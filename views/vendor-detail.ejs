@@ -21,15 +21,32 @@
     h1 { color: #7a1b1b; margin-bottom: 25px; font-size: 24px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
     
     /* STYLING GALERI FOTO DENGAN TOMBOL PANAH */
-    .slider-container { position: relative; max-width: 450px; margin: 0 auto 25px auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #000; }
+    .slider-container { position: relative; max-width: 450px; margin: 0 auto 12px auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #000; }
     .slide { display: none; text-align: center; }
     .slide.active { display: block; }
-    .slide img { width: 100%; max-height: 320px; object-fit: contain; display: block; margin: 0 auto; }
+    .slide img { width: 100%; max-height: 320px; object-fit: contain; display: block; margin: 0 auto; cursor: pointer; }
     
     .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.6); color: white; border: none; width: 40px; height: 40px; cursor: pointer; font-size: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; z-index: 10; }
     .slider-btn:hover { background: rgba(0, 0, 0, 0.9); }
     .prev-btn { left: 12px; }
     .next-btn { right: 12px; }
+    .slider-counter { text-align: center; font-size: 12px; font-weight: 600; color: #7a6a6a; margin-bottom: 22px; }
+    .foto-empty { text-align: center; padding: 28px; margin-bottom: 24px; border: 1px dashed #d9c7c7; border-radius: 10px; background: #faf7f7; color: #8a7a7a; font-size: 13px; }
+
+    /* MODAL POP-UP FOTO UKURAN PENUH */
+    .img-modal {
+      display: none; position: fixed; z-index: 9999; top: 0; left: 0;
+      width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .img-modal img {
+      max-width: 90%; max-height: 90vh; object-fit: contain;
+      border-radius: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .img-modal-close {
+      position: absolute; top: 20px; right: 30px; color: #fff;
+      font-size: 35px; font-weight: bold; cursor: pointer; background: none; border: none;
+    }
 
     /* Layout 2 Kolom */
     .details-grid {
@@ -51,62 +68,53 @@
     .badge-inactive { background-color: #fce8e6; color: #c5221f; }
 
     /* ==========================================
-   RESPONSIF MOBILE (Layar di bawah 768px)
-   ========================================== */
-@media (max-width: 768px) {
-  /* 1. Sesuaikan Padding Kontainer Utama */
-  .header-container, 
-  .stats-grid, 
-  .main-box,
-  .middle-grid {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  /* 2. Kartu Statistik Menjadi 1 Kolom ke Bawah */
-  .stats-grid, 
-  .middle-grid {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-
-  /* 3. Banner Salam / Top Header */
-  .box-header,
-  .actions-toolbar,
-  .welcome-card {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 12px !important;
-  }
-
-  .search-input {
-    width: 100% !important;
-  }
-
-  /* 4. Tabel Agar Bisa Di-scroll Horizontal di HP */
-  .main-box {
-    overflow-x: auto !important;
-  }
-
-  table {
-    min-width: 600px;
-  }
-
-  /* 5. Penyesuaian Ukuran Teks di HP */
-  h1 {
-    font-size: 22px !important;
-  }
-  
-  .stat-value {
-    font-size: 22px !important;
-  }
-}
-
+    RESPONSIF MOBILE (Layar di bawah 768px)
+    ========================================== */
+    @media (max-width: 768px) {
+      .header-container, 
+      .stats-grid, 
+      .main-box,
+      .middle-grid {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      .stats-grid, 
+      .middle-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      .box-header,
+      .actions-toolbar,
+      .welcome-card {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+      }
+      .search-input {
+        width: 100% !important;
+      }
+      .main-box {
+        overflow-x: auto !important;
+      }
+      table {
+        min-width: 600px;
+      }
+      h1 {
+        font-size: 22px !important;
+      }
+      .stat-value {
+        font-size: 22px !important;
+      }
+      .container { padding: 20px; }
+      .details-grid { grid-template-columns: 1fr; gap: 10px; }
+      .detail-group.full-width { grid-column: span 1; }
+    }
   </style>
 </head>
-<div class="container">
+<body>
+  <div class="container">
     <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
       <a href="/admin" class="back-link">&larr; Kembali</a>
     <% } else { %>
@@ -116,30 +124,43 @@
     <h1>Detail Vendor: <%= vendor.namaVendor %></h1>
 
     <% 
-       let fotoList = [];
-       if (vendor.foto) {
-         if (Array.isArray(vendor.foto)) {
-           fotoList = vendor.foto;
-         } else if (typeof vendor.foto === 'string') {
-           fotoList = [vendor.foto];
-         }
-       }
+        let fotoList = [];
+        if (vendor.foto) {
+          if (Array.isArray(vendor.foto)) {
+            fotoList = vendor.foto.filter(Boolean);
+          } else if (typeof vendor.foto === 'string' && vendor.foto) {
+            fotoList = [vendor.foto];
+          }
+        }
+        const fotoCount = fotoList.length;
     %>
 
-    <% if (fotoList.length > 0) { %>
+    <% if (fotoCount > 0) { %>
       <div class="slider-container">
         <% fotoList.forEach(function(fotoName, index) { %>
           <div class="slide <%= index === 0 ? 'active' : '' %>">
-            <img src="/uploads/<%= fotoName %>" alt="Foto <%= vendor.namaVendor %>">
+            <img src="/uploads/<%= fotoName %>" alt="Foto <%= vendor.namaVendor %>" onclick="openModal(this.src)" title="Klik untuk memperbesar">
           </div>
         <% }); %>
 
-        <% if (fotoList.length > 1) { %>
-          <button class="slider-btn prev-btn" onclick="changeSlide(-1)">&#10094;</button>
-          <button class="slider-btn next-btn" onclick="changeSlide(1)">&#10095;</button>
+        <% if (fotoCount > 1) { %>
+          <button type="button" class="slider-btn prev-btn" onclick="changeSlide(-1)" aria-label="Foto sebelumnya">&#10094;</button>
+          <button type="button" class="slider-btn next-btn" onclick="changeSlide(1)" aria-label="Foto berikutnya">&#10095;</button>
         <% } %>
       </div>
+
+      <div class="slider-counter">
+        <span id="slideNow">1</span> / <%= fotoCount %> foto <span style="font-weight: normal; color: #999;">(Klik foto untuk memperbesar)</span>
+      </div>
+    <% } else { %>
+      <div class="foto-empty">Belum ada foto dokumentasi untuk vendor ini.</div>
     <% } %>
+
+    <!-- MODAL POP-UP FOTO -->
+    <div id="photoModal" class="img-modal" onclick="closeModal()">
+      <button type="button" class="img-modal-close" onclick="closeModal()">&times;</button>
+      <img id="modalImg" src="" alt="Ukuran Penuh">
+    </div>
 
     <div class="details-grid">
       <div class="detail-group">
@@ -196,19 +217,33 @@
   <script>
     let slideIndex = 0;
     const slides = document.querySelectorAll('.slide');
+    const slideNow = document.getElementById('slideNow');
 
     function showSlide(n) {
       if (slides.length === 0) return;
       if (n >= slides.length) slideIndex = 0;
-      if (n < 0) slideIndex = slides.length - 1;
+      else if (n < 0) slideIndex = slides.length - 1;
+      else slideIndex = n;
 
       slides.forEach(slide => slide.classList.remove('active'));
       slides[slideIndex].classList.add('active');
+      if (slideNow) slideNow.textContent = slideIndex + 1;
     }
 
     function changeSlide(n) {
-      slideIndex += n;
-      showSlide(slideIndex);
+      showSlide(slideIndex + n);
+    }
+
+    // Fungsi Pop-up Modal Foto
+    function openModal(imgSrc) {
+      const modal = document.getElementById('photoModal');
+      const modalImg = document.getElementById('modalImg');
+      modal.style.display = 'flex';
+      modalImg.src = imgSrc;
+    }
+
+    function closeModal() {
+      document.getElementById('photoModal').style.display = 'none';
     }
   </script>
 </body>
