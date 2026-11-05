@@ -139,15 +139,19 @@
 
     /* MODAL TAMBAH SURAT JALAN */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; overflow-y: auto; padding: 20px 0; }
-    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 650px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 820px; max-width: 96%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #334155; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 13.5px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     .form-group.full-width { grid-column: span 2; }
     
-    .item-row { display: grid; grid-template-columns: 45px 1fr 90px 90px 35px; gap: 8px; align-items: center; margin-bottom: 8px; }
-    .btn-remove-item { background: #fee2e2; color: #dc2626; border: none; width: 35px; height: 35px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .item-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 36px; gap: 8px; align-items: stretch; margin-bottom: 8px; }
+    .item-row input, .item-row textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 12.5px; }
+    .item-row input[readonly] { background: #f1f5f9; text-align: center; }
+    .item-row textarea { min-height: 40px; line-height: 1.35; resize: vertical; }
+    .item-head { display: grid; grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 36px; gap: 8px; margin-bottom: 6px; font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .3px; }
+    .btn-remove-item { background: #fee2e2; color: #dc2626; border: none; width: 36px; height: 100%; min-height: 40px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #edf2f7; }
     .btn-cancel { background: #e2e8f0; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #475569; }
   </style>
@@ -422,15 +426,24 @@
           </div>
           <div class="form-group">
             <label>Kepada Yth</label>
-            <input type="text" name="kepadaYth" placeholder="Nama Perusahaan / Penerima..." required>
+            <input type="text" name="kepadaYth" placeholder="Nama perusahaan penerima..." required>
+          </div>
+          <div class="form-group">
+            <label>Nama Penerima (Baris ke-2)</label>
+            <input type="text" name="namaPenerima" placeholder="Contoh: Bapak Middy">
           </div>
           <div class="form-group">
             <label>No. Telepon / Kontak</label>
             <input type="text" name="noTelepon" placeholder="Nomor telepon...">
           </div>
+          <div class="form-group">
+            <label>Nama Penyerah (Tanda Tangan)</label>
+            <input type="text" name="namaPenyerah" placeholder="Kosongkan = nama user yang login">
+          </div>
           <div class="form-group full-width">
             <label>Alamat Tujuan</label>
-            <textarea name="alamat" rows="2" placeholder="Alamat lengkap lokasi pengiriman..." required></textarea>
+            <textarea name="alamat" rows="3" placeholder="Alamat lengkap lokasi pengiriman..." required></textarea>
+            <small style="display:block; margin-top:4px; color:#94a3b8; font-size:11.5px;">Tekan Enter untuk memisahkan baris alamat (maksimal 3 baris agar rapi di hasil cetak).</small>
           </div>
           <div class="form-group">
             <label>Perihal</label>
@@ -454,12 +467,22 @@
           <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 12px;" onclick="addItemRow()">+ Tambah Barang</button>
         </div>
 
+        <div class="item-head">
+          <span>No</span>
+          <span>Diskripsi</span>
+          <span>Jumlah</span>
+          <span>Satuan</span>
+          <span>Keterangan</span>
+          <span></span>
+        </div>
+        <small style="display:block; margin:-2px 0 8px; color:#94a3b8; font-size:11px;">Jumlah dan satuan boleh diisi beberapa baris (tekan Enter) untuk barang dengan beberapa kode dalam satu baris.</small>
         <div id="itemContainer">
           <div class="item-row">
-            <input type="number" name="items[0][no]" value="1" readonly style="background:#f1f5f9; text-align:center;">
-            <input type="text" name="items[0][diskripsi]" placeholder="Nama barang / deskripsi..." required>
-            <input type="number" name="items[0][jumlah]" placeholder="Jml" min="1" required>
-            <input type="text" name="items[0][satuan]" placeholder="Satuan" required>
+            <input type="number" data-field="no" name="items[0][no]" value="1" readonly style="background:#f1f5f9; text-align:center;">
+            <textarea data-field="diskripsi" name="items[0][diskripsi]" placeholder="Nama barang / deskripsi (boleh beberapa baris)..." rows="2" required></textarea>
+            <textarea data-field="jumlah" name="items[0][jumlah]" placeholder="Jml" rows="2" required></textarea>
+            <input type="text" data-field="satuan" name="items[0][satuan]" placeholder="Satuan" required>
+            <textarea data-field="keterangan" name="items[0][keterangan]" placeholder="Keterangan (opsional)..." rows="2"></textarea>
             <button type="button" class="btn-remove-item" onclick="removeItemRow(this)"><i class="fa-solid fa-trash"></i></button>
           </div>
         </div>
@@ -494,10 +517,11 @@
       const newRow = document.createElement('div');
       newRow.className = 'item-row';
       newRow.innerHTML = `
-        <input type="number" name="items[${rowCount}][no]" value="${rowCount + 1}" readonly style="background:#f1f5f9; text-align:center;">
-        <input type="text" name="items[${rowCount}][diskripsi]" placeholder="Nama barang / deskripsi..." required>
-        <input type="number" name="items[${rowCount}][jumlah]" placeholder="Jml" min="1" required>
-        <input type="text" name="items[${rowCount}][satuan]" placeholder="Satuan" required>
+        <input type="number" data-field="no" name="items[${rowCount}][no]" value="${rowCount + 1}" readonly style="background:#f1f5f9; text-align:center;">
+        <textarea data-field="diskripsi" name="items[${rowCount}][diskripsi]" placeholder="Nama barang / deskripsi (boleh beberapa baris)..." rows="2" required></textarea>
+        <textarea data-field="jumlah" name="items[${rowCount}][jumlah]" placeholder="Jml" rows="2" required></textarea>
+        <input type="text" data-field="satuan" name="items[${rowCount}][satuan]" placeholder="Satuan" required>
+        <textarea data-field="keterangan" name="items[${rowCount}][keterangan]" placeholder="Keterangan (opsional)..." rows="2"></textarea>
         <button type="button" class="btn-remove-item" onclick="removeItemRow(this)"><i class="fa-solid fa-trash"></i></button>
       `;
       container.appendChild(newRow);
@@ -516,12 +540,11 @@
     function reindexRows() {
       const rows = document.getElementById('itemContainer').getElementsByClassName('item-row');
       for (let i = 0; i < rows.length; i++) {
-        const inputs = rows[i].querySelectorAll('input');
-        inputs[0].value = i + 1;
-        inputs[0].name = `items[${i}][no]`;
-        inputs[1].name = `items[${i}][diskripsi]`;
-        inputs[2].name = `items[${i}][jumlah]`;
-        inputs[3].name = `items[${i}][satuan]`;
+        const fields = rows[i].querySelectorAll('[data-field]');
+        fields.forEach(field => {
+          field.name = `items[${i}][${field.dataset.field}]`;
+          if (field.dataset.field === 'no') field.value = i + 1;
+        });
       }
     }
   </script>

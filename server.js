@@ -1655,22 +1655,34 @@ app.get('/surat-jalan-user', async (req, res) => {
 app.post('/surat-jalan-user/add', async (req, res) => {
     try {
         // Tambahkan namaPerusahaan di sini
-        const { noSuratJalan, tanggal, namaPerusahaan, kepadaYth, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items } = req.body;
+        const { noSuratJalan, tanggal, namaPerusahaan, kepadaYth, namaPenerima, namaPenyerah, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items } = req.body;
         
         const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username)) ? 
                          (req.session.user.namaLengkap || req.session.user.username) : 'User Operasional';
+
+        const daftarItem = (Array.isArray(items) ? items : [items])
+            .filter(item => item && (item.diskripsi || item.jumlah || item.satuan))
+            .map((item, index) => ({
+                no: index + 1,
+                diskripsi: item.diskripsi || '',
+                jumlah: item.jumlah === undefined || item.jumlah === null ? '' : String(item.jumlah).trim(),
+                satuan: item.satuan || '',
+                keterangan: item.keterangan || ''
+            }));
 
         const suratBaru = new SuratJalan({
             noSuratJalan,
             tanggal: tanggal || Date.now(),
             namaPerusahaan, // <-- TAMBAHKAN INI
             kepadaYth,
+            namaPenerima: namaPenerima || '',
+            namaPenyerah: namaPenyerah || '',
             noTelepon,
             alamat,
             perihal,
             pekerjaan,
             jenisKirim: jenisKirim || 'Barang',
-            items: Array.isArray(items) ? items : [items],
+            items: daftarItem,
             diinputOleh: namaUser
         });
 

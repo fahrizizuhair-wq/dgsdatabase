@@ -5,6 +5,8 @@ const suratJalanSchema = new mongoose.Schema({
     tanggal: { type: Date, default: Date.now },
     namaPerusahaan: { type: String, required: true }, // <-- TAMBAHKAN INI
     kepadaYth: { type: String, required: true },
+    namaPenerima: { type: String, default: '' },
+    namaPenyerah: { type: String, default: '' },
     noTelepon: { type: String },
     alamat: { type: String, required: true },
     perihal: { type: String },
@@ -13,8 +15,9 @@ const suratJalanSchema = new mongoose.Schema({
     items: [{
         no: Number,
         diskripsi: String,
-        jumlah: Number,
-        satuan: String
+        jumlah: String,
+        satuan: String,
+        keterangan: String
     }],
     diinputOleh: String,
     createdAt: { type: Date, default: Date.now }
