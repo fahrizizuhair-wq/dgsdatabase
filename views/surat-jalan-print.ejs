@@ -30,6 +30,11 @@
     const namaPenerimaTampil = (suratJalan.namaPenerima || '').trim() || suratJalan.kepadaYth || '';
     const namaPenyerahTampil = (suratJalan.namaPenyerah || '').trim() || suratJalan.diinputOleh || 'Deka';
     const kepadaYthTampil = rapiNamaPerusahaan(suratJalan.kepadaYth || '');
+
+    // Jangan tampilkan nama penerima dua kali bila isinya sama dengan "Kepada Yth".
+    const kepadaYthNormal = String(kepadaYthTampil).replace(/\s+/g, ' ').trim().toLowerCase();
+    const namaPenerimaNormal = String(namaPenerimaTampil).replace(/\s+/g, ' ').trim().toLowerCase();
+    const tampilkanBarisPenerima = namaPenerimaNormal !== '' && namaPenerimaNormal !== kepadaYthNormal;
     const jenisKirim = String(suratJalan.jenisKirim || 'Barang').trim();
     const isDokumen = jenisKirim.toLowerCase() === 'dokumen';
     const kodeSurat = isDokumen ? 'DOK-DK' : 'BRG-DK';
@@ -216,6 +221,14 @@
       height: 0;
       border-top: 0.42pt solid #000;
     }
+    /* Garis vertikal antar kolom (tanpa garis horizontal per baris) */
+    .tbl-vline {
+      position: absolute;
+      top: 225.21pt;
+      height: 419.49pt;
+      width: 0;
+      border-left: 0.42pt solid #000;
+    }
     .col-th {
       position: absolute;
       font-size: 6.5pt;
@@ -348,7 +361,7 @@
       <div class="txt b" style="left: 113.58pt; top: <%= T(121.24) %>pt;">:</div>
       <div class="txt b" style="left: 116.84pt; top: <%= T(121.24) %>pt;"><%= kepadaYthTampil %></div>
 
-      <% if (namaPenerimaTampil) { %>
+      <% if (tampilkanBarisPenerima) { %>
       <div class="txt b" style="left: 116.52pt; top: <%= T(131.23) %>pt;"><%= namaPenerimaTampil %></div>
       <% } %>
 
@@ -385,6 +398,10 @@
       <!-- TABEL BARANG -->
       <div class="tbl-border"></div>
       <div class="tbl-headline"></div>
+      <div class="tbl-vline" style="left: 111.05pt;"></div>
+      <div class="tbl-vline" style="left: 239.05pt;"></div>
+      <div class="tbl-vline" style="left: 279.05pt;"></div>
+      <div class="tbl-vline" style="left: 324.05pt;"></div>
 
       <div class="col-th" style="left: 70.45pt; width: 41pt; top: <%= T(227.46) %>pt;">No</div>
       <div class="col-th" style="left: 111.05pt; width: 128pt; top: <%= T(227.46) %>pt;">Diskripsi</div>
