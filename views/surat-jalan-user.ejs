@@ -487,6 +487,25 @@
           </div>
         </div>
 
+        <div style="margin-top: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-size: 13px; font-weight: 600; color: #334155;">Keterangan Kode Barang</label>
+          <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 12px;" onclick="addItemRow()">+ Tambah Kode Barang</button>
+        </div>
+
+        <div class="item-head">
+          <span>No</span>
+          <span>Nama Barang</span>
+          <span>Kode Barang</span>
+          
+        </div>
+        <small style="display:block; margin:-2px 0 8px; color:#94a3b8; font-size:11px;">Jumlah dan satuan boleh diisi beberapa baris (tekan Enter) untuk barang dengan beberapa kode dalam satu baris.</small>
+        <div id="itemContainer">
+          <div class="item-row">
+            <input type="number" data-field="no" name="items[0][no]" value="1" readonly style="background:#f1f5f9; text-align:center;">
+            <textarea data-field="diskripsi" name="items[0][diskripsi]" placeholder="Nama barang" rows="2" required></textarea>
+            <textarea data-field="jumlah" name="items[0][jumlah]" placeholder="Kode Barang" rows="2" required></textarea>
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
           <button type="submit" class="btn-action">Simpan Surat Jalan</button>
