@@ -209,7 +209,7 @@
     .txt {
       position: absolute;
       white-space: nowrap;
-      font-size: 6.5pt;
+      font-size: 6.5pt; /* Dikembalikan ke ukuran proporsional cetak */
       line-height: 6.5pt;
     }
     .b { font-weight: 700; }
@@ -241,13 +241,15 @@
       border-top: 0.425pt solid #000;
     }
 
-    /* Kotak tabel: hanya border luar + garis header (sesuai template) */
+    /* Kotak tabel dinamis menyesuaikan isi barang, berhenti sebelum tanda tangan */
     .tbl-border {
       position: absolute;
       left: 70.05pt;
       top: 225.21pt;
       width: 455.11pt;
-      height: 419.49pt;
+      min-height: 180pt; /* Tinggi minimum agar tetap terlihat proporsional walau item sedikit */
+      height: auto;
+      bottom: 215pt;     /* Memberikan batas jarak aman agar tidak menabrak tanda tangan di bawah */
       border: 0.42pt solid #000;
     }
     .tbl-headline {
@@ -258,11 +260,11 @@
       height: 0;
       border-top: 0.42pt solid #000;
     }
-    /* Garis vertikal antar kolom (tanpa garis horizontal per baris) */
+    /* Garis vertikal mengikuti tinggi dinamis tabel */
     .tbl-vline {
       position: absolute;
       top: 225.21pt;
-      height: 419.49pt;
+      bottom: 215pt;
       width: 0;
       border-left: 0.42pt solid #000;
     }

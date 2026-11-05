@@ -263,13 +263,15 @@
       border-top: 0.482pt solid #000;
     }
 
-    /* Tabel: border luar + garis ganda header + garis vertikal kolom. */
+    /* Tabel Puspita: Dinamis menyesuaikan isi, berhenti sebelum area tanda tangan */
     .tbl-border {
       position: absolute;
       left: 49.9275pt;
       top: 258.1056pt;
       width: 495.145pt;
-      height: 290.0944pt;
+      min-height: 180pt; /* Tinggi minimum agar tabel tetap proporsional jika item sedikit */
+      height: auto;
+      bottom: 300pt;     /* Memberikan batas jarak aman dari area tanda tangan di bawah */
       border-top: 0.4725pt solid #000;
       border-bottom: 0.4725pt solid #000;
     }
@@ -287,10 +289,11 @@
       width: 0;
       border-left: 0.4725pt solid #000;
     }
+    /* Garis vertikal body tabel mengikuti tinggi dinamis */
     .tbl-vbody {
       position: absolute;
       top: 270.8622pt;
-      height: 277.3378pt;
+      bottom: 300pt;
       width: 0;
       border-left: 0.4725pt solid #000;
     }
