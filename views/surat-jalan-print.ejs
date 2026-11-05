@@ -14,15 +14,15 @@
     }
 
     /*
-     * Helper penyesuaian posisi vertikal berbasis font 11 pt.
+     * Helper posisi vertikal proporsional (font standar 7.5 pt)
      */
     function snapTop(y0, fontPt, baselineOffset) {
       const efektif = y0 + (fontPt * 0.75) - baselineOffset;
       return (Math.round(efektif / 0.75) * 0.75).toFixed(2);
     }
-    function T(y0)   { return snapTop(y0, 11, 7.5); }   // Teks standar 11 pt
-    function T7(y0)  { return snapTop(y0, 11.5, 7.5); } // Teks bold 11.5 pt
-    function T5(y0)  { return snapTop(y0, 10, 6.5); }   // Teks kecil 10 pt
+    function T(y0)   { return snapTop(y0, 7.5, 5.75); }   // Teks standar 7.5 pt
+    function T7(y0)  { return snapTop(y0, 8.0, 5.75); }   // Teks bold 8.0 pt
+    function T5(y0)  { return snapTop(y0, 6.8, 5.00); }   // Teks kecil 6.8 pt
 
     const namaPerusahaanTampil = rapiNamaPerusahaan(suratJalan.namaPerusahaan);
     const namaPenerimaTampil = (suratJalan.namaPenerima || '').trim() || suratJalan.kepadaYth || '';
@@ -60,17 +60,17 @@
       const body = lines.slice(1);
       const titleY = cursorY + 11.08;
 
-      let titleLines = bungkus(judul, 'bold', 11.5, DESC_MAX_WIDTH);
+      let titleLines = bungkus(judul, 'bold', 8.0, DESC_MAX_WIDTH);
       if (!titleLines.length) titleLines = [''];
-      const titleHeight = titleLines.length * 13.5;
+      const titleHeight = titleLines.length * 11.0;
 
       const bodyVisuals = [];
       body.forEach(function (line) {
         if (String(line).trim() === '') {
-          bodyVisuals.push({ text: '', height: 14.0 });
+          bodyVisuals.push({ text: '', height: 10.0 });
         } else {
-          bungkus(line, 'regular', 11, DESC_MAX_WIDTH).forEach(function (visual) {
-            bodyVisuals.push({ text: visual, height: 13.0 });
+          bungkus(line, 'regular', 7.5, DESC_MAX_WIDTH).forEach(function (visual) {
+            bodyVisuals.push({ text: visual, height: 9.0 });
           });
         }
       });
@@ -83,7 +83,7 @@
 
       const lastDescY = bodyVisuals.length
         ? bodyVisuals[bodyVisuals.length - 1].y
-        : (titleLines.length ? titleY + ((titleLines.length - 1) * 13.5) : titleY);
+        : (titleLines.length ? titleY + ((titleLines.length - 1) * 11.0) : titleY);
 
       const jumlahLines = (item.jumlah === null || item.jumlah === undefined || item.jumlah === '')
         ? []
@@ -92,10 +92,10 @@
         return !(arr.length === 1 && l === '');
       });
       const jumlahYs = jumlahLines.map(function (_, i) {
-        return lastDescY - ((jumlahLines.length - 1 - i) * 13.0);
+        return lastDescY - ((jumlahLines.length - 1 - i) * 9.0);
       });
       const satuanYs = satuanLines.map(function (_, i) {
-        return lastDescY - ((satuanLines.length - 1 - i) * 13.0);
+        return lastDescY - ((satuanLines.length - 1 - i) * 9.0);
       });
 
       let ketLines = [];
@@ -105,14 +105,14 @@
           if (line.trim() === '') {
             ketLines.push('');
           } else {
-            bungkus(line, 'regular', 10, KET_MAX_WIDTH).forEach(function (visual) {
+            bungkus(line, 'regular', 6.8, KET_MAX_WIDTH).forEach(function (visual) {
               ketLines.push(visual);
             });
           }
         });
       }
 
-      const ketPitch = 12.0;
+      const ketPitch = 9.0;
       const ketYs = [];
       if (ketLines.length) {
         let lastKetY = lastDescY + 0.54;
@@ -128,7 +128,7 @@
       }, 0);
       const ketHeight = ketLines.length * ketPitch;
       const contentHeight = Math.max(descHeight, ketHeight);
-      const blockHeight = 11.08 + contentHeight + 4.0;
+      const blockHeight = 11.08 + contentHeight + 2.0;
 
       const hasil = {
         index: index,
@@ -198,15 +198,15 @@
     .toolbar .btn-close { background: #e2e8f0; color: #475569; }
     .toolbar .hint { color: #64748b; font-size: 12px; }
 
-    /* Ukuran font standar diperbesar ke 11 pt */
+    /* Ukuran font standar disesuaikan ke 7.5pt (sedikit lebih besar dari awal tapi tetap rapi) */
     .txt {
       position: absolute;
       white-space: nowrap;
-      font-size: 11pt;
-      line-height: 11pt;
+      font-size: 7.5pt;
+      line-height: 7.5pt;
     }
     .b { font-weight: 700; }
-    .small { font-size: 10pt; line-height: 10pt; }
+    .small { font-size: 6.8pt; line-height: 6.8pt; }
 
     .letterhead {
       position: absolute;
@@ -218,8 +218,8 @@
 
     .chk {
       position: absolute;
-      width: 10pt;
-      height: 10pt;
+      width: 7.5pt;
+      height: 7.5pt;
       border: 0.55pt solid #000;
       background: #fff;
     }
@@ -234,15 +234,15 @@
       border-top: 0.425pt solid #000;
     }
 
-    /* Kotak tabel dinamis yang ringkas dan pas mengikuti isi barang */
+    /* Kotak tabel dinamis dengan tinggi pas di atas tanda tangan */
     .tbl-border {
       position: absolute;
       left: 70.05pt;
       top: 225.21pt;
       width: 455.11pt;
-      min-height: 60pt;
+      min-height: 80pt;
       height: auto;
-      bottom: 340pt;     /* Berhenti lebih awal agar tidak terlalu panjang ke bawah */
+      bottom: 275pt;     /* Berhenti dengan pas di atas area keterangan & tanda tangan */
       border: 0.42pt solid #000;
     }
     .tbl-headline {
@@ -256,14 +256,14 @@
     .tbl-vline {
       position: absolute;
       top: 225.21pt;
-      bottom: 340pt;
+      bottom: 275pt;
       width: 0;
       border-left: 0.42pt solid #000;
     }
     .col-th {
       position: absolute;
-      font-size: 11pt;
-      line-height: 11pt;
+      font-size: 7.5pt;
+      line-height: 7.5pt;
       font-weight: 700;
       text-align: center;
       white-space: nowrap;
@@ -272,8 +272,8 @@
       position: absolute;
       left: 70.45pt;
       width: 41pt;
-      font-size: 11pt;
-      line-height: 11pt;
+      font-size: 7.5pt;
+      line-height: 7.5pt;
       font-weight: 700;
       text-align: center;
       white-space: nowrap;
@@ -281,24 +281,24 @@
     .desc-title {
       position: absolute;
       left: 113.58pt;
-      font-size: 11.5pt;
-      line-height: 11.5pt;
+      font-size: 8.0pt;
+      line-height: 8.0pt;
       font-weight: 700;
       white-space: nowrap;
     }
     .desc-line {
       position: absolute;
       left: 113.58pt;
-      font-size: 11pt;
-      line-height: 11pt;
+      font-size: 7.5pt;
+      line-height: 7.5pt;
       white-space: pre;
     }
     .col-jml {
       position: absolute;
       left: 239.20pt;
       width: 40pt;
-      font-size: 11pt;
-      line-height: 11pt;
+      font-size: 7.5pt;
+      line-height: 7.5pt;
       text-align: center;
       white-space: nowrap;
     }
@@ -306,8 +306,8 @@
       position: absolute;
       left: 278.70pt;
       width: 45pt;
-      font-size: 11pt;
-      line-height: 11pt;
+      font-size: 7.5pt;
+      line-height: 7.5pt;
       text-align: center;
       white-space: nowrap;
     }
@@ -315,8 +315,8 @@
       position: absolute;
       left: 323.10pt;
       width: 201.11pt;
-      font-size: 10pt;
-      line-height: 10pt;
+      font-size: 6.8pt;
+      line-height: 6.8pt;
       text-align: center;
       white-space: nowrap;
     }
@@ -324,17 +324,17 @@
     .sig-title {
       position: absolute;
       width: 110pt;
-      font-size: 11pt;
+      font-size: 7.5pt;
       font-weight: 700;
-      line-height: 11pt;
+      line-height: 7.5pt;
       text-align: center;
       white-space: nowrap;
     }
     .sig-line {
       position: absolute;
       width: 110pt;
-      font-size: 11pt;
-      line-height: 11pt;
+      font-size: 7.5pt;
+      line-height: 7.5pt;
       text-align: center;
       white-space: nowrap;
     }
@@ -393,35 +393,35 @@
       <div class="txt b" style="left: 116.84pt; top: <%= T(121.24) %>pt;"><%= kepadaYthTampil %></div>
 
       <% if (tampilkanBarisPenerima) { %>
-      <div class="txt b" style="left: 116.52pt; top: <%= T(133.23) %>pt;"><%= namaPenerimaTampil %></div>
+      <div class="txt b" style="left: 116.52pt; top: <%= T(131.23) %>pt;"><%= namaPenerimaTampil %></div>
       <% } %>
 
-      <div class="txt b" style="left: 71.51pt; top: <%= T(145.23) %>pt;">No. Telepon</div>
-      <div class="txt b" style="left: 113.58pt; top: <%= T(145.23) %>pt;">:</div>
-      <div class="txt b" style="left: 116.84pt; top: <%= T(145.23) %>pt;"><%= suratJalan.noTelepon || '-' %></div>
+      <div class="txt b" style="left: 71.51pt; top: <%= T(141.23) %>pt;">No. Telepon</div>
+      <div class="txt b" style="left: 113.58pt; top: <%= T(141.23) %>pt;">:</div>
+      <div class="txt b" style="left: 116.84pt; top: <%= T(141.23) %>pt;"><%= suratJalan.noTelepon || '-' %></div>
 
-      <div class="txt b" style="left: 71.51pt; top: <%= T(157.24) %>pt;">Alamat</div>
-      <div class="txt b" style="left: 113.58pt; top: <%= T(157.23) %>pt;">:</div>
+      <div class="txt b" style="left: 71.51pt; top: <%= T(151.24) %>pt;">Alamat</div>
+      <div class="txt b" style="left: 113.58pt; top: <%= T(151.23) %>pt;">:</div>
       <% alamatLines.forEach(function (line, i) { %>
-      <div class="txt b" style="left: <%= i === 0 ? '116.84' : '116.52' %>pt; top: <%= T(157.23 + (i * 13)) %>pt;"><%= line %></div>
+      <div class="txt b" style="left: <%= i === 0 ? '116.84' : '116.52' %>pt; top: <%= T(151.23 + (i * 10.5)) %>pt;"><%= line %></div>
       <% }) %>
 
       <div class="txt b" style="left: 71.51pt; top: <%= T(198.72) %>pt;">Perihal</div>
       <div class="txt b" style="left: 113.58pt; top: <%= T(198.72) %>pt;">:</div>
       <div class="txt b" style="left: 116.84pt; top: <%= T(198.72) %>pt;"><%= suratJalan.perihal || '-' %></div>
 
-      <div class="txt b" style="left: 71.51pt; top: <%= T(212.72) %>pt;">Pekerjaaan</div>
-      <div class="txt b" style="left: 113.58pt; top: <%= T(212.72) %>pt;">:</div>
-      <div class="txt b" style="left: 116.84pt; top: <%= T(212.72) %>pt;"><%= suratJalan.pekerjaan || '-' %></div>
+      <div class="txt b" style="left: 71.51pt; top: <%= T(208.72) %>pt;">Pekerjaaan</div>
+      <div class="txt b" style="left: 113.58pt; top: <%= T(208.72) %>pt;">:</div>
+      <div class="txt b" style="left: 116.84pt; top: <%= T(208.72) %>pt;"><%= suratJalan.pekerjaan || '-' %></div>
 
       <!-- INFO KANAN -->
       <div class="txt b" style="left: 323.95pt; top: <%= T(121.24) %>pt;">Tanggal</div>
       <div class="txt b" style="left: 368.53pt; top: <%= T(121.24) %>pt;">:</div>
       <div class="txt small" style="left: 376.44pt; top: <%= T5(121.78) %>pt;"><%= tanggalTampil %></div>
 
-      <div class="txt b" style="left: 323.95pt; top: <%= T(145.23) %>pt;">No. Surat Jalan</div>
-      <div class="txt b" style="left: 368.53pt; top: <%= T(145.23) %>pt;">:</div>
-      <div class="txt" style="left: 376.44pt; top: <%= T(145.23) %>pt;"><%= suratJalan.noSuratJalan %></div>
+      <div class="txt b" style="left: 323.95pt; top: <%= T(141.23) %>pt;">No. Surat Jalan</div>
+      <div class="txt b" style="left: 368.53pt; top: <%= T(141.23) %>pt;">:</div>
+      <div class="txt" style="left: 376.44pt; top: <%= T(141.23) %>pt;"><%= suratJalan.noSuratJalan %></div>
 
       <!-- KODE -->
       <div class="txt small" style="left: 504.73pt; top: <%= T5(218.42) %>pt;"><%= kodeSurat %></div>
@@ -444,7 +444,7 @@
       <div class="col-no" style="top: <%= T(it.numberY) %>pt;"><%= it.index + 1 %></div>
       <% it.titleLines.forEach(function (line, i) { %>
       <% if (line !== '') { %>
-      <div class="desc-title" style="top: <%= T7(it.titleY + (i * 13.5)) %>pt;"><%= line %></div>
+      <div class="desc-title" style="top: <%= T7(it.titleY + (i * 11.0)) %>pt;"><%= line %></div>
       <% } %>
       <% }); %>
       <% it.bodyVisuals.forEach(function (visual) { %>
@@ -465,7 +465,7 @@
 
       <!-- KETERANGAN KODE BARANG -->
       <% if (kodeBarangList && kodeBarangList.length > 0) { %>
-      <div style="position: absolute; left: 71.51pt; top: 520pt; font-size: 11pt; line-height: 14pt;">
+      <div style="position: absolute; left: 71.51pt; top: 580pt; font-size: 7.5pt; line-height: 11pt;">
         <div style="font-weight: 700; margin-bottom: 2pt;">Keterangan Kode Barang:</div>
         <% kodeBarangList.forEach(function (kb) { %>
         <div><span style="font-weight: 700;"><%= kb.namaBarang %></span> : <span><%= kb.kodeBarang %></span></div>
@@ -474,17 +474,17 @@
       <% } %>
 
       <!-- TANDA TANGAN -->
-      <div class="sig-title" style="left: 99pt; top: <%= T(620) %>pt;">Yang Menyerahkan,</div>
-      <div class="sig-line" style="left: 99pt; top: <%= T(675) %>pt;">
+      <div class="sig-title" style="left: 99pt; top: <%= T(660) %>pt;">Yang Menyerahkan,</div>
+      <div class="sig-line" style="left: 99pt; top: <%= T(705) %>pt;">
         <span class="sig-name"><span>(</span><span><%= namaPenyerahTampil %></span><span>)</span></span>
       </div>
-      <div class="sig-line b" style="left: 99pt; top: <%= T(690) %>pt;"><%= namaPerusahaanTampil %></div>
+      <div class="sig-line b" style="left: 99pt; top: <%= T(718) %>pt;"><%= namaPerusahaanTampil %></div>
 
-      <div class="sig-title" style="left: 347.4pt; top: <%= T(620) %>pt;">Penerima,</div>
-      <div class="sig-line" style="left: 347.4pt; top: <%= T(675) %>pt;">
+      <div class="sig-title" style="left: 347.4pt; top: <%= T(660) %>pt;">Penerima,</div>
+      <div class="sig-line" style="left: 347.4pt; top: <%= T(705) %>pt;">
         <span class="sig-name right"><span>(</span><span><%= namaPenerimaTampil %></span><span>)</span></span>
       </div>
-      <div class="sig-line b" style="left: 347.4pt; top: <%= T(690) %>pt;"><%= kepadaYthTampil %></div>
+      <div class="sig-line b" style="left: 347.4pt; top: <%= T(718) %>pt;"><%= kepadaYthTampil %></div>
     </div>
   </div>
 
