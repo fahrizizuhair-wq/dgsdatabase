@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const suratJalanSchema = new mongoose.Schema({
     noSuratJalan: { type: String, required: true, unique: true },
     tanggal: { type: Date, default: Date.now },
-    namaPerusahaan: { type: String, required: true }, // <-- TAMBAHKAN INI
+    namaPerusahaan: { type: String, required: true },
     kepadaYth: { type: String, required: true },
     namaPenerima: { type: String, default: '' },
     namaPenyerah: { type: String, default: '' },
@@ -18,6 +18,12 @@ const suratJalanSchema = new mongoose.Schema({
         jumlah: String,
         satuan: String,
         keterangan: String
+    }],
+    // TAMBAHKAN ARRAY INI UNTUK MENAMPUNG KETERANGAN KODE BARANG
+    kodeBarangList: [{
+        no: Number,
+        namaBarang: String,
+        kodeBarang: String
     }],
     diinputOleh: String,
     createdAt: { type: Date, default: Date.now }

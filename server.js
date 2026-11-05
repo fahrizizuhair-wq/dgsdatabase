@@ -1655,14 +1655,13 @@ app.get('/surat-jalan-user', async (req, res) => {
 
 app.post('/surat-jalan-user/add', async (req, res) => {
     try {
-        // Tambahkan namaPerusahaan di sini
-        const { noSuratJalan, tanggal, namaPerusahaan, kepadaYth, namaPenerima, namaPenyerah, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items } = req.body;
+        const { noSuratJalan, tanggal, namaPerusahaan, kepadaYth, namaPenerima, namaPenyerah, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items, kodeBarangList } = req.body;
         
         const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username)) ? 
                          (req.session.user.namaLengkap || req.session.user.username) : 'User Operasional';
 
         const daftarItem = (Array.isArray(items) ? items : [items])
-            .filter(item => item && (item.diskripsi || item.jumlah || item.satuan))
+            .filter(item => item && (item.diskripsi || item.jumlah))
             .map((item, index) => ({
                 no: index + 1,
                 diskripsi: item.diskripsi || '',
@@ -1671,10 +1670,19 @@ app.post('/surat-jalan-user/add', async (req, res) => {
                 keterangan: item.keterangan || ''
             }));
 
+        
+        const daftarKodeBarang = (Array.isArray(kodeBarangList) ? kodeBarangList : [kodeBarangList])
+            .filter(kb => kb && (kb.namaBarang || kb.kodeBarang))
+            .map((kb, index) => ({
+                no: index + 1,
+                namaBarang: kb.namaBarang || '',
+                kodeBarang: kb.kodeBarang || ''
+            }));
+
         const suratBaru = new SuratJalan({
             noSuratJalan,
             tanggal: tanggal || Date.now(),
-            namaPerusahaan, // <-- TAMBAHKAN INI
+            namaPerusahaan,
             kepadaYth,
             namaPenerima: namaPenerima || '',
             namaPenyerah: namaPenyerah || '',
@@ -1684,6 +1692,7 @@ app.post('/surat-jalan-user/add', async (req, res) => {
             pekerjaan,
             jenisKirim: jenisKirim || 'Barang',
             items: daftarItem,
+            kodeBarangList: daftarKodeBarang,
             diinputOleh: namaUser
         });
 
