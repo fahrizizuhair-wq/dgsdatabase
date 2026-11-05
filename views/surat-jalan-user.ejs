@@ -151,6 +151,14 @@
     .item-row input[readonly] { background: #f1f5f9; text-align: center; }
     .item-row textarea { min-height: 40px; line-height: 1.35; resize: vertical; }
     .item-head { display: grid; grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 36px; gap: 8px; margin-bottom: 6px; font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .3px; }
+    
+    /* Style khusus baris Keterangan Kode Barang */
+    .kode-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) minmax(0, 1fr) 36px; gap: 8px; align-items: stretch; margin-bottom: 8px; }
+    .kode-row input, .kode-row textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 12.5px; }
+    .kode-row input[readonly] { background: #f1f5f9; text-align: center; }
+    .kode-row textarea { min-height: 40px; line-height: 1.35; resize: vertical; }
+    .kode-head { display: grid; grid-template-columns: 38px minmax(0, 1fr) minmax(0, 1fr) 36px; gap: 8px; margin-bottom: 6px; font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .3px; }
+
     .btn-remove-item { background: #fee2e2; color: #dc2626; border: none; width: 36px; height: 100%; min-height: 40px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #edf2f7; }
     .btn-cancel { background: #e2e8f0; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #475569; }
@@ -271,7 +279,7 @@
     %>
     
     <section class="cards-grid">
-      <!-- 1. Total Surat Jalan (Ikon Dokumen/Surat) -->
+      <!-- 1. Total Surat Jalan -->
       <div class="stat-card card-blue">
         <div class="card-header">
           <span class="card-title">Total Surat Jalan</span>
@@ -295,7 +303,7 @@
         </div>
       </div>
 
-      <!-- 2. Pengiriman Barang (Ikon Kardus / Kotak / Box) -->
+      <!-- 2. Pengiriman Barang -->
       <div class="stat-card card-green">
         <div class="card-header">
           <span class="card-title">Pengiriman Barang</span>
@@ -317,7 +325,7 @@
         </div>
       </div>
 
-      <!-- 3. Pengiriman Dokumen (Ikon Folder / Buku) -->
+      <!-- 3. Pengiriman Dokumen -->
       <div class="stat-card card-red">
         <div class="card-header">
           <span class="card-title">Pengiriman Dokumen</span>
@@ -462,6 +470,7 @@
           </div>
         </div>
 
+        <!-- DAFTAR BARANG UTAMA -->
         <div style="margin-top: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
           <label style="font-size: 13px; font-weight: 600; color: #334155;">Daftar Barang / Material</label>
           <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 12px;" onclick="addItemRow()">+ Tambah Barang</button>
@@ -487,25 +496,27 @@
           </div>
         </div>
 
+        <!-- KETERANGAN KODE BARANG -->
         <div style="margin-top: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
           <label style="font-size: 13px; font-weight: 600; color: #334155;">Keterangan Kode Barang</label>
-          <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 12px;" onclick="addItemRow()">+ Tambah Kode Barang</button>
+          <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 12px;" onclick="addKodeRow()">+ Tambah Kode Barang</button>
         </div>
 
-        <div class="item-head">
+        <div class="kode-head">
           <span>No</span>
           <span>Nama Barang</span>
           <span>Kode Barang</span>
-          
+          <span></span>
         </div>
-        <small style="display:block; margin:-2px 0 8px; color:#94a3b8; font-size:11px;">Jumlah dan satuan boleh diisi beberapa baris (tekan Enter) untuk barang dengan beberapa kode dalam satu baris.</small>
-        <div id="itemContainer">
-        <div class="item-row">
-          <input type="number" data-field="no" name="items[0][no]" value="1" readonly style="background:#f1f5f9; text-align:center;">
-          <textarea data-field="diskripsi" name="items[0][diskripsi]" placeholder="Nama barang" rows="2" required></textarea>
-          <textarea data-field="kodeBarang" name="items[0][kodeBarang]" placeholder="Kode Barang" rows="2" required></textarea>
+        <small style="display:block; margin:-2px 0 8px; color:#94a3b8; font-size:11px;">Masukkan rincian kode barang jika diperlukan.</small>
+        <div id="kodeBarangContainer">
+          <div class="kode-row">
+            <input type="number" data-field="no" name="kodeBarangList[0][no]" value="1" readonly style="background:#f1f5f9; text-align:center;">
+            <textarea data-field="namaBarang" name="kodeBarangList[0][namaBarang]" placeholder="Nama barang" rows="2" required></textarea>
+            <textarea data-field="kodeBarang" name="kodeBarangList[0][kodeBarang]" placeholder="Kode Barang" rows="2" required></textarea>
+            <button type="button" class="btn-remove-item" onclick="removeKodeRow(this)"><i class="fa-solid fa-trash"></i></button>
+          </div>
         </div>
-      </div>
 
         <div class="modal-actions">
           <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
@@ -530,6 +541,7 @@
       parentLi.classList.toggle('active');
     }
 
+    // Fungsi untuk Daftar Barang Utama
     function addItemRow() {
       const container = document.getElementById('itemContainer');
       const rowCount = container.getElementsByClassName('item-row').length;
@@ -563,6 +575,43 @@
         const fields = rows[i].querySelectorAll('[data-field]');
         fields.forEach(field => {
           field.name = `items[${i}][${field.dataset.field}]`;
+          if (field.dataset.field === 'no') field.value = i + 1;
+        });
+      }
+    }
+
+    // Fungsi khusus untuk Keterangan Kode Barang
+    function addKodeRow() {
+      const container = document.getElementById('kodeBarangContainer');
+      const rowCount = container.getElementsByClassName('kode-row').length;
+      
+      const newRow = document.createElement('div');
+      newRow.className = 'kode-row';
+      newRow.innerHTML = `
+        <input type="number" data-field="no" name="kodeBarangList[${rowCount}][no]" value="${rowCount + 1}" readonly style="background:#f1f5f9; text-align:center;">
+        <textarea data-field="namaBarang" name="kodeBarangList[${rowCount}][namaBarang]" placeholder="Nama barang" rows="2" required></textarea>
+        <textarea data-field="kodeBarang" name="kodeBarangList[${rowCount}][kodeBarang]" placeholder="Kode Barang" rows="2" required></textarea>
+        <button type="button" class="btn-remove-item" onclick="removeKodeRow(this)"><i class="fa-solid fa-trash"></i></button>
+      `;
+      container.appendChild(newRow);
+    }
+
+    function removeKodeRow(btn) {
+      const container = document.getElementById('kodeBarangContainer');
+      if (container.getElementsByClassName('kode-row').length > 1) {
+        btn.closest('.kode-row').remove();
+        reindexKodeRows();
+      } else {
+        alert("Minimal harus ada 1 baris keterangan kode barang.");
+      }
+    }
+
+    function reindexKodeRows() {
+      const rows = document.getElementById('kodeBarangContainer').getElementsByClassName('kode-row');
+      for (let i = 0; i < rows.length; i++) {
+        const fields = rows[i].querySelectorAll('[data-field]');
+        fields.forEach(field => {
+          field.name = `kodeBarangList[${i}][${field.dataset.field}]`;
           if (field.dataset.field === 'no') field.value = i + 1;
         });
       }
