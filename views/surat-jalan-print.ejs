@@ -13,16 +13,13 @@
       return s;
     }
 
-    /*
-     * Helper posisi vertikal proporsional (font standar 7.5 pt)
-     */
     function snapTop(y0, fontPt, baselineOffset) {
       const efektif = y0 + (fontPt * 0.75) - baselineOffset;
       return (Math.round(efektif / 0.75) * 0.75).toFixed(2);
     }
-    function T(y0)   { return snapTop(y0, 7.5, 5.75); }   // Teks standar 7.5 pt
-    function T7(y0)  { return snapTop(y0, 8.0, 5.75); }   // Teks bold 8.0 pt
-    function T5(y0)  { return snapTop(y0, 6.8, 5.00); }   // Teks kecil 6.8 pt
+    function T(y0)   { return snapTop(y0, 7.5, 5.75); }   
+    function T7(y0)  { return snapTop(y0, 8.0, 5.75); }   
+    function T5(y0)  { return snapTop(y0, 6.8, 5.00); }   
 
     const namaPerusahaanTampil = rapiNamaPerusahaan(suratJalan.namaPerusahaan);
     const namaPenerimaTampil = (suratJalan.namaPenerima || '').trim() || suratJalan.kepadaYth || '';
@@ -147,6 +144,18 @@
       cursorY += blockHeight;
       return hasil;
     });
+
+    // Hitung tinggi tabel secara dinamis agar pas dan tidak terlalu panjang ke bawah
+    const lastItem = posisiItem.length ? posisiItem[posisiItem.length - 1] : null;
+    let calculatedTableHeight = 140; 
+    if (lastItem) {
+      const maxItemBottom = Math.max(
+        lastItem.titleY + (lastItem.titleLines.length * 11.0),
+        lastItem.bodyVisuals.length ? lastItem.bodyVisuals[lastItem.bodyVisuals.length - 1].y + 9.0 : 0,
+        lastItem.ketYs.length ? lastItem.ketYs[lastItem.ketYs.length - 1] + 9.0 : 0
+      );
+      calculatedTableHeight = Math.max(140, (maxItemBottom - 225.21) + 12); 
+    }
   %>
   <style>
     @page { size: A4; margin: 0; }
@@ -198,7 +207,6 @@
     .toolbar .btn-close { background: #e2e8f0; color: #475569; }
     .toolbar .hint { color: #64748b; font-size: 12px; }
 
-    /* Ukuran font standar disesuaikan ke 7.5pt (sedikit lebih besar dari awal tapi tetap rapi) */
     .txt {
       position: absolute;
       white-space: nowrap;
@@ -234,15 +242,12 @@
       border-top: 0.425pt solid #000;
     }
 
-    /* Kotak tabel dinamis dengan tinggi pas di atas tanda tangan */
+    /* Kotak tabel diset dinamis via inline style */
     .tbl-border {
       position: absolute;
       left: 70.05pt;
       top: 225.21pt;
       width: 455.11pt;
-      min-height: 80pt;
-      height: auto;
-      bottom: 275pt;     /* Berhenti dengan pas di atas area keterangan & tanda tangan */
       border: 0.42pt solid #000;
     }
     .tbl-headline {
@@ -256,7 +261,6 @@
     .tbl-vline {
       position: absolute;
       top: 225.21pt;
-      bottom: 275pt;
       width: 0;
       border-left: 0.42pt solid #000;
     }
@@ -427,12 +431,12 @@
       <div class="txt small" style="left: 504.73pt; top: <%= T5(218.42) %>pt;"><%= kodeSurat %></div>
 
       <!-- TABEL BARANG -->
-      <div class="tbl-border"></div>
+      <div class="tbl-border" style="height: <%= calculatedTableHeight %>pt;"></div>
       <div class="tbl-headline"></div>
-      <div class="tbl-vline" style="left: 111.05pt;"></div>
-      <div class="tbl-vline" style="left: 239.05pt;"></div>
-      <div class="tbl-vline" style="left: 279.05pt;"></div>
-      <div class="tbl-vline" style="left: 324.05pt;"></div>
+      <div class="tbl-vline" style="left: 111.05pt; height: <%= calculatedTableHeight %>pt;"></div>
+      <div class="tbl-vline" style="left: 239.05pt; height: <%= calculatedTableHeight %>pt;"></div>
+      <div class="tbl-vline" style="left: 279.05pt; height: <%= calculatedTableHeight %>pt;"></div>
+      <div class="tbl-vline" style="left: 324.05pt; height: <%= calculatedTableHeight %>pt;"></div>
 
       <div class="col-th" style="left: 70.45pt; width: 41pt; top: <%= T(227.46) %>pt;">No</div>
       <div class="col-th" style="left: 111.05pt; width: 128pt; top: <%= T(227.46) %>pt;">Diskripsi</div>
@@ -463,9 +467,9 @@
       <% }); %>
       <% }); %>
 
-      <!-- KETERANGAN KODE BARANG -->
+      <!-- KETERANGAN KODE BARANG (Disesuaikan posisinya mengikuti tinggi dinamis tabel) -->
       <% if (kodeBarangList && kodeBarangList.length > 0) { %>
-      <div style="position: absolute; left: 71.51pt; top: 580pt; font-size: 7.5pt; line-height: 11pt;">
+      <div style="position: absolute; left: 71.51pt; top: <%= 232.21 + calculatedTableHeight + 12 %>pt; font-size: 7.5pt; line-height: 11pt;">
         <div style="font-weight: 700; margin-bottom: 2pt;">Keterangan Kode Barang:</div>
         <% kodeBarangList.forEach(function (kb) { %>
         <div><span style="font-weight: 700;"><%= kb.namaBarang %></span> : <span><%= kb.kodeBarang %></span></div>
@@ -473,18 +477,21 @@
       </div>
       <% } %>
 
-      <!-- TANDA TANGAN -->
-      <div class="sig-title" style="left: 99pt; top: <%= T(660) %>pt;">Yang Menyerahkan,</div>
-      <div class="sig-line" style="left: 99pt; top: <%= T(705) %>pt;">
+      <!-- TANDA TANGAN (Disesuaikan posisinya agar tidak bertabrakan) -->
+      <% 
+        const sigTop = Math.max(620, 232.21 + calculatedTableHeight + (kodeBarangList.length > 0 ? (35 + (kodeBarangList.length * 11)) : 20));
+      %>
+      <div class="sig-title" style="left: 99pt; top: <%= T(sigTop) %>pt;">Yang Menyerahkan,</div>
+      <div class="sig-line" style="left: 99pt; top: <%= T(sigTop + 45) %>pt;">
         <span class="sig-name"><span>(</span><span><%= namaPenyerahTampil %></span><span>)</span></span>
       </div>
-      <div class="sig-line b" style="left: 99pt; top: <%= T(718) %>pt;"><%= namaPerusahaanTampil %></div>
+      <div class="sig-line b" style="left: 99pt; top: <%= T(sigTop + 58) %>pt;"><%= namaPerusahaanTampil %></div>
 
-      <div class="sig-title" style="left: 347.4pt; top: <%= T(660) %>pt;">Penerima,</div>
-      <div class="sig-line" style="left: 347.4pt; top: <%= T(705) %>pt;">
+      <div class="sig-title" style="left: 347.4pt; top: <%= T(sigTop) %>pt;">Penerima,</div>
+      <div class="sig-line" style="left: 347.4pt; top: <%= T(sigTop + 45) %>pt;">
         <span class="sig-name right"><span>(</span><span><%= namaPenerimaTampil %></span><span>)</span></span>
       </div>
-      <div class="sig-line b" style="left: 347.4pt; top: <%= T(718) %>pt;"><%= kepadaYthTampil %></div>
+      <div class="sig-line b" style="left: 347.4pt; top: <%= T(sigTop + 58) %>pt;"><%= kepadaYthTampil %></div>
     </div>
   </div>
 
