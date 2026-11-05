@@ -12,7 +12,6 @@ const { MongoStore } = require('connect-mongo');
 const multer   = require('multer');
 const path     = require('path');
 const fs       = require('fs');
-const { PDFDocument, rgb } = require('pdf-lib');
 const crypto   = require('crypto');
 const bcrypt   = require('bcrypt');
 const ExcelJS  = require('exceljs');
@@ -1720,76 +1719,13 @@ app.get('/surat-jalan/cetak/:id', async (req, res) => {
         if (!suratJalan) {
             return res.status(404).send("Data Surat Jalan tidak ditemukan.");
         }
-
-        // Tentukan nama file template berdasarkan perusahaan yang dipilih
-        let templateFileName = 'PT.PUSPITA JAYA GIRI.pdf'; // Default atau sesuaikan
-        
-        if (suratJalan.namaPerusahaan && suratJalan.namaPerusahaan.includes('PUSPITA')) {
-            templateFileName = 'PT.PUSPITA JAYA GIRI.pdf';
-        } else {
-            // Jika untuk PT Dian Giri Saputra atau lainnya, arahkan ke file template terkait
-            templateFileName = 'PUSPITA JAYA GIRI.pdf'; 
-        }
-
-        const templatePath = path.join(__dirname, 'templates', templateFileName);
-        
-        if (!fs.existsSync(templatePath)) {
-            return res.status(404).send(`File template ${templateFileName} tidak ditemukan di folder templates/.`);
-        }
-
-        const existingPdfBytes = fs.readFileSync(templatePath);
-        const pdfDoc = await PDFDocument.load(existingPdfBytes);
-        const pages = pdfDoc.getPages();
-        const firstPage = pages[0];
-
-        // Format tanggal
-        const tanggalStr = suratJalan.tanggal ? new Date(suratJalan.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '';
-
-        // 1. Informasi Penerima & Alamat (Sisi Kiri)
-        firstPage.drawText(suratJalan.kepadaYth || '', { x: 110, y: 705, size: 10, rgb: rgb(0, 0, 0) });
-        firstPage.drawText(suratJalan.noTelepon || '', { x: 110, y: 690, size: 10, rgb: rgb(0, 0, 0) });
-        firstPage.drawText(suratJalan.alamat || '', { x: 110, y: 675, size: 9, maxWidth: 260, rgb: rgb(0, 0, 0) });
-
-        // 2. Tanggal & No Surat Jalan (Sisi Kanan)
-        firstPage.drawText(tanggalStr, { x: 410, y: 705, size: 10, rgb: rgb(0, 0, 0) });
-        firstPage.drawText(suratJalan.noSuratJalan || '', { x: 410, y: 690, size: 10, rgb: rgb(0, 0, 0) });
-
-        // 3. Perihal & Pekerjaan
-        firstPage.drawText(suratJalan.perihal || '', { x: 110, y: 630, size: 10, rgb: rgb(0, 0, 0) });
-        firstPage.drawText(suratJalan.pekerjaan || '', { x: 110, y: 615, size: 10, rgb: rgb(0, 0, 0) });
-
-        // 4. Centang Jenis Pengiriman (Dokumen / Barang)
-        if (suratJalan.jenisKirim === 'Dokumen') {
-            firstPage.drawText('v', { x: 532, y: 733, size: 10, rgb: rgb(0, 0, 0) });
-        } else {
-            firstPage.drawText('v', { x: 532, y: 720, size: 10, rgb: rgb(0, 0, 0) });
-        }
-
-        // 5. Loop Daftar Item Barang ke dalam Tabel PDF
-        let startY = 540; 
-        if (suratJalan.items && suratJalan.items.length > 0) {
-            suratJalan.items.forEach((item, index) => {
-                const currentY = startY - (index * 22);
-                firstPage.drawText(String(index + 1), { x: 52, y: currentY, size: 9, rgb: rgb(0, 0, 0) });
-                firstPage.drawText(item.diskripsi || '', { x: 85, y: currentY, size: 9, maxWidth: 210, rgb: rgb(0, 0, 0) });
-                firstPage.drawText(String(item.jumlah || ''), { x: 320, y: currentY, size: 9, rgb: rgb(0, 0, 0) });
-                firstPage.drawText(item.satuan || '', { x: 385, y: currentY, size: 9, rgb: rgb(0, 0, 0) });
-            });
-        }
-
-        // 6. Nama Penandatangan di Bawah
-        firstPage.drawText(suratJalan.namaPenyerah || suratJalan.diinputOleh || 'Fahrizi', { x: 250, y: 155, size: 10, rgb: rgb(0, 0, 0) });
-        firstPage.drawText(suratJalan.namaPenerima || suratJalan.kepadaYth || 'Penerima', { x: 420, y: 155, size: 10, rgb: rgb(0, 0, 0) });
-
-        const pdfBytes = await pdfDoc.save();
-
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `inline; filename=SuratJalan-${suratJalan.noSuratJalan.replace(/\//g, '-')}.pdf`);
-        res.send(Buffer.from(pdfBytes));
-
+        res.render('surat-jalan-print', { 
+            suratJalan: suratJalan,
+            wrapText: wrapText
+        });
     } catch (err) {
-        console.error("Error mengisi template PDF:", err);
-        res.status(500).send("Gagal memproses template PDF: " + err.message);
+        console.error("Error cetak surat jalan:", err);
+        res.status(500).send("Terjadi kesalahan pada server");
     }
 });
 

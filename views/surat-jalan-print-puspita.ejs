@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cetak Surat Jalan - <%= suratJalan.noSuratJalan %></title>
+  <%
+    function rapiNamaPerusahaan(nama) {
+      if (!nama) return 'PT Puspita Jayagiri';
+      let s = String(nama).replace(/\./g, '. ').replace(/\s+/g, ' ').trim();
+      s = s.toLowerCase().replace(/\b([a-z])/g, function (m) { return m.toUpperCase(); });
+      s = s.replace(/^Pt\.?\s*/i, 'PT ');
+      return s;
+    }
+
+    /*
+     * Chrome membulatkan posisi vertikal elemen ke 1 px (0.75 pt) dan
+     * menempatkan baseline pada offset tertentu. Helper di bawah menghitung
+     * top CSS agar baseline teks jatuh sedekat mungkin dengan template PDF.
+     * Offset baseline diskalakan dari template 6.5 pt yang sudah teruji.
+     */
+    function snapTop(y0, fontPt) {
+      const baselineOffset = fontPt * (5.25 / 6.5);
+      const efektif = y0 + (fontPt * 0.75) - baselineOffset;
+      return (Math.round(efektif / 0.75) * 0.75).toFixed(2);
+    }
+    function TP(y0)  { return snapTop(y0, 7.37); }  // Calibri 7.37 pt
+    function TP8(y0) { return snapTop(y0, 7.98); }  // Calibri 7.98 pt bold
+    function TP6(y0) { return snapTop(y0, 6.76); }  // Calibri 6.76 pt
+
+    const namaPenerimaTampil = (suratJalan.namaPenerima || '').trim() || suratJalan.kepadaYth || '';
+    const namaPenyerahTampil = (suratJalan.namaPenyerah || '').trim() || suratJalan.diinputOleh || 'Audri';
+    const kepadaYthTampil = rapiNamaPerusahaan(suratJalan.kepadaYth || '');
+
+    // Jangan tampilkan nama penerima dua kali bila isinya sama dengan "Kepada Yth".
+    const kepadaYthNormal = String(kepadaYthTampil).replace(/\s+/g, ' ').trim().toLowerCase();
+    const namaPenerimaNormal = String(namaPenerimaTampil).replace(/\s+/g, ' ').trim().toLowerCase();
+    const tampilkanBarisPenerima = namaPenerimaNormal !== '' && namaPenerimaNormal !== kepadaYthNormal;
+    const jenisKirim = String(suratJalan.jenisKirim || 'Barang').trim();
+    const isDokumen = jenisKirim.toLowerCase() === 'dokumen';
+    const kodeSurat = isDokumen ? 'DOK-ADR' : 'BRG-ADR';
+
+    // Format tanggal mengikuti template: hari selalu dua digit.
+    let tanggalTampil = '-';
+    if (suratJalan.tanggal) {
+      const tgl = new Date(suratJalan.tanggal);
+      const hari = String(tgl.getUTCDate()).padStart(2, '0');
+      const bulan = tgl.toLocaleDateString('id-ID', { month: 'long', timeZone: 'UTC' });
+      tanggalTampil = hari + ' ' + bulan + ' ' + tgl.getUTCFullYear();
+    }
+
+    const alamatLines = String(suratJalan.alamat || '')
+      .split(/\r?\n/)
+      .map(function (line) { return line.trim(); })
+      .filter(function (line) { return line.length > 0; })
+      .slice(0, 5);
+    const daftarItem = Array.isArray(suratJalan.items) ? suratJalan.items : [];
+
+    // Bungkus teks per kolom agar tidak melewati garis vertikal.
+    const bungkus = (typeof wrapText === 'function')
+      ? wrapText
+      : function (text) { return String(text || '').replace(/\r\n?/g, '\n').split('\n'); };
+
+    const DESC_MAX_WIDTH = 138.5; // isi kolom diskripsi: 99.54 s/d 241.04, diberi margin aman
+    const KET_MAX_WIDTH = 204.0;  // lebar kolom keterangan 208.36
+
+    const TITLE_SIZE = 7.98;
+    const BODY_SIZE = 7.37;
+    const KET_SIZE = 6.76;
+    const TITLE_PITCH = 11.96;
+    const BODY_PITCH = 11.67;
+    const KET_PITCH = 10.80;
+
+    // Hitung posisi vertikal setiap item mengikuti tinggi baris template PDF.
+    let cursorY = 271.52;
+    const posisiItem = daftarItem.map(function (item, index) {
+      const lines = String(item.diskripsi || '').replace(/\r\n?/g, '\n').split('\n');
+      const judul = lines.length ? lines[0] : '';
+      const body = lines.slice(1);
+      const titleY = cursorY + 11.67;
+
+      // Judul diskripsi (bold) juga dibungkus bila terlalu panjang.
+      let titleLines = bungkus(judul, 'bold', TITLE_SIZE, DESC_MAX_WIDTH);
+      if (!titleLines.length) titleLines = [''];
+      const titleHeight = titleLines.length * TITLE_PITCH;
+
+      // Setiap baris diskripsi dibungkus sesuai lebar kolom.
+      const bodyVisuals = [];
+      body.forEach(function (line) {
+        if (String(line).trim() === '') {
+          bodyVisuals.push({ text: '', height: BODY_PITCH });
+        } else {
+          bungkus(line, 'regular', BODY_SIZE, DESC_MAX_WIDTH).forEach(function (visual) {
+            bodyVisuals.push({ text: visual, height: BODY_PITCH });
+          });
+        }
+      });
+
+      let bodyCursor = titleY + titleHeight;
+      bodyVisuals.forEach(function (visual) {
+        visual.y = bodyCursor;
+        bodyCursor += visual.height;
+      });
+
+      const lastDescY = bodyVisuals.length
+        ? bodyVisuals[bodyVisuals.length - 1].y
+        : (titleLines.length ? titleY + ((titleLines.length - 1) * TITLE_PITCH) : titleY);
+
+      const jumlahLines = (item.jumlah === null || item.jumlah === undefined || item.jumlah === '')
+        ? []
+        : String(item.jumlah).replace(/\r\n?/g, '\n').split('\n');
+      const satuanLines = String(item.satuan || '').replace(/\r\n?/g, '\n').split('\n').filter(function (l, i, arr) {
+        return !(arr.length === 1 && l === '');
+      });
+
+      // Template menempatkan Jumlah/Satuan sejajar dengan judul item (rata atas).
+      const jumlahYs = jumlahLines.map(function (_, i) {
+        return titleY + 0.62 + (i * BODY_PITCH);
+      });
+      const satuanYs = satuanLines.map(function (_, i) {
+        return titleY + 0.62 + (i * BODY_PITCH);
+      });
+
+      // Keterangan juga dibungkus agar tidak melewati garis kolom.
+      let ketLines = [];
+      const ketRaw = String(item.keterangan || '').replace(/\r\n?/g, '\n');
+      if (ketRaw.trim() !== '') {
+        ketRaw.split('\n').forEach(function (line) {
+          if (line.trim() === '') {
+            ketLines.push('');
+          } else {
+            bungkus(line, 'regular', KET_SIZE, KET_MAX_WIDTH).forEach(function (visual) {
+              ketLines.push(visual);
+            });
+          }
+        });
+      }
+
+      const ketYs = [];
+      if (ketLines.length) {
+        let lastKetY = lastDescY + 0.61;
+        const minLastKetY = titleY + titleHeight + ((ketLines.length - 1) * KET_PITCH);
+        if (lastKetY < minLastKetY) lastKetY = minLastKetY;
+        ketLines.forEach(function (_, i) {
+          ketYs.push(lastKetY - ((ketLines.length - 1 - i) * KET_PITCH));
+        });
+      }
+
+      const descHeight = titleHeight + bodyVisuals.reduce(function (total, visual) {
+        return total + visual.height;
+      }, 0);
+      const ketHeight = ketLines.length * KET_PITCH;
+      const jumlahHeight = jumlahLines.length
+        ? 0.62 + ((jumlahLines.length - 1) * BODY_PITCH) + BODY_SIZE
+        : 0;
+      const satuanHeight = satuanLines.length
+        ? 0.62 + ((satuanLines.length - 1) * BODY_PITCH) + BODY_SIZE
+        : 0;
+      const contentHeight = Math.max(descHeight, ketHeight, jumlahHeight, satuanHeight);
+      const blockHeight = 11.67 + contentHeight + 0.02;
+
+      const hasil = {
+        index: index,
+        titleLines: titleLines,
+        titleY: titleY,
+        bodyVisuals: bodyVisuals,
+        jumlahLines: jumlahLines,
+        jumlahYs: jumlahYs,
+        satuanLines: satuanLines,
+        satuanYs: satuanYs,
+        numberY: titleY - 0.18,
+        ketLines: ketLines,
+        ketYs: ketYs
+      };
+
+      cursorY += blockHeight;
+      return hasil;
+    });
+  %>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #e5e7eb; }
+    body {
+      font-family: Calibri, Carlito, 'Segoe UI', Arial, sans-serif;
+      color: #000;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .page-wrap { padding: 24px 0 40px; }
+    .page {
+      position: relative;
+      width: 595.28pt;
+      height: 841.89pt;
+      margin: 0 auto;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 2px 18px rgba(0, 0, 0, 0.25);
+    }
+    .toolbar {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 13px;
+      color: #334155;
+    }
+    .toolbar button {
+      border: none;
+      border-radius: 7px;
+      padding: 9px 16px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .toolbar .btn-print { background: #7a1b1b; color: #fff; }
+    .toolbar .btn-print:hover { background: #5c1313; }
+    .toolbar .btn-close { background: #e2e8f0; color: #475569; }
+    .toolbar .hint { color: #64748b; font-size: 12px; }
+
+    .txt {
+      position: absolute;
+      white-space: nowrap;
+      font-size: 7.37pt;
+      line-height: 7.37pt;
+    }
+    .b { font-weight: 700; }
+    .small { font-size: 6.76pt; line-height: 6.76pt; }
+
+    .letterhead {
+      position: absolute;
+      left: 50.4pt;
+      top: 63.92pt;
+      width: 303.89pt;
+      height: 63.31pt;
+    }
+
+    .chk {
+      position: absolute;
+      width: 7.37pt;
+      height: 7.37pt;
+      border: 0.62pt solid #000;
+      background: #fff;
+    }
+    .chk svg { display: block; width: 100%; height: 100%; }
+
+    .title-underline {
+      position: absolute;
+      left: 443.96pt;
+      top: 125.28pt;
+      width: 40.82pt;
+      height: 0;
+      border-top: 0.482pt solid #000;
+    }
+
+    /* Tabel: border luar + garis ganda header + garis vertikal kolom. */
+    .tbl-border {
+      position: absolute;
+      left: 49.9275pt;
+      top: 258.1056pt;
+      width: 495.145pt;
+      height: 290.0944pt;
+      border-top: 0.4725pt solid #000;
+      border-bottom: 0.4725pt solid #000;
+    }
+    .tbl-hline {
+      position: absolute;
+      left: 49.9275pt;
+      width: 495.145pt;
+      height: 0;
+      border-top: 0.4725pt solid #000;
+    }
+    .tbl-vtop {
+      position: absolute;
+      top: 258.1056pt;
+      height: 11.3392pt;
+      width: 0;
+      border-left: 0.4725pt solid #000;
+    }
+    .tbl-vbody {
+      position: absolute;
+      top: 270.8622pt;
+      height: 277.3378pt;
+      width: 0;
+      border-left: 0.4725pt solid #000;
+    }
+    .col-th {
+      position: absolute;
+      font-size: 7.37pt;
+      line-height: 7.37pt;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .item-num {
+      position: absolute;
+      left: 50.1638pt;
+      width: 47.7191pt;
+      font-size: 7.98pt;
+      line-height: 7.98pt;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .item-title {
+      position: absolute;
+      left: 99.54pt;
+      font-size: 7.98pt;
+      line-height: 7.98pt;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .item-body {
+      position: absolute;
+      left: 99.54pt;
+      font-size: 7.37pt;
+      line-height: 7.37pt;
+      white-space: pre;
+    }
+    .col-jml {
+      position: absolute;
+      left: 241.0403pt;
+      width: 47.7191pt;
+      font-size: 7.37pt;
+      line-height: 7.37pt;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .col-sat {
+      position: absolute;
+      left: 288.7594pt;
+      width: 47.7191pt;
+      font-size: 7.37pt;
+      line-height: 7.37pt;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .col-ket {
+      position: absolute;
+      left: 336.4785pt;
+      width: 208.3578pt;
+      font-size: 6.76pt;
+      line-height: 6.76pt;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .sig-title {
+      position: absolute;
+      font-size: 7.37pt;
+      font-weight: 700;
+      line-height: 7.37pt;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .sig-line {
+      position: absolute;
+      font-size: 7.37pt;
+      line-height: 7.37pt;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .sig-name {
+      display: inline-flex;
+      justify-content: space-between;
+      width: 100%;
+      font-weight: 700;
+    }
+
+    @media print {
+      html, body { background: #fff !important; }
+      .no-print { display: none !important; }
+      .page-wrap { padding: 0 !important; }
+      .page {
+        width: 595.28pt;
+        height: 841.89pt;
+        margin: 0 !important;
+        box-shadow: none !important;
+        page-break-after: avoid;
+        break-after: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <div class="page">
+      <!-- KOP / LETTERHEAD PT PUSPITA JAYA GIRI -->
+      <img class="letterhead" src="/images/surat-jalan-header-puspita.png" alt="Kop Surat PT Puspita Jayagiri">
+
+      <!-- CHECKBOX JENIS PENGIRIMAN -->
+      <div class="chk" style="left: 437.35pt; top: 86.32pt;">
+        <% if (isDokumen) { %>
+        <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.6 5.2 L3.9 7.5 L8.5 2.1" fill="none" stroke="#000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <% } %>
+      </div>
+      <div class="txt" style="left: 498.77pt; top: <%= TP(86.32) %>pt;">Dokumen</div>
+
+      <div class="chk" style="left: 438.30pt; top: 97.66pt;">
+        <% if (!isDokumen) { %>
+        <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.6 5.2 L3.9 7.5 L8.5 2.1" fill="none" stroke="#000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <% } %>
+      </div>
+      <div class="txt" style="left: 498.77pt; top: <%= TP(97.66) %>pt;">Barang</div>
+
+      <!-- JUDUL -->
+      <div class="txt b" style="left: 443.96pt; top: <%= TP(118.92) %>pt;">SURAT JALAN</div>
+      <div class="title-underline"></div>
+
+      <!-- INFO KIRI: PENERIMA -->
+      <div class="txt b" style="left: 51.82pt; top: <%= TP(140.18) %>pt;">Kepada Yth,</div>
+      <div class="txt b" style="left: 99.54pt; top: <%= TP(140.18) %>pt;">: <%= kepadaYthTampil %></div>
+
+      <% if (tampilkanBarisPenerima) { %>
+      <div class="txt b" style="left: 102.87pt; top: <%= TP(151.52) %>pt;"><%= namaPenerimaTampil %></div>
+      <% } %>
+
+      <div class="txt b" style="left: 51.82pt; top: <%= TP(162.86) %>pt;">No. Telepon</div>
+      <div class="txt b" style="left: 99.54pt; top: <%= TP(162.86) %>pt;">: <%= suratJalan.noTelepon || '-' %></div>
+
+      <div class="txt b" style="left: 51.82pt; top: <%= TP(174.21) %>pt;">Alamat</div>
+      <% alamatLines.forEach(function (line, i) { %>
+        <% if (i === 0) { %>
+        <div class="txt b" style="left: 99.54pt; top: <%= TP(174.20) %>pt;">: <%= line %></div>
+        <% } else { %>
+        <div class="txt b" style="left: 102.87pt; top: <%= TP(185.54 + ((i - 1) * 11.33)) %>pt;"><%= line %></div>
+        <% } %>
+      <% }) %>
+
+      <div class="txt b" style="left: 51.82pt; top: <%= TP(228.06) %>pt;">Perihal</div>
+      <div class="txt b" style="left: 99.54pt; top: <%= TP(228.06) %>pt;">: <%= suratJalan.perihal || '-' %></div>
+
+      <div class="txt b" style="left: 51.82pt; top: <%= TP(239.40) %>pt;">Pekerjaaan</div>
+      <div class="txt b" style="left: 99.54pt; top: <%= TP(239.40) %>pt;">: <%= suratJalan.pekerjaan || '-' %></div>
+
+      <!-- INFO KANAN -->
+      <div class="txt b" style="left: 338.13pt; top: <%= TP(140.18) %>pt;">Tanggal</div>
+      <div class="txt b" style="left: 385.85pt; top: <%= TP(140.18) %>pt;">:</div>
+      <div class="txt small" style="left: 397.19pt; top: <%= TP6(140.79) %>pt;"><%= tanggalTampil %></div>
+
+      <div class="txt b" style="left: 338.13pt; top: <%= TP(162.86) %>pt;">No. Surat Jalan</div>
+      <div class="txt b" style="left: 385.85pt; top: <%= TP(162.86) %>pt;">:</div>
+      <div class="txt" style="left: 397.19pt; top: <%= TP(162.86) %>pt;"><%= suratJalan.noSuratJalan %></div>
+
+      <!-- KODE -->
+      <div class="txt small" style="left: 517.84pt; top: <%= TP6(250.40) %>pt;"><%= kodeSurat %></div>
+
+      <!-- TABEL BARANG -->
+      <div class="tbl-border"></div>
+      <div class="tbl-hline" style="top: 269.445pt;"></div>
+      <div class="tbl-hline" style="top: 270.390pt;"></div>
+      <% [50.1638, 97.8829, 241.0403, 288.7594, 336.4785, 544.8362].forEach(function (x) { %>
+      <div class="tbl-vtop" style="left: <%= (x - 0.2362).toFixed(4) %>pt;"></div>
+      <div class="tbl-vbody" style="left: <%= (x - 0.2362).toFixed(4) %>pt;"></div>
+      <% }); %>
+
+      <div class="col-th" style="left: 50.1638pt; width: 47.7191pt; top: <%= TP(260.66) %>pt;">No</div>
+      <div class="col-th" style="left: 97.8829pt; width: 143.1574pt; top: <%= TP(260.66) %>pt;">Diskripsi</div>
+      <div class="col-th" style="left: 241.0403pt; width: 47.7191pt; top: <%= TP(260.66) %>pt;">Jumlah</div>
+      <div class="col-th" style="left: 288.7594pt; width: 47.7191pt; top: <%= TP(260.66) %>pt;">Satuan</div>
+      <div class="col-th" style="left: 336.4785pt; width: 208.3578pt; top: <%= TP(260.66) %>pt;">Keterangan</div>
+
+      <% posisiItem.forEach(function (it) { %>
+      <div class="item-num" style="top: <%= TP8(it.numberY) %>pt;"><%= it.index + 1 %></div>
+      <% it.titleLines.forEach(function (line, i) { %>
+      <% if (line !== '') { %>
+      <div class="item-title" style="top: <%= TP8(it.titleY + (i * 11.96)) %>pt;"><%= line %></div>
+      <% } %>
+      <% }); %>
+      <% it.bodyVisuals.forEach(function (visual) { %>
+      <% if (visual.text !== '') { %>
+      <div class="item-body" style="top: <%= TP(visual.y) %>pt;"><%= visual.text %></div>
+      <% } %>
+      <% }); %>
+      <% it.jumlahLines.forEach(function (line, i) { %>
+      <div class="col-jml" style="top: <%= TP(it.jumlahYs[i]) %>pt;"><%= line %></div>
+      <% }); %>
+      <% it.satuanLines.forEach(function (line, i) { %>
+      <div class="col-sat" style="top: <%= TP(it.satuanYs[i]) %>pt;"><%= line %></div>
+      <% }); %>
+      <% it.ketLines.forEach(function (line, i) { %>
+      <div class="col-ket" style="top: <%= TP6(it.ketYs[i]) %>pt;"><%= line %></div>
+      <% }); %>
+      <% }); %>
+
+      <!-- TANDA TANGAN -->
+      <div class="sig-title" style="left: 110.40pt; width: 69.68pt; top: <%= TP(590.44) %>pt;">Yang Menyerahkan,</div>
+      <div class="sig-line" style="left: 110.40pt; width: 69.68pt; top: <%= TP(641.47) %>pt;">
+        <span class="sig-name"><span>(</span><span><%= namaPenyerahTampil %></span><span>)</span></span>
+      </div>
+      <div class="sig-line b" style="left: 110.40pt; width: 69.68pt; top: <%= TP(652.80) %>pt;">PT. Puspita Jayagiri</div>
+
+      <div class="sig-title" style="left: 383.96pt; width: 65.24pt; top: <%= TP(590.44) %>pt;">Penerima,</div>
+      <div class="sig-line" style="left: 383.96pt; width: 65.24pt; top: <%= TP(641.47) %>pt;">
+        <span class="sig-name"><span>(</span><span><%= namaPenerimaTampil %></span><span>)</span></span>
+      </div>
+      <div class="sig-line b" style="left: 383.96pt; width: 65.24pt; top: <%= TP(652.80) %>pt;"><%= kepadaYthTampil %></div>
+    </div>
+  </div>
+
+  <div class="toolbar no-print">
+    <span class="hint">Pilih <strong>Save as PDF</strong>, ukuran A4, margin <strong>None</strong>.</span>
+    <button type="button" class="btn-print" onclick="window.print()">Cetak / Simpan PDF</button>
+    <button type="button" class="btn-close" onclick="window.close()">Tutup</button>
+  </div>
+
+  <script>
+    window.addEventListener('load', function () {
+      var img = document.querySelector('.letterhead');
+      var cetak = function () {
+        setTimeout(function () { window.print(); }, 350);
+      };
+      if (img && !img.complete) {
+        img.addEventListener('load', cetak);
+        img.addEventListener('error', cetak);
+      } else {
+        cetak();
+      }
+    });
+  </script>
+</body>
+</html>
