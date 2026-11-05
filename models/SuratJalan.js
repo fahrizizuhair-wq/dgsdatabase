@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const suratJalanSchema = new mongoose.Schema({
     noSuratJalan: { type: String, required: true, unique: true },
     tanggal: { type: Date, default: Date.now },
+    jenisSurat: { type: String, default: 'Surat Jalan' },
     namaPerusahaan: { type: String, required: true },
     kepadaYth: { type: String, required: true },
     namaPenerima: { type: String, default: '' },

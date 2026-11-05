@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak Surat Jalan - <%= suratJalan.noSuratJalan %></title>
+  <title>Cetak <%= suratJalan.jenisSurat || 'Surat Jalan' %> - <%= suratJalan.noSuratJalan %></title>
   <%
     function rapiNamaPerusahaan(nama) {
       if (!nama) return 'PT Dian Giri Saputra';
@@ -25,6 +25,9 @@
     const namaPenerimaTampil = (suratJalan.namaPenerima || '').trim() || suratJalan.kepadaYth || '';
     const namaPenyerahTampil = (suratJalan.namaPenyerah || '').trim() || suratJalan.diinputOleh || 'Deka';
     const kepadaYthTampil = rapiNamaPerusahaan(suratJalan.kepadaYth || '');
+
+    // Menangkap pilihan Jenis Surat dari database/form secara dinamis (Default: SURAT JALAN)
+    const jenisSuratTampil = String(suratJalan.jenisSurat || 'Surat Jalan').trim().toUpperCase();
 
     const kepadaYthNormal = String(kepadaYthTampil).replace(/\s+/g, ' ').trim().toLowerCase();
     const namaPenerimaNormal = String(namaPenerimaTampil).replace(/\s+/g, ' ').trim().toLowerCase();
@@ -387,8 +390,8 @@
       </div>
       <div class="txt" style="left: 489.75pt; top: <%= T(83.74) %>pt;">Barang</div>
 
-      <!-- JUDUL -->
-      <div class="txt b" style="left: 426.43pt; top: <%= T(102.49) %>pt;">SURAT JALAN</div>
+      <!-- JUDUL DINAMIS (SURAT JALAN / TANDA TERIMA) -->
+      <div class="txt b" style="left: 426.43pt; top: <%= T(102.49) %>pt;"><%= jenisSuratTampil %></div>
       <div class="title-underline"></div>
 
       <!-- INFO KIRI: PENERIMA -->
@@ -467,7 +470,7 @@
       <% }); %>
       <% }); %>
 
-      <!-- KETERANGAN KODE BARANG (Disesuaikan posisinya mengikuti tinggi dinamis tabel) -->
+      <!-- KETERANGAN KODE BARANG -->
       <% if (kodeBarangList && kodeBarangList.length > 0) { %>
       <div style="position: absolute; left: 71.51pt; top: <%= 232.21 + calculatedTableHeight + 12 %>pt; font-size: 7.5pt; line-height: 11pt;">
         <div style="font-weight: 700; margin-bottom: 2pt;">Keterangan Kode Barang:</div>
@@ -477,7 +480,7 @@
       </div>
       <% } %>
 
-      <!-- TANDA TANGAN (Disesuaikan posisinya agar tidak bertabrakan) -->
+      <!-- TANDA TANGAN -->
       <% 
         const sigTop = Math.max(620, 232.21 + calculatedTableHeight + (kodeBarangList.length > 0 ? (35 + (kodeBarangList.length * 11)) : 20));
       %>

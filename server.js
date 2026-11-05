@@ -1655,7 +1655,7 @@ app.get('/surat-jalan-user', async (req, res) => {
 
 app.post('/surat-jalan-user/add', async (req, res) => {
     try {
-        const { noSuratJalan, tanggal, namaPerusahaan, kepadaYth, namaPenerima, namaPenyerah, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items, kodeBarangList } = req.body;
+        const { jenisSurat, noSuratJalan, tanggal, namaPerusahaan, kepadaYth, namaPenerima, namaPenyerah, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items, kodeBarangList } = req.body;
         
         const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username)) ? 
                          (req.session.user.namaLengkap || req.session.user.username) : 'User Operasional';
@@ -1670,7 +1670,6 @@ app.post('/surat-jalan-user/add', async (req, res) => {
                 keterangan: item.keterangan || ''
             }));
 
-        
         const daftarKodeBarang = (Array.isArray(kodeBarangList) ? kodeBarangList : [kodeBarangList])
             .filter(kb => kb && (kb.namaBarang || kb.kodeBarang))
             .map((kb, index) => ({
@@ -1680,6 +1679,7 @@ app.post('/surat-jalan-user/add', async (req, res) => {
             }));
 
         const suratBaru = new SuratJalan({
+            jenisSurat: jenisSurat || 'Surat Jalan',
             noSuratJalan,
             tanggal: tanggal || Date.now(),
             namaPerusahaan,
