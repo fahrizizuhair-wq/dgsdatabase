@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Surat Jalan - Dian Giri Saputra</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; color: #333; background-color: #f4f6f9; min-height: 100vh; position: relative; }
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%), 
+                  url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover; z-index: -1; pointer-events: none;
+    }
+
+    /* Styling Sidebar */
+    .sidebar { width: 260px; height: 100vh; position: fixed; top: 0; left: 0; background: #7a1b1b; color: #fff; display: flex; flex-direction: column; justify-content: space-between; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
+    .sidebar-header { padding: 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-wrap { display: flex; align-items: center; gap: 12px; }
+    .brand-logo-img { width: 36px; height: 36px; object-fit: contain; border-radius: 6px; }
+    .brand-text h2 { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.2; }
+    .brand-text span { font-size: 11px; color: rgba(255,255,255,0.7); }
+    .close-sidebar-btn { background: none; border: none; color: #fff; cursor: pointer; display: none; }
+    
+    .sidebar-user-card { margin: 15px 20px; padding: 12px; background: rgba(0,0,0,0.15); border-radius: 8px; display: flex; align-items: center; gap: 12px; }
+    .user-avatar-circle { width: 36px; height: 36px; background: #fff; color: #7a1b1b; font-weight: 700; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .sidebar-user-info h4 { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+    .sidebar-user-info span { font-size: 11px; color: rgba(255,255,255,0.7); }
+
+    .nav-label { padding: 10px 20px 5px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.5); }
+    .nav-menu { list-style: none; padding: 0 10px; overflow-y: auto; flex: 1; }
+    .nav-item { margin-bottom: 4px; }
+    .nav-item a { display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; font-weight: 500; border-radius: 8px; transition: all 0.2s; }
+    .nav-item a:hover, .nav-item.active > a { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    
+    /* Dropdown Sidebar */
+    .dropdown-menu { list-style: none; padding-left: 32px; display: none; flex-direction: column; gap: 2px; margin-top: 2px; }
+    .nav-item.dropdown.open .dropdown-menu { display: flex; }
+    .dropdown-menu a { padding: 8px 12px; font-size: 12px; color: rgba(255,255,255,0.75); }
+    .dropdown-menu a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    .dropdown-toggle { display: flex; align-items: center; justify-content: space-width; width: 100%; cursor: pointer; }
+    .dropdown-toggle-left { display: flex; align-items: center; gap: 12px; }
+    .arrow { font-size: 10px; transition: transform 0.3s; margin-left: auto; }
+    .nav-item.dropdown.open .arrow { transform: rotate(180deg); }
+
+    .sidebar-footer { padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .btn-bottom { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 13px; font-weight: 500; padding: 8px 10px; border-radius: 6px; transition: background 0.2s; }
+    .btn-bottom:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    /* Layout Konten Utama */
+    .main-content { margin-left: 260px; padding: 30px; max-width: calc(100% - 260px); }
+    
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    .page-title h1 { color: #7a1b1b; font-size: 24px; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .page-title p { color: #64748b; font-size: 14px; }
+
+    .btn-primary {
+      background-color: #7a1b1b; color: white; padding: 10px 20px; border-radius: 8px;
+      font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 4px 12px rgba(122, 27, 27, 0.3); transition: background 0.2s; border: none; cursor: pointer;
+    }
+    .btn-primary:hover { background-color: #5c1313; }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+      border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); overflow: hidden; padding: 25px;
+    }
+
+    .table-responsive { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+    th { background-color: #f8fafc; color: #475569; font-weight: 700; padding: 14px 16px; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; color: #1e293b; vertical-align: middle; }
+    tr:hover { background-color: #f8fafc; }
+
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-barang { background-color: #e0f2fe; color: #0369a1; }
+    .badge-dokumen { background-color: #fef3c7; color: #b45309; }
+
+    .action-btns { display: flex; gap: 8px; }
+    .btn-action {
+      padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px; border: none; cursor: pointer;
+    }
+    .btn-view { background-color: #f1f5f9; color: #475569; }
+    .btn-view:hover { background-color: #e2e8f0; }
+    .btn-print { background-color: #7a1b1b; color: #fff; }
+    .btn-print:hover { background-color: #5c1313; }
+
+    .empty-state { text-align: center; padding: 40px; color: #64748b; }
+    .empty-state i { font-size: 40px; margin-bottom: 10px; color: #cbd5e1; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 0; overflow: hidden; }
+      .main-content { margin-left: 0; max-width: 100%; padding: 15px; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <div class="brand-wrap">
+          <img src="/images/dgs.png" alt="Logo DGS" class="brand-logo-img" onerror="this.style.display='none'">
+          <div class="brand-text">
+            <h2>Dian Giri Saputra</h2>
+            <span>User Database</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-user-card">
+          <div class="user-avatar-circle">
+              <%= (typeof user !== 'undefined' && user && user.username) ? user.username.substring(0,2).toUpperCase() : 'DG' %>
+          </div>
+          <div class="sidebar-user-info">
+              <h4><%= (typeof user !== 'undefined' && user && (user.namaLengkap || user.username)) ? (user.namaLengkap || user.username) : 'User' %></h4>
+              <span>User Operasional</span>
+          </div>
+      </div>
+
+      <div class="nav-label">Menu Navigasi</div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="/dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard Utama</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>Data Vendor</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/harga-dasar-user">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+            <span>Harga Dasar</span>
+          </a>
+        </li>
+        <li class="nav-item dropdown">
+          <a href="javascript:void(0)" class="dropdown-toggle" onclick="toggleDropdown(this)">
+            <div class="dropdown-toggle-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+              <span>Stok & Barang</span>
+            </div>
+            <span class="arrow">&#9662;</span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="/stok-masuk-user">Stok Masuk</a></li>
+            <li><a href="/stok-keluar-user">Stok Keluar</a></li>
+            <li><a href="/stok-opname-user">Stok Opname</a></li>
+          </ul>
+        </li>
+
+        <!-- Menu Dropdown Laporan & Surat Jalan -->
+        <li class="nav-item dropdown open">
+          <a href="javascript:void(0)" class="dropdown-toggle" onclick="toggleDropdown(this)">
+            <div class="dropdown-toggle-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Laporan</span>
+            </div>
+            <span class="arrow">&#9662;</span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="/laporan-user">Data Laporan</a></li>
+            <li><a href="/surat-jalan" style="color: #fff; font-weight: 700;">Surat Jalan</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item">
+          <a href="/data-bahan-kain">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span>Data kain</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="/" class="btn-bottom">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Keluar / Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- KONTEN UTAMA -->
+  <div class="main-content">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Data Surat Jalan</h1>
+        <p>Kelola dan cetak surat jalan pengiriman barang / dokumen PT Dian Giri Saputra</p>
+      </div>
+      <a href="/surat-jalan/tambah" class="btn-primary">
+        <i class="fa-solid fa-plus"></i> Buat Surat Jalan Baru
+      </a>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>No. Surat Jalan</th>
+              <th>Tanggal</th>
+              <th>Kepada Yth</th>
+              <th>Perihal / Pekerjaan</th>
+              <th>Jenis</th>
+              <th>Diinput Oleh</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (typeof suratJalans !== 'undefined' && suratJalans.length > 0) { %>
+              <% suratJalans.forEach(item => { %>
+                <tr>
+                  <td><strong><%= item.noSuratJalan %></strong></td>
+                  <td><%= item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-' %></td>
+                  <td><%= item.kepadaYth %></td>
+                  <td>
+                    <div style="font-weight: 600;"><%= item.perihal || '-' %></div>
+                    <div style="font-size: 12px; color: #64748b;"><%= item.pekerjaan || '' %></div>
+                  </td>
+                  <td>
+                    <span class="badge <%= item.jenisKirim === 'Dokumen' ? 'badge-dokumen' : 'badge-barang' %>">
+                      <%= item.jenisKirim || 'Barang' %>
+                    </span>
+                  </td>
+                  <td><%= item.diinputOleh || '-' %></td>
+                  <td>
+                    <div class="action-btns">
+                      <a href="/surat-jalan/detail/<%= item._id %>" class="btn-action btn-view" title="Detail">
+                        <i class="fa-solid fa-eye"></i> Detail
+                      </a>
+                      <a href="/surat-jalan/cetak/<%= item._id %>" target="_blank" class="btn-action btn-print" title="Cetak PDF">
+                        <i class="fa-solid fa-print"></i> Cetak
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <i class="fa-regular fa-folder-open"></i>
+                    <p>Belum ada data Surat Jalan yang diinput.</p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleDropdown(element) {
+      const parent = element.parentElement;
+      parent.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
