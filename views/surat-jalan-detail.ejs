@@ -107,15 +107,15 @@
       </tbody>
     </table>
 
-    <!-- Keterangan Kode Barang (Tampil berdampingan di bawah tabel) -->
+    <!-- Keterangan Kode Barang (Tanpa background/kotak, teks biasa berdampingan) -->
     <% if (suratJalan.kodeBarangList && suratJalan.kodeBarangList.length > 0) { %>
-      <div style="margin-top: 20px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <label style="font-size: 12px; color: #64748b; font-weight: 600; display: block; margin-bottom: 8px; text-transform: uppercase;">Keterangan Kode Barang</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+      <div style="margin-top: 20px; margin-bottom: 25px;">
+        <label style="font-size: 12px; color: #64748b; font-weight: 600; display: block; margin-bottom: 6px; text-transform: uppercase;">Keterangan Kode Barang</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; font-size: 14px;">
           <% suratJalan.kodeBarangList.forEach((kb) => { %>
-            <div style="background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+            <div>
               <span style="font-weight: 600; color: #1e293b;"><%= kb.namaBarang %></span> : 
-              <span style="font-family: monospace; font-weight: 700; color: #7a1b1b;"><%= kb.kodeBarang %></span>
+              <span style="color: #334155;"><%= kb.kodeBarang %></span>
             </div>
           <% }) %>
         </div>

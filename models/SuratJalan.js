@@ -19,7 +19,6 @@ const suratJalanSchema = new mongoose.Schema({
         satuan: String,
         keterangan: String
     }],
-    // TAMBAHKAN ARRAY INI UNTUK MENAMPUNG KETERANGAN KODE BARANG
     kodeBarangList: [{
         no: Number,
         namaBarang: String,
