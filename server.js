@@ -1654,15 +1654,16 @@ app.get('/surat-jalan-user', async (req, res) => {
 
 app.post('/surat-jalan-user/add', async (req, res) => {
     try {
-        const { noSuratJalan, tanggal, kepadaYth, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items } = req.body;
+        // Tambahkan namaPerusahaan di sini
+        const { noSuratJalan, tanggal, namaPerusahaan, kepadaYth, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items } = req.body;
         
-        // Ambil nama user yang sedang login untuk dicatat
         const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username)) ? 
                          (req.session.user.namaLengkap || req.session.user.username) : 'User Operasional';
 
         const suratBaru = new SuratJalan({
             noSuratJalan,
             tanggal: tanggal || Date.now(),
+            namaPerusahaan, // <-- TAMBAHKAN INI
             kepadaYth,
             noTelepon,
             alamat,
