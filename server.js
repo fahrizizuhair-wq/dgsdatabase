@@ -130,6 +130,7 @@ const StokKeluar    = require('./models/StokKeluar');
 const StokOpname    = require('./models/StokOpname');
 const DataBahanKain = require('./models/DataBahanKain');
 const User          = require('./models/User');
+const SuratJalan = require('./models/SuratJalan');
 
 // ============================================================
 //  DATABASE CONNECTION
