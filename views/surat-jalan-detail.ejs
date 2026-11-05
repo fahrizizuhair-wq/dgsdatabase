@@ -107,11 +107,11 @@
       </tbody>
     </table>
 
-    <!-- Keterangan Kode Barang (Tanpa background/kotak, teks biasa berdampingan) -->
+    <!-- Keterangan Kode Barang (Tampil berbaris ke bawah / vertical) -->
     <% if (suratJalan.kodeBarangList && suratJalan.kodeBarangList.length > 0) { %>
       <div style="margin-top: 20px; margin-bottom: 25px;">
         <label style="font-size: 12px; color: #64748b; font-weight: 600; display: block; margin-bottom: 6px; text-transform: uppercase;">Keterangan Kode Barang</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 20px; font-size: 14px;">
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 14px;">
           <% suratJalan.kodeBarangList.forEach((kb) => { %>
             <div>
               <span style="font-weight: 600; color: #1e293b;"><%= kb.namaBarang %></span> : 
