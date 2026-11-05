@@ -414,6 +414,13 @@
     <div class="modal-content">
       <h3 style="margin-bottom: 15px; color: #7a1b1b; font-weight: 700;">Buat Surat Jalan Baru</h3>
       <form action="/surat-jalan-user/add" method="POST">
+        <div class="form-group full-width">
+            <label>Jenis Surat</label>
+            <select name="jenisSurat">
+              <option value="Surat Jalan">Surat Jalan</option>
+              <option value="Surat Tanda Terima">Surat Tanda Terima</option>
+            </select>
+          </div>
         <div class="form-grid">
           <div class="form-group">
             <label>No. Surat Jalan</label>
