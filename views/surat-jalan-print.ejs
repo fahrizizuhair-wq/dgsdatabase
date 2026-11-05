@@ -4,38 +4,37 @@
   <meta charset="UTF-8">
   <title>Cetak Surat Jalan - <%= suratJalan.noSuratJalan %></title>
   <style>
-    body { font-family: Arial, sans-serif; font-size: 12px; color: #000; margin: 0; padding: 15px; background: #fff; }
-    .print-container { width: 100%; max-width: 800px; margin: 0 auto; padding: 10px; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #000; margin: 0; padding: 10px; background: #fff; line-height: 1.3; }
+    .print-container { width: 100%; max-width: 800px; margin: 0 auto; padding: 5px; }
     
     /* Header */
-    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
     .header-table td { vertical-align: top; }
     
-    .logo-container { display: flex; align-items: center; gap: 10px; }
-    .logo-box { border: 2px solid #7a1b1b; color: #7a1b1b; padding: 6px 10px; font-weight: bold; font-size: 14px; display: inline-block; }
-    .company-title { font-size: 15px; font-weight: bold; text-transform: uppercase; color: #7a1b1b; margin-top: 2px; }
-    .company-subtitle { font-size: 10px; text-transform: uppercase; color: #444; letter-spacing: 0.5px; }
+    .logo-box { border: 2px solid #7a1b1b; color: #7a1b1b; padding: 4px 8px; font-weight: bold; font-size: 13px; display: inline-block; text-align: center; }
+    .company-title { font-size: 14px; font-weight: bold; text-transform: uppercase; color: #7a1b1b; margin-top: 2px; }
+    .company-subtitle { font-size: 9px; text-transform: uppercase; color: #444; letter-spacing: 0.5px; }
 
-    /* Pilihan Dokumen / Barang di Kanan Atas */
-    .checkbox-container { float: right; font-size: 11px; line-height: 1.4; text-align: left; }
+    /* Checkbox Dokumen / Barang */
+    .checkbox-container { float: right; font-size: 11px; line-height: 1.3; text-align: left; }
     .checkbox-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
-    .box-check { width: 10px; height: 10px; border: 1px solid #000; display: inline-block; text-align: center; line-height: 9px; font-size: 9px; font-weight: bold; }
+    .box-check { width: 11px; height: 11px; border: 1px solid #000; display: inline-block; text-align: center; line-height: 10px; font-size: 10px; font-weight: bold; }
 
-    .doc-title-wrapper { text-align: right; clear: both; margin-top: 5px; }
-    .doc-title { font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .doc-title-wrapper { text-align: right; clear: both; margin-top: 2px; }
+    .doc-title { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
 
     /* Info Surat */
-    .info-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; margin-top: 5px; }
-    .info-table td { padding: 3px 4px; font-size: 12px; vertical-align: top; }
+    .info-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    .info-table td { padding: 2px 3px; font-size: 11px; vertical-align: top; }
 
     /* Tabel Barang */
-    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-    .items-table th, .items-table td { border: 1px solid #000; padding: 6px 8px; font-size: 12px; }
-    .items-table th { background: #fff; text-align: center; font-weight: bold; }
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .items-table th, .items-table td { border: 1px solid #000; padding: 5px 6px; font-size: 11px; vertical-align: top; }
+    .items-table th { background: #f0f0f0; text-align: center; font-weight: bold; }
     
     /* Tanda Tangan */
-    .signature-table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: center; }
-    .signature-table td { width: 50%; vertical-align: top; height: 80px; font-size: 12px; }
+    .signature-table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: center; page-break-inside: avoid; }
+    .signature-table td { width: 50%; vertical-align: top; height: 70px; font-size: 11px; }
     
     @media print {
       body { padding: 0; }
@@ -45,14 +44,14 @@
 </head>
 <body onload="window.print()">
   <div class="no-print" style="margin-bottom: 20px; text-align: right;">
-    <button onclick="window.print()" style="padding: 10px 20px; background: #7a1b1b; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">Cetak Dokumen</button>
+    <button onclick="window.print()" style="padding: 8px 16px; background: #7a1b1b; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">Cetak Dokumen</button>
   </div>
 
   <div class="print-container">
     <table class="header-table">
       <tr>
         <td style="width: 55%;">
-          <div style="display: flex; align-items: flex-start; gap: 10px;">
+          <div style="display: flex; align-items: flex-start; gap: 8px;">
             <div class="logo-box">DGS</div>
             <div>
               <div class="company-title"><%= suratJalan.namaPerusahaan || 'PT. DIAN GIRI SAPUTRA' %></div>
@@ -64,11 +63,11 @@
           <div class="checkbox-container">
             <div class="checkbox-row">
               <span>Dokumen</span>
-              <span class="box-check"><%= suratJalan.jenisKirim === 'Dokumen' ? 'v' : '' %></span>
+              <span class="box-check"><%= suratJalan.jenisKirim === 'Dokumen' ? '✓' : '' %></span>
             </div>
             <div class="checkbox-row">
               <span>Barang</span>
-              <span class="box-check"><%= suratJalan.jenisKirim === 'Barang' ? 'v' : '' %></span>
+              <span class="box-check"><%= suratJalan.jenisKirim === 'Barang' ? '✓' : '' %></span>
             </div>
           </div>
           <div style="clear: both;"></div>
@@ -84,7 +83,7 @@
         <td style="width: 55%;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="width: 90px; font-weight: bold;">Kepada Yth,</td>
+              <td style="width: 80px; font-weight: bold;">Kepada Yth</td>
               <td style="width: 10px;">:</td>
               <td><%= suratJalan.kepadaYth %></td>
             </tr>
@@ -103,24 +102,24 @@
         <td style="width: 45%;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="width: 90px; font-weight: bold;">Tanggal</td>
+              <td style="width: 95px; font-weight: bold;">Tanggal</td>
               <td style="width: 10px;">:</td>
               <td><%= suratJalan.tanggal ? new Date(suratJalan.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-' %></td>
             </tr>
             <tr>
               <td style="font-weight: bold;">No. Surat Jalan</td>
               <td>:</td>
-              <td><%= suratJalan.noSuratJalan %></td>
+              <td><strong><%= suratJalan.noSuratJalan %></strong></td>
             </tr>
           </table>
         </td>
       </tr>
     </table>
 
-    <table class="info-table" style="margin-bottom: 10px;">
+    <table class="info-table" style="margin-bottom: 8px;">
       <% if (suratJalan.perihal) { %>
       <tr>
-        <td style="width: 90px; font-weight: bold;">Perihal</td>
+        <td style="width: 80px; font-weight: bold;">Perihal</td>
         <td style="width: 10px;">:</td>
         <td><%= suratJalan.perihal %></td>
       </tr>
@@ -137,11 +136,11 @@
     <table class="items-table">
       <thead>
         <tr>
-          <th style="width: 45px;">No</th>
+          <th style="width: 35px;">No</th>
           <th>Diskripsi</th>
-          <th style="width: 80px;">Jumlah</th>
-          <th style="width: 80px;">Satuan</th>
-          <th style="width: 140px;">Keterangan</th>
+          <th style="width: 65px;">Jumlah</th>
+          <th style="width: 65px;">Satuan</th>
+          <th style="width: 150px;">Keterangan</th>
         </tr>
       </thead>
       <tbody>
@@ -149,25 +148,29 @@
           <% suratJalan.items.forEach((item, index) => { %>
             <tr>
               <td style="text-align: center;"><%= index + 1 %></td>
-              <td><%= item.diskripsi %></td>
+              <td><div style="white-space: pre-line;"><%= item.diskripsi %></div></td>
               <td style="text-align: center;"><%= item.jumlah %></td>
               <td style="text-align: center;"><%= item.satuan %></td>
-              <td></td>
+              <td><%= item.keterangan || '' %></td>
             </tr>
           <% }) %>
+        <% } else { %>
+          <tr><td colspan="5" style="text-align: center; color: #888;">Tidak ada item barang.</td></tr>
         <% } %>
       </tbody>
     </table>
 
     <table class="signature-table">
       <tr>
-        <td style="text-align: left; padding-left: 40px;">
-          Yang Menyerahkan,<br><br><br><br>
-          ( &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )
+        <td style="text-align: left; padding-left: 30px;">
+          Yang Menyerahkan,<br>
+          <div style="font-size: 10px; color: #444;"><%= suratJalan.namaPerusahaan || 'PT Dian Giri Saputra' %></div><br><br>
+          ( <strong><%= suratJalan.diinputOleh || 'Deka' %></strong> )
         </td>
-        <td style="text-align: right; padding-right: 40px;">
-          Penerima,<br><br><br><br>
-          ( &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )
+        <td style="text-align: right; padding-right: 30px;">
+          Penerima,<br>
+          <div style="font-size: 10px; color: #444;"><%= suratJalan.kepadaYth %></div><br><br>
+          ( <strong><%= suratJalan.kepadaYth %></strong> )
         </td>
       </tr>
     </table>
