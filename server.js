@@ -1652,6 +1652,35 @@ app.get('/surat-jalan-user', async (req, res) => {
     }
 });
 
+app.post('/surat-jalan-user/add', async (req, res) => {
+    try {
+        const { noSuratJalan, tanggal, kepadaYth, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items } = req.body;
+        
+        // Ambil nama user yang sedang login untuk dicatat
+        const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username)) ? 
+                         (req.session.user.namaLengkap || req.session.user.username) : 'User Operasional';
+
+        const suratBaru = new SuratJalan({
+            noSuratJalan,
+            tanggal: tanggal || Date.now(),
+            kepadaYth,
+            noTelepon,
+            alamat,
+            perihal,
+            pekerjaan,
+            jenisKirim: jenisKirim || 'Barang',
+            items: Array.isArray(items) ? items : [items],
+            diinputOleh: namaUser
+        });
+
+        await suratBaru.save();
+        res.redirect('/surat-jalan-user');
+    } catch (err) {
+        console.error("Error menyimpan surat jalan:", err);
+        res.status(500).send("Gagal menyimpan Surat Jalan: " + err.message);
+    }
+});
+
 // ============================================================
 //  RUTE: EKSPOR EXCEL
 // ============================================================
