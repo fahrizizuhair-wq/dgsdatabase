@@ -1719,13 +1719,15 @@ app.get('/surat-jalan/cetak/:id', async (req, res) => {
         if (!suratJalan) {
             return res.status(404).send("Data Surat Jalan tidak ditemukan.");
         }
-        res.render('surat-jalan-print', { 
-            suratJalan: suratJalan,
-            wrapText: wrapText
-        });
+        if (suratJalan.namaPerusahaan && suratJalan.namaPerusahaan.toUpperCase().includes('PUSPITA')) {
+            return res.render('surat-jalan-print-puspita', { suratJalan });
+        }
+
+        res.render('surat-jalan-print', { suratJalan });
+
     } catch (err) {
-        console.error("Error cetak surat jalan:", err);
-        res.status(500).send("Terjadi kesalahan pada server");
+        console.error("Error mencetak surat jalan:", err);
+        res.status(500).send("Gagal mencetak Surat Jalan: " + err.message);
     }
 });
 
