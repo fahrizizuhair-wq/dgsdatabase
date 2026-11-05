@@ -48,28 +48,53 @@
       .slice(0, 5);
     const daftarItem = Array.isArray(suratJalan.items) ? suratJalan.items : [];
 
+    // Bungkus teks per kolom agar tidak melewati garis vertikal.
+    const bungkus = (typeof wrapText === 'function')
+      ? wrapText
+      : function (text) { return String(text || '').replace(/\r\n?/g, '\n').split('\n'); };
+
+    const DESC_MAX_WIDTH = 124.0; // isi kolom diskripsi: 113.58 s/d 239.05, diberi margin aman
+    const KET_MAX_WIDTH = 198.5;  // lebar kolom keterangan 201.11
+
     // Hitung posisi vertikal setiap item mengikuti tinggi baris template PDF.
     let cursorY = 236.25;
     const posisiItem = daftarItem.map(function (item, index) {
-      const lines = String(item.diskripsi || '').split(/\r?\n/);
+      const lines = String(item.diskripsi || '').replace(/\r\n?/g, '\n').split('\n');
       const judul = lines.length ? lines[0] : '';
       const body = lines.slice(1);
       const titleY = cursorY + 11.08;
 
-      // Template PDF memberi tinggi berbeda pada baris kosong (11.2 pt),
-      // sedangkan baris teks biasa 7.93 pt. Ikuti agar posisi tetap sama.
-      const bodyYs = [];
-      let bodyCursor = titleY + 10.53;
+      // Judul diskripsi (bold) juga dibungkus bila terlalu panjang.
+      let titleLines = bungkus(judul, 'bold', 7.04, DESC_MAX_WIDTH);
+      if (!titleLines.length) titleLines = [''];
+      const titleHeight = titleLines.length * 10.53;
+
+      // Setiap baris diskripsi dibungkus sesuai lebar kolom.
+      const bodyVisuals = [];
       body.forEach(function (line) {
-        bodyYs.push(bodyCursor);
-        bodyCursor += (line === '' ? 11.2 : 7.93);
+        if (String(line).trim() === '') {
+          bodyVisuals.push({ text: '', height: 11.2 });
+        } else {
+          bungkus(line, 'regular', 6.5, DESC_MAX_WIDTH).forEach(function (visual) {
+            bodyVisuals.push({ text: visual, height: 7.93 });
+          });
+        }
       });
-      const lastDescY = bodyYs.length ? bodyYs[bodyYs.length - 1] : titleY;
+
+      let bodyCursor = titleY + titleHeight;
+      bodyVisuals.forEach(function (visual) {
+        visual.y = bodyCursor;
+        bodyCursor += visual.height;
+      });
+
+      const lastDescY = bodyVisuals.length
+        ? bodyVisuals[bodyVisuals.length - 1].y
+        : (titleLines.length ? titleY + ((titleLines.length - 1) * 10.53) : titleY);
 
       const jumlahLines = (item.jumlah === null || item.jumlah === undefined || item.jumlah === '')
         ? []
-        : String(item.jumlah).split(/\r?\n/);
-      const satuanLines = String(item.satuan || '').split(/\r?\n/).filter(function (l, i, arr) {
+        : String(item.jumlah).replace(/\r\n?/g, '\n').split('\n');
+      const satuanLines = String(item.satuan || '').replace(/\r\n?/g, '\n').split('\n').filter(function (l, i, arr) {
         return !(arr.length === 1 && l === '');
       });
       const jumlahYs = jumlahLines.map(function (_, i) {
@@ -79,22 +104,34 @@
         return lastDescY - ((satuanLines.length - 1 - i) * 7.93);
       });
 
-      const ketLines = String(item.keterangan || '').split(/\r?\n/).filter(function (l, i, arr) {
-        return !(arr.length === 1 && l === '');
-      });
+      // Keterangan juga dibungkus agar tidak melewati garis kolom.
+      let ketLines = [];
+      const ketRaw = String(item.keterangan || '').replace(/\r\n?/g, '\n');
+      if (ketRaw.trim() !== '') {
+        ketRaw.split('\n').forEach(function (line) {
+          if (line.trim() === '') {
+            ketLines.push('');
+          } else {
+            bungkus(line, 'regular', 5.96, KET_MAX_WIDTH).forEach(function (visual) {
+              ketLines.push(visual);
+            });
+          }
+        });
+      }
+
       const ketPitch = 7.27;
       const ketYs = [];
       if (ketLines.length) {
         let lastKetY = lastDescY + 0.54;
-        const minLastKetY = titleY + ((ketLines.length - 1) * ketPitch);
+        const minLastKetY = titleY + titleHeight + ((ketLines.length - 1) * ketPitch);
         if (lastKetY < minLastKetY) lastKetY = minLastKetY;
         ketLines.forEach(function (_, i) {
           ketYs.push(lastKetY - ((ketLines.length - 1 - i) * ketPitch));
         });
       }
 
-      const descHeight = 10.53 + body.reduce(function (total, line) {
-        return total + (line === '' ? 11.2 : 7.93);
+      const descHeight = titleHeight + bodyVisuals.reduce(function (total, visual) {
+        return total + visual.height;
       }, 0);
       const ketHeight = ketLines.length * ketPitch;
       const contentHeight = Math.max(descHeight, ketHeight);
@@ -102,10 +139,9 @@
 
       const hasil = {
         index: index,
-        judul: judul,
+        titleLines: titleLines,
         titleY: titleY,
-        body: body,
-        bodyYs: bodyYs,
+        bodyVisuals: bodyVisuals,
         jumlahLines: jumlahLines,
         jumlahYs: jumlahYs,
         satuanLines: satuanLines,
@@ -411,12 +447,14 @@
 
       <% posisiItem.forEach(function (it) { %>
       <div class="col-no" style="top: <%= T(it.numberY) %>pt;"><%= it.index + 1 %></div>
-      <% if (it.judul) { %>
-      <div class="desc-title" style="top: <%= T7(it.titleY) %>pt;"><%= it.judul %></div>
-      <% } %>
-      <% it.body.forEach(function (line, i) { %>
+      <% it.titleLines.forEach(function (line, i) { %>
       <% if (line !== '') { %>
-      <div class="desc-line" style="top: <%= T(it.bodyYs[i]) %>pt;"><%= line %></div>
+      <div class="desc-title" style="top: <%= T7(it.titleY + (i * 10.53)) %>pt;"><%= line %></div>
+      <% } %>
+      <% }); %>
+      <% it.bodyVisuals.forEach(function (visual) { %>
+      <% if (visual.text !== '') { %>
+      <div class="desc-line" style="top: <%= T(visual.y) %>pt;"><%= visual.text %></div>
       <% } %>
       <% }); %>
       <% it.jumlahLines.forEach(function (line, i) { %>

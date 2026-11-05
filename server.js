@@ -15,6 +15,7 @@ const fs       = require('fs');
 const crypto   = require('crypto');
 const bcrypt   = require('bcrypt');
 const ExcelJS  = require('exceljs');
+const { wrapText } = require('./utils/textWrap');
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
@@ -1719,7 +1720,8 @@ app.get('/surat-jalan/cetak/:id', async (req, res) => {
             return res.status(404).send("Data Surat Jalan tidak ditemukan.");
         }
         res.render('surat-jalan-print', { 
-            suratJalan: suratJalan 
+            suratJalan: suratJalan,
+            wrapText: wrapText
         });
     } catch (err) {
         console.error("Error cetak surat jalan:", err);
