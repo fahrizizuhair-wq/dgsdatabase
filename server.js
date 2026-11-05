@@ -1639,13 +1639,13 @@ app.get('/surat-jalan-user', async (req, res) => {
     try {
         const suratJalans = await SuratJalan.find().sort({ createdAt: -1 });
         
-        res.render('surat-jalan', { 
+        res.render('surat-jalan-user', { 
             user: req.session.user || { username: 'User' },
             suratJalans: suratJalans 
         });
     } catch (err) {
         console.error("Error fetching surat jalan:", err);
-        res.render('surat-jalan', { 
+        res.render('surat-jalan-user', { 
             user: req.session.user || { username: 'User' },
             suratJalans: [] 
         });
