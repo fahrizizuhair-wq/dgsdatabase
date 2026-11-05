@@ -78,7 +78,7 @@
       </div>
     </div>
 
-    <!-- Tabel 1: Daftar Barang / Material -->
+    <!-- Tabel Daftar Barang / Material -->
     <h3 style="font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">Daftar Barang / Material</h3>
     <table>
       <thead>
@@ -106,29 +106,6 @@
         <% } %>
       </tbody>
     </table>
-
-    <!-- Tabel 2: Keterangan Kode Barang (Terpisah) -->
-    <% if (suratJalan.kodeBarangList && suratJalan.kodeBarangList.length > 0) { %>
-      <h3 style="font-size: 15px; font-weight: 700; color: #1e293b; margin-top: 25px; margin-bottom: 5px;">Keterangan Kode Barang</h3>
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 50px; text-align: center;">No</th>
-            <th>Nama Barang</th>
-            <th>Kode Barang</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% suratJalan.kodeBarangList.forEach((kb, index) => { %>
-            <tr>
-              <td style="text-align: center;"><%= index + 1 %></td>
-              <td style="white-space: pre-line;"><%= kb.namaBarang %></td>
-              <td style="white-space: pre-line;"><%= kb.kodeBarang %></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    <% } %>
 
     <div class="info-item" style="margin-top: 20px; margin-bottom: 25px;">
       <label>Diinput Oleh</label>
