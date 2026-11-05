@@ -107,6 +107,21 @@
       </tbody>
     </table>
 
+    <!-- Keterangan Kode Barang (Tampil berdampingan di bawah tabel) -->
+    <% if (suratJalan.kodeBarangList && suratJalan.kodeBarangList.length > 0) { %>
+      <div style="margin-top: 20px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <label style="font-size: 12px; color: #64748b; font-weight: 600; display: block; margin-bottom: 8px; text-transform: uppercase;">Keterangan Kode Barang</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+          <% suratJalan.kodeBarangList.forEach((kb) => { %>
+            <div style="background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+              <span style="font-weight: 600; color: #1e293b;"><%= kb.namaBarang %></span> : 
+              <span style="font-family: monospace; font-weight: 700; color: #7a1b1b;"><%= kb.kodeBarang %></span>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
     <div class="info-item" style="margin-top: 20px; margin-bottom: 25px;">
       <label>Diinput Oleh</label>
       <span><%= suratJalan.diinputOleh || 'System' %></span>
