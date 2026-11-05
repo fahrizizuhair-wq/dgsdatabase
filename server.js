@@ -1682,6 +1682,39 @@ app.post('/surat-jalan-user/add', async (req, res) => {
     }
 });
 
+// Route Menampilkan Detail Surat Jalan
+app.get('/surat-jalan/detail/:id', async (req, res) => {
+    try {
+        const suratJalan = await SuratJalan.findById(req.params.id);
+        if (!suratJalan) {
+            return res.status(404).send("Data Surat Jalan tidak ditemukan.");
+        }
+        res.render('surat-jalan-detail', { 
+            user: req.session.user || { username: 'User' },
+            suratJalan: suratJalan 
+        });
+    } catch (err) {
+        console.error("Error fetching detail surat jalan:", err);
+        res.status(500).send("Terjadi kesalahan pada server");
+    }
+});
+
+// Route Menampilkan Halaman Cetak Surat Jalan (PDF / Print View)
+app.get('/surat-jalan/cetak/:id', async (req, res) => {
+    try {
+        const suratJalan = await SuratJalan.findById(req.params.id);
+        if (!suratJalan) {
+            return res.status(404).send("Data Surat Jalan tidak ditemukan.");
+        }
+        res.render('surat-jalan-print', { 
+            suratJalan: suratJalan 
+        });
+    } catch (err) {
+        console.error("Error cetak surat jalan:", err);
+        res.status(500).send("Terjadi kesalahan pada server");
+    }
+});
+
 // ============================================================
 //  RUTE: EKSPOR EXCEL
 // ============================================================

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Cetak Surat Jalan - <%= suratJalan.noSuratJalan %></title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 13px; color: #000; margin: 0; padding: 20px; background: #fff; }
+    .print-container { width: 100%; max-width: 800px; margin: 0 auto; border: 1px solid #000; padding: 25px; }
+    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+    .header-table td { vertical-align: top; }
+    .company-title { font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
+    .doc-title { font-size: 18px; font-weight: bold; text-align: right; text-transform: uppercase; }
+    .info-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .info-table td { padding: 4px 6px; font-size: 13px; vertical-align: top; }
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    .items-table th, .items-table td { border: 1px solid #000; padding: 8px; font-size: 13px; }
+    .items-table th { background: #f0f0f0; text-align: center; }
+    .signature-table { width: 100%; border-collapse: collapse; margin-top: 40px; text-align: center; }
+    .signature-table td { width: 33%; vertical-align: top; height: 80px; }
+    @media print {
+      body { padding: 0; }
+      .print-container { border: none; padding: 0; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body onload="window.print()">
+  <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+    <button onclick="window.print()" style="padding: 10px 20px; background: #7a1b1b; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">Cetak Dokumen</button>
+  </div>
+
+  <div class="print-container">
+    <table class="header-table">
+      <tr>
+        <td>
+          <div class="company-title"><%= suratJalan.namaPerusahaan || 'PT DIAN GIRI SAPUTRA' %></div>
+          <div style="font-size: 11px; color: #444;">Bagian Pengadaan & Operasional Logistik</div>
+        </td>
+        <td>
+          <div class="doc-title">Surat Jalan</div>
+          <div style="text-align: right; font-size: 12px; margin-top: 4px;">No: <strong><%= suratJalan.noSuratJalan %></strong></div>
+        </td>
+      </tr>
+    </table>
+
+    <hr style="border: 1px solid #000; margin-bottom: 15px;">
+
+    <table class="info-table">
+      <tr>
+        <td style="width: 50%;">
+          <strong>Kepada Yth:</strong><br>
+          <%= suratJalan.kepadaYth %><br>
+          <% if (suratJalan.noTelepon) { %>Telp: <%= suratJalan.noTelepon %><br><% } %>
+          Alamat: <%= suratJalan.alamat %>
+        </td>
+        <td style="width: 50%;">
+          <strong>Tanggal:</strong> <%= suratJalan.tanggal ? new Date(suratJalans = suratJalan.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-' %><br>
+          <strong>Perihal:</strong> <%= suratJalan.perihal || '-' %><br>
+          <strong>Pekerjaan:</strong> <%= suratJalan.pekerjaan || '-' %><br>
+          <strong>Jenis Kirim:</strong> <%= suratJalan.jenisKirim %>
+        </td>
+      </tr>
+    </table>
+
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;">No</th>
+          <th>Nama Barang / Deskripsi Material</th>
+          <th style="width: 80px;">Jumlah</th>
+          <th style="width: 90px;">Satuan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (suratJalan.items && suratJalan.items.length > 0) { %>
+          <% suratJalan.items.forEach((item, index) => { %>
+            <tr>
+              <td style="text-align: center;"><%= index + 1 %></td>
+              <td><%= item.diskripsi %></td>
+              <td style="text-align: center;"><%= item.jumlah %></td>
+              <td style="text-align: center;"><%= item.satuan %></td>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+
+    <table class="signature-table">
+      <tr>
+        <td>
+          Penerima,<br><br><br><br>
+          ( __________________ )
+        </td>
+        <td>
+          Pengirim / Driver,<br><br><br><br>
+          ( __________________ )
+        </td>
+        <td>
+          Hormat Kami,<br><br><br><br>
+          ( <strong><%= suratJalan.diinputOleh || 'Admin' %></strong> )
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>
