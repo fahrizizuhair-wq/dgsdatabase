@@ -55,6 +55,7 @@
       .filter(function (line) { return line.length > 0; })
       .slice(0, 5);
     const daftarItem = Array.isArray(suratJalan.items) ? suratJalan.items : [];
+    const kodeBarangList = Array.isArray(suratJalan.kodeBarangList) ? suratJalan.kodeBarangList : [];
 
     // Bungkus teks per kolom agar tidak melewati garis vertikal.
     const bungkus = (typeof wrapText === 'function')
@@ -491,6 +492,16 @@
       <div class="col-ket" style="top: <%= TP6(it.ketYs[i]) %>pt;"><%= line %></div>
       <% }); %>
       <% }); %>
+
+      <!-- KETERANGAN KODE BARANG (Tampil vertikal ke bawah di atas area tanda tangan) -->
+      <% if (kodeBarangList && kodeBarangList.length > 0) { %>
+      <div style="position: absolute; left: 51.82pt; top: 560pt; font-size: 7.37pt; line-height: 11pt;">
+        <div style="font-weight: 700; margin-bottom: 2pt;">Keterangan Kode Barang:</div>
+        <% kodeBarangList.forEach(function (kb) { %>
+        <div><span style="font-weight: 700;"><%= kb.namaBarang %></span> : <span><%= kb.kodeBarang %></span></div>
+        <% }) %>
+      </div>
+      <% } %>
 
       <!-- TANDA TANGAN -->
       <div class="sig-title" style="left: 110.40pt; width: 69.68pt; top: <%= TP(590.44) %>pt;">Yang Menyerahkan,</div>
