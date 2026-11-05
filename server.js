@@ -1636,19 +1636,18 @@ app.post('/laporan-user/add', upload.single('fileLaporan'), async (req, res) => 
 // Route Halaman Surat Jalan (User)
 app.get('/surat-jalan-user', async (req, res) => {
     try {
-        // Jika Anda sudah memiliki model SuratJalan, ambil datanya dari database:
-        // const suratJalans = await SuratJalan.find().sort({ createdAt: -1 });
+        const suratJalans = await SuratJalan.find().sort({ createdAt: -1 });
         
-        // Untuk sementara jika model belum ada, kirim array kosong agar tidak error:
-        const suratJalans = []; 
-
         res.render('surat-jalan', { 
             user: req.session.user || { username: 'User' },
             suratJalans: suratJalans 
         });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Terjadi kesalahan pada server");
+        console.error("Error fetching surat jalan:", err);
+        res.render('surat-jalan', { 
+            user: req.session.user || { username: 'User' },
+            suratJalans: [] 
+        });
     }
 });
 
