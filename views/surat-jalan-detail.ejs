@@ -137,9 +137,10 @@
       <a href="/surat-jalan/cetak/<%= suratJalan._id %>" target="_blank" class="btn btn-primary">
         <i class="fa-solid fa-print"></i> Cetak <%= suratJalan.jenisSurat || 'Surat Jalan' %>
       </a>
-      <button type="button" onclick="downloadPDFDirect()" class="btn" style="background-color: #7a1b1b; color: #fff; padding: 10px 16px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-       <i class="fa-solid fa-file-pdf"></i> Unduh PDF
-      </button>
+      <!-- Tombol Unduh PDF langsung ke template cetak -->
+  <a href="/surat-jalan/cetak/<%= suratJalan._id %>" target="_blank" onclick="setTimeout(() => window.print(), 500);" class="btn" style="background-color: #7a1b1b; color: #fff; padding: 10px 16px; border-radius: 6px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+    <i class="fa-solid fa-file-pdf"></i> Unduh PDF
+  </a>
     </div>
   </div>
 
