@@ -14,6 +14,7 @@ const path     = require('path');
 const fs       = require('fs');
 const crypto   = require('crypto');
 const bcrypt   = require('bcrypt');
+const puppeteer = require('puppeteer');
 const ExcelJS  = require('exceljs');
 const { wrapText } = require('./utils/textWrap');
 const PORT = process.env.PORT || 3000;
@@ -1973,6 +1974,46 @@ app.get('/export-harga-dasar-excel', async (req, res) => {
       res.status(500).send('Gagal mengekspor data harga dasar: ' + error.message);
     }
   }
+});
+
+// Route khusus untuk Download PDF secara langsung
+app.get('/surat-jalan/download-pdf/:id', async (req, res) => {
+    try {
+        const suratJalan = await SuratJalan.findById(req.params.id);
+        if (!suratJalan) {
+            return res.status(404).send("Data tidak ditemukan.");
+        }
+
+        // Render template EJS menjadi HTML string
+        const html = await res.app.render('surat-jalan-print', { suratJalan });
+
+        // Jalankan browser headless puppeteer untuk mencetak PDF
+        const browser = await puppeteer.launch({ 
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' }
+        });
+
+        await browser.close();
+
+        // Kirim response file PDF ke browser
+        const fileName = `${(suratJalan.jenisSurat || 'Surat-Jalan').replace(/\s+/g, '-')}-${suratJalan.noSuratJalan.replace(/\//g, '-')}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.send(pdfBuffer);
+
+    } catch (err) {
+        console.error("Error generating PDF:", err);
+        res.status(500).send("Gagal mengunduh PDF: " + err.message);
+    }
 });
 
 // ============================================================
