@@ -47,7 +47,7 @@
       ? wrapText
       : function (text) { return String(text || '').replace(/\r\n?/g, '\n').split('\n'); };
 
-    const ALAMAT_MAX_WIDTH = 230.0; // Batas lebar maksimal teks alamat agar tidak menabrak sisi kanan
+    const ALAMAT_MAX_WIDTH = 230.0;
     const alamatRaw = String(suratJalan.alamat || '').replace(/\r\n?/g, '\n').trim();
     let alamatVisualLines = [];
     if (alamatRaw !== '') {
@@ -441,29 +441,28 @@
       </div>
 
       <!-- JUDUL -->
-      <div class="txt b" style="left: 443.96pt; top: TP(118.92)pt;">SURAT JALAN</div>
+      <div class="txt b" style="left: 443.96pt; top: <%= TP(118.92) %>pt;">SURAT JALAN</div>
       <div class="title-underline"></div>
 
       <!-- INFO KIRI: PENERIMA -->
-      <div class="txt b" style="left: 51.82pt; top: TP(140.18)pt;">Kepada Yth,</div>
-      <div class="txt b" style="left: 99.54pt; top: TP(140.18)pt;">: <%= kepadaYthTampil %></div>
+      <div class="txt b" style="left: 51.82pt; top: <%= TP(140.18) %>pt;">Kepada Yth,</div>
+      <div class="txt b" style="left: 99.54pt; top: <%= TP(140.18) %>pt;">: <%= kepadaYthTampil %></div>
 
       <% if (tampilkanBarisPenerima) { %>
-      <div class="txt b" style="left: 102.87pt; top: TP(151.52)pt;"><%= namaPenerimaTampil %></div>
+      <div class="txt b" style="left: 102.87pt; top: <%= TP(151.52) %>pt;"><%= namaPenerimaTampil %></div>
       <% } %>
 
-      <div class="txt b" style="left: 51.82pt; top: TP(162.86)pt;">No. Telepon</div>
-      <div class="txt b" style="left: 99.54pt; top: TP(162.86)pt;">: <%= suratJalan.noTelepon || '-' %></div>
+      <div class="txt b" style="left: 51.82pt; top: <%= TP(162.86) %>pt;">No. Telepon</div>
+      <div class="txt b" style="left: 99.54pt; top: <%= TP(162.86) %>pt;">: <%= suratJalan.noTelepon || '-' %></div>
 
       <!-- ALAMAT OTOMATIS TURUN KE BAWAH JIKA PANJANG -->
-      <div class="txt b" style="left: 51.82pt; top: TP(174.21)pt;">Alamat</div>
-      <div class="txt b" style="left: 99.54pt; top: TP(174.20)pt;">:</div>
+      <div class="txt b" style="left: 51.82pt; top: <%= TP(174.21) %>pt;">Alamat</div>
+      <div class="txt b" style="left: 99.54pt; top: <%= TP(174.20) %>pt;">:</div>
       <% alamatVisualLines.forEach(function (line, i) { %>
       <div class="txt b" style="left: 106.87pt; top: <%= TP(174.20 + (i * 11.33)) %>pt;"><%= line %></div>
       <% }) %>
 
       <% 
-        // Hitung pergeseran vertikal baris alamat agar field Perihal & Pekerjaan ikut turun rapi jika alamat lebih dari 1 baris
         const alamatExtraOffset = Math.max(0, (alamatVisualLines.length - 1) * 11.33);
       %>
 
@@ -474,16 +473,16 @@
       <div class="txt b" style="left: 99.54pt; top: <%= TP(239.40) + alamatExtraOffset %>pt;">: <%= suratJalan.pekerjaan || '-' %></div>
 
       <!-- INFO KANAN -->
-      <div class="txt b" style="left: 338.13pt; top: TP(140.18)pt;">Tanggal</div>
-      <div class="txt b" style="left: 385.85pt; top: TP(140.18)pt;">:</div>
-      <div class="txt small" style="left: 397.19pt; top: TP6(140.79) %>pt;"><%= tanggalTampil %></div>
+      <div class="txt b" style="left: 338.13pt; top: <%= TP(140.18) %>pt;">Tanggal</div>
+      <div class="txt b" style="left: 385.85pt; top: <%= TP(140.18) %>pt;">:</div>
+      <div class="txt small" style="left: 397.19pt; top: <%= TP6(140.79) %>pt;"><%= tanggalTampil %></div>
 
-      <div class="txt b" style="left: 338.13pt; top: TP(162.86)pt;">No. Surat Jalan</div>
-      <div class="txt b" style="left: 385.85pt; top: TP(162.86) %>pt;">:</div>
-      <div class="txt" style="left: 397.19pt; top: TP(162.86) %>pt;"><%= suratJalan.noSuratJalan %></div>
+      <div class="txt b" style="left: 338.13pt; top: <%= TP(162.86) %>pt;">No. Surat Jalan</div>
+      <div class="txt b" style="left: 385.85pt; top: <%= TP(162.86) %>pt;">:</div>
+      <div class="txt" style="left: 397.19pt; top: <%= TP(162.86) %>pt;"><%= suratJalan.noSuratJalan %></div>
 
       <!-- KODE -->
-      <div class="txt small" style="left: 517.84pt; top: TP6(250.40) %>pt;"><%= kodeSurat %></div>
+      <div class="txt small" style="left: 517.84pt; top: <%= TP6(250.40) %>pt;"><%= kodeSurat %></div>
 
       <!-- TABEL BARANG -->
       <div class="tbl-border"></div>
@@ -494,32 +493,32 @@
       <div class="tbl-vbody" style="left: <%= (x - 0.2362).toFixed(4) %>pt;"></div>
       <% }); %>
 
-      <div class="col-th" style="left: 50.1638pt; width: 47.7191pt; top: TP(260.66) %>pt;">No</div>
-      <div class="col-th" style="left: 97.8829pt; width: 143.1574pt; top: TP(260.66) %>pt;">Diskripsi</div>
-      <div class="col-th" style="left: 241.0403pt; width: 47.7191pt; top: TP(260.66) %>pt;">Jumlah</div>
-      <div class="col-th" style="left: 288.7594pt; width: 47.7191pt; top: TP(260.66) %>pt;">Satuan</div>
-      <div class="col-th" style="left: 336.4785pt; width: 208.3578pt; top: TP(260.66) %>pt;">Keterangan</div>
+      <div class="col-th" style="left: 50.1638pt; width: 47.7191pt; top: <%= TP(260.66) %>pt;">No</div>
+      <div class="col-th" style="left: 97.8829pt; width: 143.1574pt; top: <%= TP(260.66) %>pt;">Diskripsi</div>
+      <div class="col-th" style="left: 241.0403pt; width: 47.7191pt; top: <%= TP(260.66) %>pt;">Jumlah</div>
+      <div class="col-th" style="left: 288.7594pt; width: 47.7191pt; top: <%= TP(260.66) %>pt;">Satuan</div>
+      <div class="col-th" style="left: 336.4785pt; width: 208.3578pt; top: <%= TP(260.66) %>pt;">Keterangan</div>
 
       <% posisiItem.forEach(function (it) { %>
-      <div class="item-num" style="top: TP8(it.numberY) %>pt;"><%= it.index + 1 %></div>
+      <div class="item-num" style="top: <%= TP8(it.numberY) %>pt;"><%= it.index + 1 %></div>
       <% it.titleLines.forEach(function (line, i) { %>
       <% if (line !== '') { %>
-      <div class="item-title" style="top: TP8(it.titleY + (i * 11.96)) %>pt;"><%= line %></div>
+      <div class="item-title" style="top: <%= TP8(it.titleY + (i * 11.96)) %>pt;"><%= line %></div>
       <% } %>
       <% }); %>
       <% it.bodyVisuals.forEach(function (visual) { %>
       <% if (visual.text !== '') { %>
-      <div class="item-body" style="top: TP(visual.y) %>pt;"><%= visual.text %></div>
+      <div class="item-body" style="top: <%= TP(visual.y) %>pt;"><%= visual.text %></div>
       <% } %>
       <% }); %>
       <% it.jumlahLines.forEach(function (line, i) { %>
-      <div class="col-jml" style="top: TP(it.jumlahYs[i]) %>pt;"><%= line %></div>
+      <div class="col-jml" style="top: <%= TP(it.jumlahYs[i]) %>pt;"><%= line %></div>
       <% }); %>
       <% it.satuanLines.forEach(function (line, i) { %>
-      <div class="col-sat" style="top: TP(it.satuanYs[i]) %>pt;"><%= line %></div>
+      <div class="col-sat" style="top: <%= TP(it.satuanYs[i]) %>pt;"><%= line %></div>
       <% }); %>
       <% it.ketLines.forEach(function (line, i) { %>
-      <div class="col-ket" style="top: TP6(it.ketYs[i]) %>pt;"><%= line %></div>
+      <div class="col-ket" style="top: <%= TP6(it.ketYs[i]) %>pt;"><%= line %></div>
       <% }); %>
       <% }); %>
 
@@ -534,17 +533,17 @@
       <% } %>
 
       <!-- TANDA TANGAN -->
-      <div class="sig-title" style="left: 110.40pt; width: 69.68pt; top: TP(590.44) %>pt;">Yang Menyerahkan,</div>
-      <div class="sig-line" style="left: 110.40pt; width: 69.68pt; top: TP(641.47) %>pt;">
+      <div class="sig-title" style="left: 110.40pt; width: 69.68pt; top: <%= TP(590.44) %>pt;">Yang Menyerahkan,</div>
+      <div class="sig-line" style="left: 110.40pt; width: 69.68pt; top: <%= TP(641.47) %>pt;">
         <span class="sig-name"><span>(</span><span><%= namaPenyerahTampil %></span><span>)</span></span>
       </div>
-      <div class="sig-line b" style="left: 110.40pt; width: 69.68pt; top: TP(652.80) %>pt;">PT. Puspita Jayagiri</div>
+      <div class="sig-line b" style="left: 110.40pt; width: 69.68pt; top: <%= TP(652.80) %>pt;">PT. Puspita Jayagiri</div>
 
-      <div class="sig-title" style="left: 383.96pt; width: 65.24pt; top: TP(590.44) %>pt;">Penerima,</div>
-      <div class="sig-line" style="left: 383.96pt; width: 65.24pt; top: TP(641.47) %>pt;">
+      <div class="sig-title" style="left: 383.96pt; width: 65.24pt; top: <%= TP(590.44) %>pt;">Penerima,</div>
+      <div class="sig-line" style="left: 383.96pt; width: 65.24pt; top: <%= TP(641.47) %>pt;">
         <span class="sig-name"><span>(</span><span><%= namaPenerimaTampil %></span><span>)</span></span>
       </div>
-      <div class="sig-line b" style="left: 383.96pt; width: 65.24pt; top: TP(652.80) %>pt;"><%= kepadaYthTampil %></div>
+      <div class="sig-line b" style="left: 383.96pt; width: 65.24pt; top: <%= TP(652.80) %>pt;"><%= kepadaYthTampil %></div>
     </div>
   </div>
 
@@ -582,7 +581,7 @@
 
       if (img && !img.complete) {
         img.addEventListener('load', prosesCetakAtauDownload);
-        img.addEventListener('error', prosesC(_, cetak));
+        img.addEventListener('error', prosesCetakAtauDownload);
       } else {
         prosesCetakAtauDownload();
       }
