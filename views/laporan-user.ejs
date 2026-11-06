@@ -332,6 +332,17 @@
       border-color: #9ca3af;
     }
 
+    .search-input { 
+    padding: 10px 14px; 
+    border: 1px solid #d1d5db; 
+    border-radius: 8px; 
+    width: 220px; 
+    font-size: 14px; 
+    outline: none; 
+    background: white;
+    }
+    .search-input:focus { border-color: #7a1b1b; }
+
     /* Panel Filter Melayang (Popover) */
     .filter-panel-right {
       display: none;
@@ -694,6 +705,8 @@
     <section class="report-container">
       <div class="report-header">
         <h2>Daftar Arsip Laporan</h2>
+
+        <input type="text" id="searchInput" class="search-input" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari Laporan...">
         
         <!-- GRUP TOMBOL AKSI (FILTER DI SAMPING TAMBAH LAPORAN) -->
         <div class="header-actions-group">
@@ -722,6 +735,15 @@
                     <option value="Surat Jalan" <%= (typeof selectedJenis !== 'undefined' && selectedJenis === 'Surat Jalan') ? 'selected' : '' %>>Surat Jalan</option>
                     <option value="Laporan Harian" <%= (typeof selectedJenis !== 'undefined' && selectedJenis === 'Laporan Harian') ? 'selected' : '' %>>Laporan Harian</option>
                   </select>
+                </div>
+                <div class="filter-group">
+                    <label for="status">Status Vendor:</label>
+                    <select name="status" id="status">
+                        <option value="">Semua Status</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Review">Review</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                    </select>
                 </div>
 
                 <div class="filter-actions">
