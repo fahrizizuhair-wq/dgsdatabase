@@ -589,6 +589,71 @@
         <h2>Daftar Arsip Laporan</h2>
         <button class="btn-action" onclick="openModal()">+ Tambah Laporan</button>
       </div>
+      <button type="button" id="filter-toggle-btn" class="btn-filter-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+        </svg>
+        <span>Filter Data</span>
+    </button>
+    <!-- PANEL FILTER HARUS DI DALAM SINI AGAR MELAYANG -->
+    <div id="filter-panel" class="filter-panel-right">
+        <form id="filter-form" action="/admin" method="GET"> <!-- Sesuaikan action dengan /admin atau /user -->
+            <div class="filter-form-grid">
+                <div class="filter-group">
+                    <label for="kategori">Kategori:</label>
+                    <select name="kategori" id="kategori">
+                        <option value="">Semua Kategori</option>
+                        <option value="ATK">ATK</option>
+                        <option value="Pakaian">Pakaian</option>
+                        <option value="Kain">Kain</option>
+                        <option value="Elektronik">Elektronik</option>
+                        <option value="Packaging">Packaging</option>
+                        <option value="Percetakan">Percetakan</option>
+                        <option value="Merchandise">Merchandise</option>
+                        <option value="Logistik">Logistik</option>
+                        <option value="Voucher">Voucher</option>
+                        <option value="Rental">Rental</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="status">Status Vendor:</label>
+                    <select name="status" id="status">
+                        <option value="">Semua Status</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Review">Review</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="wilayah">Wilayah:</label>
+                    <select name="wilayah" id="wilayah">
+                        <option value="">Semua Wilayah</option>
+                        <option value="Jakarta">Jakarta</option>
+                        <option value="Bogor">Bogor</option>
+                        <option value="Depok">Depok</option>
+                        <option value="Tanggerang">Tanggerang</option>
+                        <option value="Bekasi">Bekasi</option>
+                        <option value="Garut">Garut</option>
+                        <option value="Bandung">Bandung</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-apply">Terapkan</button>
+                    <a href="/admin" class="btn-reset">Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+    
+
 
       <table>
         <thead>
@@ -691,6 +756,15 @@
   const parentLi = element.parentElement;
   parentLi.classList.toggle('active');
 }
+
+function filterVendor() {
+      const input = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.getElementsByClassName('vendor-row');
+      for (let row of rows) {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(input) ? '' : 'none';
+      }
+    }
 
   </script>
 </body>
