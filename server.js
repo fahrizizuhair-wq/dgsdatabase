@@ -1364,6 +1364,7 @@ app.get('/surat-jalan-admin', async (req, res) => {
         const daftarSurat = await SuratJalan.find().sort({ createdAt: -1 });
         res.render('surat-jalan-admin', {
             user: req.session.user || { username: 'Admin' },
+            suratJalans: daftarSurat,
             daftarSurat: daftarSurat
         });
     } catch (err) {
@@ -1852,10 +1853,10 @@ app.get('/surat-jalan/cetak/:id', async (req, res) => {
             return res.status(404).send("Data Surat Jalan tidak ditemukan.");
         }
         if (suratJalan.namaPerusahaan && suratJalan.namaPerusahaan.toUpperCase().includes('PUSPITA')) {
-            return res.render('surat-jalan-print-puspita', { suratJalan });
+            return res.render('surat-jalan-print-puspita', { suratJalan, wrapText });
         }
 
-        res.render('surat-jalan-print', { suratJalan });
+        res.render('surat-jalan-print', { suratJalan, wrapText });
 
     } catch (err) {
         console.error("Error mencetak surat jalan:", err);
