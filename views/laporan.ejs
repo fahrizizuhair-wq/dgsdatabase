@@ -696,17 +696,17 @@
 
           <button class="btn-action" onclick="openModal()">+ Tambah Laporan</button>
 
-          <!-- PANEL FILTER POPOVER MELAYANG -->
-          <div id="filter-panel" class="filter-panel-right">
+            <!-- PANEL FILTER POPOVER MELAYANG -->
+            <div id="filter-panel" class="filter-panel-right">
             <form id="filter-form" action="/laporan" method="GET">
               <div class="filter-form-grid">
                 <div class="filter-group">
                   <label for="jenis">Jenis Laporan:</label>
                   <select name="jenis" id="jenis">
                     <option value="">Semua Jenis</option>
-                    <option value="Surat Tanda Terima">Surat Tanda Terima</option>
-                    <option value="Surat Jalan">Surat Jalan</option>
-                    <option value="Laporan Harian">Laporan Harian</option>
+                    <option value="Surat Tanda Terima" <%= (typeof selectedJenis !== 'undefined' && selectedJenis === 'Surat Tanda Terima') ? 'selected' : '' %>>Surat Tanda Terima</option>
+                    <option value="Surat Jalan" <%= (typeof selectedJenis !== 'undefined' && selectedJenis === 'Surat Jalan') ? 'selected' : '' %>>Surat Jalan</option>
+                    <option value="Laporan Harian" <%= (typeof selectedJenis !== 'undefined' && selectedJenis === 'Laporan Harian') ? 'selected' : '' %>>Laporan Harian</option>
                   </select>
                 </div>
 

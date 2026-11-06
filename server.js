@@ -1304,8 +1304,16 @@ app.post('/stok-opname/delete/:id', async (req, res) => {
 // ============================================================
 app.get('/laporan', async (req, res) => {
   try {
-    const rawListLaporan = await Laporan.find().sort({ _id: -1 }).lean();
-    const totalLaporan = rawListLaporan.length;
+
+    const selectedJenis = req.query.jenis || '';
+    
+    let filter = {};
+    if (selectedJenis !== '') {
+      filter.jenis = selectedJenis;
+    }
+
+    const rawListLaporan = await Laporan.find(filter).sort({ _id: -1 }).lean();
+    const totalLaporan = await Laporan.countDocuments(filter);
 
     const listLaporan = rawListLaporan.map(item => ({
       ...item,
@@ -1315,7 +1323,8 @@ app.get('/laporan', async (req, res) => {
     res.render('laporan', { 
       listLaporan, 
       totalLaporan, 
-      role: req.session.role || 'admin' 
+      role: req.session.role || 'admin',
+      selectedJenis 
     });
   } catch (err) {
     console.error(err);
