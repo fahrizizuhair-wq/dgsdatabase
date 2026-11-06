@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cetak Surat Jalan - <%= suratJalan.noSuratJalan %></title>
+  <!-- Library html2pdf untuk unduh otomatis -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <%
     function rapiNamaPerusahaan(nama) {
       if (!nama) return 'PT Puspita Jayagiri';
@@ -13,12 +15,6 @@
       return s;
     }
 
-    /*
-     * Chrome membulatkan posisi vertikal elemen ke 1 px (0.75 pt) dan
-     * menempatkan baseline pada offset tertentu. Helper di bawah menghitung
-     * top CSS agar baseline teks jatuh sedekat mungkin dengan template PDF.
-     * Offset baseline diskalakan dari template 6.5 pt yang sudah teruji.
-     */
     function snapTop(y0, fontPt) {
       const baselineOffset = fontPt * (5.25 / 6.5);
       const efektif = y0 + (fontPt * 0.75) - baselineOffset;
@@ -32,7 +28,6 @@
     const namaPenyerahTampil = (suratJalan.namaPenyerah || '').trim() || suratJalan.diinputOleh || 'Audri';
     const kepadaYthTampil = rapiNamaPerusahaan(suratJalan.kepadaYth || '');
 
-    // Jangan tampilkan nama penerima dua kali bila isinya sama dengan "Kepada Yth".
     const kepadaYthNormal = String(kepadaYthTampil).replace(/\s+/g, ' ').trim().toLowerCase();
     const namaPenerimaNormal = String(namaPenerimaTampil).replace(/\s+/g, ' ').trim().toLowerCase();
     const tampilkanBarisPenerima = namaPenerimaNormal !== '' && namaPenerimaNormal !== kepadaYthNormal;
@@ -40,7 +35,6 @@
     const isDokumen = jenisKirim.toLowerCase() === 'dokumen';
     const kodeSurat = isDokumen ? 'DOK-ADR' : 'BRG-ADR';
 
-    // Format tanggal mengikuti template: hari selalu dua digit.
     let tanggalTampil = '-';
     if (suratJalan.tanggal) {
       const tgl = new Date(suratJalan.tanggal);
@@ -49,21 +43,32 @@
       tanggalTampil = hari + ' ' + bulan + ' ' + tgl.getUTCFullYear();
     }
 
-    const alamatLines = String(suratJalan.alamat || '')
-      .split(/\r?\n/)
-      .map(function (line) { return line.trim(); })
-      .filter(function (line) { return line.length > 0; })
-      .slice(0, 5);
-    const daftarItem = Array.isArray(suratJalan.items) ? suratJalan.items : [];
-    const kodeBarangList = Array.isArray(suratJalan.kodeBarangList) ? suratJalan.kodeBarangList : [];
-
     // Bungkus teks per kolom agar tidak melewati garis vertikal.
     const bungkus = (typeof wrapText === 'function')
       ? wrapText
       : function (text) { return String(text || '').replace(/\r\n?/g, '\n').split('\n'); };
 
-    const DESC_MAX_WIDTH = 138.5; // isi kolom diskripsi: 99.54 s/d 241.04, diberi margin aman
-    const KET_MAX_WIDTH = 204.0;  // lebar kolom keterangan 208.36
+    // Bungkus alamat otomatis agar turun ke bawah jika terlalu panjang (lebar maks 230pt)
+    const ALAMAT_MAX_WIDTH = 230.0;
+    const alamatRaw = String(suratJalan.alamat || '').replace(/\r\n?/g, '\n').trim();
+    let alamatVisualLines = [];
+    if (alamatRaw !== '') {
+      alamatRaw.split('\n').forEach(function(par) {
+        if (par.trim() === '') {
+          alamatVisualLines.push('');
+        } else {
+          bungkus(par, 'bold', 7.37, ALAMAT_MAX_WIDTH).forEach(function(v) {
+            alamatVisualLines.push(v);
+          });
+        }
+      });
+    }
+
+    const daftarItem = Array.isArray(suratJalan.items) ? suratJalan.items : [];
+    const kodeBarangList = Array.isArray(suratJalan.kodeBarangList) ? suratJalan.kodeBarangList : [];
+
+    const DESC_MAX_WIDTH = 138.5; 
+    const KET_MAX_WIDTH = 204.0;  
 
     const TITLE_SIZE = 7.98;
     const BODY_SIZE = 7.37;
@@ -72,7 +77,6 @@
     const BODY_PITCH = 11.67;
     const KET_PITCH = 10.80;
 
-    // Hitung posisi vertikal setiap item mengikuti tinggi baris template PDF.
     let cursorY = 271.52;
     const posisiItem = daftarItem.map(function (item, index) {
       const lines = String(item.diskripsi || '').replace(/\r\n?/g, '\n').split('\n');
@@ -80,12 +84,10 @@
       const body = lines.slice(1);
       const titleY = cursorY + 11.67;
 
-      // Judul diskripsi (bold) juga dibungkus bila terlalu panjang.
       let titleLines = bungkus(judul, 'bold', TITLE_SIZE, DESC_MAX_WIDTH);
       if (!titleLines.length) titleLines = [''];
       const titleHeight = titleLines.length * TITLE_PITCH;
 
-      // Setiap baris diskripsi dibungkus sesuai lebar kolom.
       const bodyVisuals = [];
       body.forEach(function (line) {
         if (String(line).trim() === '') {
@@ -114,7 +116,6 @@
         return !(arr.length === 1 && l === '');
       });
 
-      // Template menempatkan Jumlah/Satuan sejajar dengan judul item (rata atas).
       const jumlahYs = jumlahLines.map(function (_, i) {
         return titleY + 0.62 + (i * BODY_PITCH);
       });
@@ -122,7 +123,6 @@
         return titleY + 0.62 + (i * BODY_PITCH);
       });
 
-      // Keterangan juga dibungkus agar tidak melewati garis kolom.
       let ketLines = [];
       const ketRaw = String(item.keterangan || '').replace(/\r\n?/g, '\n');
       if (ketRaw.trim() !== '') {
@@ -177,6 +177,18 @@
       cursorY += blockHeight;
       return hasil;
     });
+
+    // Tinggi tabel dinamis menyesuaikan isi item
+    const lastItem = posisiItem.length ? posisiItem[posisiItem.length - 1] : null;
+    let calculatedTableHeight = 180;
+    if (lastItem) {
+      const maxItemBottom = Math.max(
+        lastItem.titleY + (lastItem.titleLines.length * TITLE_PITCH),
+        lastItem.bodyVisuals.length ? lastItem.bodyVisuals[lastItem.bodyVisuals.length - 1].y + BODY_PITCH : 0,
+        lastItem.ketYs.length ? lastItem.ketYs[lastItem.ketYs.length - 1] + KET_PITCH : 0
+      );
+      calculatedTableHeight = Math.max(180, (maxItemBottom - 258.1056) + 15);
+    }
   %>
   <style>
     @page { size: A4; margin: 0; }
@@ -263,15 +275,12 @@
       border-top: 0.482pt solid #000;
     }
 
-    /* Tabel Puspita: Dinamis menyesuaikan isi, berhenti sebelum area tanda tangan */
     .tbl-border {
       position: absolute;
       left: 49.9275pt;
       top: 258.1056pt;
       width: 495.145pt;
-      min-height: 180pt; /* Tinggi minimum agar tabel tetap proporsional jika item sedikit */
-      height: auto;
-      bottom: 300pt;     /* Memberikan batas jarak aman dari area tanda tangan di bawah */
+      height: <%= calculatedTableHeight %>pt;
       border-top: 0.4725pt solid #000;
       border-bottom: 0.4725pt solid #000;
     }
@@ -289,11 +298,10 @@
       width: 0;
       border-left: 0.4725pt solid #000;
     }
-    /* Garis vertikal body tabel mengikuti tinggi dinamis */
     .tbl-vbody {
       position: absolute;
       top: 270.8622pt;
-      bottom: 300pt;
+      height: <%= calculatedTableHeight %>pt;
       width: 0;
       border-left: 0.4725pt solid #000;
     }
@@ -431,20 +439,23 @@
       <div class="txt b" style="left: 51.82pt; top: <%= TP(162.86) %>pt;">No. Telepon</div>
       <div class="txt b" style="left: 99.54pt; top: <%= TP(162.86) %>pt;">: <%= suratJalan.noTelepon || '-' %></div>
 
+      <!-- ALAMAT OTOMATIS TURUN KE BAWAH -->
       <div class="txt b" style="left: 51.82pt; top: <%= TP(174.21) %>pt;">Alamat</div>
-      <% alamatLines.forEach(function (line, i) { %>
-        <% if (i === 0) { %>
-        <div class="txt b" style="left: 99.54pt; top: <%= TP(174.20) %>pt;">: <%= line %></div>
-        <% } else { %>
-        <div class="txt b" style="left: 102.87pt; top: <%= TP(185.54 + ((i - 1) * 11.33)) %>pt;"><%= line %></div>
-        <% } %>
+      <div class="txt b" style="left: 99.54pt; top: <%= TP(174.20) %>pt;">:</div>
+      <% alamatVisualLines.forEach(function (line, i) { %>
+      <div class="txt b" style="left: 106.87pt; top: <%= TP(174.20 + (i * 11.33)) %>pt;"><%= line %></div>
       <% }) %>
 
-      <div class="txt b" style="left: 51.82pt; top: <%= TP(228.06) %>pt;">Perihal</div>
-      <div class="txt b" style="left: 99.54pt; top: <%= TP(228.06) %>pt;">: <%= suratJalan.perihal || '-' %></div>
+      <% 
+        // Hitung ekstra offset baris alamat agar field Perihal & Pekerjaan otomatis ikut turun rapi
+        const alamatExtraOffset = Math.max(0, (alamatVisualLines.length - 1) * 11.33);
+      %>
 
-      <div class="txt b" style="left: 51.82pt; top: <%= TP(239.40) %>pt;">Pekerjaaan</div>
-      <div class="txt b" style="left: 99.54pt; top: <%= TP(239.40) %>pt;">: <%= suratJalan.pekerjaan || '-' %></div>
+      <div class="txt b" style="left: 51.82pt; top: <%= TP(228.06) + alamatExtraOffset %>pt;">Perihal</div>
+      <div class="txt b" style="left: 99.54pt; top: <%= TP(228.06) + alamatExtraOffset %>pt;">: <%= suratJalan.perihal || '-' %></div>
+
+      <div class="txt b" style="left: 51.82pt; top: <%= TP(239.40) + alamatExtraOffset %>pt;">Pekerjaaan</div>
+      <div class="txt b" style="left: 99.54pt; top: <%= TP(239.40) + alamatExtraOffset %>pt;">: <%= suratJalan.pekerjaan || '-' %></div>
 
       <!-- INFO KANAN -->
       <div class="txt b" style="left: 338.13pt; top: <%= TP(140.18) %>pt;">Tanggal</div>
@@ -496,9 +507,14 @@
       <% }); %>
       <% }); %>
 
-      <!-- KETERANGAN KODE BARANG (Tampil vertikal ke bawah di atas area tanda tangan) -->
+      <!-- KETERANGAN KODE BARANG & TANDA TANGAN POSISI DINAMIS -->
+      <% 
+        const tableBottomY = 258.1056 + calculatedTableHeight;
+        const kodeBarangTopY = tableBottomY + 15;
+        const sigTopY = Math.max(590.44, kodeBarangTopY + (kodeBarangList.length > 0 ? (20 + (kodeBarangList.length * 11)) : 10));
+      %>
       <% if (kodeBarangList && kodeBarangList.length > 0) { %>
-      <div style="position: absolute; left: 51.82pt; top: 560pt; font-size: 7.37pt; line-height: 11pt;">
+      <div style="position: absolute; left: 51.82pt; top: <%= kodeBarangTopY %>pt; font-size: 7.37pt; line-height: 11pt;">
         <div style="font-weight: 700; margin-bottom: 2pt;">Keterangan Kode Barang:</div>
         <% kodeBarangList.forEach(function (kb) { %>
         <div><span style="font-weight: 700;"><%= kb.namaBarang %></span> : <span><%= kb.kodeBarang %></span></div>
@@ -507,17 +523,17 @@
       <% } %>
 
       <!-- TANDA TANGAN -->
-      <div class="sig-title" style="left: 110.40pt; width: 69.68pt; top: <%= TP(590.44) %>pt;">Yang Menyerahkan,</div>
-      <div class="sig-line" style="left: 110.40pt; width: 69.68pt; top: <%= TP(641.47) %>pt;">
+      <div class="sig-title" style="left: 110.40pt; width: 69.68pt; top: <%= TP(sigTopY) %>pt;">Yang Menyerahkan,</div>
+      <div class="sig-line" style="left: 110.40pt; width: 69.68pt; top: <%= TP(sigTopY + 51.03) %>pt;">
         <span class="sig-name"><span>(</span><span><%= namaPenyerahTampil %></span><span>)</span></span>
       </div>
-      <div class="sig-line b" style="left: 110.40pt; width: 69.68pt; top: <%= TP(652.80) %>pt;">PT. Puspita Jayagiri</div>
+      <div class="sig-line b" style="left: 110.40pt; width: 69.68pt; top: <%= TP(sigTopY + 62.36) %>pt;">PT. Puspita Jayagiri</div>
 
-      <div class="sig-title" style="left: 383.96pt; width: 65.24pt; top: <%= TP(590.44) %>pt;">Penerima,</div>
-      <div class="sig-line" style="left: 383.96pt; width: 65.24pt; top: <%= TP(641.47) %>pt;">
+      <div class="sig-title" style="left: 383.96pt; width: 65.24pt; top: <%= TP(sigTopY) %>pt;">Penerima,</div>
+      <div class="sig-line" style="left: 383.96pt; width: 65.24pt; top: <%= TP(sigTopY + 51.03) %>pt;">
         <span class="sig-name"><span>(</span><span><%= namaPenerimaTampil %></span><span>)</span></span>
       </div>
-      <div class="sig-line b" style="left: 383.96pt; width: 65.24pt; top: <%= TP(652.80) %>pt;"><%= kepadaYthTampil %></div>
+      <div class="sig-line b" style="left: 383.96pt; width: 65.24pt; top: <%= TP(sigTopY + 62.36) %>pt;"><%= kepadaYthTampil %></div>
     </div>
   </div>
 
