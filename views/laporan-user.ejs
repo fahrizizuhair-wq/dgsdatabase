@@ -298,12 +298,112 @@
     .card-value { font-size: 26px; font-weight: 700; color: #7a1b1b; }
 
     /* REPORT CONTAINER */
-    .report-container { background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 24px; border: 1px solid #eef0f4; backdrop-filter: blur(5px); overflow-x: auto; }
+    .report-container { background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 24px; border: 1px solid #eef0f4; backdrop-filter: blur(5px); position: relative; }
     .report-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
     .report-header h2 { color: #7a1b1b; margin-right: auto; }
 
-    .btn-action { background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+    /* HEADER ACTIONS & FILTER POPOVER STYLING */
+    .header-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .btn-action { background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; }
     .btn-action:hover { background-color: #5c1313; }
+
+    .btn-filter-icon {
+      background-color: #ffffff;
+      color: #333;
+      border: 1px solid #d1d5db;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      transition: all 0.2s;
+    }
+    .btn-filter-icon:hover {
+      background-color: #f3f4f6;
+      border-color: #9ca3af;
+    }
+
+    /* Panel Filter Melayang (Popover) */
+    .filter-panel-right {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50px;
+      width: 320px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      border: 1px solid #e5e7eb;
+      padding: 20px;
+      z-index: 100;
+    }
+    .filter-panel-right.active {
+      display: block;
+    }
+
+    .filter-form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .filter-group label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .filter-group select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      background-color: #fff;
+    }
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn-apply {
+      background-color: #7a1b1b;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+      font-size: 13px;
+    }
+    .btn-apply:hover { background-color: #5c1313; }
+    .btn-reset {
+      background-color: #e5e7eb;
+      color: #374151;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      font-size: 13px;
+    }
+    .btn-reset:hover { background-color: #d1d5db; }
 
     table { width: 100%; border-collapse: collapse; text-align: left; min-width: 800px; margin-top: 10px; }
     th, td { padding: 12px 14px; border-bottom: 1px solid #edf0f2; font-size: 13px; vertical-align: middle; }
@@ -332,58 +432,50 @@
     }
 
     /* ==========================================
-   RESPONSIF MOBILE (Layar di bawah 768px)
-   ========================================== */
-@media (max-width: 768px) {
-  /* 1. Sesuaikan Padding Kontainer Utama */
-  .header-container, 
-  .stats-grid, 
-  .main-box,
-  .middle-grid {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  /* 2. Kartu Statistik Menjadi 1 Kolom ke Bawah */
-  .stats-grid, 
-  .middle-grid {
-    grid-template-columns: 1fr !important; /* Bertumpuk vertikal */
-    gap: 12px !important;
-  }
-
-  /* 3. Banner Salam / Top Header */
-  .box-header,
-  .actions-toolbar {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 10px !important;
-  }
-
-  .search-input {
-    width: 100% !important; /* Input pencarian memenuhi layar */
-  }
-
-  /* 4. Tabel Agar Bisa Di-scroll Horizontal di HP */
-  .main-box {
-    overflow-x: auto !important; /* Mencegah tabel merusak lebar layar */
-  }
-
-  table {
-    min-width: 600px; /* Menjaga ukuran isi tabel tetap terbaca */
-  }
-
-  /* 5. Ukuran Judul & Teks yang Lebih Pas di HP */
-  h1 {
-    font-size: 22px !important;
-  }
-  
-  .stat-value {
-    font-size: 22px !important;
-  }
-}
-
+    RESPONSIF MOBILE (Layar di bawah 768px)
+    ========================================== */
+    @media (max-width: 768px) {
+      .header-container, 
+      .stats-grid, 
+      .main-box,
+      .middle-grid {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      .stats-grid, 
+      .middle-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      .box-header,
+      .actions-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+      .search-input {
+        width: 100% !important;
+      }
+      .main-box {
+        overflow-x: auto !important;
+      }
+      table {
+        min-width: 600px;
+      }
+      h1 {
+        font-size: 22px !important;
+      }
+      .stat-value {
+        font-size: 22px !important;
+      }
+      .filter-panel-right {
+        width: 100% !important;
+        right: 0 !important;
+        left: 0 !important;
+      }
+    }
   </style>
   <link rel="stylesheet" href="/css/stat-cards.css">
 </head>
@@ -444,7 +536,6 @@
             <span>Data Vendor</span>
           </a>
         </li>
-        <!-- PINDAHKAN CLASS ACTIVE KE SINI -->
         <li class="nav-item">
           <a href="/harga-dasar-user">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -473,7 +564,7 @@
           </ul>
         </li>
         <!-- Menu Dropdown Laporan -->
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown active">
           <a href="javascript:void(0)" class="dropdown-toggle" onclick="toggleDropdown(this)">
             <div class="dropdown-toggle-left">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -545,11 +636,11 @@
     </header>
 
     <%
-  var _lapList = (typeof listLaporan !== 'undefined' && listLaporan) ? listLaporan : [];
-  var _lapBerkas = _lapList.filter(function (i) { return !!i.filePath; }).length;
-  var _lapTanpa = _lapList.length - _lapBerkas;
-%>
-<section class="card-grid">
+      var _lapList = (typeof listLaporan !== 'undefined' && listLaporan) ? listLaporan : [];
+      var _lapBerkas = _lapList.filter(function (i) { return !!i.filePath; }).length;
+      var _lapTanpa = _lapList.length - _lapBerkas;
+    %>
+    <section class="card-grid">
       <div class="stat-card card-blue">
         <div class="card-header">
           <span class="card-title">Total Dokumen Laporan</span>
@@ -603,7 +694,44 @@
     <section class="report-container">
       <div class="report-header">
         <h2>Daftar Arsip Laporan</h2>
-        <button class="btn-action" onclick="openModal()">+ Tambah Laporan</button>
+        
+        <!-- GRUP TOMBOL AKSI (FILTER DI SAMPING TAMBAH LAPORAN) -->
+        <div class="header-actions-group">
+          <button type="button" id="filter-toggle-btn" class="btn-filter-icon" onclick="toggleFilterPanel()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            <span>Filter Data</span>
+          </button>
+
+          <button class="btn-action" onclick="openModal()">+ Tambah Laporan</button>
+
+          <!-- PANEL FILTER POPOVER MELAYANG -->
+          <div id="filter-panel" class="filter-panel-right">
+            <form id="filter-form" action="/laporan-user" method="GET">
+              <div class="filter-form-grid">
+                <div class="filter-group">
+                  <label for="jenis">Jenis Laporan:</label>
+                  <select name="jenis" id="jenis">
+                    <option value="">Semua Jenis</option>
+                    <option value="Surat Tanda Terima" <%= (typeof selectedJenis !== 'undefined' && selectedJenis === 'Surat Tanda Terima') ? 'selected' : '' %>>Surat Tanda Terima</option>
+                    <option value="Surat Jalan" <%= (typeof selectedJenis !== 'undefined' && selectedJenis === 'Surat Jalan') ? 'selected' : '' %>>Surat Jalan</option>
+                    <option value="Laporan Harian" <%= (typeof selectedJenis !== 'undefined' && selectedJenis === 'Laporan Harian') ? 'selected' : '' %>>Laporan Harian</option>
+                  </select>
+                </div>
+
+                <div class="filter-actions">
+                  <button type="submit" class="btn-apply">Terapkan</button>
+                  <a href="/laporan-user" class="btn-reset">Reset</a>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
 
       <table>
@@ -630,22 +758,13 @@
                 <td><%= index + 1 %></td>
                 <td><strong><%= lap.namaDokumen || lap.judul %></strong></td>
                 <td><%= lap.jenis || lap.kategori %></td>
-                
-                <!-- 1. Kolom Tujuan/Kepada (Sesuaikan nama field database Anda, misal: lap.tujuan atau lap.kepada) -->
                 <td><%= lap.tujuan || lap.kepada || '-' %></td>
-                
-                <!-- 2. Kolom Keterangan (Yang tadinya terlewat) -->
                 <td><%= lap.keterangan || '-' %></td>
-                
-                <!-- 3. Kolom Tanggal -->
                 <td><%= lap.tanggal ? new Date(lap.tanggal).toLocaleDateString('id-ID') : '-' %></td>
                 <td><%= lap.diinputOleh || '-' %></td>
-                
-                <!-- 4. Kolom Unduh PDF -->
                 <td style="text-align: center;">
                   <% if (lap.filePath) { %>
                    <a href="/uploads/<%= lap.cleanName %>" target="_blank" class="btn-action" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Unduh PDF</a>
-                    <span style="color: #888; font-size: 12px;"></span>
                   <% } %>
                 </td>
               </tr>
@@ -671,14 +790,14 @@
         <div class="form-group">
           <label>Jenis Laporan</label>
           <select name="jenis">
-            <option value="Harga Dasar">Surat Masuk</option>
-            <option value="Master Vendor">Surat Keluar</option>
+            <option value="Surat Tanda Terima">Surat Tanda Terima</option>
+            <option value="Surat Jalan">Surat Jalan</option>
             <option value="Laporan Harian">Laporan Harian</option>
           </select>
         </div>
         <div class="form-group">
           <label>Tujuan/Kepada</label>
-          <input type="text" name="tujuan" placeholder="Tujua/Kepada..." required>
+          <input type="text" name="tujuan" placeholder="Tujuan/Kepada..." required>
         </div>
         <div class="form-group">
           <label>Keterangan</label>
@@ -707,6 +826,21 @@
       const parentLi = element.parentElement;
       parentLi.classList.toggle('active');
     }
+
+    // Fungsi untuk memunculkan/menutup panel filter popover
+    function toggleFilterPanel() {
+      const panel = document.getElementById('filter-panel');
+      panel.classList.toggle('active');
+    }
+
+    // Menutup panel filter jika pengguna mengklik di luar area tombol/panel filter
+    window.addEventListener('click', function(e) {
+      const btn = document.getElementById('filter-toggle-btn');
+      const panel = document.getElementById('filter-panel');
+      if (panel && btn && !btn.contains(e.target) && !panel.contains(e.target)) {
+        panel.classList.remove('active');
+      }
+    });
   </script>
 </body>
 </html>

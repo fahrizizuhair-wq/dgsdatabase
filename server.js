@@ -1730,15 +1730,28 @@ app.post('/stok-opname-user/add', async (req, res) => {
 // ============================================================
 app.get('/laporan-user', async (req, res) => {
   try {
-    const rawListLaporan = await Laporan.find().sort({ _id: -1 }).lean();
-    const totalLaporan = rawListLaporan.length;
+
+    const selectedJenis = req.query.jenis || '';
+  
+    let filter = {};
+    if (selectedJenis !== '') {
+      filter.jenis = selectedJenis;
+    }
+
+    const rawListLaporan = await Laporan.find(filter).sort({ _id: -1 }).lean();
+    const totalLaporan = await Laporan.countDocuments({}); 
 
     const listLaporan = rawListLaporan.map(item => ({
       ...item,
       cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
     }));
 
-    res.render('laporan-user', { listLaporan, totalLaporan });
+    res.render('laporan-user', { 
+      listLaporan, 
+      totalLaporan, 
+      role: req.session.role || 'user',
+      selectedJenis 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat data laporan user: ' + err.message);
