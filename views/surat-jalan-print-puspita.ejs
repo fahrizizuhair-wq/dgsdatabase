@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cetak Surat Jalan - <%= suratJalan.noSuratJalan %></title>
+  <!-- Library html2pdf untuk unduh otomatis -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <%
     function rapiNamaPerusahaan(nama) {
       if (!nama) return 'PT Puspita Jayagiri';
@@ -263,15 +265,14 @@
       border-top: 0.482pt solid #000;
     }
 
-    /* Tabel Puspita: Dinamis menyesuaikan isi, berhenti sebelum area tanda tangan */
     .tbl-border {
       position: absolute;
       left: 49.9275pt;
       top: 258.1056pt;
       width: 495.145pt;
-      min-height: 180pt; /* Tinggi minimum agar tabel tetap proporsional jika item sedikit */
+      min-height: 180pt;
       height: auto;
-      bottom: 300pt;     /* Memberikan batas jarak aman dari area tanda tangan di bawah */
+      bottom: 300pt;
       border-top: 0.4725pt solid #000;
       border-bottom: 0.4725pt solid #000;
     }
@@ -289,7 +290,6 @@
       width: 0;
       border-left: 0.4725pt solid #000;
     }
-    /* Garis vertikal body tabel mengikuti tinggi dinamis */
     .tbl-vbody {
       position: absolute;
       top: 270.8622pt;
@@ -496,7 +496,7 @@
       <% }); %>
       <% }); %>
 
-      <!-- KETERANGAN KODE BARANG (Tampil vertikal ke bawah di atas area tanda tangan) -->
+      <!-- KETERANGAN KODE BARANG -->
       <% if (kodeBarangList && kodeBarangList.length > 0) { %>
       <div style="position: absolute; left: 51.82pt; top: 560pt; font-size: 7.37pt; line-height: 11pt;">
         <div style="font-weight: 700; margin-bottom: 2pt;">Keterangan Kode Barang:</div>
@@ -529,15 +529,37 @@
 
   <script>
     window.addEventListener('load', function () {
+      const urlParams = new URLSearchParams(window.location.search);
       var img = document.querySelector('.letterhead');
-      var cetak = function () {
-        setTimeout(function () { window.print(); }, 350);
+
+      var prosesCetakAtauDownload = function () {
+        setTimeout(function () {
+          // Jika dibuka dari tombol "Unduh PDF" (?download=true), langsung download PDF secara instan
+          if (urlParams.has('download')) {
+            const element = document.querySelector('.page');
+            const opt = {
+              margin:       0,
+              filename:     '<%= (suratJalan.jenisSurat || "Surat-Jalan").replace(/\s+/g, "-") %>-<%= suratJalan.noSuratJalan.replace(/\//g, "-") %>.pdf',
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2, useCORS: true },
+              jsPDF:        { unit: 'pt', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().from(element).set(opt).save().then(() => {
+              setTimeout(() => window.close(), 1000);
+            });
+          } else {
+            // Jika dibuka biasa lewat tombol "Cetak", tampilkan dialog print browser
+            window.print();
+          }
+        }, 350);
       };
+
       if (img && !img.complete) {
-        img.addEventListener('load', cetak);
-        img.addEventListener('error', cetak);
+        img.addEventListener('load', prosesCetakAtauDownload);
+        img.addEventListener('error', prosesCetakAtauDownload);
       } else {
-        cetak();
+        prosesCetakAtauDownload();
       }
     });
   </script>
