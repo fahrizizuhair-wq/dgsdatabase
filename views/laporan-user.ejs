@@ -663,7 +663,10 @@
       <form action="/laporan-user/add" method="POST" enctype="multipart/form-data">
         <div class="form-group">
           <label>Nama Dokumen</label>
-          <input type="text" name="namaDokumen" placeholder="Contoh: Laporan Keuangan Bulanan" required>
+          <select name="namaDokumen">
+            <option value="Surat Jalan">Surat Jalan</option>
+            <option value="Surat Tanda Terima">Surat Tanda Terima</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Jenis Laporan</label>
@@ -679,7 +682,7 @@
           <input type="text" name="tujuan" placeholder="Tujua/Kepada..." required>
         </div>
         <div class="form-group">
-          <label>Keterangan / Catatan</label>
+          <label>Keterangan</label>
           <textarea name="keterangan" rows="3" placeholder="Keterangan singkat laporan..."></textarea>
         </div>
         <div class="form-group">
