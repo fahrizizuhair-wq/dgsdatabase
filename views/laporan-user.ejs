@@ -333,13 +333,13 @@
     }
 
     .search-input { 
-    padding: 10px 14px; 
-    border: 1px solid #d1d5db; 
-    border-radius: 8px; 
-    width: 220px; 
-    font-size: 14px; 
-    outline: none; 
-    background: white;
+      padding: 9px 14px; 
+      border: 1px solid #d1d5db; 
+      border-radius: 8px; 
+      width: 220px; 
+      font-size: 13.5px; 
+      outline: none; 
+      background: white;
     }
     .search-input:focus { border-color: #7a1b1b; }
 
@@ -706,9 +706,10 @@
       <div class="report-header">
         <h2>Daftar Arsip Laporan</h2>
 
-        <input type="text" id="searchInput" class="search-input" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari Laporan.....">
+        <!-- KOTAK PENCARIAN DENGAN EVENT ONKEYUP -->
+        <input type="text" id="searchInput" class="search-input" onkeyup="filterLaporan()" placeholder="Cari Laporan.....">
         
-        <!-- GRUP TOMBOL AKSI (FILTER DI SAMPING TAMBAH LAPORAN) -->
+        <!-- GRUP TOMBOL AKSI -->
         <div class="header-actions-group">
           <button type="button" id="filter-toggle-btn" class="btn-filter-icon" onclick="toggleFilterPanel()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -775,8 +776,9 @@
               <td colspan="8" style="text-align: center; padding: 20px; color: #888;">Belum ada arsip laporan.</td>
             </tr>
           <% } else { %>
+            <!-- DITAMBAHKAN CLASS 'laporan-row' AGAR PENCARIAN BERFUNGSI -->
             <% listLaporan.forEach((lap, index) => { %>
-              <tr>
+              <tr class="laporan-row">
                 <td><%= index + 1 %></td>
                 <td><strong><%= lap.namaDokumen || lap.judul %></strong></td>
                 <td><%= lap.jenis || lap.kategori %></td>
@@ -797,7 +799,7 @@
     </section>
   </main>
 
-  <!-- MODAL TAMBAH LAPORAN (KHUSUS USER MENGARAH KE RUTE USER) -->
+  <!-- MODAL TAMBAH LAPORAN -->
   <div class="modal" id="laporanModal">
     <div class="modal-content">
       <h3 style="margin-bottom: 15px; color: #7a1b1b;">Tambah Laporan Baru</h3>
@@ -853,6 +855,21 @@
     function toggleFilterPanel() {
       const panel = document.getElementById('filter-panel');
       panel.classList.toggle('active');
+    }
+
+    // FUNGSI PENCARIAN REAL-TIME
+    function filterLaporan() {
+      const input = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.getElementsByClassName('laporan-row');
+      
+      for (let row of rows) {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(input)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
     }
 
     // Menutup panel filter jika pengguna mengklik di luar area tombol/panel filter
