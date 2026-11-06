@@ -1358,6 +1358,129 @@ app.post('/laporan/delete/:id', async (req, res) => {
   }
 });
 
+// 1. RUTE SURAT JALAN VERSI ADMIN
+app.get('/surat-jalan-admin', async (req, res) => {
+    try {
+        const daftarSurat = await SuratJalan.find().sort({ createdAt: -1 });
+        res.render('surat-jalan-admin', {
+            user: req.session.user || { username: 'Admin' },
+            daftarSurat: daftarSurat
+        });
+    } catch (err) {
+        console.error("Error fetching admin surat jalan:", err);
+        res.status(500).send("Terjadi kesalahan pada server");
+    }
+});
+
+app.post('/surat-jalan-admin/add', async (req, res) => {
+    try {
+        const { jenisSurat, noSuratJalan, tanggal, namaPerusahaan, kepadaYth, namaPenerima, namaPenyerah, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items, kodeBarangList } = req.body;
+        
+        const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username)) ? 
+                         (req.session.user.namaLengkap || req.session.user.username) : 'Administrator';
+
+        const daftarItem = (Array.isArray(items) ? items : [items])
+            .filter(item => item && (item.diskripsi || item.jumlah))
+            .map((item, index) => ({
+                no: index + 1,
+                diskripsi: item.diskripsi || '',
+                jumlah: item.jumlah === undefined || item.jumlah === null ? '' : String(item.jumlah).trim(),
+                satuan: item.satuan || '',
+                keterangan: item.keterangan || ''
+            }));
+
+        const daftarKodeBarang = (Array.isArray(kodeBarangList) ? kodeBarangList : [kodeBarangList])
+            .filter(kb => kb && (kb.namaBarang || kb.kodeBarang))
+            .map((kb, index) => ({
+                no: index + 1,
+                namaBarang: kb.namaBarang || '',
+                kodeBarang: kb.kodeBarang || ''
+            }));
+
+        const suratBaru = new SuratJalan({
+            jenisSurat: jenisSurat || 'Surat Jalan',
+            noSuratJalan,
+            tanggal: tanggal || Date.now(),
+            namaPerusahaan,
+            kepadaYth,
+            namaPenerima: namaPenerima || '',
+            namaPenyerah: namaPenyerah || '',
+            noTelepon,
+            alamat,
+            perihal,
+            pekerjaan,
+            jenisKirim: jenisKirim || 'Barang',
+            items: daftarItem,
+            kodeBarangList: daftarKodeBarang,
+            diinputOleh: namaUser
+        });
+
+        await suratBaru.save();
+        res.redirect('/surat-jalan-admin');
+    } catch (err) {
+        console.error("Error menyimpan surat jalan admin:", err);
+        res.status(500).send("Gagal menyimpan Surat Jalan: " + err.message);
+    }
+});
+
+
+app.post('/surat-jalan-admin/edit/:id', async (req, res) => {
+    try {
+        const { jenisSurat, noSuratJalan, tanggal, namaPerusahaan, kepadaYth, namaPenerima, namaPenyerah, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items, kodeBarangList } = req.body;
+
+        const daftarItem = (Array.isArray(items) ? items : [items])
+            .filter(item => item && (item.diskripsi || item.jumlah))
+            .map((item, index) => ({
+                no: index + 1,
+                diskripsi: item.diskripsi || '',
+                jumlah: item.jumlah === undefined || item.jumlah === null ? '' : String(item.jumlah).trim(),
+                satuan: item.satuan || '',
+                keterangan: item.keterangan || ''
+            }));
+
+        const daftarKodeBarang = (Array.isArray(kodeBarangList) ? kodeBarangList : [kodeBarangList])
+            .filter(kb => kb && (kb.namaBarang || kb.kodeBarang))
+            .map((kb, index) => ({
+                no: index + 1,
+                namaBarang: kb.namaBarang || '',
+                kodeBarang: kb.kodeBarang || ''
+            }));
+
+        await SuratJalan.findByIdAndUpdate(req.params.id, {
+            jenisSurat: jenisSurat || 'Surat Jalan',
+            noSuratJalan,
+            tanggal: tanggal || Date.now(),
+            namaPerusahaan,
+            kepadaYth,
+            namaPenerima: namaPenerima || '',
+            namaPenyerah: namaPenyerah || '',
+            noTelepon,
+            alamat,
+            perihal,
+            pekerjaan,
+            jenisKirim: jenisKirim || 'Barang',
+            items: daftarItem,
+            kodeBarangList: daftarKodeBarang
+        });
+
+        res.redirect('/surat-jalan-admin');
+    } catch (err) {
+        console.error("Error mengupdate surat jalan admin:", err);
+        res.status(500).send("Gagal mengupdate Surat Jalan: " + err.message);
+    }
+});
+
+
+app.post('/surat-jalan-admin/delete/:id', async (req, res) => {
+    try {
+        await SuratJalan.findByIdAndDelete(req.params.id);
+        res.redirect('/surat-jalan-admin');
+    } catch (err) {
+        console.error("Error menghapus surat jalan admin:", err);
+        res.status(500).send("Gagal menghapus Surat Jalan");
+    }
+});
+
 // ============================================================
 //  RUTE: USER – Data Vendor
 // ============================================================
