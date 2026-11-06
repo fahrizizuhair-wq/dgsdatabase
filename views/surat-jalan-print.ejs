@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak <%= suratJalan.jenisSurat || 'Surat Jalan' %> - <%= suratJalan.noSuratJalan %></title>
+  <title>Cetak <%= suratJalan.jenisSurat || 'Surat Jalan' %> <%= suratJalan.noSuratJalan %></title>
+  <!-- Library html2pdf untuk unduh otomatis -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <%
     function rapiNamaPerusahaan(nama) {
       if (!nama) return 'PT Dian Giri Saputra';
@@ -26,7 +28,6 @@
     const namaPenyerahTampil = (suratJalan.namaPenyerah || '').trim() || suratJalan.diinputOleh || 'Deka';
     const kepadaYthTampil = rapiNamaPerusahaan(suratJalan.kepadaYth || '');
 
-    // Menangkap pilihan Jenis Surat dari database/form secara dinamis (Default: SURAT JALAN)
     const jenisSuratTampil = String(suratJalan.jenisSurat || 'Surat Jalan').trim().toUpperCase();
 
     const kepadaYthNormal = String(kepadaYthTampil).replace(/\s+/g, ' ').trim().toLowerCase();
@@ -148,7 +149,6 @@
       return hasil;
     });
 
-    // Hitung tinggi tabel secara dinamis agar pas dan tidak terlalu panjang ke bawah
     const lastItem = posisiItem.length ? posisiItem[posisiItem.length - 1] : null;
     let calculatedTableHeight = 140; 
     if (lastItem) {
@@ -245,7 +245,6 @@
       border-top: 0.425pt solid #000;
     }
 
-    /* Kotak tabel diset dinamis via inline style */
     .tbl-border {
       position: absolute;
       left: 70.05pt;
@@ -506,15 +505,37 @@
 
   <script>
     window.addEventListener('load', function () {
+      const urlParams = new URLSearchParams(window.location.search);
       var img = document.querySelector('.letterhead');
-      var cetak = function () {
-        setTimeout(function () { window.print(); }, 350);
+
+      var prosesCetakAtauDownload = function () {
+        setTimeout(function () {
+          // Jika dibuka dari tombol "Unduh PDF" (?download=true), langsung download PDF secara instan
+          if (urlParams.has('download')) {
+            const element = document.querySelector('.page');
+            const opt = {
+              margin:       0,
+              filename:     '<%= (suratJalan.jenisSurat || "Surat-Jalan").replace(/\s+/g, "-") %>-<%= suratJalan.noSuratJalan.replace(/\//g, "-") %>.pdf',
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2, useCORS: true },
+              jsPDF:        { unit: 'pt', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().from(element).set(opt).save().then(() => {
+              setTimeout(() => window.close(), 1000);
+            });
+          } else {
+            // Jika dibuka biasa lewat tombol "Cetak", tampilkan dialog print browser
+            window.print();
+          }
+        }, 350);
       };
+
       if (img && !img.complete) {
-        img.addEventListener('load', cetak);
-        img.addEventListener('error', cetak);
+        img.addEventListener('load', prosesCetakAtauDownload);
+        img.addEventListener('error', prosesCetakAtauDownload);
       } else {
-        cetak();
+        prosesCetakAtauDownload();
       }
     });
   </script>
