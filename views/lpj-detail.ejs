@@ -103,7 +103,6 @@
     .table-rincian td { padding: 11px 10px; border-bottom: 1px solid #eef2f7; vertical-align: top; color: #334155; }
     .table-rincian tbody tr:hover { background: #fcfafa; }
     .table-rincian .num { text-align: right; white-space: nowrap; }
-    .table-rincian tfoot td { padding: 12px 10px; font-weight: 700; border-top: 2px solid #e2e8f0; color: #0f172a; }
     .badge-kategori-item { display: inline-block; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
     .nota-link { display: inline-flex; align-items: center; gap: 5px; color: #7a1b1b; font-weight: 600; text-decoration: none; font-size: 12px; }
     .nota-link:hover { text-decoration: underline; }
@@ -314,7 +313,7 @@
           <% } %>
         </div>
 
-        <!-- TAB 3: RINCIAN PENGELUARAN -->
+        <!-- TAB 3: RINCIAN PENGELUARAN (DIPISAH: Biaya Produksi di atas, Biaya Operasional di bawah) -->
         <div id="rincian" class="tab-pane <%= currentTab === 'rincian' ? 'active' : '' %>">
           <div class="tab-section-head">
             <div>
@@ -324,14 +323,35 @@
             <button type="button" class="btn-tambah-catatan" onclick="openCatatanModal()">+ Tambah Catatan</button>
           </div>
 
-          <% if (rincianList.length > 0) { %>
-            <div style="overflow-x: auto; border: 1px solid #eef2f7; border-radius: 10px;">
+          <% 
+            const produksiItems = rincianList.filter(i => (i.kategoriPengeluaran || '').toUpperCase() === 'BIAYA PRODUKSI');
+            const operasionalItems = rincianList.filter(i => (i.kategoriPengeluaran || '').toLowerCase().includes('oprasional') || (i.kategoriPengeluaran || '').toLowerCase().includes('operasional'));
+            
+            const totalProduksi = produksiItems.reduce((acc, curr) => acc + (Number(curr.nominal) || 0), 0);
+            const totalOperasional = operasionalItems.reduce((acc, curr) => acc + (Number(curr.nominal) || 0), 0);
+          %>
+
+          <!-- CARD 1: BIAYA PRODUKSI -->
+          <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 24px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+            <div style="padding: 16px 20px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="background: #fef2f2; color: #dc2626; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+                </div>
+                <div>
+                  <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; text-transform: uppercase;">BIAYA PRODUKSI</h4>
+                  <span style="font-size: 12px; color: #64748b;"><%= produksiItems.length %> Item Belanja</span>
+                </div>
+              </div>
+              <div style="font-size: 16px; font-weight: 700; color: #0f172a;">Rp <%= totalProduksi.toLocaleString('id-ID') %></div>
+            </div>
+
+            <div style="overflow-x: auto;">
               <table class="table-rincian">
                 <thead>
                   <tr>
                     <th>No</th>
                     <th>Tanggal</th>
-                    <th>Kategori</th>
                     <th>Uraian Barang</th>
                     <th class="num">Qty</th>
                     <th class="num">Harga Satuan</th>
@@ -341,41 +361,90 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <% rincianList.forEach((item, index) => { %>
-                    <tr>
-                      <td><%= index + 1 %></td>
-                      <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
-                      <td><span class="badge-kategori-item"><%= item.kategoriPengeluaran || '-' %></span></td>
-                      <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong></td>
-                      <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
-                      <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
-                      <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
-                      <td>
-                        <% if (item.notaPath) { %>
-                          <a class="nota-link" href="<%= item.notaPath %>" target="_blank" rel="noopener">📎 Lihat Nota</a>
-                        <% } else { %>
-                          <span style="color: #cbd5e1;">-</span>
-                        <% } %>
-                      </td>
-                      <td><%= item.keterangan || '-' %></td>
-                    </tr>
-                  <% }) %>
+                  <% if (produksiItems.length > 0) { %>
+                    <% produksiItems.forEach((item, index) => { %>
+                      <tr>
+                        <td><%= index + 1 %></td>
+                        <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
+                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong></td>
+                        <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
+                        <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
+                        <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
+                        <td>
+                          <% if (item.notaPath) { %>
+                            <a class="nota-link" href="<%= item.notaPath %>" target="_blank" rel="noopener">📎 Lihat Nota</a>
+                          <% } else { %>
+                            <span style="color: #cbd5e1;">-</span>
+                          <% } %>
+                        </td>
+                        <td><%= item.keterangan || '-' %></td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr><td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada transaksi di kategori ini.</td></tr>
+                  <% } %>
                 </tbody>
-                <tfoot>
-                  <tr>
-                    <td colspan="6" style="text-align: right;">Total Pengeluaran</td>
-                    <td class="num" style="color: #dc2626;">Rp <%= (lpj.totalPengeluaran || 0).toLocaleString('id-ID') %></td>
-                    <td colspan="2"></td>
-                  </tr>
-                </tfoot>
               </table>
             </div>
-          <% } else { %>
-            <div class="empty-state">
-              <strong>Belum ada rincian item pengeluaran</strong>
-              Klik tombol <b>+ Tambah Catatan</b> untuk mencatat belanja beserta foto nota/invoice.
+          </div>
+
+          <!-- CARD 2: BIAYA OPERASIONAL -->
+          <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+            <div style="padding: 16px 20px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="background: #fef2f2; color: #dc2626; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+                </div>
+                <div>
+                  <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; text-transform: uppercase;">BIAYA OPERASIONAL</h4>
+                  <span style="font-size: 12px; color: #64748b;"><%= operasionalItems.length %> Item Belanja</span>
+                </div>
+              </div>
+              <div style="font-size: 16px; font-weight: 700; color: #0f172a;">Rp <%= totalOperasional.toLocaleString('id-ID') %></div>
             </div>
-          <% } %>
+
+            <div style="overflow-x: auto;">
+              <table class="table-rincian">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Tanggal</th>
+                    <th>Uraian Barang</th>
+                    <th class="num">Qty</th>
+                    <th class="num">Harga Satuan</th>
+                    <th class="num">Nominal</th>
+                    <th>Nota</th>
+                    <th>Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (operasionalItems.length > 0) { %>
+                    <% operasionalItems.forEach((item, index) => { %>
+                      <tr>
+                        <td><%= index + 1 %></td>
+                        <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
+                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong></td>
+                        <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
+                        <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
+                        <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
+                        <td>
+                          <% if (item.notaPath) { %>
+                            <a class="nota-link" href="<%= item.notaPath %>" target="_blank" rel="noopener">📎 Lihat Nota</a>
+                          <% } else { %>
+                            <span style="color: #cbd5e1;">-</span>
+                          <% } %>
+                        </td>
+                        <td><%= item.keterangan || '-' %></td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr><td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada transaksi di kategori ini.</td></tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
 
         <!-- TAB 4: VAULT NOTA DIGITAL -->
@@ -390,7 +459,7 @@
 
           <% if (vaultList.length > 0) { %>
             <div class="vault-grid">
-              <% vaultList.forEach((v) => {
+              <% vaultList.get('vaultList') || vaultList.forEach((v) => {
                    const isFoto = polaFoto.test(String(v.filePath || v.fileName || ''));
               %>
                 <div class="vault-card">
