@@ -91,11 +91,6 @@
 
     /* MAIN CONTENT & BANNER */
     .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
-    
-    .toggle-btn { 
-      font-size: 20px; background: #ffffff !important; color: #000000 !important; border: none; 
-      padding: 8px 14px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
 
     .system-banner {
       background: #1e293b; color: #ffffff; border-radius: 12px; padding: 22px 24px;
@@ -103,7 +98,14 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 15px;
     }
     .banner-title-wrap { display: flex; align-items: center; gap: 14px; }
-    .banner-icon { background: #7a1b1b; color: white; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+    
+    /* TOMBOL TOGGLE DI DALAM BANNER */
+    .banner-toggle-btn { 
+      background: #7a1b1b; color: white; width: 44px; height: 44px; border-radius: 10px; border: none;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;
+    }
+    .banner-toggle-btn:hover { background: #5c1313; }
+
     .banner-text span { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #f87171; font-weight: 700; }
     .banner-text h1 { font-size: 20px; font-weight: 700; color: #fff; margin-top: 2px; }
 
@@ -219,14 +221,13 @@
   </aside>
 
   <main class="main-content">
-    <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
-
-    <!-- SYSTEM BANNER HEADER -->
+    
+    <!-- SYSTEM BANNER HEADER (TOMBOL TOGGLE BERADA DI DALAMNYA) -->
     <div class="system-banner">
       <div class="banner-title-wrap">
-        <div class="banner-icon">LPJ</div>
+        <button class="banner-toggle-btn" onclick="toggleSidebar()" title="Buka Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
         <div class="banner-text">
           <span>System LPJ Terpusat</span>
           <h1>Dashboard Management Multi-LPJ</h1>
