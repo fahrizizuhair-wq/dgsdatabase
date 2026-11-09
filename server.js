@@ -1969,6 +1969,38 @@ app.post('/lpj-user/add', async (req, res) => {
   }
 });
 
+app.get('/lpj/detail/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Cari data LPJ berdasarkan ID dari MongoDB
+    const lpj = await Lpj.findById(id).lean();
+
+    if (!lpj) {
+      return res.status(404).send('Data LPJ atau Workspace kegiatan tidak ditemukan.');
+    }
+
+    // Kalkulasi data pendukung untuk template detail
+    const anggaran = lpj.anggaranKasbon || 1;
+    const pengeluaran = lpj.totalPengeluaran || 0;
+    const sisaSaldo = anggaran - pengeluaran;
+    let progress = Math.round((pengeluaran / anggaran) * 100);
+    if (progress > 100) progress = 100;
+
+    lpj.progressBelanja = progress;
+    lpj.sisaSaldo = sisaSaldo;
+
+    // Render ke satu template universal 'lpj-detail'
+    res.render('lpj-detail', {
+      lpj,
+      role: req.session.role || 'admin'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal memuat workspace detail LPJ: ' + err.message);
+  }
+});
+
 // ============================================================
 //  RUTE: EKSPOR EXCEL
 // ============================================================
