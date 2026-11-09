@@ -2036,6 +2036,58 @@ app.get('/lpj/detail/:id', async (req, res) => {
   }
 });
 
+// ==========================================
+// RUTE TAMBAH CATATAN & PENCAIRAN (BARU)
+// ==========================================
+app.post('/lpj/detail/:id/tambah-catatan', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { kategoriPengeluaran, namaItem, keterangan, qty, hargaSatuan, nominal } = req.body;
+
+    const lpj = await Lpj.findById(id);
+    if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
+
+    // Jika Anda ingin menyimpan rincian pengeluaran, pastikan skemanya ada di model Lpj.
+    // Untuk saat ini, kita akumulasikan total pengeluarannya:
+    const tambahNominal = Number(nominal) || 0;
+    lpj.totalPengeluaran = (lpj.totalPengeluaran || 0) + tambahNominal;
+
+    await lpj.save();
+    res.redirect('/lpj/detail/' + id);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal menyimpan catatan belanja: ' + err.message);
+  }
+});
+
+app.post('/lpj/detail/:id/tambah-pencairan', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nominal, keterangan } = req.body;
+
+    const lpj = await Lpj.findById(id);
+    if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
+
+    const nominalAngka = Number(nominal) || 0;
+
+    if (!lpj.riwayatPencairan) lpj.riwayatPencairan = [];
+    lpj.riwayatPencairan.push({
+      tanggal: new Date(),
+      nominal: nominalAngka,
+      keterangan: keterangan || ''
+    });
+
+    // Tambah juga ke total anggaran kasbon jika pencairan baru menambah dana
+    lpj.anggaranKasbon = (lpj.anggaranKasbon || 0) + nominalAngka;
+
+    await lpj.save();
+    res.redirect('/lpj/detail/' + id);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal menyimpan pencairan: ' + err.message);
+  }
+});
+
 // ============================================================
 //  RUTE: EKSPOR EXCEL
 // ============================================================
