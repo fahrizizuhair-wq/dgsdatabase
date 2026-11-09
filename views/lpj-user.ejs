@@ -110,10 +110,8 @@
     .btn-buat-lpj { background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; }
     .btn-buat-lpj:hover { background-color: #5c1313; }
 
-    /* STAT CARDS memakai desain seragam /css/stat-cards.css */
-
     /* FILTER & SEARCH TOOLBAR */
-    .filter-search-toolbar { background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .filter-search-toolbar { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; flex-wrap: wrap; }
     .search-box-wrap { position: relative; flex: 1; min-width: 260px; }
     .search-box-wrap input { width: 100%; padding: 10px 14px 10px 38px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: #fff; }
     .search-box-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 16px; height: 16px; }
@@ -122,7 +120,7 @@
     .filter-status-wrap select { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: #fff; font-family: inherit; }
 
     /* LPJ CARD GRID CONTAINER */
-    .lpj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .lpj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; width: 100%; }
     .lpj-card { background: #ffffff; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
     .lpj-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
     
@@ -299,124 +297,127 @@
       </div>
     </section>
 
-    <!-- PENCARIAN & FILTER TOOLBAR -->
-    <div class="filter-search-toolbar">
-      <form action="/lpj" method="GET" style="display: flex; width: 100%; gap: 15px; flex-wrap: wrap; align-items: center;">
-        <div class="search-box-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari LPJ (Merchandise, Seminar, Baksos)...">
-        </div>
-        <div class="filter-status-wrap">
-          <label for="status">Filter Status:</label>
-          <select name="status" id="status" onchange="this.form.submit()">
-            <option value="">Semua LPJ</option>
-            <option value="Selesai" <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Selesai') ? 'selected' : '' %>>Selesai</option>
-            <option value="Sedang Direview" <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Sedang Direview') ? 'selected' : '' %>>Sedang Direview</option>
-            <option value="Draft" <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Draft') ? 'selected' : '' %>>Draft</option>
-          </select>
-        </div>
-      </form>
-    </div>
-
-    <!-- DAFTAR KARTU LPJ (GRID) -->
-    <div class="lpj-grid">
-      <% if (!listLpj || listLpj.length === 0) { %>
-        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: rgba(255,255,255,0.95); border-radius: 12px; color: #64748b;">
-          Belum ada data LPJ terdaftar. Silakan buat LPJ baru.
-        </div>
-      <% } else { %>
-        <% listLpj.forEach(lpj => { 
-           let statusClass = 'status-draft';
-           if (lpj.status === 'Selesai') statusClass = 'status-selesai';
-           else if (lpj.status === 'Sedang Direview') statusClass = 'status-review';
-        %>
-          <div class="lpj-card">
-            <div class="lpj-card-top">
-              <div class="lpj-meta-row">
-                <span class="badge-kategori"><%= lpj.kategori %></span>
-                <span class="badge-status <%= statusClass %>"><%= lpj.status %></span>
-              </div>
-              <h3><%= lpj.namaKegiatan %></h3>
-
-              <div class="lpj-finances">
-                <div class="finance-row">
-                  <span>Anggaran Kasbon:</span>
-                  <span>Rp <%= (lpj.anggaranKasbon || 0).toLocaleString('id-ID') %></span>
-                </div>
-                <div class="finance-row pengeluaran">
-                  <span>Total Pengeluaran:</span>
-                  <span>Rp <%= (lpj.totalPengeluaran || 0).toLocaleString('id-ID') %></span>
-                </div>
-                <div class="finance-row saldo">
-                  <span>Sisa Saldo:</span>
-                  <span>Rp <%= ((lpj.anggaranKasbon || 0) - (lpj.totalPengeluaran || 0)).toLocaleString('id-ID') %></span>
-                </div>
-              </div>
-
-              <div class="progress-wrap">
-                <div class="progress-info">
-                  <span>Progress Belanja</span>
-                  <span><%= lpj.progressBelanja || 0 %>%</span>
-                </div>
-                <div class="progress-bar-bg">
-                  <div class="progress-bar-fill" style="width: <%= lpj.progressBelanja || 0 %>%"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="lpj-card-footer">
-              <a href="/lpj/detail/<%= lpj._id %>" class="btn-workspace">👁️ Lihat Detail Workspace LPJ</a>
-            </div>
+    <!-- KOTAK WRAPPER UTAMA BERLATAR BELAKANG PUTIH (MENUTUP BACKGROUND WEB) -->
+    <div style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); border-radius: 14px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-top: 25px;">
+      
+      <!-- PENCARIAN & FILTER TOOLBAR -->
+      <div class="filter-search-toolbar">
+        <form action="/lpj" method="GET" style="display: flex; width: 100%; gap: 15px; flex-wrap: wrap; align-items: center;">
+          <div class="search-box-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari LPJ (Merchandise, Seminar, Baksos)...">
           </div>
-        <% }); %>
-      <% } %>
+          <div class="filter-status-wrap">
+            <label for="status">Filter Status:</label>
+            <select name="status" id="status" onchange="this.form.submit()">
+              <option value="">Semua LPJ</option>
+              <option value="Selesai" <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Selesai') ? 'selected' : '' %>>Selesai</option>
+              <option value="Sedang Direview" <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Sedang Direview') ? 'selected' : '' %>>Sedang Direview</option>
+              <option value="Draft" <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Draft') ? 'selected' : '' %>>Draft</option>
+            </select>
+          </div>
+        </form>
+      </div>
+
+      <!-- DAFTAR KARTU LPJ (GRID) -->
+      <div class="lpj-grid">
+        <% if (!listLpj || listLpj.length === 0) { %>
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748b;">
+            Belum ada data LPJ terdaftar. Silakan buat LPJ baru.
+          </div>
+        <% } else { %>
+          <% listLpj.forEach(lpj => { 
+             let statusClass = 'status-draft';
+             if (lpj.status === 'Selesai') statusClass = 'status-selesai';
+             else if (lpj.status === 'Sedang Direview') statusClass = 'status-review';
+          %>
+            <div class="lpj-card">
+              <div class="lpj-card-top">
+                <div class="lpj-meta-row">
+                  <span class="badge-kategori"><%= lpj.kategori %></span>
+                  <span class="badge-status <%= statusClass %>"><%= lpj.status %></span>
+                </div>
+                <h3><%= lpj.namaKegiatan %></h3>
+
+                <div class="lpj-finances">
+                  <div class="finance-row">
+                    <span>Anggaran Kasbon:</span>
+                    <span>Rp <%= (lpj.anggaranKasbon || 0).toLocaleString('id-ID') %></span>
+                  </div>
+                  <div class="finance-row pengeluaran">
+                    <span>Total Pengeluaran:</span>
+                    <span>Rp <%= (lpj.totalPengeluaran || 0).toLocaleString('id-ID') %></span>
+                  </div>
+                  <div class="finance-row saldo">
+                    <span>Sisa Saldo:</span>
+                    <span>Rp <%= ((lpj.anggaranKasbon || 0) - (lpj.totalPengeluaran || 0)).toLocaleString('id-ID') %></span>
+                  </div>
+                </div>
+
+                <div class="progress-wrap">
+                  <div class="progress-info">
+                    <span>Progress Belanja</span>
+                    <span><%= lpj.progressBelanja || 0 %>%</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: <%= lpj.progressBelanja || 0 %>%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="lpj-card-footer">
+                <a href="/lpj/detail/<%= lpj._id %>" class="btn-workspace">👁️ Lihat Detail Workspace LPJ</a>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+
     </div>
   </main>
 
-
   <div class="modal" id="lpjModal">
-  <div class="modal-content">
-    <h3 style="margin-bottom: 16px; color: #7a1b1b;">Buat LPJ Baru</h3>
-    <form action="/lpj-user/add" method="POST">
-      <div class="form-group">
-        <label>Nama Kegiatan / Judul LPJ</label>
-        <input type="text" name="namaKegiatan" placeholder="Contoh: LPJ Pengadaan Merchandise..." required>
-      </div>
-      <div class="form-group">
-        <label>Kategori & Tahun</label>
-        <input type="text" name="kategori" placeholder="Contoh: PENGADAAN BARANG" required>
-      </div>
-      <div class="form-group">
-        <label>Status Awal</label>
-        <select name="status">
-          <option value="Draft">Draft</option>
-          <option value="Proses">Proses</option>
-          <option value="Selesai">Selesai</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label>Anggaran Kasbon (Rp)</label>
-        <input type="number" id="inputAnggaran" name="anggaranKasbon" placeholder="Contoh: 43000000" required oninput="formatEstimasiRupiah(this)">
-      </div>
+    <div class="modal-content">
+      <h3 style="margin-bottom: 16px; color: #7a1b1b;">Buat LPJ Baru</h3>
+      <form action="/lpj-user/add" method="POST">
+        <div class="form-group">
+          <label>Nama Kegiatan / Judul LPJ</label>
+          <input type="text" name="namaKegiatan" placeholder="Contoh: LPJ Pengadaan Merchandise..." required>
+        </div>
+        <div class="form-group">
+          <label>Kategori & Tahun</label>
+          <input type="text" name="kategori" placeholder="Contoh: PENGADAAN BARANG" required>
+        </div>
+        <div class="form-group">
+          <label>Status Awal</label>
+          <select name="status">
+            <option value="Draft">Draft</option>
+            <option value="Proses">Proses</option>
+            <option value="Selesai">Selesai</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Anggaran Kasbon (Rp)</label>
+          <input type="number" id="inputAnggaran" name="anggaranKasbon" placeholder="Contoh: 43000000" required oninput="formatEstimasiRupiah(this)">
+        </div>
 
-      
-      <div id="previewEstimasi" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; margin-bottom: 15px; display: none;">
-        <span style="font-size: 11px; color: #1e40af; font-weight: 600; display: block; margin-bottom: 2px;">Estimasi Anggaran Kasbon:</span>
-        <span id="textEstimasiRupiah" style="font-size: 15px; font-weight: 700; color: #1d4ed8;">Rp 0</span>
-      </div>
+        <div id="previewEstimasi" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; margin-bottom: 15px; display: none;">
+          <span style="font-size: 11px; color: #1e40af; font-weight: 600; display: block; margin-bottom: 2px;">Estimasi Anggaran Kasbon:</span>
+          <span id="textEstimasiRupiah" style="font-size: 15px; font-weight: 700; color: #1d4ed8;">Rp 0</span>
+        </div>
 
-      <div class="form-group">
-        <label>Keterangan Tambahan</label>
-        <textarea name="keterangan" rows="2" placeholder="Catatan singkat..."></textarea>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
-        <button type="submit" class="btn-buat-lpj" style="border-radius: 6px; padding: 9px 16px;">Simpan LPJ</button>
-      </div>
-    </form>
+        <div class="form-group">
+          <label>Keterangan Tambahan</label>
+          <textarea name="keterangan" rows="2" placeholder="Catatan singkat..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+          <button type="submit" class="btn-buat-lpj" style="border-radius: 6px; padding: 9px 16px;">Simpan LPJ</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
   <script>
     function openModal() { document.getElementById('lpjModal').style.display = 'flex'; }
@@ -427,25 +428,23 @@
     }
 
     function formatEstimasiRupiah(input) {
-  const previewBox = document.getElementById('previewEstimasi');
-  const textRupiah = document.getElementById('textEstimasiRupiah');
-  const nilai = input.value;
+      const previewBox = document.getElementById('previewEstimasi');
+      const textRupiah = document.getElementById('textEstimasiRupiah');
+      const nilai = input.value;
 
-  if (nilai && !isNaN(nilai) && Number(nilai) > 0) {
-    // Format angka menjadi mata uang Rupiah
-    const formatRp = Number(nilai).toLocaleString('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0
-    });
-    
-    // Ubah format string "IDR 43.000.000" menjadi "Rp 43.000.000"
-    textRupiah.textContent = formatRp.replace('IDR', 'Rp');
-    previewBox.style.display = 'block';
-  } else {
-    previewBox.style.display = 'none';
-  }
-}
+      if (nilai && !isNaN(nilai) && Number(nilai) > 0) {
+        const formatRp = Number(nilai).toLocaleString('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          maximumFractionDigits: 0
+        });
+        
+        textRupiah.textContent = formatRp.replace('IDR', 'Rp');
+        previewBox.style.display = 'block';
+      } else {
+        previewBox.style.display = 'none';
+      }
+    }
   </script>
 </body>
 </html>
