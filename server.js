@@ -1370,24 +1370,30 @@ app.post('/laporan/delete/:id', async (req, res) => {
 });
 
 // Rute untuk memproses update/edit data laporan
-app.post('/laporan/edit/:id', async (req, res) => {
+app.post('/laporan/edit/:id', upload.single('fileLaporan'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { kategoriPengeluaran, namaItem, keterangan, qty, hargaSatuan, nominal } = req.body;
+    const { namaDokumen, jenis, tujuan, keterangan } = req.body;
 
-    // Cari dan update data berdasarkan ID item/transaksi
-    // Sesuaikan dengan struktur skema database Mongoose Anda
-    await LaporanModel.findByIdAndUpdate(id, {
-      kategoriPengeluaran,
-      namaItem,
-      keterangan,
-      qty: Number(qty),
-      hargaSatuan: Number(hargaSatuan),
-      nominal: Number(nominal)
-    });
+    // Siapkan objek data yang akan di-update ke database
+    let updateData = {
+      namaDokumen,
+      jenis,
+      tujuan,
+      keterangan
+    };
+
+    // Jika user mengunggah file PDF baru saat edit
+    if (req.file) {
+      updateData.filePath = req.file.path;
+      updateData.cleanName = req.file.filename; // Sesuaikan jika database Anda menyimpan nama file bersih
+    }
+
+    // Update data berdasarkan ID dokumen laporan
+    await LaporanModel.findByIdAndUpdate(id, updateData);
 
     // Redirect kembali ke halaman laporan setelah berhasil
-    res.redirect('/laporan'); // Sesuaikan dengan endpoint halaman laporan Anda
+    res.redirect('/laporan');
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memperbarui data laporan');
