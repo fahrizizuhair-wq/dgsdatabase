@@ -1936,26 +1936,33 @@ app.get('/lpj-user', async (req, res) => {
     }
 
     const rawListLpj = await Lpj.find(filter).sort({ _id: -1 }).lean();
-    
-    // Hitung Statistik Anggaran, Pengeluaran, dan Sisa Saldo secara Otomatis
-    const totalAnggaranKelolaan = rawListLpj.reduce((acc, curr) => acc + (curr.anggaranKasbon || 0), 0);
-    const totalPengeluaran = rawListLpj.reduce((acc, curr) => acc + (curr.totalPengeluaran || 0), 0);
-    const totalSisaSaldo = totalAnggaranKelolaan - totalPengeluaran;
-    const totalLpjTerdaftar = rawListLpj.length;
 
-    // Perhitungan otomatis progress belanja tiap LPJ
+    // Perhitungan otomatis progress belanja tiap LPJ.
+    // Jika LPJ sudah punya rincian pengeluaran, total dihitung dari rincian.
     const listLpj = rawListLpj.map(item => {
-      const anggaran = item.anggaranKasbon || 1;
-      const pengeluaran = item.totalPengeluaran || 0;
-      let progress = Math.round((pengeluaran / anggaran) * 100);
+      const rincian = Array.isArray(item.rincianPengeluaran) ? item.rincianPengeluaran : [];
+      const pengeluaran = rincian.length > 0
+        ? rincian.reduce((acc, row) => acc + (Number(row.nominal) || 0), 0)
+        : (item.totalPengeluaran || 0);
+      const anggaran = item.anggaranKasbon || 0;
+      let progress = anggaran > 0 ? Math.round((pengeluaran / anggaran) * 100) : 0;
       if (progress > 100) progress = 100;
+      if (progress < 0) progress = 0;
 
       return {
         ...item,
+        totalPengeluaran: pengeluaran,
+        sisaSaldo: anggaran - pengeluaran,
         progressBelanja: progress,
         cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
       };
     });
+
+    // Hitung Statistik Anggaran, Pengeluaran, dan Sisa Saldo secara Otomatis
+    const totalAnggaranKelolaan = listLpj.reduce((acc, curr) => acc + (curr.anggaranKasbon || 0), 0);
+    const totalPengeluaran = listLpj.reduce((acc, curr) => acc + (curr.totalPengeluaran || 0), 0);
+    const totalSisaSaldo = totalAnggaranKelolaan - totalPengeluaran;
+    const totalLpjTerdaftar = listLpj.length;
 
     res.render('lpj-user', {
       listLpj,
@@ -2007,6 +2014,21 @@ app.post('/lpj-user/add', async (req, res) => {
   }
 });
 
+// Menghitung ulang total pengeluaran, sisa saldo, dan progress dari rincian belanja
+function sinkronTotalLpj(lpj) {
+  const rincian = Array.isArray(lpj.rincianPengeluaran) ? lpj.rincianPengeluaran : [];
+  const total = rincian.reduce((acc, row) => acc + (Number(row.nominal) || 0), 0);
+  const anggaran = Number(lpj.anggaranKasbon) || 0;
+
+  lpj.totalPengeluaran = total;
+  lpj.sisaSaldo = anggaran - total;
+
+  let progress = anggaran > 0 ? Math.round((total / anggaran) * 100) : 0;
+  if (progress > 100) progress = 100;
+  if (progress < 0) progress = 0;
+  lpj.progressBelanja = progress;
+}
+
 app.get('/lpj/detail/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -2016,19 +2038,65 @@ app.get('/lpj/detail/:id', async (req, res) => {
       return res.status(404).send('Workspace LPJ tidak ditemukan.');
     }
 
-    const kasbon = lpj.anggaranKasbon || 0;
-    const pengeluaran = lpj.totalPengeluaran || 0;
+    const rincian = Array.isArray(lpj.rincianPengeluaran) ? lpj.rincianPengeluaran : [];
+    const vault = Array.isArray(lpj.vaultNota) ? lpj.vaultNota : [];
+
+    const kasbon = Number(lpj.anggaranKasbon) || 0;
+    const pengeluaran = rincian.length > 0
+      ? rincian.reduce((acc, row) => acc + (Number(row.nominal) || 0), 0)
+      : (Number(lpj.totalPengeluaran) || 0);
     const sisaSaldo = kasbon - pengeluaran;
-    let progress = Math.round((pengeluaran / kasbon) * 100);
+
+    let progress = kasbon > 0 ? Math.round((pengeluaran / kasbon) * 100) : 0;
     if (progress > 100) progress = 100;
-    if (isNaN(progress)) progress = 0;
+    if (progress < 0) progress = 0;
 
     lpj.progressBelanja = progress;
     lpj.sisaSaldo = sisaSaldo;
+    lpj.totalPengeluaran = pengeluaran;
+    lpj.rincianPengeluaran = rincian;
+    lpj.vaultNota = vault;
+
+    // Gabungkan seluruh nota: nota dari catatan belanja + upload manual di vault
+    const vaultItems = [];
+    rincian.forEach(item => {
+      if (item.notaPath) {
+        vaultItems.push({
+          filePath: item.notaPath,
+          fileName: item.notaNama || 'Nota pengeluaran',
+          uploadedAt: item.tanggal || lpj.createdAt || new Date(),
+          sumber: 'Rincian Belanja',
+          keterangan: item.namaItem || ''
+        });
+      }
+    });
+    vault.forEach(item => {
+      if (item.filePath) {
+        vaultItems.push({
+          filePath: item.filePath,
+          fileName: item.fileName || 'Nota',
+          uploadedAt: item.uploadedAt || lpj.createdAt || new Date(),
+          sumber: 'Vault Manual',
+          keterangan: item.diinputOleh || ''
+        });
+      }
+    });
+    vaultItems.sort((a, b) => {
+      const tA = new Date(a.uploadedAt).getTime() || 0;
+      const tB = new Date(b.uploadedAt).getTime() || 0;
+      return tB - tA;
+    });
+
+    const tabDiizinkan = ['ringkasan', 'pencairan', 'rincian', 'vault'];
+    const activeTab = tabDiizinkan.includes(req.query.tab) ? req.query.tab : 'ringkasan';
 
     res.render('lpj-detail', {
       lpj,
-      role: req.session.role || 'admin'
+      vaultItems,
+      totalRincian: rincian.length,
+      totalNota: vaultItems.length,
+      activeTab,
+      role: req.session.isAdmin ? 'admin' : (req.session.isUser ? 'user' : 'guest')
     });
   } catch (err) {
     console.error(err);
@@ -2037,23 +2105,39 @@ app.get('/lpj/detail/:id', async (req, res) => {
 });
 
 // ==========================================
-// RUTE TAMBAH CATATAN & PENCAIRAN (BARU)
+// RUTE TAMBAH CATATAN, PENCAIRAN & NOTA
 // ==========================================
-app.post('/lpj/detail/:id/tambah-catatan', async (req, res) => {
+app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
+
     const { id } = req.params;
     const { kategoriPengeluaran, namaItem, keterangan, qty, hargaSatuan, nominal } = req.body;
 
     const lpj = await Lpj.findById(id);
     if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
 
-    // Jika Anda ingin menyimpan rincian pengeluaran, pastikan skemanya ada di model Lpj.
-    // Untuk saat ini, kita akumulasikan total pengeluarannya:
-    const tambahNominal = Number(nominal) || 0;
-    lpj.totalPengeluaran = (lpj.totalPengeluaran || 0) + tambahNominal;
+    const qtyAngka = Number(qty) || 0;
+    const hargaAngka = Number(hargaSatuan) || 0;
+    const nominalAngka = Number(nominal) || (qtyAngka * hargaAngka);
 
+    if (!Array.isArray(lpj.rincianPengeluaran)) lpj.rincianPengeluaran = [];
+    lpj.rincianPengeluaran.push({
+      tanggal: new Date(),
+      kategoriPengeluaran: kategoriPengeluaran || '',
+      namaItem: namaItem || '',
+      keterangan: keterangan || '',
+      qty: qtyAngka,
+      hargaSatuan: hargaAngka,
+      nominal: nominalAngka,
+      notaPath: req.file ? '/uploads/' + req.file.filename : '',
+      notaNama: req.file ? req.file.originalname : ''
+    });
+
+    sinkronTotalLpj(lpj);
     await lpj.save();
-    res.redirect('/lpj/detail/' + id);
+
+    res.redirect('/lpj/detail/' + id + '?tab=rincian');
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menyimpan catatan belanja: ' + err.message);
@@ -2080,11 +2164,42 @@ app.post('/lpj/detail/:id/tambah-pencairan', async (req, res) => {
     // Tambah juga ke total anggaran kasbon jika pencairan baru menambah dana
     lpj.anggaranKasbon = (lpj.anggaranKasbon || 0) + nominalAngka;
 
+    sinkronTotalLpj(lpj);
     await lpj.save();
-    res.redirect('/lpj/detail/' + id);
+
+    res.redirect('/lpj/detail/' + id + '?tab=pencairan');
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menyimpan pencairan: ' + err.message);
+  }
+});
+
+app.post('/lpj/detail/:id/tambah-nota', upload.single('nota'), async (req, res) => {
+  try {
+    await syncReqFilesToGridFS(req);
+
+    const { id } = req.params;
+    const lpj = await Lpj.findById(id);
+    if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
+
+    if (!req.file) {
+      return res.redirect('/lpj/detail/' + id + '?tab=vault');
+    }
+
+    if (!Array.isArray(lpj.vaultNota)) lpj.vaultNota = [];
+    lpj.vaultNota.push({
+      filePath: '/uploads/' + req.file.filename,
+      fileName: req.file.originalname,
+      uploadedAt: new Date(),
+      diinputOleh: getNamaPenginput(req)
+    });
+
+    await lpj.save();
+
+    res.redirect('/lpj/detail/' + id + '?tab=vault');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal menyimpan nota ke vault: ' + err.message);
   }
 });
 

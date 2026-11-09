@@ -1,20 +1,15 @@
 const mongoose = require('mongoose');
 
-const lpjSchema = new mongoose.Schema({
-  namaKegiatan: { type: String, required: true },
-  kategori: { type: String, default: '' },
-  status: { type: String, default: 'Draft' },
-  anggaranKasbon: { type: Number, default: 0 },
-  totalPengeluaran: { type: Number, default: 0 },
+const laporanSchema = new mongoose.Schema({
+  namaDokumen: { type: String, required: true },
+  jenis: { type: String, default: '' },
+  tujuan: { type: String, default: '' },
   keterangan: { type: String, default: '' },
-  diinputOleh: { type: String, default: '' },
-  
-  // TAMBAHKAN BAGIAN INI:
-  riwayatPencairan: [{
-    tanggal: { type: Date, default: Date.now },
-    nominal: Number,
-    keterangan: String
-  }]
-}, { timestamps: true });
+  filePath: { type: String, default: '' },
+  cleanName: { type: String, default: '' },
+  tanggal: { type: Date, default: Date.now },
+  diinputOleh: { type: String, default: '' }
+}, { timestamps: true, collection: 'laporan' });
 
-module.exports = mongoose.model('Lpj', lpjSchema);
+// Gunakan pengecekan ini agar tidak terjadi OverwriteModelError
+module.exports = mongoose.models.Laporan || mongoose.model('Laporan', laporanSchema);

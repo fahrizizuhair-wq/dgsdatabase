@@ -204,7 +204,7 @@
           </a>
         </li>
         <li class="nav-item active">
-          <a href="/lpj">
+          <a href="/lpj-user">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
             <span>Manajemen Multi-LPJ</span>
           </a>
@@ -303,7 +303,7 @@
       
       <!-- PENCARIAN & FILTER TOOLBAR -->
       <div class="filter-search-toolbar">
-        <form action="/lpj" method="GET" style="display: flex; width: 100%; gap: 15px; flex-wrap: wrap; align-items: center;">
+        <form action="/lpj-user" method="GET" style="display: flex; width: 100%; gap: 15px; flex-wrap: wrap; align-items: center;">
           <div class="search-box-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari LPJ (Merchandise, Seminar, Baksos)...">
@@ -427,6 +427,12 @@
       document.getElementById('sidebar').classList.toggle('active');
       document.getElementById('sidebarOverlay').classList.toggle('active');
     }
+
+    // Buka modal otomatis jika diarahkan dari halaman detail (?buat=1)
+    document.addEventListener('DOMContentLoaded', function () {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('buat') === '1') openModal();
+    });
 
     function formatEstimasiRupiah(input) {
       const previewBox = document.getElementById('previewEstimasi');
