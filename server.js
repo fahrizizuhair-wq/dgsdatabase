@@ -1892,7 +1892,7 @@ app.get('/surat-jalan/cetak/:id', async (req, res) => {
 // ==========================================
 // RUTE LPJ LAPORAN PERTANGGUNGJAWABAN
 // ==========================================
-app.get('/lpj', async (req, res) => {
+app.get('/lpj-user', async (req, res) => {
   try {
     const search = req.query.search || '';
     const statusFilter = req.query.status || '';
@@ -1943,7 +1943,7 @@ app.get('/lpj', async (req, res) => {
   }
 });
 
-app.post('/lpj/add', async (req, res) => {
+app.post('/lpj-user/add', async (req, res) => {
   try {
     const { namaKegiatan, kategori, status, anggaranKasbon, keterangan } = req.body;
 
@@ -1962,7 +1962,7 @@ app.post('/lpj/add', async (req, res) => {
     });
 
     await newLpj.save();
-    res.redirect('/lpj');
+    res.redirect('/lpj-user');
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menyimpan LPJ baru: ' + err.message);
