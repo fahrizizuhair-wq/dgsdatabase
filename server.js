@@ -1369,6 +1369,31 @@ app.post('/laporan/delete/:id', async (req, res) => {
   }
 });
 
+// Rute untuk memproses update/edit data laporan
+app.post('/laporan/edit/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { kategoriPengeluaran, namaItem, keterangan, qty, hargaSatuan, nominal } = req.body;
+
+    // Cari dan update data berdasarkan ID item/transaksi
+    // Sesuaikan dengan struktur skema database Mongoose Anda
+    await LaporanModel.findByIdAndUpdate(id, {
+      kategoriPengeluaran,
+      namaItem,
+      keterangan,
+      qty: Number(qty),
+      hargaSatuan: Number(hargaSatuan),
+      nominal: Number(nominal)
+    });
+
+    // Redirect kembali ke halaman laporan setelah berhasil
+    res.redirect('/laporan'); // Sesuaikan dengan endpoint halaman laporan Anda
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal memperbarui data laporan');
+  }
+});
+
 // 1. RUTE SURAT JALAN VERSI ADMIN
 app.get('/surat-jalan-admin', async (req, res) => {
     try {

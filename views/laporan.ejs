@@ -416,6 +416,8 @@
     .btn-reset:hover { background-color: #d1d5db; }
 
     .btn-delete { background-color: #912d2d; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .btn-edit { background-color: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn-edit:hover { background-color: #1d4ed8; }
 
     table { width: 100%; border-collapse: collapse; text-align: left; min-width: 800px; margin-top: 10px; }
     th, td { padding: 12px 14px; border-bottom: 1px solid #edf0f2; font-size: 13px; vertical-align: middle; }
@@ -585,7 +587,7 @@
           </ul>
         </li>
         <!-- Menu Dropdown Laporan -->
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown active">
           <a href="javascript:void(0)" class="dropdown-toggle" onclick="toggleDropdown(this)">
             <div class="dropdown-toggle-left">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -599,7 +601,7 @@
             </div>
             <span class="arrow">&#9662;</span>
           </a>
-          <ul class="dropdown-menu">
+          <ul class="dropdown-menu" style="max-height: 200px; padding-top: 6px; padding-bottom: 6px;">
             <li>
               <a href="/laporan">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -778,7 +780,6 @@
               <td colspan="9" style="text-align: center; padding: 20px; color: #888;">Belum ada arsip laporan.</td>
             </tr>
           <% } else { %>
-            <!-- DITAMBAHKAN class="laporan-row" AGAR FUNGSI PENCARIAN BERFUNGSI -->
             <% listLaporan.forEach((lap, index) => { %>
               <tr class="laporan-row">
                 <td><%= index + 1 %></td>
@@ -796,9 +797,15 @@
                   <% } %>
                 </td>
                 <td style="text-align: center;">
-                  <form action="/laporan/delete/<%= lap._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('Hapus laporan <%= lap.namaDokumen %>?');">
-                    <button type="submit" class="btn-delete">Hapus</button>
-                  </form>
+                  <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                    <!-- Tombol Edit -->
+                    <button type="button" class="btn-edit" onclick="openEditModal('<%= lap._id %>', '<%= lap.namaDokumen %>', '<%= lap.jenis %>', '<%= lap.tujuan %>', '<%= lap.keterangan %>')">Edit</button>
+                    
+                    <!-- Tombol Hapus -->
+                    <form action="/laporan/delete/<%= lap._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('Hapus laporan <%= lap.namaDokumen %>?');">
+                      <button type="submit" class="btn-delete">Hapus</button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             <% }); %>
@@ -845,48 +852,84 @@
     </div>
   </div>
 
+  <!-- MODAL EDIT LAPORAN -->
+  <div class="modal" id="editLaporanModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 15px; color: #2563eb;">Edit Data Laporan</h3>
+      <form id="formEditLaporan" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label>Nama Dokumen</label>
+          <input type="text" id="editNamaDokumen" name="namaDokumen" required>
+        </div>
+        <div class="form-group">
+          <label>Jenis Laporan</label>
+          <select id="editJenis" name="jenis">
+            <option value="Surat Tanda Terima">Surat Tanda Terima</option>
+            <option value="Surat Jalan">Surat Jalan</option>
+            <option value="Laporan Harian">Laporan Harian</option>
+          </select>
+        </div>
+         <div class="form-group">
+          <label>Tujuan/Kepada</label>
+          <input type="text" id="editTujuan" name="tujuan" required>
+        </div>
+        <div class="form-group">
+          <label>Keterangan / Catatan</label>
+          <textarea id="editKeterangan" name="keterangan" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Perbarui File PDF (Opsional)</label>
+          <input type="file" name="fileLaporan" accept="application/pdf">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
+          <button type="submit" class="btn-action" style="background-color: #2563eb;">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     function openModal() { document.getElementById('laporanModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('laporanModal').style.display = 'none'; }
+    
+    function openEditModal(id, namaDokumen, jenis, tujuan, keterangan) {
+      document.getElementById('editLaporanModal').style.display = 'flex';
+      document.getElementById('formEditLaporan').action = `/laporan/edit/${id}`;
+      document.getElementById('editNamaDokumen').value = namaDokumen;
+      document.getElementById('editJenis').value = jenis;
+      document.getElementById('editTujuan').value = tujuan !== 'undefined' ? tujuan : '';
+      document.getElementById('editKeterangan').value = keterangan !== 'undefined' ? keterangan : '';
+    }
+    function closeEditModal() { document.getElementById('editLaporanModal').style.display = 'none'; }
+
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('active');
       document.getElementById('sidebarOverlay').classList.toggle('active');
     }
 
-    function toggleDropdown(element) {
-      const parentLi = element.parentElement;
-      parentLi.classList.toggle('active');
+    function toggleDropdown(el) {
+      el.closest('.nav-item.dropdown').classList.toggle('active');
     }
 
-    // Fungsi untuk memunculkan/menutup panel filter popover
     function toggleFilterPanel() {
-      const panel = document.getElementById('filter-panel');
-      panel.classList.toggle('active');
+      document.getElementById('filter-panel').classList.toggle('active');
     }
 
-    // FUNGSI PENCARIAN REAL-TIME
     function filterLaporan() {
-      const input = document.getElementById('searchInput').value.toLowerCase();
-      const rows = document.getElementsByClassName('laporan-row');
-      
-      for (let row of rows) {
-        const text = row.textContent.toLowerCase();
-        if (text.includes(input)) {
-          row.style.display = '';
+      let input = document.getElementById('searchInput');
+      let filter = input.value.toLowerCase();
+      let rows = document.getElementsByClassName('laporan-row');
+
+      for (let i = 0; i < rows.length; i++) {
+        let text = rows[i].textContent || rows[i].innerText;
+        if (text.toLowerCase().indexOf(filter) > -1) {
+          rows[i].style.display = "";
         } else {
-          row.style.display = 'none';
+          rows[i].style.display = "none";
         }
       }
     }
-
-    // Menutup panel filter jika pengguna mengklik di luar area tombol/panel filter
-    window.addEventListener('click', function(e) {
-      const btn = document.getElementById('filter-toggle-btn');
-      const panel = document.getElementById('filter-panel');
-      if (panel && btn && !btn.contains(e.target) && !panel.contains(e.target)) {
-        panel.classList.remove('active');
-      }
-    });
   </script>
 </body>
 </html>
