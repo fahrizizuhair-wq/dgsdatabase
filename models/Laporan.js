@@ -1,13 +1,20 @@
 const mongoose = require('mongoose');
 
-const laporanSchema = new mongoose.Schema({
-  namaDokumen: { type: String, required: true },
+const lpjSchema = new mongoose.Schema({
+  namaKegiatan: { type: String, required: true },
+  kategori: { type: String, default: '' },
+  status: { type: String, default: 'Draft' },
+  anggaranKasbon: { type: Number, default: 0 },
+  totalPengeluaran: { type: Number, default: 0 },
   keterangan: { type: String, default: '' },
-  jenis: { type: String, default: 'Umum' },
-  tujuan: { type: String, default: '' }, // <-- Tambahkan baris ini di sini!
-  filePath: { type: String, default: '' },
-  tanggal: { type: Date, default: Date.now },
-  diinputOleh: { type: String, default: '' }
-}, { timestamps: true, collection: 'laporan' });
+  diinputOleh: { type: String, default: '' },
+  
+  // TAMBAHKAN BAGIAN INI:
+  riwayatPencairan: [{
+    tanggal: { type: Date, default: Date.now },
+    nominal: Number,
+    keterangan: String
+  }]
+}, { timestamps: true });
 
-module.exports = mongoose.model('Laporan', laporanSchema);
+module.exports = mongoose.model('Lpj', lpjSchema);

@@ -178,7 +178,7 @@
         </button>
         <button class="tab-btn" onclick="switchTab(event, 'pencairan')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-          Pencairan Dana (0)
+          Pencairan Dana (<%= lpj.riwayatPencairan ? lpj.riwayatPencairan.length : 0 %>)
         </button>
         <button class="tab-btn" onclick="switchTab(event, 'rincian')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
@@ -210,40 +210,40 @@
         </div>
 
         <!-- TAB 2: PENCAIRAN DANA -->
-            <div id="pencairan" class="tab-pane">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0;">Riwayat Pencairan Dana</h3>
-                <!-- Tombol Tambah Kasbon / Pencairan -->
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKasbon" style="background-color: #7c2d12; border: none; padding: 6px 12px; font-size: 13px; border-radius: 6px; color: #fff;">+ Tambah Pencairan</button>
-            </div>
+        <div id="pencairan" class="tab-pane">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0;">Riwayat Pencairan Dana</h3>
+            <!-- Tombol Tambah Kasbon / Pencairan -->
+            <button type="button" class="btn btn-primary btn-sm" onclick="openPencairanModal()" style="background-color: #7c2d12; border: none; padding: 6px 12px; font-size: 13px; border-radius: 6px; color: #fff; cursor: pointer;">+ Tambah Pencairan</button>
+          </div>
 
-            <% if (lpj.riwayatPencairan && lpj.riwayatPencairan.length > 0) { %>
-                <div class="table-responsive">
-                <table class="table table-bordered align-middle" style="font-size: 13px;">
-                    <thead class="table-light">
+          <% if (lpj.riwayatPencairan && lpj.riwayatPencairan.length > 0) { %>
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle" style="font-size: 13px; width: 100%; border-collapse: collapse;">
+                <thead class="table-light" style="background: #f8fafc;">
+                  <tr>
+                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">No</th>
+                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">Tanggal</th>
+                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">Nominal</th>
+                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% lpj.riwayatPencairan.forEach((item, index) => { %>
                     <tr>
-                        <th>No</th>
-                        <th>Tanggal</th>
-                        <th>Nominal</th>
-                        <th>Keterangan</th>
+                      <td style="padding: 10px; border: 1px solid #e2e8f0;"><%= index + 1 %></td>
+                      <td style="padding: 10px; border: 1px solid #e2e8f0;"><%= new Date(item.tanggal).toLocaleDateString('id-ID') %></td>
+                      <td style="padding: 10px; border: 1px solid #e2e8f0;">Rp <%= item.nominal.toLocaleString('id-ID') %></td>
+                      <td style="padding: 10px; border: 1px solid #e2e8f0;"><%= item.keterangan %></td>
                     </tr>
-                    </thead>
-                    <tbody>
-                    <% lpj.riwayatPencairan.forEach((item, index) => { %>
-                        <tr>
-                        <td><%= index + 1 %></td>
-                        <td><%= new Date(item.tanggal).toLocaleDateString('id-ID') %></td>
-                        <td>Rp <%= item.nominal.toLocaleString('id-ID') %></td>
-                        <td><%= item.keterangan %></td>
-                        </tr>
-                    <% }) %>
-                    </tbody>
-                </table>
-                </div>
-            <% } else { %>
-                <p style="color: #64748b; font-size: 13px;">Belum ada riwayat pencairan dana tercatat untuk kegiatan ini.</p>
-            <% } %>
+                  <% }) %>
+                </tbody>
+              </table>
             </div>
+          <% } else { %>
+            <p style="color: #64748b; font-size: 13px;">Belum ada riwayat pencairan dana tercatat untuk kegiatan ini.</p>
+          <% } %>
+        </div>
 
         <!-- TAB 3: RINCIAN PENGELUARAN -->
         <div id="rincian" class="tab-pane">
@@ -266,8 +266,6 @@
   <!-- MODAL TAMBAH ITEM TRANSAKSI BELANJA -->
   <div class="modal" id="catatanModal">
     <div class="modal-content">
-      
-      <!-- HEADER MODAL -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
         <div>
           <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #dc2626;">INPUT BEBAS RUMUS</span>
@@ -277,8 +275,6 @@
       </div>
 
       <form action="/lpj/detail/<%= lpj._id %>/tambah-catatan" method="POST">
-        
-        <!-- 1. KATEGORI PENGELUARAN -->
         <div class="form-group">
           <label>Kategori Pengeluaran</label>
           <select name="kategoriPengeluaran" required>
@@ -287,19 +283,16 @@
           </select>
         </div>
 
-        <!-- 2. URAIAN BARANG -->
         <div class="form-group">
           <label>Uraian Barang</label>
           <input type="text" name="namaItem" placeholder="Contoh: Pembelian 10 pcs Kipas Mini" required>
         </div>
 
-        <!-- 3. KETERANGAN -->
         <div class="form-group">
           <label>Keterangan</label>
           <input type="text" name="keterangan" placeholder="Tambahkan Keterangan...">
         </div>
 
-        <!-- JUMLAH (QTY) & HARGA SATUAN -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
           <div class="form-group">
             <label>Jumlah (Qty)</label>
@@ -311,19 +304,46 @@
           </div>
         </div>
 
-        <!-- TOTAL OTOMATIS BOX -->
         <div style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
           <span style="font-size: 12.5px; font-weight: 700; color: #7a1b1b;">Total Otomatis:</span>
           <span id="textTotalOtomatis" style="font-size: 16px; font-weight: 700; color: #dc2626;">Rp 0</span>
         </div>
         
-        <!-- Hidden input untuk mengirim total nominal ke backend -->
         <input type="hidden" id="inputNominalTotal" name="nominal" value="0">
 
-        <!-- TOMBOL AKSI -->
         <div class="modal-actions" style="border-top: 1px solid #f1f5f9; padding-top: 15px;">
           <button type="button" class="btn-cancel" onclick="closeCatatanModal()">Batal</button>
           <button type="submit" class="btn-buat-baru" style="background: #dc2626;">Simpan Transaksi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL TAMBAH PENCAIRAN DANA -->
+  <div class="modal" id="modalTambahKasbon">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+        <div>
+          <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #7c2d12;">PENCARIAN DANA</span>
+          <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-top: 2px;">+ Tambah Riwayat Pencairan</h3>
+        </div>
+        <button type="button" onclick="closePencairanModal()" style="background: transparent; border: none; font-size: 18px; cursor: pointer; color: #64748b;">✕</button>
+      </div>
+
+      <form action="/lpj/detail/<%= lpj._id %>/tambah-pencairan" method="POST">
+        <div class="form-group">
+          <label>Nominal Pencairan (Rp)</label>
+          <input type="number" name="nominal" placeholder="Masukan nominal..." required>
+        </div>
+
+        <div class="form-group">
+          <label>Keterangan / Catatan</label>
+          <textarea name="keterangan" rows="3" placeholder="Contoh: Pencairan tahap 1 via transfer bank..." required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 13px; outline: none; background: #fff;"></textarea>
+        </div>
+
+        <div class="modal-actions" style="border-top: 1px solid #f1f5f9; padding-top: 15px;">
+          <button type="button" class="btn-cancel" onclick="closePencairanModal()">Batal</button>
+          <button type="submit" class="btn-buat-baru" style="background: #7c2d12;">Simpan Pencairan</button>
         </div>
       </form>
     </div>
@@ -347,13 +367,20 @@
       document.getElementById('catatanModal').style.display = 'none'; 
     }
 
+    // Fungsi modal tambah pencairan dana
+    function openPencairanModal() { 
+      document.getElementById('modalTambahKasbon').style.display = 'flex'; 
+    }
+    function closePencairanModal() { 
+      document.getElementById('modalTambahKasbon').style.display = 'none'; 
+    }
+
     // Fungsi kalkulasi otomatis (Qty x Harga Satuan)
     function hitungTotalOtomatis() {
       const qty = parseFloat(document.getElementById('inputQty').value) || 0;
       const hargaSatuan = parseFloat(document.getElementById('inputHargaSatuan').value) || 0;
       const total = qty * hargaSatuan;
 
-      // Format ke Rupiah
       const formatRp = total.toLocaleString('id-ID', {
         style: 'currency',
         currency: 'IDR',
