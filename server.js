@@ -1981,14 +1981,22 @@ app.post('/lpj-user/add', async (req, res) => {
       || req.session.adminUser
       || 'Administrator';
 
+    const nominalKasbon = Number(anggaranKasbon) || 0;
+
     const newLpj = new Lpj({
       namaKegiatan,
       kategori,
       status: status || 'Draft',
-      anggaranKasbon: Number(anggaranKasbon) || 0,
-      totalPengeluaran: 0, // Awal dibuat pengeluaran 0
+      anggaranKasbon: nominalKasbon,
+      totalPengeluaran: 0,
       keterangan: keterangan || '',
-      diinputOleh: namaUser
+      diinputOleh: namaUser,
+      // Masukkan otomatis sebagai riwayat pencairan awal jika ada nilainya
+      riwayatPencairan: nominalKasbon > 0 ? [{
+        tanggal: new Date(),
+        nominal: nominalKasbon,
+        keterangan: keterangan || 'Pencairan Kasbon Awal'
+      }] : []
     });
 
     await newLpj.save();
