@@ -1375,7 +1375,7 @@ app.post('/laporan/edit/:id', upload.single('fileLaporan'), async (req, res) => 
     const { id } = req.params;
     const { namaDokumen, jenis, tujuan, keterangan } = req.body;
 
-    // Siapkan objek data yang akan di-update ke database
+    // Siapkan data teks yang pasti di-update
     let updateData = {
       namaDokumen,
       jenis,
@@ -1383,16 +1383,15 @@ app.post('/laporan/edit/:id', upload.single('fileLaporan'), async (req, res) => 
       keterangan
     };
 
-    // Jika user mengunggah file PDF baru saat edit
+    // HANYA update data file jika user benar-benar memilih file baru
     if (req.file) {
       updateData.filePath = req.file.path;
-      updateData.cleanName = req.file.filename; // Sesuaikan jika database Anda menyimpan nama file bersih
+      updateData.cleanName = req.file.filename;
     }
 
-    // Update data berdasarkan ID dokumen laporan
-    await LaporanModel.findByIdAndUpdate(id, updateData);
+    // Lakukan update ke database tanpa merusak file lama jika tidak ada file baru
+    await Laporan.findByIdAndUpdate(id, updateData);
 
-    // Redirect kembali ke halaman laporan setelah berhasil
     res.redirect('/laporan');
   } catch (err) {
     console.error(err);
