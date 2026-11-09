@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('partials/head') %>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Management Multi-LPJ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html, body {
+      width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden;
+    }
+
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      color: #333; display: flex; min-height: 100vh;
+      position: relative; background-color: #f4f6f9;
+    }
+
+    /* GRADASI MERAH BACKGROUND KONSISTEN */
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%), 
+                  url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover; z-index: -1; pointer-events: none;
+    }
+    
+    /* SIDEBAR STYLING */
+    .sidebar-overlay { 
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+      background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px); z-index: 999; opacity: 0; transition: opacity 0.3s ease; 
+    }
+    .sidebar-overlay.active { display: block; opacity: 1; }
+
+    .sidebar { 
+      position: fixed; top: 0; left: 0; width: 280px; height: 100vh; 
+      background: linear-gradient(180deg, #4d0e0e 0%, #7a1b1b 50%, #3e0b0b 100%);
+      color: white; padding: 28px 22px; display: flex; flex-direction: column; justify-content: space-between; 
+      z-index: 1000; transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); 
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25); overflow-y: auto; 
+    }
+    .sidebar.active { transform: translateX(0); }
+
+    .sidebar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 25px; padding-bottom: 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+    .brand-wrap { display: flex; align-items: center; gap: 12px; }
+    .brand-logo-img {
+      width: 42px; height: 42px; object-fit: contain; background: rgba(255, 255, 255, 0.12);
+      padding: 5px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .brand-text h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.2; }
+    .brand-text span { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255, 255, 255, 0.7); font-weight: 600; }
+    
+    .close-sidebar-btn {
+      background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 32px; height: 32px;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+    }
+    .close-sidebar-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+    .sidebar-user-card {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px; padding: 12px 14px; margin-bottom: 22px; display: flex; align-items: center; gap: 12px;
+    }
+    .user-avatar-circle {
+      width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #c9933b 0%, #7a1b1b 100%);
+      color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+    }
+    .sidebar-user-info h4 { font-size: 13px; font-weight: 600; color: white; }
+    .sidebar-user-info span { font-size: 11px; color: #86efac; font-weight: 500; }
+
+    .nav-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255, 255, 255, 0.5); margin: 10px 0 10px 8px; }
+    .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .nav-item a { 
+      display: flex; align-items: center; gap: 12px; padding: 11px 14px; color: rgba(255, 255, 255, 0.82); 
+      text-decoration: none; border-radius: 10px; font-weight: 500; font-size: 13.5px; transition: all 0.2s ease;
+    }
+    .nav-item a svg { width: 18px; height: 18px; opacity: 0.8; }
+    .nav-item a:hover { background-color: rgba(255, 255, 255, 0.12); color: #ffffff; transform: translateX(3px); }
+    .nav-item.active a { 
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%); 
+      color: #ffffff; font-weight: 600; border-left: 3px solid #f87171; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .sidebar-footer { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.12); }
+    .btn-bottom { display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: rgba(255, 255, 255, 0.8); text-decoration: none; font-size: 13.5px; border-radius: 8px; }
+    .btn-bottom:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+
+    /* MAIN CONTENT & BANNER */
+    .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
+    
+    .toggle-btn { 
+      font-size: 20px; background: #ffffff !important; color: #000000 !important; border: none; 
+      padding: 8px 14px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .system-banner {
+      background: #1e293b; color: #ffffff; border-radius: 12px; padding: 22px 24px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 15px;
+    }
+    .banner-title-wrap { display: flex; align-items: center; gap: 14px; }
+    .banner-icon { background: #7a1b1b; color: white; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+    .banner-text span { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #f87171; font-weight: 700; }
+    .banner-text h1 { font-size: 20px; font-weight: 700; color: #fff; margin-top: 2px; }
+
+    .btn-buat-lpj { background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; }
+    .btn-buat-lpj:hover { background-color: #5c1313; }
+
+    /* STAT CARDS memakai desain seragam /css/stat-cards.css */
+
+    /* FILTER & SEARCH TOOLBAR */
+    .filter-search-toolbar { background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .search-box-wrap { position: relative; flex: 1; min-width: 260px; }
+    .search-box-wrap input { width: 100%; padding: 10px 14px 10px 38px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: #fff; }
+    .search-box-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 16px; height: 16px; }
+
+    .filter-status-wrap { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; font-weight: 600; }
+    .filter-status-wrap select { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: #fff; font-family: inherit; }
+
+    /* LPJ CARD GRID CONTAINER */
+    .lpj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .lpj-card { background: #ffffff; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
+    .lpj-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    
+    .lpj-card-top { padding: 20px; }
+    .lpj-meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .badge-kategori { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #475569; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; }
+    
+    .badge-status { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .status-selesai { background: #dcfce7; color: #15803d; }
+    .status-review { background: #fef9c3; color: #a16207; }
+    .status-draft { background: #f1f5f9; color: #475569; }
+
+    .lpj-card h3 { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px; line-height: 1.4; }
+
+    .lpj-finances { background: #f8fafc; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; border: 1px solid #f1f5f9; }
+    .finance-row { display: flex; justify-content: space-between; font-size: 13px; align-items: center; }
+    .finance-row span:first-child { color: #64748b; }
+    .finance-row span:last-child { font-weight: 600; color: #0f172a; }
+    .finance-row.saldo span:last-child { color: #2563eb; }
+    .finance-row.pengeluaran span:last-child { color: #dc2626; }
+
+    .progress-wrap { margin-bottom: 4px; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 11.5px; color: #64748b; margin-bottom: 5px; font-weight: 500; }
+    .progress-bar-bg { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: #7a1b1b; border-radius: 3px; }
+
+    .lpj-card-footer { border-top: 1px solid #f1f5f9; padding: 12px 20px; background: #fafafa; text-align: center; }
+    .btn-workspace { display: block; width: 100%; background: #0f172a; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s; }
+    .btn-workspace:hover { background: #1e293b; }
+
+    /* MODAL */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 5px; color: #334155; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 13px; outline: none; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .btn-cancel { background: #e2e8f0; border: none; padding: 9px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #334155; }
+  </style>
+  <link rel="stylesheet" href="/css/stat-cards.css">
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- SIDEBAR KONSISTEN -->
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <div class="brand-wrap">
+          <img src="/images/dgs.png" alt="Logo DGS" class="brand-logo-img" onerror="this.style.display='none'">
+          <div class="brand-text">
+            <h2>Dian Giri Saputra</h2>
+            <span>Admin Database</span>
+          </div>
+        </div>
+        <button class="close-sidebar-btn" onclick="toggleSidebar()" title="Tutup Menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="6"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-user-card">
+        <div class="user-avatar-circle">AD</div>
+        <div class="sidebar-user-info">
+          <h4>Administrator</h4>
+          <span>Admin Master Control</span>
+        </div>
+      </div>
+
+      <div class="nav-label">Menu Administrasi</div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="/dashboard-admin">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard Admin</span>
+          </a>
+        </li>
+        <li class="nav-item active">
+          <a href="/lpj">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>Manajemen Multi-LPJ</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="/logout" class="btn-bottom">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Keluar / Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+
+    <!-- SYSTEM BANNER HEADER -->
+    <div class="system-banner">
+      <div class="banner-title-wrap">
+        <div class="banner-icon">LPJ</div>
+        <div class="banner-text">
+          <span>System LPJ Terpusat</span>
+          <h1>Dashboard Management Multi-LPJ</h1>
+        </div>
+      </div>
+      <button class="btn-buat-lpj" onclick="openModal()">+ Buat LPJ Baru</button>
+    </div>
+
+    <!-- STAT CARDS (RINGKASAN) -->
+    <section class="card-grid">
+      <div class="stat-card card-blue">
+        <div class="card-header">
+          <span class="card-title">Total Anggaran Kelolaan</span>
+          <div class="icon-wrapper icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="14" rx="2"></rect>
+              <path d="M2 10h20"></path>
+              <circle cx="17" cy="15" r="1"></circle>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value" style="font-size: 1.55rem;">Rp <%= (typeof totalAnggaranKelolaan !== 'undefined' ? totalAnggaranKelolaan : 0).toLocaleString('id-ID') %></span>
+        </div>
+        <div class="card-footer">
+          <span class="text-blue">Dari <%= typeof totalLpjTerdaftar !== 'undefined' ? totalLpjTerdaftar : 0 %> LPJ</span>
+          <span>Terdaftar</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-red">
+        <div class="card-header">
+          <span class="card-title">Total Pengeluaran Saat Ini</span>
+          <div class="icon-wrapper icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+              <polyline points="17 18 23 18 23 12"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value" style="font-size: 1.55rem;">Rp <%= (typeof totalPengeluaran !== 'undefined' ? totalPengeluaran : 0).toLocaleString('id-ID') %></span>
+        </div>
+        <div class="card-footer">
+          <span class="text-red">Realisasi Anggaran</span>
+          <span>Pengeluaran</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-green">
+        <div class="card-header">
+          <span class="card-title">Total Sisa Saldo Kas</span>
+          <div class="icon-wrapper icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 21h18"></path>
+              <path d="M5 21V7l7-4 7 4v14"></path>
+              <path d="M9 21v-6h6v6"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value" style="font-size: 1.55rem;">Rp <%= (typeof totalSisaSaldo !== 'undefined' ? totalSisaSaldo : 0).toLocaleString('id-ID') %></span>
+        </div>
+        <div class="card-footer">
+          <span class="text-green">Tersedia</span>
+          <span>Pengembalian</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PENCARIAN & FILTER TOOLBAR -->
+    <div class="filter-search-toolbar">
+      <form action="/lpj" method="GET" style="display: flex; width: 100%; gap: 15px; flex-wrap: wrap; align-items: center;">
+        <div class="search-box-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari LPJ (Merchandise, Seminar, Baksos)...">
+        </div>
+        <div class="filter-status-wrap">
+          <label for="status">Filter Status:</label>
+          <select name="status" id="status" onchange="this.form.submit()">
+            <option value="">Semua LPJ</option>
+            <option value="Selesai" <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Selesai') ? 'selected' : '' %>>Selesai</option>
+            <option value="Sedang Direview" <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Sedang Direview') ? 'selected' : '' %>>Sedang Direview</option>
+            <option value="Draft" <%= (typeof statusFilter !== 'undefined' && statusFilter === 'Draft') ? 'selected' : '' %>>Draft</option>
+          </select>
+        </div>
+      </form>
+    </div>
+
+    <!-- DAFTAR KARTU LPJ (GRID) -->
+    <div class="lpj-grid">
+      <% if (!listLpj || listLpj.length === 0) { %>
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: rgba(255,255,255,0.95); border-radius: 12px; color: #64748b;">
+          Belum ada data LPJ terdaftar. Silakan buat LPJ baru.
+        </div>
+      <% } else { %>
+        <% listLpj.forEach(lpj => { 
+           let statusClass = 'status-draft';
+           if (lpj.status === 'Selesai') statusClass = 'status-selesai';
+           else if (lpj.status === 'Sedang Direview') statusClass = 'status-review';
+        %>
+          <div class="lpj-card">
+            <div class="lpj-card-top">
+              <div class="lpj-meta-row">
+                <span class="badge-kategori"><%= lpj.kategori %></span>
+                <span class="badge-status <%= statusClass %>"><%= lpj.status %></span>
+              </div>
+              <h3><%= lpj.namaKegiatan %></h3>
+
+              <div class="lpj-finances">
+                <div class="finance-row">
+                  <span>Anggaran Kasbon:</span>
+                  <span>Rp <%= (lpj.anggaranKasbon || 0).toLocaleString('id-ID') %></span>
+                </div>
+                <div class="finance-row pengeluaran">
+                  <span>Total Pengeluaran:</span>
+                  <span>Rp <%= (lpj.totalPengeluaran || 0).toLocaleString('id-ID') %></span>
+                </div>
+                <div class="finance-row saldo">
+                  <span>Sisa Saldo:</span>
+                  <span>Rp <%= ((lpj.anggaranKasbon || 0) - (lpj.totalPengeluaran || 0)).toLocaleString('id-ID') %></span>
+                </div>
+              </div>
+
+              <div class="progress-wrap">
+                <div class="progress-info">
+                  <span>Progress Belanja</span>
+                  <span><%= lpj.progressBelanja || 0 %>%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" style="width: <%= lpj.progressBelanja || 0 %>%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="lpj-card-footer">
+              <a href="/lpj/detail/<%= lpj._id %>" class="btn-workspace">👁️ Lihat Detail Workspace LPJ</a>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+  </main>
+
+  <!-- MODAL TAMBAH LPJ BARU -->
+  <div class="modal" id="lpjModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 16px; color: #7a1b1b;">Buat LPJ Baru</h3>
+      <form action="/lpj/add" method="POST">
+        <div class="form-group">
+          <label>Nama Kegiatan / Judul LPJ</label>
+          <input type="text" name="namaKegiatan" placeholder="Contoh: LPJ Pengadaan Merchandise..." required>
+        </div>
+        <div class="form-group">
+          <label>Kategori & Tahun</label>
+          <input type="text" name="kategori" placeholder="Contoh: PENGADAAN BARANG • 2026" required>
+        </div>
+        <div class="form-group">
+          <label>Status Awal</label>
+          <select name="status">
+            <option value="Draft">Draft</option>
+            <option value="Sedang Direview">Sedang Direview</option>
+            <option value="Selesai">Selesai</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Anggaran Kasbon (Rp)</label>
+          <input type="number" name="anggaranKasbon" placeholder="Contoh: 120000000" required>
+        </div>
+        <div class="form-group">
+          <label>Keterangan Tambahan</label>
+          <textarea name="keterangan" rows="2" placeholder="Catatan singkat..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+          <button type="submit" class="btn-buat-lpj" style="border-radius: 6px; padding: 9px 16px;">Simpan LPJ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openModal() { document.getElementById('lpjModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('lpjModal').style.display = 'none'; }
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

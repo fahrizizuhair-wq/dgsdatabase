@@ -132,7 +132,8 @@ const StokKeluar    = require('./models/StokKeluar');
 const StokOpname    = require('./models/StokOpname');
 const DataBahanKain = require('./models/DataBahanKain');
 const User          = require('./models/User');
-const SuratJalan = require('./models/SuratJalan');
+const SuratJalan    = require('./models/SuratJalan');
+const Lpj           = require('./models/Lpj');
 
 // ============================================================
 //  DATABASE CONNECTION
@@ -1885,6 +1886,87 @@ app.get('/surat-jalan/cetak/:id', async (req, res) => {
         console.error("Error mencetak surat jalan:", err);
         res.status(500).send("Gagal mencetak Surat Jalan: " + err.message);
     }
+});
+
+
+// ==========================================
+// RUTE LPJ LAPORAN PERTANGGUNGJAWABAN
+// ==========================================
+app.get('/lpj', async (req, res) => {
+  try {
+    const search = req.query.search || '';
+    const statusFilter = req.query.status || '';
+
+    let filter = {};
+    if (search) {
+      filter.namaKegiatan = { $regex: search, $options: 'i' };
+    }
+    if (statusFilter) {
+      filter.status = statusFilter;
+    }
+
+    const rawListLpj = await Lpj.find(filter).sort({ _id: -1 }).lean();
+    
+    // Hitung Statistik Anggaran, Pengeluaran, dan Sisa Saldo secara Otomatis
+    const totalAnggaranKelolaan = rawListLpj.reduce((acc, curr) => acc + (curr.anggaranKasbon || 0), 0);
+    const totalPengeluaran = rawListLpj.reduce((acc, curr) => acc + (curr.totalPengeluaran || 0), 0);
+    const totalSisaSaldo = totalAnggaranKelolaan - totalPengeluaran;
+    const totalLpjTerdaftar = rawListLpj.length;
+
+    // Perhitungan otomatis progress belanja tiap LPJ
+    const listLpj = rawListLpj.map(item => {
+      const anggaran = item.anggaranKasbon || 1;
+      const pengeluaran = item.totalPengeluaran || 0;
+      let progress = Math.round((pengeluaran / anggaran) * 100);
+      if (progress > 100) progress = 100;
+
+      return {
+        ...item,
+        progressBelanja: progress,
+        cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
+      };
+    });
+
+    res.render('lpj-user', {
+      listLpj,
+      totalLpjTerdaftar,
+      totalAnggaranKelolaan,
+      totalPengeluaran,
+      totalSisaSaldo,
+      search,
+      statusFilter,
+      role: req.session.isAdmin ? 'admin' : (req.session.isUser ? 'user' : 'guest')
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal memuat data dashboard LPJ: ' + err.message);
+  }
+});
+
+app.post('/lpj/add', async (req, res) => {
+  try {
+    const { namaKegiatan, kategori, status, anggaranKasbon, keterangan } = req.body;
+
+    const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username))
+      || req.session.adminUser
+      || 'Administrator';
+
+    const newLpj = new Lpj({
+      namaKegiatan,
+      kategori,
+      status: status || 'Draft',
+      anggaranKasbon: Number(anggaranKasbon) || 0,
+      totalPengeluaran: 0, // Awal dibuat pengeluaran 0
+      keterangan: keterangan || '',
+      diinputOleh: namaUser
+    });
+
+    await newLpj.save();
+    res.redirect('/lpj');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal menyimpan LPJ baru: ' + err.message);
+  }
 });
 
 // ============================================================

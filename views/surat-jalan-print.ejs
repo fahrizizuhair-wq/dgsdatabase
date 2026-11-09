@@ -39,11 +39,6 @@
     const tanggalTampil = suratJalan.tanggal
       ? new Date(suratJalan.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
       : '-';
-    const alamatLines = String(suratJalan.alamat || '')
-      .split(/\r?\n/)
-      .map(function (line) { return line.trim(); })
-      .filter(function (line) { return line.length > 0; })
-      .slice(0, 5);
     const daftarItem = Array.isArray(suratJalan.items) ? suratJalan.items : [];
     const kodeBarangList = Array.isArray(suratJalan.kodeBarangList) ? suratJalan.kodeBarangList : [];
 
@@ -51,10 +46,34 @@
       ? wrapText
       : function (text) { return String(text || '').replace(/\r\n?/g, '\n').split('\n'); };
 
+    /*
+     * Alamat dibungkus per baris agar tidak memanjang ke samping.
+     * Lebar dibatasi sampai sebelum kolom kanan (Tanggal / No. Surat Jalan
+     * mulai di x = 323.95pt). Jika baris melebihi kapasitas awal (4 baris),
+     * field di bawahnya ikut bergeser ke bawah agar tidak bertumpuk.
+     */
+    const ALAMAT_MAX_WIDTH = 202.0;
+    const ALAMAT_PITCH = 10.5;
+    const ALAMAT_BASE_LINES = 4;
+    const alamatRaw = String(suratJalan.alamat || '').replace(/\r\n?/g, '\n').trim();
+    const alamatLines = [];
+    if (alamatRaw !== '') {
+      alamatRaw.split('\n').forEach(function (par) {
+        if (par.trim() === '') {
+          alamatLines.push('');
+        } else {
+          bungkus(par, 'bold', 7.5, ALAMAT_MAX_WIDTH).forEach(function (visual) {
+            alamatLines.push(visual);
+          });
+        }
+      });
+    }
+    const alamatExtraOffset = Math.max(0, alamatLines.length - ALAMAT_BASE_LINES) * ALAMAT_PITCH;
+
     const DESC_MAX_WIDTH = 124.0;
     const KET_MAX_WIDTH = 198.5;
 
-    let cursorY = 236.25;
+    let cursorY = 236.25 + alamatExtraOffset;
     const posisiItem = daftarItem.map(function (item, index) {
       const lines = String(item.diskripsi || '').replace(/\r\n?/g, '\n').split('\n');
       const judul = lines.length ? lines[0] : '';
@@ -157,7 +176,7 @@
         lastItem.bodyVisuals.length ? lastItem.bodyVisuals[lastItem.bodyVisuals.length - 1].y + 9.0 : 0,
         lastItem.ketYs.length ? lastItem.ketYs[lastItem.ketYs.length - 1] + 9.0 : 0
       );
-      calculatedTableHeight = Math.max(140, (maxItemBottom - 225.21) + 12); 
+      calculatedTableHeight = Math.max(140, (maxItemBottom - (225.21 + alamatExtraOffset)) + 12); 
     }
   %>
   <style>
@@ -248,21 +267,21 @@
     .tbl-border {
       position: absolute;
       left: 70.05pt;
-      top: 225.21pt;
+      top: <%= (225.21 + alamatExtraOffset).toFixed(3) %>pt;
       width: 455.11pt;
       border: 0.42pt solid #000;
     }
     .tbl-headline {
       position: absolute;
       left: 69.84pt;
-      top: 235.42pt;
+      top: <%= (235.42 + alamatExtraOffset).toFixed(3) %>pt;
       width: 455.32pt;
       height: 0;
       border-top: 0.42pt solid #000;
     }
     .tbl-vline {
       position: absolute;
-      top: 225.21pt;
+      top: <%= (225.21 + alamatExtraOffset).toFixed(3) %>pt;
       width: 0;
       border-left: 0.42pt solid #000;
     }
@@ -409,16 +428,16 @@
       <div class="txt b" style="left: 71.51pt; top: <%= T(151.24) %>pt;">Alamat</div>
       <div class="txt b" style="left: 113.58pt; top: <%= T(151.23) %>pt;">:</div>
       <% alamatLines.forEach(function (line, i) { %>
-      <div class="txt b" style="left: <%= i === 0 ? '116.84' : '116.52' %>pt; top: <%= T(151.23 + (i * 10.5)) %>pt;"><%= line %></div>
-      <% }) %>
+      <div class="txt b" style="left: <%= i === 0 ? '116.84' : '116.52' %>pt; top: <%= T(151.23 + (i * ALAMAT_PITCH)) %>pt;"><%= line %></div>
+      <% }); %>
 
-      <div class="txt b" style="left: 71.51pt; top: <%= T(198.72) %>pt;">Perihal</div>
-      <div class="txt b" style="left: 113.58pt; top: <%= T(198.72) %>pt;">:</div>
-      <div class="txt b" style="left: 116.84pt; top: <%= T(198.72) %>pt;"><%= suratJalan.perihal || '-' %></div>
+      <div class="txt b" style="left: 71.51pt; top: <%= T(198.72 + alamatExtraOffset) %>pt;">Perihal</div>
+      <div class="txt b" style="left: 113.58pt; top: <%= T(198.72 + alamatExtraOffset) %>pt;">:</div>
+      <div class="txt b" style="left: 116.84pt; top: <%= T(198.72 + alamatExtraOffset) %>pt;"><%= suratJalan.perihal || '-' %></div>
 
-      <div class="txt b" style="left: 71.51pt; top: <%= T(208.72) %>pt;">Pekerjaaan</div>
-      <div class="txt b" style="left: 113.58pt; top: <%= T(208.72) %>pt;">:</div>
-      <div class="txt b" style="left: 116.84pt; top: <%= T(208.72) %>pt;"><%= suratJalan.pekerjaan || '-' %></div>
+      <div class="txt b" style="left: 71.51pt; top: <%= T(208.72 + alamatExtraOffset) %>pt;">Pekerjaaan</div>
+      <div class="txt b" style="left: 113.58pt; top: <%= T(208.72 + alamatExtraOffset) %>pt;">:</div>
+      <div class="txt b" style="left: 116.84pt; top: <%= T(208.72 + alamatExtraOffset) %>pt;"><%= suratJalan.pekerjaan || '-' %></div>
 
       <!-- INFO KANAN -->
       <div class="txt b" style="left: 323.95pt; top: <%= T(121.24) %>pt;">Tanggal</div>
@@ -430,7 +449,7 @@
       <div class="txt" style="left: 376.44pt; top: <%= T(141.23) %>pt;"><%= suratJalan.noSuratJalan %></div>
 
       <!-- KODE -->
-      <div class="txt small" style="left: 504.73pt; top: <%= T5(218.42) %>pt;"><%= kodeSurat %></div>
+      <div class="txt small" style="left: 504.73pt; top: <%= T5(218.42 + alamatExtraOffset) %>pt;"><%= kodeSurat %></div>
 
       <!-- TABEL BARANG -->
       <div class="tbl-border" style="height: <%= calculatedTableHeight %>pt;"></div>
@@ -440,11 +459,11 @@
       <div class="tbl-vline" style="left: 279.05pt; height: <%= calculatedTableHeight %>pt;"></div>
       <div class="tbl-vline" style="left: 324.05pt; height: <%= calculatedTableHeight %>pt;"></div>
 
-      <div class="col-th" style="left: 70.45pt; width: 41pt; top: <%= T(227.46) %>pt;">No</div>
-      <div class="col-th" style="left: 111.05pt; width: 128pt; top: <%= T(227.46) %>pt;">Diskripsi</div>
-      <div class="col-th" style="left: 239.20pt; width: 40pt; top: <%= T(227.46) %>pt;">Jumlah</div>
-      <div class="col-th" style="left: 278.70pt; width: 45pt; top: <%= T(227.46) %>pt;">Satuan</div>
-      <div class="col-th" style="left: 323.10pt; width: 201.11pt; top: <%= T(227.46) %>pt;">Keterangan</div>
+      <div class="col-th" style="left: 70.45pt; width: 41pt; top: <%= T(227.46 + alamatExtraOffset) %>pt;">No</div>
+      <div class="col-th" style="left: 111.05pt; width: 128pt; top: <%= T(227.46 + alamatExtraOffset) %>pt;">Diskripsi</div>
+      <div class="col-th" style="left: 239.20pt; width: 40pt; top: <%= T(227.46 + alamatExtraOffset) %>pt;">Jumlah</div>
+      <div class="col-th" style="left: 278.70pt; width: 45pt; top: <%= T(227.46 + alamatExtraOffset) %>pt;">Satuan</div>
+      <div class="col-th" style="left: 323.10pt; width: 201.11pt; top: <%= T(227.46 + alamatExtraOffset) %>pt;">Keterangan</div>
 
       <% posisiItem.forEach(function (it) { %>
       <div class="col-no" style="top: <%= T(it.numberY) %>pt;"><%= it.index + 1 %></div>
@@ -471,7 +490,7 @@
 
       <!-- KETERANGAN KODE BARANG -->
       <% if (kodeBarangList && kodeBarangList.length > 0) { %>
-      <div style="position: absolute; left: 71.51pt; top: <%= 232.21 + calculatedTableHeight + 12 %>pt; font-size: 7.5pt; line-height: 11pt;">
+      <div style="position: absolute; left: 71.51pt; top: <%= (232.21 + alamatExtraOffset + calculatedTableHeight + 12).toFixed(3) %>pt; font-size: 7.5pt; line-height: 11pt;">
         <div style="font-weight: 700; margin-bottom: 2pt;">Keterangan Kode Barang:</div>
         <% kodeBarangList.forEach(function (kb) { %>
         <div><span style="font-weight: 700;"><%= kb.namaBarang %></span> : <span><%= kb.kodeBarang %></span></div>
@@ -481,7 +500,7 @@
 
       <!-- TANDA TANGAN -->
       <% 
-        const sigTop = Math.max(620, 232.21 + calculatedTableHeight + (kodeBarangList.length > 0 ? (35 + (kodeBarangList.length * 11)) : 20));
+        const sigTop = Math.max(620, 232.21 + alamatExtraOffset + calculatedTableHeight + (kodeBarangList.length > 0 ? (35 + (kodeBarangList.length * 11)) : 20));
       %>
       <div class="sig-title" style="left: 99pt; top: <%= T(sigTop) %>pt;">Yang Menyerahkan,</div>
       <div class="sig-line" style="left: 99pt; top: <%= T(sigTop + 45) %>pt;">
