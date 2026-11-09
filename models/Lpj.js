@@ -1,18 +1,31 @@
 const mongoose = require('mongoose');
 
 const lpjSchema = new mongoose.Schema({
-  namaKegiatan: { type: String, required: true }, 
+  namaKegiatan: { type: String, required: true },
   kategori: { type: String, required: true },
   status: { type: String, default: 'Draft' },
-  anggaranKasbon: { type: Number, required: true, default: 0 },
+  anggaranKasbon: { type: Number, default: 0 },
   totalPengeluaran: { type: Number, default: 0 },
-  sisaSaldo: { type: Number, default: 0 },
-  progressBelanja: { type: Number, default: 0 }, // Persentase (0 - 100)
-  keterangan: { type: String, default: '' },
-  filePath: { type: String },
-  cleanName: { type: String },
+  keterangan: { type: String },
   diinputOleh: { type: String },
-  tanggal: { type: Date, default: Date.now }
-});
+  
+  // Array data untuk tab detail (opsional/bisa dikembangkan nanti)
+  pencairanDana: [{
+    tanggal: String,
+    uraian: String,
+    nomorOrder: String,
+    jumlah: Number,
+    status: String
+  }],
+  rincianPengeluaran: [{
+    kategoriBiaya: String,
+    tanggal: String,
+    uraianBarang: String,
+    qty: String,
+    hargaSatuan: Number,
+    total: Number,
+    notaUrl: String
+  }]
+}, { timestamps: true });
 
 module.exports = mongoose.model('Lpj', lpjSchema);

@@ -4,7 +4,7 @@
   <%- include('partials/head') %>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Workspace Detail - <%= lpj.namaKegiatan %></title>
+  <title>Workspace - <%= lpj.namaKegiatan %></title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,70 +21,195 @@
     }
     .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
     
+    /* TOP SYSTEM BANNER */
     .system-banner {
-      background: #1e293b; color: #ffffff; border-radius: 12px; padding: 22px 24px;
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
+      background: #0f172a; color: #ffffff; border-radius: 12px; padding: 20px 24px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 15px;
     }
     .banner-title-wrap { display: flex; align-items: center; gap: 14px; }
-    .banner-icon { background: #7a1b1b; color: white; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+    .banner-icon { background: #7a1b1b; color: white; width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; }
     .banner-text span { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #f87171; font-weight: 700; }
-    .banner-text h1 { font-size: 20px; font-weight: 700; color: #fff; margin-top: 2px; }
+    .banner-text h1 { font-size: 18px; font-weight: 700; color: #fff; margin-top: 2px; }
 
-    .btn-back { background-color: #475569; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; }
-    .btn-back:hover { background-color: #334155; }
+    .banner-actions { display: flex; gap: 10px; align-items: center; }
+    .btn-daftar-lpj { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.2s; }
+    .btn-daftar-lpj:hover { background: rgba(255,255,255,0.2); }
+    .btn-buat-baru { background-color: #dc2626; color: white; border: none; padding: 9px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 13px; }
+    .btn-buat-baru:hover { background-color: #b91c1c; }
 
-    .workspace-container {
-      background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); border-radius: 14px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    /* DETAIL HEADER CARD */
+    .detail-header-card {
+      background: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+      border: 1px solid #e2e8f0;
     }
-    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px; }
-    .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; }
-    .info-box span { font-size: 12px; color: #64748b; font-weight: 600; display: block; margin-bottom: 4px; }
-    .info-box h3 { font-size: 18px; font-weight: 700; color: #0f172a; }
+    .back-link { font-size: 12.5px; color: #dc2626; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+    .detail-title-area h2 { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .detail-meta-badges { display: flex; gap: 12px; font-size: 12.5px; color: #64748b; font-weight: 500; align-items: center; }
+    .badge-status-green { color: #15803d; font-weight: 600; }
+    
+    .btn-tambah-catatan { background: #dc2626; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-tambah-catatan:hover { background: #b91c1c; }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 20px; }
+    .stat-box { background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: flex-start; }
+    .stat-box-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 8px; }
+    .stat-box-value { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .stat-box-sub { font-size: 12px; color: #64748b; }
+    .stat-icon { width: 36px; height: 36px; border-radius: 8px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #475569; }
+
+    /* TAB NAVIGATION */
+    .tab-nav { background: white; border-radius: 12px; padding: 10px; display: flex; gap: 10px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); overflow-x: auto; }
+    .tab-btn { flex: 1; padding: 12px 16px; text-align: center; border-radius: 8px; background: transparent; border: none; font-family: inherit; font-size: 13.5px; font-weight: 600; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; white-space: nowrap; }
+    .tab-btn:hover { background: #f8fafc; color: #0f172a; }
+    .tab-btn.active { background: #dc2626; color: white; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25); }
+
+    /* CONTENT TAB CARD */
+    .tab-content-card { background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
   </style>
+  <link rel="stylesheet" href="/css/stat-cards.css">
 </head>
 <body>
 
   <main class="main-content">
-    <!-- BANNER HEADER DETAIL -->
+    
+    <!-- TOP BANNER -->
     <div class="system-banner">
       <div class="banner-title-wrap">
-        <div class="banner-icon">WS</div>
+        <div class="banner-icon">LPJ</div>
         <div class="banner-text">
-          <span>Workspace Detail Kegiatan</span>
-          <h1><%= lpj.namaKegiatan %></h1>
+          <span>System LPJ Terpusat</span>
+          <h1>Dashboard Management Multi-LPJ</h1>
         </div>
       </div>
-      <a href="/lpj" class="btn-back">← Kembali ke Dashboard</a>
-    </div>
-
-    <!-- KONTEN UTAMA DETAIL WORKSPACE -->
-    <div class="workspace-container">
-      <div class="info-grid">
-        <div class="info-box">
-          <span>Kategori & Tahun</span>
-          <h3><%= lpj.kategori %></h3>
-        </div>
-        <div class="info-box">
-          <span>Status LPJ</span>
-          <h3 style="color: #2563eb;"><%= lpj.status %></h3>
-        </div>
-        <div class="info-box">
-          <span>Anggaran Kasbon</span>
-          <h3>Rp <%= (lpj.anggaranKasbon || 0).toLocaleString('id-ID') %></h3>
-        </div>
-        <div class="info-box">
-          <span>Sisa Saldo</span>
-          <h3 style="color: #16a34a;">Rp <%= (lpj.sisaSaldo || 0).toLocaleString('id-ID') %></h3>
-        </div>
-      </div>
-
-      <div style="background: #f1f5f9; padding: 20px; border-radius: 10px; margin-top: 20px;">
-        <h4 style="margin-bottom: 10px; color: #0f172a;">Keterangan / Catatan Kegiatan:</h4>
-        <p style="color: #475569; font-size: 14px;"><%= lpj.keterangan || 'Tidak ada catatan tambahan.' %></p>
+      <div class="banner-actions">
+        <a href="/lpj" class="btn-daftar-lpj">← Daftar LPJ Utama</a>
+        <a href="/lpj" class="btn-buat-baru">+ Buat LPJ Baru</a>
       </div>
     </div>
+
+    <!-- HEADER DETAIL KEGIATAN -->
+    <div class="detail-header-card">
+      <div class="detail-title-area">
+        <a href="/lpj" class="back-link">← Kembali ke Daftar LPJ Utama</a>
+        <h2><%= lpj.namaKegiatan %></h2>
+        <div class="detail-meta-badges">
+          <span><%= lpj.kategori %></span>
+          <span>•</span>
+          <span>Tahun 2026</span>
+          <span>•</span>
+          <span>Status: <strong class="badge-status-green"><%= lpj.status %></strong></span>
+        </div>
+      </div>
+      <button class="btn-tambah-catatan" onclick="alert('Fitur tambah catatan belanja')">
+        + Tambah Catatan Belanja
+      </button>
+    </div>
+
+    <!-- 3 STATS KARTU ATAS -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div>
+          <div class="stat-box-title">KASBON DITERIMA</div>
+          <div class="stat-box-value">Rp <%= (lpj.anggaranKasbon || 0).toLocaleString('id-ID') %></div>
+          <div class="stat-box-sub">Disetujui Bendahara</div>
+        </div>
+        <div class="stat-icon">💳</div>
+      </div>
+
+      <div class="stat-box">
+        <div>
+          <div class="stat-box-title">TOTAL PENGELUARAN REALIS</div>
+          <div class="stat-box-value" style="color: #dc2626;">Rp <%= (lpj.totalPengeluaran || 0).toLocaleString('id-ID') %></div>
+          <div class="stat-box-sub"><%= lpj.progressBelanja %>% Dari Kasbon</div>
+        </div>
+        <div class="stat-icon">📦</div>
+      </div>
+
+      <div class="stat-box">
+        <div>
+          <div class="stat-box-title">SISA SALDO / BALANS</div>
+          <div class="stat-box-value" style="color: #2563eb;">Rp <%= (lpj.sisaSaldo || 0).toLocaleString('id-ID') %></div>
+          <div class="stat-box-sub">Status Aman</div>
+        </div>
+        <div class="stat-icon">💰</div>
+      </div>
+    </div>
+
+    <!-- MENU TAB NAVIGASI -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab(event, 'ringkasan')">
+        📋 Ringkasan
+      </button>
+      <button class="tab-btn" onclick="switchTab(event, 'pencairan')">
+        💵 Pencairan Dana (0)
+      </button>
+      <button class="tab-btn" onclick="switchTab(event, 'rincian')">
+        📑 Rincian Pengeluaran (0)
+      </button>
+      <button class="tab-btn" onclick="switchTab(event, 'vault')">
+        📁 Vault Nota Digital
+      </button>
+    </div>
+
+    <!-- KONTEN TAB -->
+    <div class="tab-content-card">
+      
+      <!-- TAB 1: RINGKASAN -->
+      <div id="ringkasan" class="tab-pane active">
+        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 10px;">Deskripsi & Progress LPJ</h3>
+        <p style="color: #475569; font-size: 13.5px; margin-bottom: 20px;">
+          <%= lpj.keterangan || 'Laporan pertanggungjawaban ini merangkum seluruh penggunaan anggaran kasbon secara transparan. Semua bukti pengeluaran fisik telah dikonversi ke format digital yang siap diproses oleh auditor.' %>
+        </p>
+        
+        <div style="margin-bottom: 8px; display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
+          <span>Realisasi Total Pengeluaran</span>
+          <span style="color: #dc2626;"><%= lpj.progressBelanja %>%</span>
+        </div>
+        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+          <div style = "width: '<%= lpj.progressBelanja  %>%' ; height: 100%; background: #dc2626; border-radius: 4px;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: PENCAIRAN DANA -->
+      <div id="pencairan" class="tab-pane">
+        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 15px;">Riwayat Pencairan Dana</h3>
+        <p style="color: #64748b; font-size: 13px;">Belum ada riwayat pencairan dana tercatat untuk kegiatan ini.</p>
+      </div>
+
+      <!-- TAB 3: RINCIAN PENGELUARAN -->
+      <div id="rincian" class="tab-pane">
+        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 15px;">Daftar Item Pengeluaran Belanja</h3>
+        <p style="color: #64748b; font-size: 13px;">Belum ada rincian item pengeluaran yang dimasukkan.</p>
+      </div>
+
+      <!-- TAB 4: VAULT NOTA DIGITAL -->
+      <div id="vault" class="tab-pane">
+        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 15px;">Vault Arsip Nota & Bukti Fisik</h3>
+        <p style="color: #64748b; font-size: 13px;">Belum ada foto nota atau file digital di dalam vault.</p>
+      </div>
+
+    </div>
+
   </main>
 
+  <script>
+    function switchTab(evt, tabName) {
+      const panes = document.getElementsByClassName('tab-pane');
+      for (let pane of panes) {
+        pane.classList.remove('active');
+      }
+      const buttons = document.getElementsByClassName('tab-btn');
+      for (let btn of buttons) {
+        btn.classList.remove('active');
+      }
+      document.getElementById(tabName).classList.add('active');
+      evt.currentTarget.classList.add('active');
+    }
+  </script>
 </body>
-</html> 
+</html>
