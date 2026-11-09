@@ -210,10 +210,40 @@
         </div>
 
         <!-- TAB 2: PENCAIRAN DANA -->
-        <div id="pencairan" class="tab-pane">
-          <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 15px;">Riwayat Pencairan Dana</h3>
-          <p style="color: #64748b; font-size: 13px;">Belum ada riwayat pencairan dana tercatat untuk kegiatan ini.</p>
-        </div>
+            <div id="pencairan" class="tab-pane">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0;">Riwayat Pencairan Dana</h3>
+                <!-- Tombol Tambah Kasbon / Pencairan -->
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKasbon" style="background-color: #7c2d12; border: none; padding: 6px 12px; font-size: 13px; border-radius: 6px; color: #fff;">+ Tambah Pencairan</button>
+            </div>
+
+            <% if (lpj.riwayatPencairan && lpj.riwayatPencairan.length > 0) { %>
+                <div class="table-responsive">
+                <table class="table table-bordered align-middle" style="font-size: 13px;">
+                    <thead class="table-light">
+                    <tr>
+                        <th>No</th>
+                        <th>Tanggal</th>
+                        <th>Nominal</th>
+                        <th>Keterangan</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <% lpj.riwayatPencairan.forEach((item, index) => { %>
+                        <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= new Date(item.tanggal).toLocaleDateString('id-ID') %></td>
+                        <td>Rp <%= item.nominal.toLocaleString('id-ID') %></td>
+                        <td><%= item.keterangan %></td>
+                        </tr>
+                    <% }) %>
+                    </tbody>
+                </table>
+                </div>
+            <% } else { %>
+                <p style="color: #64748b; font-size: 13px;">Belum ada riwayat pencairan dana tercatat untuk kegiatan ini.</p>
+            <% } %>
+            </div>
 
         <!-- TAB 3: RINCIAN PENGELUARAN -->
         <div id="rincian" class="tab-pane">
