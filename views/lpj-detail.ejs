@@ -23,51 +23,54 @@
     
     /* TOP SYSTEM BANNER */
     .system-banner {
-      background: #0f172a; color: #ffffff; border-radius: 12px; padding: 20px 24px;
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+      background: #1e293b; color: #ffffff; border-radius: 12px; padding: 22px 24px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 15px;
     }
     .banner-title-wrap { display: flex; align-items: center; gap: 14px; }
-    .banner-icon { background: #7a1b1b; color: white; width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; }
+    .banner-icon { background: #7a1b1b; color: white; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
     .banner-text span { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #f87171; font-weight: 700; }
-    .banner-text h1 { font-size: 18px; font-weight: 700; color: #fff; margin-top: 2px; }
+    .banner-text h1 { font-size: 20px; font-weight: 700; color: #fff; margin-top: 2px; }
 
     .banner-actions { display: flex; gap: 10px; align-items: center; }
     .btn-daftar-lpj { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.2s; }
     .btn-daftar-lpj:hover { background: rgba(255,255,255,0.2); }
-    .btn-buat-baru { background-color: #dc2626; color: white; border: none; padding: 9px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 13px; }
-    .btn-buat-baru:hover { background-color: #b91c1c; }
+    .btn-buat-baru { background-color: #7a1b1b; color: white; border: none; padding: 9px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 13px; }
+    .btn-buat-baru:hover { background-color: #5c1313; }
 
     /* DETAIL HEADER CARD */
     .detail-header-card {
-      background: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+      background: #ffffff; border-radius: 14px; padding: 22px; margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
       border: 1px solid #e2e8f0;
     }
-    .back-link { font-size: 12.5px; color: #dc2626; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; }
-    .detail-title-area h2 { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-    .detail-meta-badges { display: flex; gap: 12px; font-size: 12.5px; color: #64748b; font-weight: 500; align-items: center; }
-    .badge-status-green { color: #15803d; font-weight: 600; }
+    .back-link { font-size: 12.5px; color: #7a1b1b; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+    .detail-title-area h2 { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .detail-meta-badges { display: flex; gap: 10px; font-size: 12px; color: #64748b; font-weight: 500; align-items: center; }
+    .badge-status-green { color: #15803d; font-weight: 600; background: #dcfce7; padding: 2px 8px; border-radius: 20px; font-size: 11px; }
     
-    .btn-tambah-catatan { background: #dc2626; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-tambah-catatan:hover { background: #b91c1c; }
+    .btn-tambah-catatan { background: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
+    .btn-tambah-catatan:hover { background: #5c1313; }
 
     /* STATS ROW */
     .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 20px; }
-    .stat-box { background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: flex-start; }
+    .stat-box { background: #ffffff; border-radius: 14px; padding: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: flex-start; }
     .stat-box-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 8px; }
-    .stat-box-value { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-    .stat-box-sub { font-size: 12px; color: #64748b; }
-    .stat-icon { width: 36px; height: 36px; border-radius: 8px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #475569; }
+    .stat-box-value { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .stat-box-sub { font-size: 11.5px; color: #64748b; font-weight: 500; }
+    
+    .stat-icon { width: 38px; height: 38px; border-radius: 10px; background: #f8fafc; border: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: center; color: #475569; }
+    .stat-icon svg { width: 18px; height: 18px; }
 
     /* TAB NAVIGATION */
-    .tab-nav { background: white; border-radius: 12px; padding: 10px; display: flex; gap: 10px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); overflow-x: auto; }
-    .tab-btn { flex: 1; padding: 12px 16px; text-align: center; border-radius: 8px; background: transparent; border: none; font-family: inherit; font-size: 13.5px; font-weight: 600; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; white-space: nowrap; }
+    .tab-nav { background: #ffffff; border-radius: 14px; padding: 10px; display: flex; gap: 10px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.04); overflow-x: auto; }
+    .tab-btn { flex: 1; padding: 12px 16px; text-align: center; border-radius: 10px; background: transparent; border: none; font-family: inherit; font-size: 13.5px; font-weight: 600; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; white-space: nowrap; }
+    .tab-btn svg { width: 16px; height: 16px; }
     .tab-btn:hover { background: #f8fafc; color: #0f172a; }
-    .tab-btn.active { background: #dc2626; color: white; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25); }
+    .tab-btn.active { background: #7a1b1b; color: white; box-shadow: 0 2px 8px rgba(122, 27, 27, 0.25); }
 
     /* CONTENT TAB CARD */
-    .tab-content-card { background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+    .tab-content-card { background: #ffffff; border-radius: 14px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
     .tab-pane { display: none; }
     .tab-pane.active { display: block; }
   </style>
@@ -110,7 +113,7 @@
       </button>
     </div>
 
-    <!-- 3 STATS KARTU ATAS -->
+    <!-- 3 STATS KARTU ATAS DENGAN SVG ICON -->
     <div class="stats-row">
       <div class="stat-box">
         <div>
@@ -118,7 +121,9 @@
           <div class="stat-box-value">Rp <%= (lpj.anggaranKasbon || 0).toLocaleString('id-ID') %></div>
           <div class="stat-box-sub">Disetujui Bendahara</div>
         </div>
-        <div class="stat-icon">💳</div>
+        <div class="stat-icon" style="color: #2563eb; background: #eff6ff;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+        </div>
       </div>
 
       <div class="stat-box">
@@ -127,7 +132,9 @@
           <div class="stat-box-value" style="color: #dc2626;">Rp <%= (lpj.totalPengeluaran || 0).toLocaleString('id-ID') %></div>
           <div class="stat-box-sub"><%= lpj.progressBelanja %>% Dari Kasbon</div>
         </div>
-        <div class="stat-icon">📦</div>
+        <div class="stat-icon" style="color: #dc2626; background: #fef2f2;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+        </div>
       </div>
 
       <div class="stat-box">
@@ -136,23 +143,29 @@
           <div class="stat-box-value" style="color: #2563eb;">Rp <%= (lpj.sisaSaldo || 0).toLocaleString('id-ID') %></div>
           <div class="stat-box-sub">Status Aman</div>
         </div>
-        <div class="stat-icon">💰</div>
+        <div class="stat-icon" style="color: #16a34a; background: #f0fdf4;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
       </div>
     </div>
 
-    <!-- MENU TAB NAVIGASI -->
+    <!-- MENU TAB NAVIGASI DENGAN SVG ICON -->
     <div class="tab-nav">
       <button class="tab-btn active" onclick="switchTab(event, 'ringkasan')">
-        📋 Ringkasan
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        Ringkasan
       </button>
       <button class="tab-btn" onclick="switchTab(event, 'pencairan')">
-        💵 Pencairan Dana (0)
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        Pencairan Dana (0)
       </button>
       <button class="tab-btn" onclick="switchTab(event, 'rincian')">
-        📑 Rincian Pengeluaran (0)
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        Rincian Pengeluaran (0)
       </button>
       <button class="tab-btn" onclick="switchTab(event, 'vault')">
-        📁 Vault Nota Digital
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        Vault Nota Digital
       </button>
     </div>
 
@@ -171,7 +184,8 @@
           <span style="color: #dc2626;"><%= lpj.progressBelanja %>%</span>
         </div>
         <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-          <div style = "width: '<%= lpj.progressBelanja  %>%' ; height: 100%; background: #dc2626; border-radius: 4px;"></div>
+            <div style="width: '<%=lpj.progressBelanja %>%' ; height: 100% ; background: #dc2626; border-radius: 4px;"></div>
+
         </div>
       </div>
 

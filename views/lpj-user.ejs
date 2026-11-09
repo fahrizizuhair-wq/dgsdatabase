@@ -93,7 +93,7 @@
     .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
 
     .system-banner {
-      background: #1e293b; color: #ffffff; border-radius: 12px; padding: 22px 24px;
+      background: #f4f6f9; color: #7a1b1b; border-radius: 12px; padding: 22px 24px;
       display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 15px;
     }
@@ -101,13 +101,13 @@
     
     /* TOMBOL TOGGLE DI DALAM BANNER */
     .banner-toggle-btn { 
-      background: #7a1b1b; color: white; width: 44px; height: 44px; border-radius: 10px; border: none;
+      background: #ffffff; color: #7a1b1b; width: 44px; height: 44px; border-radius: 10px; border: none;
       display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;
     }
-    .banner-toggle-btn:hover { background: #5c1313; }
+    .banner-toggle-btn:hover { background: #7a1b1b; color: #ffffff ; }
 
-    .banner-text span { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #f87171; font-weight: 700; }
-    .banner-text h1 { font-size: 20px; font-weight: 700; color: #fff; margin-top: 2px; }
+    .banner-text span { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #000000; font-weight: 700; }
+    .banner-text h1 { font-size: 20px; font-weight: 700; color: #000000; margin-top: 2px; }
 
     .btn-buat-lpj { background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; }
     .btn-buat-lpj:hover { background-color: #5c1313; }
@@ -123,21 +123,21 @@
 
     /* LPJ CARD GRID CONTAINER */
     .lpj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; width: 100%; }
-    .lpj-card { background: #ffffff; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
-    .lpj-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+    .lpj-card { background: #ffffff; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
+    .lpj-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
     
-    .lpj-card-top { padding: 22px; }
-    .lpj-meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .badge-kategori { font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #475569; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px; }
+    .lpj-card-top { padding: 20px; }
+    .lpj-meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .badge-kategori { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #475569; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; }
     
     .badge-status { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
     .status-selesai { background: #dcfce7; color: #15803d; }
     .status-review { background: #fef9c3; color: #a16207; }
     .status-draft { background: #f1f5f9; color: #475569; }
 
-    .lpj-card h3 { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 18px; line-height: 1.4; }
+    .lpj-card h3 { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px; line-height: 1.4; }
 
-    .lpj-finances { background: #f8fafc; border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; border: 1px solid #f1f5f9; }
+    .lpj-finances { background: #f8fafc; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; border: 1px solid #f1f5f9; }
     .finance-row { display: flex; justify-content: space-between; font-size: 13px; align-items: center; }
     .finance-row span:first-child { color: #64748b; }
     .finance-row span:last-child { font-weight: 600; color: #0f172a; }
@@ -145,11 +145,11 @@
     .finance-row.pengeluaran span:last-child { color: #dc2626; }
 
     .progress-wrap { margin-bottom: 4px; }
-    .progress-info { display: flex; justify-content: space-between; font-size: 11.5px; color: #64748b; margin-bottom: 6px; font-weight: 500; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 11.5px; color: #64748b; margin-bottom: 5px; font-weight: 500; }
     .progress-bar-bg { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: #7a1b1b; border-radius: 3px; }
 
-    .lpj-card-footer { border-top: 1px solid #f1f5f9; padding: 14px 22px; background: #fafafa; text-align: center; }
+    .lpj-card-footer { border-top: 1px solid #f1f5f9; padding: 12px 20px; background: #fafafa; text-align: center; }
     .btn-workspace { display: block; width: 100%; background: #0f172a; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s; }
     .btn-workspace:hover { background: #1e293b; }
 
@@ -198,7 +198,7 @@
       <div class="nav-label">Menu Administrasi</div>
       <ul class="nav-menu">
         <li class="nav-item">
-          <a href="/dashboard-admin">
+          <a href="/dashboard">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
             <span>Dashboard Admin</span>
           </a>
@@ -222,7 +222,7 @@
 
   <main class="main-content">
     
-    <!-- SYSTEM BANNER HEADER -->
+    <!-- SYSTEM BANNER HEADER (TOMBOL TOGGLE BERADA DI DALAMNYA) -->
     <div class="system-banner">
       <div class="banner-title-wrap">
         <button class="banner-toggle-btn" onclick="toggleSidebar()" title="Buka Menu">
@@ -367,7 +367,7 @@
               </div>
 
               <div class="lpj-card-footer">
-                <a href="/lpj/detail/<%= lpj._id %>" class="btn-workspace">Lihat Detail Workspace LPJ</a>
+                <a href="/lpj/detail/<%= lpj._id %>" class="btn-workspace">👁️ Lihat Detail Workspace LPJ</a>
               </div>
             </div>
           <% }); %>
