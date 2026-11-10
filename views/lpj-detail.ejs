@@ -378,7 +378,7 @@
                       <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
                         <td><%= index + 1 %></td>
                         <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
-                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '📎' : '' %></td>
+                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '' : '' %></td>
                         <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
                         <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
                         <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
@@ -427,7 +427,7 @@
                       <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
                         <td><%= index + 1 %></td>
                         <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
-                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '📎' : '' %></td>
+                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '' : '' %></td>
                         <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
                         <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
                         <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
