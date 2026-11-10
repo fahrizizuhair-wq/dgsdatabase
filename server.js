@@ -1982,7 +1982,7 @@ app.get('/lpj-user', async (req, res) => {
 
 app.post('/lpj-user/add', async (req, res) => {
   try {
-    const { namaKegiatan, kategori, status, anggaranKasbon, keterangan } = req.body;
+    const { namaKegiatan, kategori, status, anggaranKasbon, keterangan, tanggal } = req.body;
 
     const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username))
       || req.session.adminUser
@@ -1990,17 +1990,29 @@ app.post('/lpj-user/add', async (req, res) => {
 
     const nominalKasbon = Number(anggaranKasbon) || 0;
 
+    let tanggalLpj = new Date();
+    if (tanggal) {
+      const parts = String(tanggal).split('-');
+      if (parts.length === 3) {
+        tanggalLpj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
+      } else {
+        const parsed = new Date(tanggal);
+        if (!isNaN(parsed.getTime())) tanggalLpj = parsed;
+      }
+    }
+
     const newLpj = new Lpj({
       namaKegiatan,
       kategori,
       status: status || 'Draft',
       anggaranKasbon: nominalKasbon,
       totalPengeluaran: 0,
+      tanggal: tanggalLpj,
       keterangan: keterangan || '',
       diinputOleh: namaUser,
       // Masukkan otomatis sebagai riwayat pencairan awal jika ada nilainya
       riwayatPencairan: nominalKasbon > 0 ? [{
-        tanggal: new Date(),
+        tanggal: tanggalLpj,
         nominal: nominalKasbon,
         keterangan: keterangan || 'Pencairan Kasbon Awal'
       }] : []
@@ -2011,6 +2023,18 @@ app.post('/lpj-user/add', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menyimpan LPJ baru: ' + err.message);
+  }
+});
+
+// Hapus LPJ
+app.post(['/lpj-user/hapus/:id', '/lpj-user/delete/:id', '/lpj/hapus/:id', '/lpj/delete/:id'], async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Lpj.findByIdAndDelete(id);
+    res.redirect('/lpj-user');
+  } catch (err) {
+    console.error('Error saat menghapus LPJ:', err);
+    res.status(500).send('Gagal menghapus data LPJ: ' + err.message);
   }
 });
 
@@ -2158,16 +2182,27 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
 app.post('/lpj/detail/:id/tambah-pencairan', async (req, res) => {
   try {
     const { id } = req.params;
-    const { nominal, keterangan } = req.body;
+    const { nominal, keterangan, tanggal } = req.body;
 
     const lpj = await Lpj.findById(id);
     if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
 
     const nominalAngka = Number(nominal) || 0;
 
+    let tanggalPencairan = new Date();
+    if (tanggal) {
+      const parts = String(tanggal).split('-');
+      if (parts.length === 3) {
+        tanggalPencairan = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
+      } else {
+        const parsed = new Date(tanggal);
+        if (!isNaN(parsed.getTime())) tanggalPencairan = parsed;
+      }
+    }
+
     if (!lpj.riwayatPencairan) lpj.riwayatPencairan = [];
     lpj.riwayatPencairan.push({
-      tanggal: new Date(),
+      tanggal: tanggalPencairan,
       nominal: nominalAngka,
       keterangan: keterangan || ''
     });
@@ -2182,6 +2217,22 @@ app.post('/lpj/detail/:id/tambah-pencairan', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menyimpan pencairan: ' + err.message);
+  }
+});
+
+// Hapus Nota dari Vault
+app.post('/lpj/detail/:id/hapus-nota/:notaId', async (req, res) => {
+  try {
+    const { id, notaId } = req.params;
+    const lpj = await Lpj.findById(id);
+    if (lpj && Array.isArray(lpj.vaultNota)) {
+      lpj.vaultNota = lpj.vaultNota.filter(v => String(v._id) !== String(notaId));
+      await lpj.save();
+    }
+    res.redirect('/lpj/detail/' + id + '?tab=vault');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal menghapus nota: ' + err.message);
   }
 });
 

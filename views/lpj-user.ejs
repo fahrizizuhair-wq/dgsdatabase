@@ -135,6 +135,31 @@
     .status-review { background: #fef9c3; color: #a16207; }
     .status-draft { background: #f1f5f9; color: #475569; }
 
+    .lpj-delete-btn {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      line-height: 1;
+      padding: 0;
+    }
+    .lpj-delete-btn:hover {
+      background: #dc2626;
+      color: #ffffff;
+      border-color: #dc2626;
+      transform: scale(1.12);
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+    }
+
     .lpj-card h3 { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px; line-height: 1.4; }
 
     .lpj-finances { background: #f8fafc; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; border: 1px solid #f1f5f9; }
@@ -336,7 +361,12 @@
               <div class="lpj-card-top">
                 <div class="lpj-meta-row">
                   <span class="badge-kategori"><%= lpj.kategori %></span>
-                  <span class="badge-status <%= statusClass %>"><%= lpj.status %></span>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="badge-status <%= statusClass %>"><%= lpj.status %></span>
+                    <form action="/lpj-user/hapus/<%= lpj._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus LPJ &quot;<%= lpj.namaKegiatan %>&quot;?');" style="margin: 0; display: inline-flex;">
+                      <button type="submit" class="lpj-delete-btn" title="Hapus LPJ">✕</button>
+                    </form>
+                  </div>
                 </div>
                 <h3><%= lpj.namaKegiatan %></h3>
 
@@ -386,6 +416,10 @@
           <input type="text" name="namaKegiatan" placeholder="Contoh: LPJ Pengadaan Merchandise..." required>
         </div>
         <div class="form-group">
+          <label>Tanggal LPJ</label>
+          <input type="date" name="tanggal" id="inputTanggalLpj" value="<%= new Date().toISOString().split('T')[0] %>" required>
+        </div>
+        <div class="form-group">
           <label>Kategori & Tahun</label>
           <input type="text" name="kategori" placeholder="Contoh: PENGADAAN BARANG" required>
         </div>
@@ -421,7 +455,14 @@
   </div>
 
   <script>
-    function openModal() { document.getElementById('lpjModal').style.display = 'flex'; }
+    function openModal() { 
+      const tglInput = document.getElementById('inputTanggalLpj');
+      if (tglInput && !tglInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        tglInput.value = today;
+      }
+      document.getElementById('lpjModal').style.display = 'flex'; 
+    }
     function closeModal() { document.getElementById('lpjModal').style.display = 'none'; }
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('active');
