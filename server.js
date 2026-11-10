@@ -1922,57 +1922,148 @@ app.get('/surat-jalan/cetak/:id', async (req, res) => {
 // ==========================================
 // RUTE LPJ LAPORAN PERTANGGUNGJAWABAN
 // ==========================================
-app.get('/lpj-user', async (req, res) => {
+// Helper: ambil dan hitung data dashboard LPJ (dipakai versi user & admin)
+async function getLpjDashboardData(query) {
+  const search = query.search || '';
+  const statusFilter = query.status || '';
+
+  let filter = {};
+  if (search) {
+    filter.namaKegiatan = { $regex: search, $options: 'i' };
+  }
+  if (statusFilter) {
+    filter.status = statusFilter;
+  }
+
+  const rawListLpj = await Lpj.find(filter).sort({ _id: -1 }).lean();
+
+  // Perhitungan otomatis progress belanja tiap LPJ.
+  // Jika LPJ sudah punya rincian pengeluaran, total dihitung dari rincian.
+  const listLpj = rawListLpj.map(item => {
+    const rincian = Array.isArray(item.rincianPengeluaran) ? item.rincianPengeluaran : [];
+    const pengeluaran = rincian.length > 0
+      ? rincian.reduce((acc, row) => acc + (Number(row.nominal) || 0), 0)
+      : (item.totalPengeluaran || 0);
+    const anggaran = item.anggaranKasbon || 0;
+    let progress = anggaran > 0 ? Math.round((pengeluaran / anggaran) * 100) : 0;
+    if (progress > 100) progress = 100;
+    if (progress < 0) progress = 0;
+
+    return {
+      ...item,
+      totalPengeluaran: pengeluaran,
+      sisaSaldo: anggaran - pengeluaran,
+      progressBelanja: progress,
+      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
+    };
+  });
+
+  // Hitung Statistik Anggaran, Pengeluaran, dan Sisa Saldo secara Otomatis
+  const totalAnggaranKelolaan = listLpj.reduce((acc, curr) => acc + (curr.anggaranKasbon || 0), 0);
+  const totalPengeluaran = listLpj.reduce((acc, curr) => acc + (curr.totalPengeluaran || 0), 0);
+  const totalSisaSaldo = totalAnggaranKelolaan - totalPengeluaran;
+  const totalLpjTerdaftar = listLpj.length;
+
+  return {
+    listLpj,
+    totalLpjTerdaftar,
+    totalAnggaranKelolaan,
+    totalPengeluaran,
+    totalSisaSaldo,
+    search,
+    statusFilter
+  };
+}
+
+// Helper: simpan LPJ baru lalu kembalikan tujuan redirect sesuai halaman asal
+async function simpanLpjBaru(req, redirectTo) {
+  const { namaKegiatan, kategori, status, anggaranKasbon, keterangan, tanggal } = req.body;
+
+  const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username))
+    || req.session.adminUser
+    || 'Administrator';
+
+  const nominalKasbon = Number(anggaranKasbon) || 0;
+
+  let tanggalLpj = new Date();
+  if (tanggal) {
+    const parts = String(tanggal).split('-');
+    if (parts.length === 3) {
+      tanggalLpj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
+    } else {
+      const parsed = new Date(tanggal);
+      if (!isNaN(parsed.getTime())) tanggalLpj = parsed;
+    }
+  }
+
+  const newLpj = new Lpj({
+    namaKegiatan,
+    kategori,
+    status: status || 'Draft',
+    anggaranKasbon: nominalKasbon,
+    totalPengeluaran: 0,
+    tanggal: tanggalLpj,
+    keterangan: keterangan || '',
+    diinputOleh: namaUser,
+    // Masukkan otomatis sebagai riwayat pencairan awal jika ada nilainya
+    riwayatPencairan: nominalKasbon > 0 ? [{
+      tanggal: tanggalLpj,
+      nominal: nominalKasbon,
+      keterangan: keterangan || 'Pencairan Kasbon Awal'
+    }] : []
+  });
+
+  await newLpj.save();
+  return redirectTo;
+}
+
+// Redirect pintar: admin ke versi admin, user ke versi user
+app.get('/lpj', (req, res) => {
+  if (req.session && req.session.isAdmin) return res.redirect('/lpj-admin');
+  return res.redirect('/lpj-user');
+});
+
+// ==========================================
+// DASHBOARD LPJ VERSI ADMIN
+// ==========================================
+app.get('/lpj-admin', isAdminAuthenticated, async (req, res) => {
   try {
-    const search = req.query.search || '';
-    const statusFilter = req.query.status || '';
-
-    let filter = {};
-    if (search) {
-      filter.namaKegiatan = { $regex: search, $options: 'i' };
-    }
-    if (statusFilter) {
-      filter.status = statusFilter;
-    }
-
-    const rawListLpj = await Lpj.find(filter).sort({ _id: -1 }).lean();
-
-    // Perhitungan otomatis progress belanja tiap LPJ.
-    // Jika LPJ sudah punya rincian pengeluaran, total dihitung dari rincian.
-    const listLpj = rawListLpj.map(item => {
-      const rincian = Array.isArray(item.rincianPengeluaran) ? item.rincianPengeluaran : [];
-      const pengeluaran = rincian.length > 0
-        ? rincian.reduce((acc, row) => acc + (Number(row.nominal) || 0), 0)
-        : (item.totalPengeluaran || 0);
-      const anggaran = item.anggaranKasbon || 0;
-      let progress = anggaran > 0 ? Math.round((pengeluaran / anggaran) * 100) : 0;
-      if (progress > 100) progress = 100;
-      if (progress < 0) progress = 0;
-
-      return {
-        ...item,
-        totalPengeluaran: pengeluaran,
-        sisaSaldo: anggaran - pengeluaran,
-        progressBelanja: progress,
-        cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
-      };
+    const data = await getLpjDashboardData(req.query);
+    res.render('lpj-admin', {
+      ...data,
+      role: 'admin',
+      adminUser: req.session.adminUser,
+      user: req.session.user
     });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal memuat data dashboard LPJ admin: ' + err.message);
+  }
+});
 
-    // Hitung Statistik Anggaran, Pengeluaran, dan Sisa Saldo secara Otomatis
-    const totalAnggaranKelolaan = listLpj.reduce((acc, curr) => acc + (curr.anggaranKasbon || 0), 0);
-    const totalPengeluaran = listLpj.reduce((acc, curr) => acc + (curr.totalPengeluaran || 0), 0);
-    const totalSisaSaldo = totalAnggaranKelolaan - totalPengeluaran;
-    const totalLpjTerdaftar = listLpj.length;
+app.post('/lpj-admin/add', isAdminAuthenticated, async (req, res) => {
+  try {
+    const redirectTo = await simpanLpjBaru(req, '/lpj-admin');
+    res.redirect(redirectTo);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal menyimpan LPJ baru: ' + err.message);
+  }
+});
 
+// ==========================================
+// DASHBOARD LPJ VERSI USER
+// ==========================================
+app.get('/lpj-user', isUserAuthenticated, async (req, res) => {
+  try {
+    // Admin yang membuka halaman user diarahkan ke versi admin
+    if (req.session.isAdmin) return res.redirect('/lpj-admin');
+
+    const data = await getLpjDashboardData(req.query);
     res.render('lpj-user', {
-      listLpj,
-      totalLpjTerdaftar,
-      totalAnggaranKelolaan,
-      totalPengeluaran,
-      totalSisaSaldo,
-      search,
-      statusFilter,
-      role: req.session.isAdmin ? 'admin' : (req.session.isUser ? 'user' : 'guest')
+      ...data,
+      role: 'user',
+      user: req.session.user
     });
   } catch (err) {
     console.error(err);
@@ -1980,46 +2071,10 @@ app.get('/lpj-user', async (req, res) => {
   }
 });
 
-app.post('/lpj-user/add', async (req, res) => {
+app.post('/lpj-user/add', isUserAuthenticated, async (req, res) => {
   try {
-    const { namaKegiatan, kategori, status, anggaranKasbon, keterangan, tanggal } = req.body;
-
-    const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username))
-      || req.session.adminUser
-      || 'Administrator';
-
-    const nominalKasbon = Number(anggaranKasbon) || 0;
-
-    let tanggalLpj = new Date();
-    if (tanggal) {
-      const parts = String(tanggal).split('-');
-      if (parts.length === 3) {
-        tanggalLpj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
-      } else {
-        const parsed = new Date(tanggal);
-        if (!isNaN(parsed.getTime())) tanggalLpj = parsed;
-      }
-    }
-
-    const newLpj = new Lpj({
-      namaKegiatan,
-      kategori,
-      status: status || 'Draft',
-      anggaranKasbon: nominalKasbon,
-      totalPengeluaran: 0,
-      tanggal: tanggalLpj,
-      keterangan: keterangan || '',
-      diinputOleh: namaUser,
-      // Masukkan otomatis sebagai riwayat pencairan awal jika ada nilainya
-      riwayatPencairan: nominalKasbon > 0 ? [{
-        tanggal: tanggalLpj,
-        nominal: nominalKasbon,
-        keterangan: keterangan || 'Pencairan Kasbon Awal'
-      }] : []
-    });
-
-    await newLpj.save();
-    res.redirect('/lpj-user');
+    const redirectTo = await simpanLpjBaru(req, '/lpj-user');
+    res.redirect(redirectTo);
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menyimpan LPJ baru: ' + err.message);
@@ -2027,11 +2082,14 @@ app.post('/lpj-user/add', async (req, res) => {
 });
 
 // Hapus LPJ
-app.post(['/lpj-user/hapus/:id', '/lpj-user/delete/:id', '/lpj/hapus/:id', '/lpj/delete/:id'], async (req, res) => {
+app.post(['/lpj-user/hapus/:id', '/lpj-user/delete/:id', '/lpj-admin/hapus/:id', '/lpj-admin/delete/:id', '/lpj/hapus/:id', '/lpj/delete/:id'], async (req, res) => {
   try {
     const { id } = req.params;
     await Lpj.findByIdAndDelete(id);
-    res.redirect('/lpj-user');
+    const kembali = req.path.startsWith('/lpj-admin') || (req.session && req.session.isAdmin)
+      ? '/lpj-admin'
+      : '/lpj-user';
+    res.redirect(kembali);
   } catch (err) {
     console.error('Error saat menghapus LPJ:', err);
     res.status(500).send('Gagal menghapus data LPJ: ' + err.message);
@@ -2120,7 +2178,10 @@ app.get('/lpj/detail/:id', async (req, res) => {
       totalRincian: rincian.length,
       totalNota: vaultItems.length,
       activeTab,
-      role: req.session.isAdmin ? 'admin' : (req.session.isUser ? 'user' : 'guest')
+      role: req.session.isAdmin ? 'admin' : (req.session.isUser ? 'user' : 'guest'),
+      lpjBasePath: (req.session && req.session.isAdmin) ? '/lpj-admin' : '/lpj-user',
+      adminUser: req.session.adminUser,
+      user: req.session.user
     });
   } catch (err) {
     console.error(err);
