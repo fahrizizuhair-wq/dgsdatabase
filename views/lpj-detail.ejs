@@ -74,7 +74,7 @@
     .badge-status-green { color: #15803d; font-weight: 600; }
     
     .btn-tambah-catatan { background: #ffffff; color: #7a1b1b; border: 1.5px solid #7a1b1b; padding: 9px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
-    .btn-tambah-catatan:hover {background: #7a1b1b; color: #ffffff; }
+    .btn-tambah-catatan:hover { background: #7a1b1b; color: #ffffff; }
     .btn-tambah-nota { background: #ffffff; color: #7a1b1b; border: 1.5px solid #7a1b1b; padding: 9px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
     .btn-tambah-nota:hover { background: #7a1b1b; color: #ffffff; }
 
@@ -365,7 +365,7 @@
                       <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
                         <td><%= index + 1 %></td>
                         <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
-                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '' : '' %></td>
+                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '📎' : '' %></td>
                         <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
                         <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
                         <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
@@ -414,7 +414,7 @@
                       <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
                         <td><%= index + 1 %></td>
                         <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
-                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '' : '' %></td>
+                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '📎' : '' %></td>
                         <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
                         <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
                         <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
@@ -566,7 +566,7 @@
     </div>
   </div>
 
-  <!-- MODAL TAMBAH NOTA (VAULT) -->
+  <!-- MODAL TAMBAH NOTA (VAULT) DENGAN INPUT NAMA/KETERANGAN FOTO -->
   <div class="modal" id="notaModal">
     <div class="modal-content" style="width: 420px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
@@ -578,6 +578,13 @@
       </div>
 
       <form action="/lpj/detail/<%= lpj._id %>/tambah-nota" method="POST" enctype="multipart/form-data">
+        
+        <!-- Input Nama / Keterangan Nota -->
+        <div class="form-group">
+          <label>Nama / Keterangan Nota</label>
+          <input type="text" name="keterangan" placeholder="Contoh: Nota Pembelian ATK / Bukti Transfer" required>
+        </div>
+
         <div class="form-group">
           <label>Foto Nota / Invoice</label>
           <div class="upload-box">
