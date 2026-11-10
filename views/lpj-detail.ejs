@@ -457,10 +457,10 @@
             <button type="button" class="btn-tambah-nota" onclick="openNotaModal()">+ Tambah Nota</button>
           </div>
 
-          <% if (vaultList.length > 0) { %>
+          <% if (vaultList && vaultList.length > 0) { %>
             <div class="vault-grid">
               <% vaultList.forEach((v) => {
-                   const isFoto = polaFoto.test(String(v.filePath || v.fileName || ''));
+                  const isFoto = polaFoto.test(String(v.filePath || v.fileName || ''));
               %>
                 <div class="vault-card">
                   <div class="vault-thumb">
