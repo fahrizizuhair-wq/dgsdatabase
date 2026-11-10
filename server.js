@@ -2112,7 +2112,7 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
     await syncReqFilesToGridFS(req);
 
     const { id } = req.params;
-    const { kategoriPengeluaran, namaItem, keterangan, qty, hargaSatuan, nominal } = req.body;
+    const { kategoriPengeluaran, namaItem, keterangan, qty, hargaSatuan, nominal, tanggal } = req.body;
 
     const lpj = await Lpj.findById(id);
     if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
@@ -2121,9 +2121,20 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
     const hargaAngka = Number(hargaSatuan) || 0;
     const nominalAngka = Number(nominal) || (qtyAngka * hargaAngka);
 
+    let tanggalCatatan = new Date();
+    if (tanggal) {
+      const parts = String(tanggal).split('-');
+      if (parts.length === 3) {
+        tanggalCatatan = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
+      } else {
+        const parsed = new Date(tanggal);
+        if (!isNaN(parsed.getTime())) tanggalCatatan = parsed;
+      }
+    }
+
     if (!Array.isArray(lpj.rincianPengeluaran)) lpj.rincianPengeluaran = [];
     lpj.rincianPengeluaran.push({
-      tanggal: new Date(),
+      tanggal: tanggalCatatan,
       kategoriPengeluaran: kategoriPengeluaran || '',
       namaItem: namaItem || '',
       keterangan: keterangan || '',
