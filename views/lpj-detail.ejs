@@ -107,6 +107,44 @@
     .nota-link { display: inline-flex; align-items: center; gap: 5px; color: #7a1b1b; font-weight: 600; text-decoration: none; font-size: 12px; }
     .nota-link:hover { text-decoration: underline; }
 
+    /* ACTION BUTTONS RINCIAN */
+    .btn-table-edit {
+      background-color: #0f172a;
+      color: #ffffff;
+      border: none;
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.2s ease;
+    }
+    .btn-table-edit:hover {
+      background-color: #334155;
+      transform: translateY(-1px);
+    }
+    .btn-table-delete {
+      background-color: #dc2626;
+      color: #ffffff;
+      border: none;
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.2s ease;
+    }
+    .btn-table-delete:hover {
+      background-color: #b91c1c;
+      transform: translateY(-1px);
+    }
+
     /* EMPTY STATE */
     .empty-state { text-align: center; padding: 34px 20px; color: #94a3b8; border: 1px dashed #cbd5e1; border-radius: 12px; background: #fbfcfd; font-size: 13px; }
     .empty-state strong { display: block; color: #475569; margin-bottom: 4px; font-size: 14px; }
@@ -370,11 +408,25 @@
                     <th class="num">Harga Satuan</th>
                     <th class="num">Nominal</th>
                     <th>Keterangan</th>
+                    <th style="text-align: center; width: 140px;">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   <% if (produksiItems.length > 0) { %>
-                    <% produksiItems.forEach((item, index) => { %>
+                    <% produksiItems.forEach((item, index) => { 
+                      let tglIso = '';
+                      if (item.tanggal) {
+                        try {
+                          const dObj = new Date(item.tanggal);
+                          if (!isNaN(dObj.getTime())) {
+                            const y = dObj.getFullYear();
+                            const m = String(dObj.getMonth() + 1).padStart(2, '0');
+                            const d = String(dObj.getDate()).padStart(2, '0');
+                            tglIso = `${y}-${m}-${d}`;
+                          }
+                        } catch(e) {}
+                      }
+                    %>
                       <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
                         <td><%= index + 1 %></td>
                         <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
@@ -383,10 +435,34 @@
                         <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
                         <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
                         <td><%= item.keterangan || '-' %></td>
+                        <td style="white-space: nowrap; text-align: center;" onclick="event.stopPropagation()">
+                          <div style="display: inline-flex; gap: 5px; align-items: center;">
+                            <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)"
+                              data-id="<%= item._id %>"
+                              data-tanggal="<%= tglIso %>"
+                              data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>"
+                              data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>"
+                              data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>"
+                              data-qty="<%= item.qty || 1 %>"
+                              data-harga="<%= item.hargaSatuan || 0 %>"
+                              data-nominal="<%= item.nominal || 0 %>"
+                              data-notapath="<%= item.notaPath || '' %>"
+                              title="Edit Transaksi">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                              Edit
+                            </button>
+                            <form action="/lpj/detail/<%= lpj._id %>/hapus-catatan/<%= item._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item belanja ini?');" style="margin: 0; display: inline;">
+                              <button type="submit" class="btn-table-delete" title="Hapus Transaksi">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Hapus
+                              </button>
+                            </form>
+                          </div>
+                        </td>
                       </tr>
                     <% }) %>
                   <% } else { %>
-                    <tr><td colspan="7" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada transaksi di kategori ini.</td></tr>
+                    <tr><td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada transaksi di kategori ini.</td></tr>
                   <% } %>
                 </tbody>
               </table>
@@ -419,11 +495,25 @@
                     <th class="num">Harga Satuan</th>
                     <th class="num">Nominal</th>
                     <th>Keterangan</th>
+                    <th style="text-align: center; width: 140px;">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   <% if (operasionalItems.length > 0) { %>
-                    <% operasionalItems.forEach((item, index) => { %>
+                    <% operasionalItems.forEach((item, index) => { 
+                      let tglIso = '';
+                      if (item.tanggal) {
+                        try {
+                          const dObj = new Date(item.tanggal);
+                          if (!isNaN(dObj.getTime())) {
+                            const y = dObj.getFullYear();
+                            const m = String(dObj.getMonth() + 1).padStart(2, '0');
+                            const d = String(dObj.getDate()).padStart(2, '0');
+                            tglIso = `${y}-${m}-${d}`;
+                          }
+                        } catch(e) {}
+                      }
+                    %>
                       <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
                         <td><%= index + 1 %></td>
                         <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
@@ -432,10 +522,34 @@
                         <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
                         <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
                         <td><%= item.keterangan || '-' %></td>
+                        <td style="white-space: nowrap; text-align: center;" onclick="event.stopPropagation()">
+                          <div style="display: inline-flex; gap: 5px; align-items: center;">
+                            <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)"
+                              data-id="<%= item._id %>"
+                              data-tanggal="<%= tglIso %>"
+                              data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>"
+                              data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>"
+                              data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>"
+                              data-qty="<%= item.qty || 1 %>"
+                              data-harga="<%= item.hargaSatuan || 0 %>"
+                              data-nominal="<%= item.nominal || 0 %>"
+                              data-notapath="<%= item.notaPath || '' %>"
+                              title="Edit Transaksi">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                              Edit
+                            </button>
+                            <form action="/lpj/detail/<%= lpj._id %>/hapus-catatan/<%= item._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item belanja ini?');" style="margin: 0; display: inline;">
+                              <button type="submit" class="btn-table-delete" title="Hapus Transaksi">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Hapus
+                              </button>
+                            </form>
+                          </div>
+                        </td>
                       </tr>
                     <% }) %>
                   <% } else { %>
-                    <tr><td colspan="7" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada transaksi di kategori ini.</td></tr>
+                    <tr><td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada transaksi di kategori ini.</td></tr>
                   <% } %>
                 </tbody>
               </table>
@@ -589,6 +703,78 @@
     </div>
   </div>
 
+  <!-- MODAL EDIT ITEM TRANSAKSI BELANJA -->
+  <div class="modal" id="editCatatanModal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+        <div>
+          <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #0284c7;">EDIT TRANSAKSI</span>
+          <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-top: 2px;">✏️ Edit Item Transaksi Belanja</h3>
+        </div>
+        <button type="button" onclick="closeEditCatatanModal()" style="background: transparent; border: none; font-size: 18px; cursor: pointer; color: #64748b;">✕</button>
+      </div>
+
+      <form id="formEditCatatan" action="" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label>Tanggal Transaksi</label>
+          <input type="date" name="tanggal" id="editTanggalCatatan" required>
+        </div>
+
+        <div class="form-group">
+          <label>Kategori Pengeluaran</label>
+          <select name="kategoriPengeluaran" id="editKategoriCatatan" required>
+            <option value="BIAYA PRODUKSI">Biaya Produksi</option>
+            <option value="Biaya Oprasional">Biaya Oprasional</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Uraian Barang</label>
+          <input type="text" name="namaItem" id="editNamaItem" placeholder="Contoh: Pembelian 10 pcs Kipas Mini" required>
+        </div>
+
+        <div class="form-group">
+          <label>Keterangan</label>
+          <input type="text" name="keterangan" id="editKeterangan" placeholder="Tambahkan Keterangan...">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="form-group">
+            <label>Jumlah (Qty)</label>
+            <input type="number" id="editQty" name="qty" min="1" required oninput="hitungEditTotalOtomatis()">
+          </div>
+          <div class="form-group">
+            <label>Harga Satuan (Rp)</label>
+            <input type="number" id="editHargaSatuan" name="hargaSatuan" placeholder="Masukan harga..." required oninput="hitungEditTotalOtomatis()">
+          </div>
+        </div>
+
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12.5px; font-weight: 700; color: #166534;">Total Otomatis:</span>
+          <span id="editTextTotalOtomatis" style="font-size: 16px; font-weight: 700; color: #15803d;">Rp 0</span>
+        </div>
+        
+        <input type="hidden" id="editInputNominalTotal" name="nominal" value="0">
+
+        <div class="form-group">
+          <label>Foto Nota / Invoice (Opsional)</label>
+          <div class="upload-box">
+            <input type="file" name="nota" accept="image/*,application/pdf" onchange="pratinjauNota(this, 'previewEditCatatanBox', 'previewEditCatatanImg')">
+            <span class="upload-hint" id="editNotaInfo">Format JPG, PNG, WEBP, atau PDF.</span>
+            <div class="upload-preview" id="previewEditCatatanBox">
+              <img id="previewEditCatatanImg" alt="Pratinjau nota">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions" style="border-top: 1px solid #f1f5f9; padding-top: 15px;">
+          <button type="button" class="btn-cancel" onclick="closeEditCatatanModal()">Batal</button>
+          <button type="submit" class="btn-buat-baru" style="background: #0f172a;">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL TAMBAH NOTA (VAULT) DENGAN INPUT NAMA/KETERANGAN FOTO -->
   <div class="modal" id="notaModal">
     <div class="modal-content" style="width: 420px;">
@@ -700,6 +886,81 @@
     }
     function closeCatatanModal() { 
       document.getElementById('catatanModal').style.display = 'none'; 
+    }
+
+    // Fungsi modal edit catatan belanja
+    function openEditCatatanModal(btn) {
+      const id = btn.getAttribute('data-id');
+      const tanggal = btn.getAttribute('data-tanggal');
+      const kategori = btn.getAttribute('data-kategori');
+      const nama = btn.getAttribute('data-nama');
+      const keterangan = btn.getAttribute('data-keterangan');
+      const qty = btn.getAttribute('data-qty') || 1;
+      const harga = btn.getAttribute('data-harga') || 0;
+      const nominal = btn.getAttribute('data-nominal') || 0;
+      const notaPath = btn.getAttribute('data-notapath') || '';
+
+      const form = document.getElementById('formEditCatatan');
+      form.action = '/lpj/detail/<%= lpj._id %>/edit-catatan/' + id;
+
+      document.getElementById('editTanggalCatatan').value = tanggal || '';
+
+      const selectKat = document.getElementById('editKategoriCatatan');
+      if (kategori) {
+        if (kategori.toUpperCase() === 'BIAYA PRODUKSI') {
+          selectKat.value = 'BIAYA PRODUKSI';
+        } else {
+          selectKat.value = 'Biaya Oprasional';
+        }
+      }
+
+      document.getElementById('editNamaItem').value = nama || '';
+      document.getElementById('editKeterangan').value = keterangan || '';
+      document.getElementById('editQty').value = qty;
+      document.getElementById('editHargaSatuan').value = harga;
+      document.getElementById('editInputNominalTotal').value = nominal;
+
+      hitungEditTotalOtomatis();
+
+      const notaInfo = document.getElementById('editNotaInfo');
+      const previewBox = document.getElementById('previewEditCatatanBox');
+      const previewImg = document.getElementById('previewEditCatatanImg');
+
+      if (notaPath && notaPath !== 'undefined') {
+        notaInfo.innerHTML = 'Nota saat ini: <a href="' + notaPath + '" target="_blank" style="color: #2563eb; text-decoration: underline; font-weight: 600;">Buka Nota</a>. Unggah file baru hanya jika ingin menggantinya.';
+        if (/\.(png|jpe?g|gif|webp|bmp|avif|svg)$/i.test(notaPath)) {
+          previewImg.src = notaPath;
+          previewBox.style.display = 'block';
+        } else {
+          previewBox.style.display = 'none';
+          previewImg.removeAttribute('src');
+        }
+      } else {
+        notaInfo.textContent = 'Format JPG, PNG, WEBP, atau PDF.';
+        previewBox.style.display = 'none';
+        previewImg.removeAttribute('src');
+      }
+
+      document.getElementById('editCatatanModal').style.display = 'flex';
+    }
+
+    function closeEditCatatanModal() {
+      document.getElementById('editCatatanModal').style.display = 'none';
+    }
+
+    function hitungEditTotalOtomatis() {
+      const qty = parseFloat(document.getElementById('editQty').value) || 0;
+      const hargaSatuan = parseFloat(document.getElementById('editHargaSatuan').value) || 0;
+      const total = qty * hargaSatuan;
+
+      const formatRp = total.toLocaleString('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+      });
+
+      document.getElementById('editTextTotalOtomatis').textContent = formatRp.replace('IDR', 'Rp');
+      document.getElementById('editInputNominalTotal').value = total;
     }
 
     // Fungsi modal tambah nota (vault)

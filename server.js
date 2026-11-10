@@ -2179,6 +2179,83 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
   }
 });
 
+// Edit Catatan Belanja
+app.post('/lpj/detail/:id/edit-catatan/:itemId', upload.single('nota'), async (req, res) => {
+  try {
+    await syncReqFilesToGridFS(req);
+
+    const { id, itemId } = req.params;
+    const { kategoriPengeluaran, namaItem, keterangan, qty, hargaSatuan, nominal, tanggal } = req.body;
+
+    const lpj = await Lpj.findById(id);
+    if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
+
+    const qtyAngka = Number(qty) || 0;
+    const hargaAngka = Number(hargaSatuan) || 0;
+    const nominalAngka = Number(nominal) || (qtyAngka * hargaAngka);
+
+    let tanggalCatatan = new Date();
+    if (tanggal) {
+      const parts = String(tanggal).split('-');
+      if (parts.length === 3) {
+        tanggalCatatan = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
+      } else {
+        const parsed = new Date(tanggal);
+        if (!isNaN(parsed.getTime())) tanggalCatatan = parsed;
+      }
+    }
+
+    if (Array.isArray(lpj.rincianPengeluaran)) {
+      const item = (typeof lpj.rincianPengeluaran.id === 'function' ? lpj.rincianPengeluaran.id(itemId) : null)
+        || lpj.rincianPengeluaran.find(r => String(r._id) === String(itemId));
+
+      if (item) {
+        item.tanggal = tanggalCatatan;
+        item.kategoriPengeluaran = kategoriPengeluaran || item.kategoriPengeluaran;
+        item.namaItem = namaItem || item.namaItem;
+        item.keterangan = keterangan !== undefined ? keterangan : item.keterangan;
+        item.qty = qtyAngka;
+        item.hargaSatuan = hargaAngka;
+        item.nominal = nominalAngka;
+
+        if (req.file) {
+          item.notaPath = '/uploads/' + req.file.filename;
+          item.notaNama = req.file.originalname;
+        }
+      }
+    }
+
+    sinkronTotalLpj(lpj);
+    await lpj.save();
+
+    res.redirect('/lpj/detail/' + id + '?tab=rincian');
+  } catch (err) {
+    console.error('Error saat mengedit catatan belanja:', err);
+    res.status(500).send('Gagal mengedit catatan belanja: ' + err.message);
+  }
+});
+
+// Hapus Catatan Belanja
+app.post(['/lpj/detail/:id/hapus-catatan/:itemId', '/lpj/detail/:id/delete-catatan/:itemId'], async (req, res) => {
+  try {
+    const { id, itemId } = req.params;
+    const lpj = await Lpj.findById(id);
+    if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
+
+    if (Array.isArray(lpj.rincianPengeluaran)) {
+      lpj.rincianPengeluaran = lpj.rincianPengeluaran.filter(r => String(r._id) !== String(itemId));
+    }
+
+    sinkronTotalLpj(lpj);
+    await lpj.save();
+
+    res.redirect('/lpj/detail/' + id + '?tab=rincian');
+  } catch (err) {
+    console.error('Error saat menghapus catatan belanja:', err);
+    res.status(500).send('Gagal menghapus catatan belanja: ' + err.message);
+  }
+});
+
 app.post('/lpj/detail/:id/tambah-pencairan', async (req, res) => {
   try {
     const { id } = req.params;
