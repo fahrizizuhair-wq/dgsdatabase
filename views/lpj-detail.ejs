@@ -113,7 +113,20 @@
 
     /* VAULT NOTA */
     .vault-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
-    .vault-card { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column; }
+    .vault-card { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column; position: relative; }
+    
+    /* Tombol Hapus X pada Kartu Vault */
+    .vault-delete-btn {
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(220, 38, 38, 0.9); color: white;
+      border: none; width: 26px; height: 26px; border-radius: 50%;
+      font-size: 13px; font-weight: bold; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10; transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .vault-delete-btn:hover { background: #b91c1c; transform: scale(1.1); }
+
     .vault-thumb { height: 130px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .vault-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .vault-thumb a { display: block; width: 100%; height: 100%; }
@@ -447,6 +460,11 @@
                    const isFoto = polaFoto.test(String(v.filePath || v.fileName || ''));
               %>
                 <div class="vault-card">
+                  <!-- TOMBOL X UNTUK HAPUS NOTA -->
+                  <form action="/lpj/detail/<%= lpj._id %>/hapus-nota/<%= v._id %>" method="POST" onsubmit="return confirm('Yakin ingin menghapus nota/arsip ini?');">
+                    <button type="submit" class="vault-delete-btn" title="Hapus Nota">✕</button>
+                  </form>
+
                   <div class="vault-thumb">
                     <% if (isFoto) { %>
                       <a href="<%= v.filePath %>" target="_blank" rel="noopener">
