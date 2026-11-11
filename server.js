@@ -173,46 +173,6 @@ mongoose.connect(mongoUri)
   })
   .catch(err => console.error('Koneksi MongoDB gagal:', err));
 
-// ============================================================
-//  MAINTENANCE MODE (PALING SIMPEL TANPA COOKIE-PARSER)
-// ============================================================
-const IS_MAINTENANCE = true; // true = aktif, false = normal semua
-
-// Simpan daftar token/perangkat yang diizinkan di memori server
-const allowedTokens = new Set();
-
-const maintenanceMiddleware = (req, res, next) => {
-  if (IS_MAINTENANCE) {
-    // 1. Jika ada parameter token rahasia di URL
-    if (req.query.token === 'admin123') {
-      // Tandai IP/koneksi ini sebagai yang diizinkan
-      allowedTokens.add(req.ip);
-      return next();
-    }
-
-    // 2. Jika IP/koneksi ini sudah pernah memasukkan token yang benar
-    if (allowedTokens.has(req.ip)) {
-      return next();
-    }
-
-    // 3. Jika sudah login sebagai admin
-    if (req.session && (req.session.isAdmin || req.session.adminUser)) {
-      return next();
-    }
-
-    // 4. Biarkan file aset statis (CSS/gambar) tetap dimuat agar tampilan rapi
-    if (req.path.startsWith('/public') || req.path.startsWith('/uploads')) {
-      return next();
-    }
-
-    // 5. Selain itu, tampilkan halaman maintenance
-    return res.status(503).render('maintenance');
-  }
-  next();
-};
-
-app.use(maintenanceMiddleware);
-
 
 // Rute Pengambilan File Upload (Disk Cache + MongoDB Atlas GridFS Fallback)
 app.get('/uploads/:filename', async (req, res) => {
