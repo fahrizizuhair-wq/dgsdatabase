@@ -75,8 +75,6 @@
     
     .btn-tambah-catatan { background: #ffffff; color: #7a1b1b; border: 1.5px solid #7a1b1b; padding: 9px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
     .btn-tambah-catatan:hover { background: #7a1b1b; color: #ffffff; }
-    .btn-export-excel { background: #166534; color: #ffffff; border: 1.5px solid #166534; padding: 9px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: all 0.2s; }
-    .btn-export-excel:hover { background: #14532d; border-color: #14532d; color: #ffffff; }
     .btn-tambah-nota { background: #ffffff; color: #7a1b1b; border: 1.5px solid #7a1b1b; padding: 9px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
     .btn-tambah-nota:hover { background: #7a1b1b; color: #ffffff; }
 
@@ -231,15 +229,10 @@
             <span>Status: <strong class="badge-status-green"><%= lpj.status %></strong></span>
           </div>
         </div>
-        <!-- Tombol Export Excel & Tambah Catatan Belanja -->
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <a href="/lpj/export-excel/<%= lpj._id %>" class="btn-export-excel" title="Unduh LPJ dalam format Excel">
-            ⬇ Export Excel
-          </a>
-          <button class="btn-tambah-catatan" onclick="openCatatanModal()">
-            + Tambah Catatan Belanja
-          </button>
-        </div>
+        <!-- Tombol Tambah Catatan Belanja -->
+        <button class="btn-tambah-catatan" onclick="openCatatanModal()">
+          + Tambah Catatan Belanja
+        </button>
       </div>
 
       <!-- 3 STATS KARTU ATAS (desain seragam stat-cards.css) -->
