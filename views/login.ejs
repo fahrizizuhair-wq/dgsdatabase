@@ -1626,10 +1626,6 @@ body::before {
                     kembaliKeLoginRole();
                     event.target.reset();
                     document.getElementById('inputKodePemulihan').value = '';
-                    const loginUserField = role === 'admin'
-                        ? document.getElementById('adminLoginUsername')
-                        : document.getElementById('userLoginUsername');
-                    if (loginUserField) loginUserField.value = username;
                 });
             } else {
                 Swal.fire({

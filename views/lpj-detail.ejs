@@ -208,8 +208,8 @@
         </div>
       </div>
       <div class="banner-actions">
-        <a href="<%= typeof lpjBasePath !== 'undefined' ? lpjBasePath : '/lpj-user' %>" class="btn-daftar-lpj">← Daftar LPJ Utama</a>
-        <a href="<%= typeof lpjBasePath !== 'undefined' ? lpjBasePath : '/lpj-user' %>?buat=1" class="btn-buat-baru">+ Buat LPJ Baru</a>
+        <a href="/lpj-user" class="btn-daftar-lpj">← Daftar LPJ Utama</a>
+        <a href="/lpj-user?buat=1" class="btn-buat-baru">+ Buat LPJ Baru</a>
       </div>
     </div>
 
@@ -219,7 +219,7 @@
       <!-- HEADER DETAIL KEGIATAN -->
       <div class="detail-header-card">
         <div class="detail-title-area">
-          <a href="<%= typeof lpjBasePath !== 'undefined' ? lpjBasePath : '/lpj-user' %>" class="back-link">← Kembali Daftar LPJ</a>
+          <a href="/lpj-user" class="back-link">← Kembali Daftar LPJ</a>
           <h2><%= lpj.namaKegiatan %></h2>
           <div class="detail-meta-badges">
             <span><%= lpj.kategori %></span>
