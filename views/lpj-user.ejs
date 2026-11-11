@@ -113,6 +113,10 @@
     .progress-bar-fill { height: 100%; background: #7a1b1b; border-radius: 3px; }
 
     .lpj-card-footer { border-top: 1px solid #f1f5f9; padding: 12px 20px; background: #fafafa; text-align: center; }
+    .lpj-card-actions { display: flex; gap: 8px; align-items: stretch; }
+    .lpj-card-actions .btn-workspace { flex: 1 1 auto; width: auto; }
+    .btn-export-card { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: #166534; color: #ffffff; text-decoration: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s; white-space: nowrap; }
+    .btn-export-card:hover { background: #14532d; }
     .btn-workspace { display: block; width: 100%; background: #7a1b1b; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s; }
     .btn-workspace:hover { background: #501212; }
 
@@ -284,7 +288,10 @@
               </div>
 
               <div class="lpj-card-footer">
-                <a href="/lpj/detail/<%= lpj._id %>" class="btn-workspace">👁️ Lihat Detail Workspace LPJ</a>
+                <div class="lpj-card-actions">
+                  <a href="/lpj/detail/<%= lpj._id %>" class="btn-workspace">👁️ Lihat Detail Workspace LPJ</a>
+                  <a href="/lpj/export-excel/<%= lpj._id %>" class="btn-export-card" title="Export LPJ ke Excel">⬇ Excel</a>
+                </div>
               </div>
             </div>
           <% }); %>

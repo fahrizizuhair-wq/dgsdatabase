@@ -134,6 +134,7 @@ const DataBahanKain = require('./models/DataBahanKain');
 const User          = require('./models/User');
 const SuratJalan    = require('./models/SuratJalan');
 const Lpj           = require('./models/Lpj');
+const { buildLpjWorkbook } = require('./utils/lpj-excel');
 
 // ============================================================
 //  DATABASE CONNECTION
@@ -2186,6 +2187,35 @@ app.get('/lpj/detail/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat detail LPJ: ' + err.message);
+  }
+});
+
+// ==========================================
+//  EXPORT EXCEL LPJ (mengikuti template)
+// ==========================================
+app.get('/lpj/export-excel/:id', async (req, res) => {
+  try {
+    const lpj = await Lpj.findById(req.params.id).lean();
+    if (!lpj) {
+      return res.status(404).send('Workspace LPJ tidak ditemukan.');
+    }
+
+    const workbook = await buildLpjWorkbook(lpj);
+
+    const namaBerkas = String(lpj.namaKegiatan || 'LPJ')
+      .replace(/[^\x20-\x7E]/g, '')
+      .replace(/[\\/:*?"<>|]/g, '')
+      .trim()
+      .replace(/\s+/g, '_')
+      .slice(0, 80) || 'LPJ';
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="LPJ_${namaBerkas}.xlsx"`);
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error('Gagal export Excel LPJ:', err);
+    res.status(500).send('Gagal export Excel LPJ: ' + err.message);
   }
 });
 
