@@ -584,7 +584,7 @@
               <input type="text" id="inputUnitKerja" name="unitKerja" placeholder="Contoh: Divisi Logistik & Armada" required>
             </div>
             <div class="form-group">
-              <label for="inputPemohon">Pemohon</label>
+              <label for="inputPemohon">Yang Mengajukan</label>
               <input type="text" id="inputPemohon" name="pemohon" value="<%= (typeof user !== 'undefined' && user && (user.namaLengkap || user.username)) ? (user.namaLengkap || user.username) : '' %>" placeholder="Nama pemohon" required>
             </div>
             <div class="form-group">
@@ -596,7 +596,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="inputVendor">Vendor Target <span class="required">*</span></label>
+              <label for="inputVendor">Nama Vendor <span class="required">*</span></label>
               <input type="text" id="inputVendor" name="vendor" placeholder="Contoh: CV Semen Nusantara Enterprise" required>
             </div>
             <div class="form-group">
@@ -616,7 +616,7 @@
               <input type="text" id="inputMaterial" name="namaMaterial" placeholder="Contoh: Pengadaan Semen Portland 500 Sak" required>
             </div>
             <div class="form-group full">
-              <label for="inputDeskripsi">Deskripsi Singkat</label>
+              <label for="inputDeskripsi">Deskripsi/Spesifikasi</label>
               <textarea id="inputDeskripsi" name="deskripsi" rows="2" placeholder="Contoh: Pengadaan Semen Portland 500 Sak"></textarea>
             </div>
             <div class="form-group full">
