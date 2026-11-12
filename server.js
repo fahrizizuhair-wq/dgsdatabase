@@ -134,7 +134,9 @@ const DataBahanKain = require('./models/DataBahanKain');
 const User          = require('./models/User');
 const SuratJalan    = require('./models/SuratJalan');
 const Lpj           = require('./models/Lpj');
+const MateriApproval = require('./models/MateriApproval');
 const { buildLpjWorkbook } = require('./utils/lpj-excel');
+const { ambilContohMateriApproval } = require('./utils/materi-approval-demo');
 
 // ============================================================
 //  DATABASE CONNECTION
@@ -2039,6 +2041,54 @@ app.post('/lpj-user/add', isUserAuthenticated, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menyimpan LPJ baru: ' + err.message);
+  }
+});
+
+// ==========================================
+// MATERI APPROVAL VERSI USER (READ-ONLY)
+// ==========================================
+app.get('/materi-approval-user', isUserAuthenticated, async (req, res) => {
+  try {
+    const search = (req.query.search || '').toString().trim();
+    const urgensiFilter = (req.query.urgensi || '').toString().trim();
+
+    const dataDb = await MateriApproval.find()
+      .sort({ tanggalPengajuan: -1, createdAt: -1 })
+      .lean();
+
+    const memakaiContoh = dataDb.length === 0;
+    const sumber = memakaiContoh ? ambilContohMateriApproval() : dataDb;
+
+    const kataKunci = search.toLowerCase();
+    const listMateri = sumber.filter((item) => {
+      const cocokPencarian = !kataKunci || [
+        item.nomorPengajuan,
+        item.unitKerja,
+        item.vendor,
+        item.kategori,
+        item.deskripsi,
+        item.pemohon
+      ].filter(Boolean).join(' ').toLowerCase().includes(kataKunci);
+
+      const cocokUrgensi = !urgensiFilter || item.urgensi === urgensiFilter;
+      return cocokPencarian && cocokUrgensi;
+    });
+
+    res.render('materi-approval-user', {
+      listMateri,
+      totalMateri: sumber.length,
+      search,
+      urgensiFilter,
+      memakaiContoh,
+      role: 'user',
+      user: req.session.user || {
+        username: req.session.adminUser || 'User',
+        namaLengkap: req.session.adminUser || 'User'
+      }
+    });
+  } catch (err) {
+    console.error('Gagal memuat materi approval user:', err);
+    res.status(500).send('Gagal memuat materi approval: ' + err.message);
   }
 });
 
