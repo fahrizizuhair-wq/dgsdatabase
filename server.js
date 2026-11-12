@@ -2094,7 +2094,7 @@ app.post('/materi-approval-user/add', isUserAuthenticated, async (req, res) => {
     }
 
     const namaPenginput = getNamaPenginput(req);
-    const urgensiValid = ['Rendah', 'Normal', 'Sedang', 'Tinggi', 'Kritis'];
+    const urgensiValid = ['Normal', 'High', 'Critical'];
 
     const draft = new MateriApproval({
       tanggalPengajuan: new Date(),
@@ -2106,7 +2106,7 @@ app.post('/materi-approval-user/add', isUserAuthenticated, async (req, res) => {
       namaMaterial: String(namaMaterial).trim(),
       deskripsi: String(deskripsi || '').trim(),
       totalNominal: Math.max(0, Number(totalNominal) || 0),
-      statusApproval: 'Draft',
+      statusApproval: 'Menunggu',
       diinputOleh: namaPenginput
     });
 
