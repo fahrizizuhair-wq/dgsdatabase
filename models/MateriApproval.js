@@ -7,12 +7,13 @@ const materiApprovalSchema = new mongoose.Schema({
   unitKerja: { type: String, required: true, trim: true },
   vendor: { type: String, default: '', trim: true },
   kategori: { type: String, default: '', trim: true },
+  namaMaterial: { type: String, default: '', trim: true },
   deskripsi: { type: String, default: '', trim: true },
   totalNominal: { type: Number, default: 0 },
   urgensi: {
     type: String,
-    enum: ['Rendah', 'Sedang', 'Tinggi', 'Kritis'],
-    default: 'Sedang'
+    enum: ['Rendah', 'Normal', 'Sedang', 'Tinggi', 'Kritis'],
+    default: 'Normal'
   },
   statusApproval: {
     type: String,

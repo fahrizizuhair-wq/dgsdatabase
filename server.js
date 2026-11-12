@@ -136,7 +136,6 @@ const SuratJalan    = require('./models/SuratJalan');
 const Lpj           = require('./models/Lpj');
 const MateriApproval = require('./models/MateriApproval');
 const { buildLpjWorkbook } = require('./utils/lpj-excel');
-const { ambilContohMateriApproval } = require('./utils/materi-approval-demo');
 
 // ============================================================
 //  DATABASE CONNECTION
@@ -2045,41 +2044,32 @@ app.post('/lpj-user/add', isUserAuthenticated, async (req, res) => {
 });
 
 // ==========================================
-// MATERI APPROVAL VERSI USER (READ-ONLY)
+// MATERI APPROVAL VERSI USER
 // ==========================================
 app.get('/materi-approval-user', isUserAuthenticated, async (req, res) => {
   try {
-    const search = (req.query.search || '').toString().trim();
-    const urgensiFilter = (req.query.urgensi || '').toString().trim();
-
-    const dataDb = await MateriApproval.find()
+    const dataMateri = await MateriApproval.find()
       .sort({ tanggalPengajuan: -1, createdAt: -1 })
       .lean();
 
-    const memakaiContoh = dataDb.length === 0;
-    const sumber = memakaiContoh ? ambilContohMateriApproval() : dataDb;
+    const statusAktif = ['Draft', 'Menunggu Persetujuan', 'Sedang Ditinjau'];
+    const statusSelesai = ['Disetujui', 'Ditolak'];
 
-    const kataKunci = search.toLowerCase();
-    const listMateri = sumber.filter((item) => {
-      const cocokPencarian = !kataKunci || [
-        item.nomorPengajuan,
-        item.unitKerja,
-        item.vendor,
-        item.kategori,
-        item.deskripsi,
-        item.pemohon
-      ].filter(Boolean).join(' ').toLowerCase().includes(kataKunci);
-
-      const cocokUrgensi = !urgensiFilter || item.urgensi === urgensiFilter;
-      return cocokPencarian && cocokUrgensi;
-    });
+    const totalMateri = dataMateri.length;
+    const totalNominal = dataMateri.reduce((acc, item) => acc + (Number(item.totalNominal) || 0), 0);
+    const jumlahMenunggu = dataMateri.filter((item) => statusAktif.includes(item.statusApproval)).length;
+    const jumlahDisetujui = dataMateri.filter((item) => item.statusApproval === 'Disetujui').length;
+    const jumlahKritis = dataMateri.filter((item) => item.urgensi === 'Kritis' && !statusSelesai.includes(item.statusApproval)).length;
 
     res.render('materi-approval-user', {
-      listMateri,
-      totalMateri: sumber.length,
-      search,
-      urgensiFilter,
-      memakaiContoh,
+      listMateri: dataMateri,
+      totalMateri,
+      totalNominal,
+      jumlahMenunggu,
+      jumlahDisetujui,
+      jumlahKritis,
+      dibuat: req.query.dibuat === '1',
+      gagal: req.query.error === '1',
       role: 'user',
       user: req.session.user || {
         username: req.session.adminUser || 'User',
@@ -2089,6 +2079,42 @@ app.get('/materi-approval-user', isUserAuthenticated, async (req, res) => {
   } catch (err) {
     console.error('Gagal memuat materi approval user:', err);
     res.status(500).send('Gagal memuat materi approval: ' + err.message);
+  }
+});
+
+app.post('/materi-approval-user/add', isUserAuthenticated, async (req, res) => {
+  try {
+    const {
+      unitKerja, pemohon, kategori, vendor, urgensi,
+      namaMaterial, deskripsi, totalNominal
+    } = req.body;
+
+    if (!unitKerja || !kategori || !vendor || !namaMaterial) {
+      return res.redirect('/materi-approval-user?error=1');
+    }
+
+    const namaPenginput = getNamaPenginput(req);
+    const urgensiValid = ['Rendah', 'Normal', 'Sedang', 'Tinggi', 'Kritis'];
+
+    const draft = new MateriApproval({
+      tanggalPengajuan: new Date(),
+      unitKerja: String(unitKerja).trim(),
+      pemohon: String(pemohon || namaPenginput).trim(),
+      kategori: String(kategori).trim(),
+      vendor: String(vendor).trim(),
+      urgensi: urgensiValid.includes(urgensi) ? urgensi : 'Normal',
+      namaMaterial: String(namaMaterial).trim(),
+      deskripsi: String(deskripsi || '').trim(),
+      totalNominal: Math.max(0, Number(totalNominal) || 0),
+      statusApproval: 'Draft',
+      diinputOleh: namaPenginput
+    });
+
+    await draft.save();
+    res.redirect('/materi-approval-user?dibuat=1');
+  } catch (err) {
+    console.error('Gagal menyimpan draft pengajuan:', err);
+    res.status(500).send('Gagal menyimpan draft pengajuan: ' + err.message);
   }
 });
 

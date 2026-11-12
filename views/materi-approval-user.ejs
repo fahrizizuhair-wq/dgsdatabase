@@ -29,24 +29,47 @@
 
     .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
 
-    /* PANEL UTAMA */
-    .approval-panel {
-      width: 100%; max-width: 1400px; margin: 0 auto;
-      background: rgba(255, 255, 255, 0.97);
-      backdrop-filter: blur(8px);
-      border-radius: 16px;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.14);
-      overflow: hidden;
+    /* SYSTEM BANNER */
+    .system-banner {
+      background: #f4f6f9; color: #7a1b1b; border-radius: 12px; padding: 22px 24px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); flex-wrap: wrap; gap: 15px;
     }
+    .banner-title-wrap { display: flex; align-items: center; gap: 14px; }
+    .banner-toggle-btn {
+      background: #ffffff; color: #7a1b1b; width: 44px; height: 44px; border-radius: 10px; border: none;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .banner-toggle-btn:hover { background: #7a1b1b; color: #ffffff; }
+    .banner-text span { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #000000; font-weight: 700; }
+    .banner-text h1 { font-size: 20px; font-weight: 700; color: #000000; margin-top: 2px; }
 
-    /* HEADER PANEL */
-    .approval-header {
-      padding: 26px 28px 22px;
-      border-bottom: 1px solid #eef2f7;
-      display: flex; justify-content: space-between; align-items: flex-start;
+    .btn-primary {
+      background-color: #7a1b1b; color: #ffffff; border: none; padding: 11px 18px;
+      border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-family: inherit;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background-color: #5c1313; }
+
+    /* ALERT */
+    .page-alert {
+      display: flex; align-items: flex-start; gap: 10px; padding: 13px 16px;
+      border-radius: 10px; font-size: 13px; line-height: 1.5; margin-bottom: 18px;
+    }
+    .page-alert svg { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 1px; }
+    .page-alert.success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
+    .page-alert.error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+
+    /* BOX INFORMASI PERSETUJUAN (TERPISAH DARI TABEL) */
+    .approval-intro {
+      background: rgba(255, 255, 255, 0.97);
+      border-radius: 14px; padding: 24px 26px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+      display: flex; justify-content: space-between; align-items: center;
       gap: 18px; flex-wrap: wrap;
     }
-    .approval-heading { display: flex; align-items: flex-start; gap: 16px; min-width: 0; }
+    .approval-heading { display: flex; align-items: flex-start; gap: 15px; min-width: 0; }
     .approval-icon {
       flex: 0 0 auto; width: 48px; height: 48px; border-radius: 12px;
       background: #fdf2f2; color: #7a1b1b;
@@ -54,11 +77,8 @@
       border: 1px solid #f6dada;
     }
     .approval-icon svg { width: 24px; height: 24px; }
-    .approval-title-wrap h1 { font-size: 22px; font-weight: 700; color: #0f172a; line-height: 1.3; }
-    .approval-title-wrap p {
-      margin-top: 7px; font-size: 13px; line-height: 1.65; color: #64748b; max-width: 760px;
-    }
-    .approval-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .approval-title-wrap h2 { font-size: 21px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+    .approval-title-wrap p { margin-top: 7px; font-size: 13px; line-height: 1.65; color: #64748b; max-width: 780px; }
     .mode-chip {
       display: inline-flex; align-items: center; gap: 6px;
       background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
@@ -66,17 +86,43 @@
       white-space: nowrap;
     }
     .mode-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: #16a34a; display: inline-block; }
-    .panel-toggle-btn {
-      background: #ffffff; color: #7a1b1b; width: 42px; height: 42px; border-radius: 10px;
-      border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background 0.2s, color 0.2s;
-    }
-    .panel-toggle-btn:hover { background: #7a1b1b; color: #ffffff; border-color: #7a1b1b; }
 
-    /* TOOLBAR PENCARIAN & FILTER */
-    .approval-toolbar {
-      padding: 18px 28px; display: flex; align-items: center; gap: 12px;
-      flex-wrap: wrap; background: #fbfcfe; border-bottom: 1px solid #eef2f7;
+    /* KARTU STATISTIK: 4 KOLOM */
+    .card-grid.card-grid-approval { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    @media (max-width: 1200px) {
+      .card-grid.card-grid-approval { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 700px) {
+      .card-grid.card-grid-approval { grid-template-columns: 1fr; }
+    }
+
+    /* PANEL DATA (TERPISAH DARI BOX INFORMASI) */
+    .approval-data-panel {
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(8px);
+      border-radius: 14px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      overflow: hidden;
+    }
+    .data-panel-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 14px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .data-panel-head h2 { font-size: 17px; font-weight: 700; color: #0f172a; }
+    .data-panel-head p { margin-top: 4px; font-size: 12.5px; color: #64748b; line-height: 1.55; }
+    .total-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #fdf2f2; border: 1px solid #f6dada; color: #7a1b1b;
+      padding: 7px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* TOOLBAR TANPA TOMBOL CARI */
+    .data-toolbar {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 14px 16px; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;
     }
     .search-field { position: relative; flex: 1 1 340px; min-width: 240px; }
     .search-field input {
@@ -97,31 +143,17 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
       background-repeat: no-repeat; background-position: right 12px center;
     }
-    .btn-search {
-      background: #7a1b1b; color: #ffffff; border: none; border-radius: 9px;
-      padding: 11px 20px; font-size: 13px; font-weight: 600; cursor: pointer;
-      font-family: inherit; transition: background 0.2s;
-    }
-    .btn-search:hover { background: #5c1313; }
     .btn-reset {
-      display: inline-flex; align-items: center; justify-content: center;
+      display: none; align-items: center; justify-content: center;
       padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 9px;
       background: #ffffff; color: #64748b; font-size: 12.5px; font-weight: 600;
-      text-decoration: none; transition: all 0.2s; white-space: nowrap;
+      cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap;
     }
     .btn-reset:hover { color: #7a1b1b; border-color: #f0c9c9; background: #fff7f7; }
 
-    /* INFORMASI DATA CONTOH */
-    .demo-notice {
-      margin: 18px 28px 0; padding: 11px 14px; border-radius: 9px;
-      background: #fffbeb; border: 1px solid #fde68a; color: #92400e;
-      font-size: 12.5px; line-height: 1.55; display: flex; gap: 9px; align-items: flex-start;
-    }
-    .demo-notice svg { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 1px; }
-
     /* TABEL */
-    .table-responsive { width: 100%; overflow-x: auto; padding: 4px 0 0; }
-    .approval-table { width: 100%; min-width: 1060px; border-collapse: collapse; }
+    .table-responsive { width: 100%; overflow-x: auto; }
+    .approval-table { width: 100%; min-width: 1000px; border-collapse: collapse; }
     .approval-table thead th {
       background: #f8fafc; color: #64748b; font-size: 10.5px; font-weight: 700;
       letter-spacing: 0.7px; text-transform: uppercase; text-align: left;
@@ -134,8 +166,8 @@
       font-size: 13px; color: #334155; vertical-align: middle;
     }
     .approval-table tbody tr:last-child td { border-bottom: none; }
-    .approval-table tbody tr { transition: background 0.15s; }
-    .approval-table tbody tr:hover { background: #fcfbfb; }
+    .approval-table tbody tr.data-row { transition: background 0.15s; }
+    .approval-table tbody tr.data-row:hover { background: #fcfbfb; }
 
     .cell-date { display: block; font-weight: 600; color: #0f172a; white-space: nowrap; }
     .cell-unit { font-weight: 600; color: #1e293b; }
@@ -157,6 +189,7 @@
     .urgensi-kritis { background: #fee2e2; color: #b91c1c; }
     .urgensi-tinggi { background: #ffedd5; color: #c2410c; }
     .urgensi-sedang { background: #dbeafe; color: #1d4ed8; }
+    .urgensi-normal { background: #e0f2fe; color: #0369a1; }
     .urgensi-rendah { background: #f1f5f9; color: #475569; }
 
     .status-menunggu { background: #fef3c7; color: #a16207; }
@@ -165,7 +198,7 @@
     .status-ditolak { background: #fee2e2; color: #b91c1c; }
     .status-draft { background: #f1f5f9; color: #475569; }
 
-    .empty-state { text-align: center; padding: 54px 20px !important; }
+    .empty-state { text-align: center; padding: 48px 20px !important; }
     .empty-state .empty-icon {
       width: 54px; height: 54px; margin: 0 auto 14px; border-radius: 14px;
       background: #f8fafc; color: #94a3b8; display: flex; align-items: center; justify-content: center;
@@ -174,30 +207,98 @@
     .empty-state .empty-icon svg { width: 26px; height: 26px; }
     .empty-state h3 { font-size: 14.5px; font-weight: 700; color: #334155; margin-bottom: 5px; }
     .empty-state p { font-size: 12.5px; color: #94a3b8; }
+    .btn-empty-action {
+      margin-top: 14px; background: #7a1b1b; color: #ffffff; border: none;
+      border-radius: 8px; padding: 9px 16px; font-size: 12.5px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: background 0.2s;
+    }
+    .btn-empty-action:hover { background: #5c1313; }
 
     /* FOOTER PANEL */
     .approval-footer {
-      padding: 15px 28px; display: flex; justify-content: space-between;
+      padding: 15px 0 0; display: flex; justify-content: space-between;
       align-items: center; gap: 12px; flex-wrap: wrap;
-      border-top: 1px solid #eef2f7; background: #fbfcfe;
+      border-top: 1px solid #eef2f7; margin-top: 4px;
     }
     .approval-footer .count-info { font-size: 12.5px; color: #64748b; }
     .approval-footer .count-info strong { color: #0f172a; font-weight: 700; }
     .approval-footer .readonly-info { font-size: 11.5px; color: #94a3b8; }
 
+    /* MODAL FORM */
+    .modal {
+      display: none; position: fixed; inset: 0; padding: 20px;
+      background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px);
+      justify-content: center; align-items: center; z-index: 1100;
+    }
+    .modal.open { display: flex; }
+    .modal-content {
+      background: #ffffff; width: 100%; max-width: 640px; max-height: 90vh;
+      border-radius: 16px; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 12px; padding: 22px 24px; border-bottom: 1px solid #eef2f7;
+    }
+    .modal-header h3 { font-size: 17px; font-weight: 700; color: #0f172a; }
+    .modal-header p { margin-top: 4px; font-size: 12px; color: #64748b; line-height: 1.5; }
+    .modal-close {
+      background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b;
+      width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+      font-size: 15px; transition: all 0.2s;
+    }
+    .modal-close:hover { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+    .modal-body { padding: 22px 24px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { font-size: 12px; font-weight: 700; color: #334155; }
+    .form-group label .required { color: #dc2626; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+      font-family: inherit; font-size: 13px; color: #0f172a; outline: none;
+      background: #ffffff; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group textarea { resize: vertical; min-height: 64px; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: #7a1b1b; box-shadow: 0 0 0 3px rgba(122, 27, 27, 0.08);
+    }
+    .form-hint { font-size: 10.5px; color: #94a3b8; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 10px;
+      padding: 16px 24px; border-top: 1px solid #eef2f7; background: #fbfcfe;
+    }
+    .btn-cancel {
+      background: #e2e8f0; border: 1px solid #e2e8f0; padding: 10px 18px;
+      border-radius: 8px; cursor: pointer; font-weight: 600; color: #334155;
+      font-size: 13px; font-family: inherit; transition: background 0.2s;
+    }
+    .btn-cancel:hover { background: #cbd5e1; }
+    .btn-submit {
+      background: #7a1b1b; border: none; padding: 10px 18px; border-radius: 8px;
+      cursor: pointer; font-weight: 600; color: #ffffff; font-size: 13px;
+      font-family: inherit; display: inline-flex; align-items: center; gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { background: #5c1313; }
+
     @media (max-width: 768px) {
       .main-content { padding: 16px; }
-      .approval-header { padding: 20px; }
-      .approval-toolbar { padding: 16px 20px; }
-      .demo-notice { margin: 16px 20px 0; }
-      .approval-footer { padding: 14px 20px; }
-      .approval-title-wrap h1 { font-size: 19px; }
-      .btn-search { flex: 1 1 100%; }
+      .system-banner { padding: 18px; }
+      .banner-text h1 { font-size: 17px; }
+      .btn-primary { width: 100%; justify-content: center; }
+      .approval-intro { padding: 20px; }
+      .approval-title-wrap h2 { font-size: 18px; }
+      .approval-data-panel { padding: 18px; }
       .toolbar-filter { flex: 1 1 100%; }
       .toolbar-filter select { flex: 1; }
-      .mode-chip { order: 3; }
+      .form-grid { grid-template-columns: 1fr; }
+      .modal-body { padding: 18px; }
+      .modal-header { padding: 18px; }
+      .modal-footer { padding: 14px 18px; }
     }
   </style>
+  <link rel="stylesheet" href="/css/stat-cards.css">
   <link rel="stylesheet" href="/css/sidebar.css">
 </head>
 <body>
@@ -205,66 +306,184 @@
   <%- include('partials/sidebar-user', { activePage: 'materi-approval' }) %>
 
   <main class="main-content">
-    <section class="approval-panel">
 
-      <div class="approval-header">
-        <div class="approval-heading">
-          <div class="approval-icon">
+    <!-- SYSTEM BANNER: TOMBOL SIDEBAR DI KIRI -->
+    <div class="system-banner">
+      <div class="banner-title-wrap">
+        <button class="banner-toggle-btn" type="button" onclick="toggleSidebar()" title="Buka Menu" aria-label="Buka Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div class="banner-text">
+          <span>System Approval Terpusat</span>
+          <h1>Materi Approval</h1>
+        </div>
+      </div>
+      <button class="btn-primary" type="button" onclick="openModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Buat Draft Pengajuan
+      </button>
+    </div>
+
+    <% if (typeof dibuat !== 'undefined' && dibuat) { %>
+      <div class="page-alert success">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span>Draft pengajuan berhasil disimpan dan sudah masuk ke tabel data pengajuan.</span>
+      </div>
+    <% } %>
+
+    <% if (typeof gagal !== 'undefined' && gagal) { %>
+      <div class="page-alert error">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>Draft gagal disimpan. Lengkapi unit kerja, kategori dokumen, vendor target, dan nama material.</span>
+      </div>
+    <% } %>
+
+    <!-- BOX INFORMASI PERSETUJUAN (BERDIRI SENDIRI) -->
+    <section class="approval-intro">
+      <div class="approval-heading">
+        <div class="approval-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+        <div class="approval-title-wrap">
+          <h2>Persetujuan &amp; Verifikasi Pengadaan</h2>
+          <p>Pantau status persetujuan pengajuan pembelian material (PR/PO) dan Laporan Pertanggungjawaban (LPJ). Halaman user hanya untuk melihat status, tanpa tindakan evaluasi atau otorisasi.</p>
+        </div>
+      </div>
+      <span class="mode-chip"><span class="dot"></span> Mode User &middot; Hanya Lihat</span>
+    </section>
+
+    <!-- KARTU STATISTIK -->
+    <section class="card-grid card-grid-approval">
+      <div class="stat-card card-red">
+        <div class="card-header">
+          <span class="card-title">Menunggu Persetujuan</span>
+          <div class="icon-wrapper icon-red">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 11l3 3L22 4"></path>
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-          </div>
-          <div class="approval-title-wrap">
-            <h1>Persetujuan &amp; Verifikasi Pengadaan</h1>
-            <p>Pantau status persetujuan pengajuan pembelian material (PR/PO) dan Laporan Pertanggungjawaban (LPJ). Halaman user bersifat hanya lihat, tanpa tindakan evaluasi atau otorisasi.</p>
           </div>
         </div>
-        <div class="approval-header-actions">
-          <span class="mode-chip"><span class="dot"></span> Mode User &middot; Hanya Lihat</span>
-          <button class="panel-toggle-btn" type="button" onclick="toggleSidebar()" title="Buka Menu" aria-label="Buka Menu">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
+        <div class="card-body">
+          <span class="card-value"><%= typeof jumlahMenunggu !== 'undefined' ? jumlahMenunggu : 0 %></span>
+          <span class="card-unit">Berkas</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-red">Termasuk draft</span>
+          <span>Perlu Tindakan</span>
         </div>
       </div>
 
-      <form class="approval-toolbar" action="/materi-approval-user" method="GET">
+      <div class="stat-card card-blue">
+        <div class="card-header">
+          <span class="card-title">Total Nominal Pengajuan</span>
+          <div class="icon-wrapper icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="14" rx="2"></rect>
+              <path d="M2 10h20"></path>
+              <circle cx="17" cy="15" r="1"></circle>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value" style="font-size: 1.55rem;">Rp <%= (typeof totalNominal !== 'undefined' ? totalNominal : 0).toLocaleString('id-ID') %></span>
+        </div>
+        <div class="card-footer">
+          <span class="text-blue"><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %> Dokumen</span>
+          <span>Akumulasi</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-green">
+        <div class="card-header">
+          <span class="card-title">Disetujui</span>
+          <div class="icon-wrapper icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof jumlahDisetujui !== 'undefined' ? jumlahDisetujui : 0 %></span>
+          <span class="card-unit">Berkas</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-green">Selesai</span>
+          <span>Disetujui</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-gold">
+        <div class="card-header">
+          <span class="card-title">Urgensi Kritis (SLA)</span>
+          <div class="icon-wrapper icon-gold">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof jumlahKritis !== 'undefined' ? jumlahKritis : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-orange">Prioritas</span>
+          <span>Target Respons</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL DATA (TERPISAH DARI BOX INFORMASI) -->
+    <section class="approval-data-panel">
+      <div class="data-panel-head">
+        <div>
+          <h2>Data Pengajuan</h2>
+          <p>Daftar pengajuan yang tercatat beserta status persetujuannya.</p>
+        </div>
+        <span class="total-chip"><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %> Pengajuan</span>
+      </div>
+
+      <div class="data-toolbar">
         <div class="search-field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari unit kerja, vendor, kategori, atau nomor pengajuan...">
+          <input type="text" id="searchMateri" oninput="filterTabel()" placeholder="Cari unit kerja, vendor, kategori, atau nama material...">
         </div>
         <div class="toolbar-filter">
           <label for="filterUrgensi">Urgensi</label>
-          <select name="urgensi" id="filterUrgensi" onchange="this.form.submit()">
+          <select id="filterUrgensi" onchange="filterTabel()">
             <option value="">Semua urgensi</option>
-            <% ['Kritis', 'Tinggi', 'Sedang', 'Rendah'].forEach(function (u) { %>
-              <option value="<%= u %>" <%= (typeof urgensiFilter !== 'undefined' && urgensiFilter === u) ? 'selected' : '' %>><%= u %></option>
-            <% }); %>
+            <option value="Kritis">Kritis</option>
+            <option value="Tinggi">Tinggi</option>
+            <option value="Normal">Normal</option>
+            <option value="Sedang">Sedang</option>
+            <option value="Rendah">Rendah</option>
           </select>
         </div>
-        <button type="submit" class="btn-search">Cari</button>
-        <% if ((typeof search !== 'undefined' && search) || (typeof urgensiFilter !== 'undefined' && urgensiFilter)) { %>
-          <a href="/materi-approval-user" class="btn-reset">Reset</a>
-        <% } %>
-      </form>
-
-      <% if (typeof memakaiContoh !== 'undefined' && memakaiContoh) { %>
-        <div class="demo-notice">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
-          <span>Menampilkan data contoh karena materi approval asli belum tersedia di database. Data ini hanya untuk meninjau tampilan halaman.</span>
-        </div>
-      <% } %>
+        <button type="button" class="btn-reset" id="btnResetFilter" onclick="resetFilter()">Reset</button>
+      </div>
 
       <div class="table-responsive">
         <table class="approval-table">
@@ -280,7 +499,9 @@
             </tr>
           </thead>
           <tbody>
-            <% const daftarMateri = (typeof listMateri !== 'undefined' && listMateri) ? listMateri : []; %>
+            <%
+              const daftarMateri = (typeof listMateri !== 'undefined' && listMateri) ? listMateri : [];
+            %>
             <% if (daftarMateri.length === 0) { %>
               <tr>
                 <td colspan="7" class="empty-state">
@@ -291,8 +512,9 @@
                       <line x1="9" y1="15" x2="15" y2="15"></line>
                     </svg>
                   </div>
-                  <h3>Tidak ada materi approval</h3>
-                  <p>Belum ada pengajuan yang cocok dengan pencarian atau filter yang dipilih.</p>
+                  <h3>Belum ada data pengajuan</h3>
+                  <p>Buat draft pengajuan baru untuk mulai mencatat materi approval.</p>
+                  <button type="button" class="btn-empty-action" onclick="openModal()">+ Buat Draft Pengajuan</button>
                 </td>
               </tr>
             <% } else { %>
@@ -306,8 +528,9 @@
                      'Kritis': 'urgensi-kritis',
                      'Tinggi': 'urgensi-tinggi',
                      'Sedang': 'urgensi-sedang',
+                     'Normal': 'urgensi-normal',
                      'Rendah': 'urgensi-rendah'
-                   }[materi.urgensi] || 'urgensi-sedang';
+                   }[materi.urgensi] || 'urgensi-normal';
 
                    const kelasStatus = {
                      'Menunggu Persetujuan': 'status-menunggu',
@@ -316,19 +539,38 @@
                      'Ditolak': 'status-ditolak',
                      'Draft': 'status-draft'
                    }[materi.statusApproval] || 'status-draft';
+
+                   const teksCari = [
+                     materi.unitKerja,
+                     materi.vendor,
+                     materi.kategori,
+                     materi.pemohon,
+                     materi.namaMaterial,
+                     materi.deskripsi
+                   ].filter(Boolean).join(' ').toLowerCase();
               %>
-                <tr>
-                  <td>
-                    <span class="cell-date"><%= tanggalTampil %></span>
-                  </td>
+                <tr class="data-row" data-urgensi="<%= materi.urgensi || 'Normal' %>" data-search="<%= teksCari %>">
+                  <td><span class="cell-date"><%= tanggalTampil %></span></td>
                   <td><span class="cell-unit"><%= materi.unitKerja || '-' %></span></td>
                   <td><span class="cell-vendor"><%= materi.vendor || '-' %></span></td>
                   <td><span class="category-pill"><%= materi.kategori || 'Umum' %></span></td>
                   <td class="cell-nominal">Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
-                  <td><span class="badge <%= kelasUrgensi %>"><span class="badge-dot"></span><%= materi.urgensi || 'Sedang' %></span></td>
+                  <td><span class="badge <%= kelasUrgensi %>"><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span></td>
                   <td><span class="badge <%= kelasStatus %>"><span class="badge-dot"></span><%= materi.statusApproval || 'Draft' %></span></td>
                 </tr>
               <% }); %>
+              <tr id="barisTidakCocok" style="display: none;">
+                <td colspan="7" class="empty-state">
+                  <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                  </div>
+                  <h3>Tidak ada hasil</h3>
+                  <p>Tidak ada pengajuan yang cocok dengan pencarian atau filter urgensi.</p>
+                </td>
+              </tr>
             <% } %>
           </tbody>
         </table>
@@ -336,14 +578,84 @@
 
       <div class="approval-footer">
         <span class="count-info">
-          Menampilkan <strong><%= (typeof listMateri !== 'undefined' && listMateri) ? listMateri.length : 0 %></strong>
-          dari <strong><%= (typeof totalMateri !== 'undefined' ? totalMateri : 0) %></strong> pengajuan
+          Menampilkan <strong id="jumlahTampil"><%= typeof listMateri !== 'undefined' && listMateri ? listMateri.length : 0 %></strong>
+          dari <strong><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %></strong> pengajuan
         </span>
         <span class="readonly-info">Halaman read-only &middot; tanpa aksi evaluasi &amp; otorisasi</span>
       </div>
-
     </section>
   </main>
+
+  <!-- MODAL: BUAT DRAFT PENGAJUAN -->
+  <div class="modal" id="modalDraft" onclick="if (event.target === this) closeModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3>Buat Draft Pengajuan Baru</h3>
+          <p>Lengkapi data pengajuan. Draft akan tersimpan dengan status Draft.</p>
+        </div>
+        <button type="button" class="modal-close" onclick="closeModal()" aria-label="Tutup">&times;</button>
+      </div>
+      <form action="/materi-approval-user/add" method="POST">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="inputUnitKerja">Unit Kerja <span class="required">*</span></label>
+              <input type="text" id="inputUnitKerja" name="unitKerja" placeholder="Contoh: Divisi Logistik &amp; Armada" required>
+            </div>
+            <div class="form-group">
+              <label for="inputPemohon">Pemohon</label>
+              <input type="text" id="inputPemohon" name="pemohon" value="<%= (typeof user !== 'undefined' && user && (user.namaLengkap || user.username)) ? (user.namaLengkap || user.username) : '' %>" placeholder="Nama pemohon" required>
+            </div>
+            <div class="form-group">
+              <label for="inputKategori">Kategori Dokumen <span class="required">*</span></label>
+              <select id="inputKategori" name="kategori" required>
+                <option value="Purchase Requisition (PR)">Purchase Requisition (PR)</option>
+                <option value="Purchase Order (PO)">Purchase Order (PO)</option>
+                <option value="Laporan Pertanggungjawaban (LPJ)">Laporan Pertanggungjawaban (LPJ)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="inputVendor">Vendor Target <span class="required">*</span></label>
+              <input type="text" id="inputVendor" name="vendor" placeholder="Contoh: CV Semen Nusantara Enterprise" required>
+            </div>
+            <div class="form-group">
+              <label for="inputUrgensi">Tingkat Urgensi</label>
+              <select id="inputUrgensi" name="urgensi">
+                <option value="Normal" selected>Normal</option>
+                <option value="Tinggi">Tinggi</option>
+                <option value="Kritis">Kritis</option>
+                <option value="Rendah">Rendah</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="inputNominal">Total Estimasi Nominal (IDR)</label>
+              <input type="number" id="inputNominal" name="totalNominal" min="0" step="1000" placeholder="Contoh: 75000000">
+            </div>
+            <div class="form-group full">
+              <label for="inputMaterial">Nama Material <span class="required">*</span></label>
+              <input type="text" id="inputMaterial" name="namaMaterial" placeholder="Contoh: Pengadaan Semen Portland 500 Sak" required>
+            </div>
+            <div class="form-group full">
+              <label for="inputDeskripsi">Deskripsi Singkat</label>
+              <textarea id="inputDeskripsi" name="deskripsi" rows="2" placeholder="Contoh: Pengadaan Semen Portland 500 Sak"></textarea>
+            </div>
+          </div>
+          <p class="form-hint" style="margin-top: 12px;">Field bertanda <span style="color:#dc2626;">*</span> wajib diisi.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+          <button type="submit" class="btn-submit">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            Kirim Pengajuan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script>
     function toggleSidebar() {
@@ -356,6 +668,57 @@
     function toggleDropdown(el) {
       el.closest('.nav-item.dropdown').classList.toggle('active');
     }
+
+    function openModal() {
+      document.getElementById('modalDraft').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modalDraft').classList.remove('open');
+    }
+
+    function filterTabel() {
+      const input = document.getElementById('searchMateri');
+      const select = document.getElementById('filterUrgensi');
+      const resetBtn = document.getElementById('btnResetFilter');
+      const counter = document.getElementById('jumlahTampil');
+      if (!input || !select) return;
+
+      const kataKunci = input.value.trim().toLowerCase();
+      const urgensi = select.value;
+      const rows = document.querySelectorAll('.approval-table tbody tr.data-row');
+      let tampil = 0;
+
+      rows.forEach(function (row) {
+        const teks = (row.getAttribute('data-search') || '').toLowerCase();
+        const cocokCari = !kataKunci || teks.indexOf(kataKunci) !== -1;
+        const cocokUrgensi = !urgensi || row.getAttribute('data-urgensi') === urgensi;
+        const cocok = cocokCari && cocokUrgensi;
+        row.style.display = cocok ? '' : 'none';
+        if (cocok) tampil++;
+      });
+
+      const barisKosong = document.getElementById('barisTidakCocok');
+      if (barisKosong) {
+        barisKosong.style.display = (rows.length > 0 && tampil === 0) ? '' : 'none';
+      }
+
+      if (counter) counter.textContent = tampil;
+      if (resetBtn) resetBtn.style.display = (kataKunci || urgensi) ? 'inline-flex' : 'none';
+    }
+
+    function resetFilter() {
+      const input = document.getElementById('searchMateri');
+      const select = document.getElementById('filterUrgensi');
+      if (input) input.value = '';
+      if (select) select.value = '';
+      filterTabel();
+      if (input) input.focus();
+    }
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeModal();
+    });
   </script>
 </body>
 </html>
