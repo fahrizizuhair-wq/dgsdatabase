@@ -1485,6 +1485,60 @@ app.post('/surat-jalan-admin/delete/:id', async (req, res) => {
     }
 });
 
+// Route untuk menampilkan halaman Materi Approval Admin
+app.get('/materi-approval-admin', async (req, res) => {
+  try {
+    const listMateri = await MateriApproval.find().sort({ tanggalPengajuan: -1 });
+    const totalMateri = listMateri.length;
+    
+    // Hitung statistik
+    const jumlahMenunggu = listMateri.filter(m => m.statusApproval === 'Menunggu Persetujuan' || !m.statusApproval).length;
+    const jumlahDisetujui = listMateri.filter(m => m.statusApproval === 'Disetujui').length;
+    const jumlahKritis = listMateri.filter(m => m.urgensi === 'Kritis').length;
+    const totalNominal = listMateri.reduce((acc, curr) => acc + (Number(curr.totalNominal) || 0), 0);
+
+    res.render('materi-approval-admin', {
+      listMateri,
+      totalMateri,
+      jumlahMenunggu,
+      jumlahDisetujui,
+      jumlahKritis,
+      totalNominal,
+      user: req.session.user || null
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Terjadi kesalahan pada server");
+  }
+});
+
+// Endpoint AJAX untuk mengubah status approval (Disetujui / Ditolak)
+app.post('/materi-approval-admin/update-status/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { statusApproval } = req.body;
+
+    if (!['Disetujui', 'Ditolak', 'Menunggu Persetujuan'].includes(statusApproval)) {
+      return res.status(400).json({ success: false, message: 'Status tidak valid.' });
+    }
+
+    const updated = await MateriApproval.findByIdAndUpdate(
+      id, 
+      { statusApproval }, 
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Data pengajuan tidak ditemukan.' });
+    }
+
+    res.json({ success: true, message: 'Status berhasil diperbarui.', data: updated });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Gagal memperbarui status di server.' });
+  }
+});
+
 // ============================================================
 //  RUTE: USER – Data Vendor
 // ============================================================
