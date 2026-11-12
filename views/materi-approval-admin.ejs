@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('partials/head') %>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Materi Approval</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #333; display: flex; min-height: 100vh;
+      position: relative; background-color: #f4f6f9;
+    }
+
+    /* GRADASI MERAH BACKGROUND KONSISTEN */
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%),
+                  url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover; z-index: -1; pointer-events: none;
+    }
+
+    .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
+
+    /* SYSTEM BANNER */
+    .system-banner {
+      background: #f4f6f9; color: #7a1b1b; border-radius: 12px; padding: 22px 24px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); flex-wrap: wrap; gap: 15px;
+    }
+    .banner-title-wrap { display: flex; align-items: center; gap: 14px; }
+    .banner-toggle-btn {
+      background: #ffffff; color: #7a1b1b; width: 44px; height: 44px; border-radius: 10px; border: none;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .banner-toggle-btn:hover { background: #7a1b1b; color: #ffffff; }
+    .banner-text span { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #000000; font-weight: 700; }
+    .banner-text h1 { font-size: 20px; font-weight: 700; color: #000000; margin-top: 2px; }
+
+    .btn-primary {
+      background-color: #7a1b1b; color: #ffffff; border: none; padding: 11px 18px;
+      border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-family: inherit;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background-color: #5c1313; }
+
+    /* ALERT */
+    .page-alert {
+      display: flex; align-items: flex-start; gap: 10px; padding: 13px 16px;
+      border-radius: 10px; font-size: 13px; line-height: 1.5; margin-bottom: 18px;
+    }
+    .page-alert svg { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 1px; }
+    .page-alert.success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
+    .page-alert.error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+
+    /* BOX INFORMASI PERSETUJUAN */
+    .approval-intro {
+      background: rgba(255, 255, 255, 0.97);
+      border-radius: 14px; padding: 24px 26px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 18px; flex-wrap: wrap; margin-bottom: 25px;
+    }
+    .approval-heading { display: flex; align-items: flex-start; gap: 15px; min-width: 0; }
+    .approval-icon {
+      flex: 0 0 auto; width: 48px; height: 48px; border-radius: 12px;
+      background: #fdf2f2; color: #7a1b1b;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid #f6dada;
+    }
+    .approval-icon svg { width: 24px; height: 24px; }
+    .approval-title-wrap h2 { font-size: 21px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+    .approval-title-wrap p { margin-top: 7px; font-size: 13px; line-height: 1.65; color: #64748b; max-width: 780px; }
+
+    /* KARTU STATISTIK: 4 KOLOM */
+    .card-grid.card-grid-approval { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 25px; }
+    @media (max-width: 1200px) {
+      .card-grid.card-grid-approval { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 700px) {
+      .card-grid.card-grid-approval { grid-template-columns: 1fr; }
+    }
+
+    /* PANEL DATA */
+    .approval-data-panel {
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(8px);
+      border-radius: 14px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      overflow: hidden;
+    }
+    .data-panel-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 14px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .data-panel-head h2 { font-size: 17px; font-weight: 700; color: #0f172a; }
+    .data-panel-head p { margin-top: 4px; font-size: 12.5px; color: #64748b; line-height: 1.55; }
+    .total-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #fdf2f2; border: 1px solid #f6dada; color: #7a1b1b;
+      padding: 7px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* TOOLBAR */
+    .data-toolbar {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 14px 16px; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;
+    }
+    .search-field { position: relative; flex: 1 1 340px; min-width: 240px; }
+    .search-field input {
+      width: 100%; padding: 11px 14px 11px 40px; border: 1px solid #cbd5e1;
+      border-radius: 9px; font-size: 13px; outline: none; background: #ffffff;
+      font-family: inherit; color: #0f172a; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-field input:focus { border-color: #7a1b1b; box-shadow: 0 0 0 3px rgba(122, 27, 27, 0.08); }
+    .search-field svg {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      color: #94a3b8; width: 17px; height: 17px;
+    }
+    .toolbar-filter { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #475569; font-weight: 600; }
+    .toolbar-filter select {
+      padding: 10px 34px 10px 12px; border: 1px solid #cbd5e1; border-radius: 9px;
+      font-size: 13px; outline: none; background: #ffffff; font-family: inherit;
+      color: #0f172a; cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
+    .btn-reset {
+      display: none; align-items: center; justify-content: center;
+      padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 9px;
+      background: #ffffff; color: #64748b; font-size: 12.5px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-reset:hover { color: #7a1b1b; border-color: #f0c9c9; background: #fff7f7; }
+
+    /* TABEL */
+    .table-responsive { width: 100%; overflow-x: auto; }
+    .approval-table { width: 100%; min-width: 1050px; border-collapse: collapse; }
+    .approval-table thead th {
+      background: #f8fafc; color: #64748b; font-size: 10.5px; font-weight: 700;
+      letter-spacing: 0.7px; text-transform: uppercase; text-align: left;
+      padding: 14px 18px; border-top: 1px solid #eef2f7; border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+    .approval-table thead th.col-nominal { text-align: right; }
+    .approval-table tbody td {
+      padding: 16px 18px; border-bottom: 1px solid #f1f5f9;
+      font-size: 13px; color: #334155; vertical-align: middle;
+    }
+    .approval-table tbody tr:last-child td { border-bottom: none; }
+    .approval-table tbody tr.data-row { transition: background 0.15s; }
+    .approval-table tbody tr.data-row:hover { background: #fcfbfb; }
+
+    .cell-date { display: block; font-weight: 600; color: #0f172a; white-space: nowrap; }
+    .cell-unit { font-weight: 600; color: #1e293b; }
+    .cell-vendor { color: #334155; }
+    .category-pill {
+      display: inline-block; padding: 5px 9px; border-radius: 6px;
+      background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600;
+      white-space: nowrap;
+    }
+    .cell-nominal { text-align: right; font-weight: 700; color: #0f172a; white-space: nowrap; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: 0 0 auto; }
+
+    .urgensi-kritis { background: #ffc8c8; color: #b91c1c; }
+    .urgensi-tinggi { background: #ffe0b8; color: #c2410c; }
+    .urgensi-normal { background: #b4b4b4; color: #172127; }
+
+    .status-menunggu { background: #fef3c7; color: #a16207; }
+    .status-disetujui { background: #dcfce7; color: #15803d; }
+    .status-ditolak { background: #fee2e2; color: #b91c1c; }
+
+    /* TOMBOL REVIEW & OTORISASI */
+    .btn-review {
+      background: #fdf2f2; color: #7a1b1b; border: 1px solid #f6dada;
+      padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all 0.2s; display: inline-flex;
+      align-items: center; gap: 5px; white-space: nowrap; text-decoration: none;
+    }
+    .btn-review:hover { background: #7a1b1b; color: #ffffff; }
+
+    .empty-state { text-align: center; padding: 48px 20px !important; }
+    .empty-state .empty-icon {
+      width: 54px; height: 54px; margin: 0 auto 14px; border-radius: 14px;
+      background: #f8fafc; color: #94a3b8; display: flex; align-items: center; justify-content: center;
+      border: 1px solid #eef2f7;
+    }
+    .empty-state .empty-icon svg { width: 26px; height: 26px; }
+    .empty-state h3 { font-size: 14.5px; font-weight: 700; color: #334155; margin-bottom: 5px; }
+    .empty-state p { font-size: 12.5px; color: #94a3b8; }
+
+    /* FOOTER PANEL */
+    .approval-footer {
+      padding: 15px 0 0; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; flex-wrap: wrap;
+      border-top: 1px solid #eef2f7; margin-top: 4px;
+    }
+    .approval-footer .count-info { font-size: 12.5px; color: #64748b; }
+    .approval-footer .count-info strong { color: #0f172a; font-weight: 700; }
+
+    /* MODAL EVALUASI / REVIEW */
+    .modal {
+      display: none; position: fixed; inset: 0; padding: 20px;
+      background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px);
+      justify-content: center; align-items: center; z-index: 1100;
+    }
+    .modal.open { display: flex; }
+    .modal-content {
+      background: #ffffff; width: 100%; max-width: 680px; max-height: 90vh;
+      border-radius: 16px; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 12px; padding: 22px 24px; border-bottom: 1px solid #eef2f7;
+    }
+    .modal-header h3 { font-size: 18px; font-weight: 700; color: #0f172a; }
+    .modal-header p { margin-top: 4px; font-size: 12.5px; color: #64748b; }
+    .modal-close {
+      background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b;
+      width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+      font-size: 15px; transition: all 0.2s;
+    }
+    .modal-close:hover { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+    
+    .modal-body { padding: 22px 24px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .detail-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; }
+    .detail-item.full { grid-column: 1 / -1; }
+    .detail-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .detail-value { font-size: 13.5px; font-weight: 600; color: #0f172a; }
+
+    /* LAMPIRAN BERKAS */
+    .attachment-box {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #fdf2f2; border: 1px solid #f6dada; border-radius: 10px;
+      padding: 14px 18px; margin-top: 15px;
+    }
+    .attachment-info { display: flex; align-items: center; gap: 10px; color: #7a1b1b; font-weight: 600; font-size: 13px; }
+    .btn-download {
+      background: #7a1b1b; color: #ffffff; padding: 8px 14px; border-radius: 6px;
+      font-size: 12px; font-weight: 600; text-decoration: none; display: inline-flex;
+      align-items: center; gap: 5px; transition: background 0.2s;
+    }
+    .btn-download:hover { background: #5c1313; }
+
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 10px;
+      padding: 16px 24px; border-top: 1px solid #eef2f7; background: #fbfcfe;
+    }
+    .btn-action-reject {
+      background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 10px 18px;
+      border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; font-family: inherit;
+      transition: background 0.2s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-action-reject:hover { background: #f87171; color: #ffffff; }
+
+    .btn-action-approve {
+      background: #15803d; color: #ffffff; border: none; padding: 10px 18px;
+      border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; font-family: inherit;
+      transition: background 0.2s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-action-approve:hover { background: #166534; }
+
+    @media (max-width: 768px) {
+      .main-content { padding: 16px; }
+      .system-banner { padding: 18px; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="/css/stat-cards.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+</head>
+<body>
+
+  <%- include('partials/sidebar-admin', { activePage: 'materi-approval' }) %>
+
+  <main class="main-content">
+
+    <!-- SYSTEM BANNER -->
+    <div class="system-banner">
+      <div class="banner-title-wrap">
+        <button class="banner-toggle-btn" type="button" onclick="toggleSidebar()" title="Buka Menu" aria-label="Buka Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div class="banner-text">
+          <span>Admin Approval Procurement Center</span>
+          <h1>Materi Approval (Evaluasi & Otorisasi)</h1>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOX INFORMASI PERSETUJUAN -->
+    <section class="approval-intro">
+      <div class="approval-heading">
+        <div class="approval-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+        <div class="approval-title-wrap">
+          <h2>Evaluasi & Otorisasi Pengadaan</h2>
+          <p>Sebagai Administrator, Anda memiliki hak akses penuh untuk mereview dokumen pengadaan, mengunduh berkas pendukung, serta melakukan otorisasi (menyetujui atau menolak pengajuan).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- KARTU STATISTIK -->
+    <section class="card-grid card-grid-approval">
+      <div class="stat-card card-gold">
+        <div class="card-header">
+          <span class="card-title">Menunggu Persetujuan</span>
+          <div class="icon-wrapper icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof jumlahMenunggu !== 'undefined' ? jumlahMenunggu : 0 %></span>
+          <span class="card-unit">Berkas</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-orange">Perlu Tindakan</span>
+          <span>Evaluasi Cepat</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-blue">
+        <div class="card-header">
+          <span class="card-title">Total Nominal Pengajuan</span>
+          <div class="icon-wrapper icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="14" rx="2"></rect>
+              <path d="M2 10h20"></path>
+              <circle cx="17" cy="15" r="1"></circle>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value" style="font-size: 1.55rem;">Rp <%= (typeof totalNominal !== 'undefined' ? totalNominal : 0).toLocaleString('id-ID') %></span>
+        </div>
+        <div class="card-footer">
+          <span class="text-blue"><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %> Dokumen</span>
+          <span>Akumulasi</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-green">
+        <div class="card-header">
+          <span class="card-title">Disetujui</span>
+          <div class="icon-wrapper icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof jumlahDisetujui !== 'undefined' ? jumlahDisetujui : 0 %></span>
+          <span class="card-unit">Berkas</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-green">Selesai</span>
+          <span>Disetujui</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-red">
+        <div class="card-header">
+          <span class="card-title">Urgensi Kritis (SLA)</span>
+          <div class="icon-wrapper icon-gold">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value"><%= typeof jumlahKritis !== 'undefined' ? jumlahKritis : 0 %></span>
+          <span class="card-unit">Item</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-red">Prioritas</span>
+          <span>Target Respons</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL DATA -->
+    <section class="approval-data-panel">
+      <div class="data-panel-head">
+        <div>
+          <h2>Data Pengajuan Masuk</h2>
+          <p>Daftar seluruh dokumen pengajuan dari berbagai unit kerja yang memerlukan evaluasi.</p>
+        </div>
+        <span class="total-chip"><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %> Pengajuan</span>
+      </div>
+
+      <div class="data-toolbar">
+        <div class="search-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="searchMateri" oninput="filterTabel()" placeholder="Cari unit kerja, pemohon, vendor, kategori, atau nama material...">
+        </div>
+        <div class="toolbar-filter">
+          <label for="filterUrgensi">Urgensi</label>
+          <select id="filterUrgensi" onchange="filterTabel()">
+            <option value="">Semua urgensi</option>
+            <option value="Kritis">Kritis</option>
+            <option value="Tinggi">Tinggi</option>
+            <option value="Normal">Normal</option>
+          </select>
+        </div>
+        <button type="button" class="btn-reset" id="btnResetFilter" onclick="resetFilter()">Reset</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="approval-table">
+          <thead>
+            <tr>
+              <th>Tanggal Pengajuan</th>
+              <th>Unit Kerja & Pemohon</th>
+              <th>Vendor</th>
+              <th>Kategori & Material</th>
+              <th class="col-nominal">Total Nominal</th>
+              <th>Urgensi</th>
+              <th>Status Approval</th>
+              <th>Aksi Evaluasi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%
+              const daftarMateri = (typeof listMateri !== 'undefined' && listMateri) ? listMateri : [];
+            %>
+            <% if (daftarMateri.length === 0) { %>
+              <tr>
+                <td colspan="8" class="empty-state">
+                  <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                  </div>
+                  <h3>Belum ada data pengajuan</h3>
+                  <p>Belum ada dokumen pengajuan yang masuk ke sistem.</p>
+                </td>
+              </tr>
+            <% } else { %>
+              <% daftarMateri.forEach(function (materi) {
+                   const tanggal = materi.tanggalPengajuan ? new Date(materi.tanggalPengajuan) : null;
+                   const tanggalTampil = (tanggal && !isNaN(tanggal.getTime()))
+                     ? tanggal.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+                     : '-';
+
+                   const kelasUrgensi = {
+                     'Kritis': 'urgensi-kritis',
+                     'Tinggi': 'urgensi-tinggi',
+                     'Normal': 'urgensi-normal'
+                   }[materi.urgensi] || 'urgensi-normal';
+
+                   const kelasStatus = {
+                     'Menunggu Persetujuan': 'status-menunggu',
+                     'Disetujui': 'status-disetujui',
+                     'Ditolak': 'status-ditolak'
+                   }[materi.statusApproval] || 'status-menunggu';
+
+                   const teksCari = [
+                     materi.unitKerja,
+                     materi.vendor,
+                     materi.kategori,
+                     materi.pemohon,
+                     materi.namaMaterial,
+                     materi.deskripsi
+                   ].filter(Boolean).join(' ').toLowerCase();
+              %>
+                <tr class="data-row" data-id="<%= materi._id %>" data-urgensi="<%= materi.urgensi || 'Normal' %>" data-search="<%= teksCari %>">
+                  <td><span class="cell-date"><%= tanggalTampil %></span></td>
+                  <td>
+                    <span class="cell-unit"><%= materi.unitKerja || '-' %></span>
+                    <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">Pemohon: <%= materi.pemohon || '-' %></div>
+                  </td>
+                  <td><span class="cell-vendor"><%= materi.vendor || '-' %></span></td>
+                  <td>
+                    <span class="category-pill"><%= materi.kategori || 'Umum' %></span>
+                    <div style="font-size: 12px; color: #334155; margin-top: 3px; font-weight: 500;"><%= materi.namaMaterial || '-' %></div>
+                  </td>
+                  <td class="cell-nominal">Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
+                  <td><span class="badge <%= kelasUrgensi %>"><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span></td>
+                  <td><span class="badge <%= kelasStatus %>" id="status-badge-<%= materi._id %>"><span class="badge-dot"></span><%= materi.statusApproval || 'Menunggu Persetujuan' %></span></td>
+                  <td>
+                    <button type="button" class="btn-review" onclick='bukaModalReview(<%- JSON.stringify(materi) %>)'>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      Review & Otorisasi
+                    </button>
+                  </td>
+                </tr>
+              <% }); %>
+              <tr id="barisTidakCocok" style="display: none;">
+                <td colspan="8" class="empty-state">
+                  <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                  </div>
+                  <h3>Tidak ada hasil</h3>
+                  <p>Tidak ada pengajuan yang cocok dengan pencarian atau filter urgensi.</p>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="approval-footer">
+        <span class="count-info">
+          Menampilkan <strong id="jumlahTampil"><%= typeof listMateri !== 'undefined' && listMateri ? listMateri.length : 0 %></strong>
+          dari <strong><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %></strong> pengajuan
+        </span>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL REVIEW & OTORISASI ADMIN -->
+  <div class="modal" id="modalReview" onclick="if (event.target === this) tutupModalReview()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3>Review & Otorisasi Dokumen Pengadaan</h3>
+          <p>Evaluasi detail materi pengajuan dan lakukan tindakan otorisasi status.</p>
+        </div>
+        <button type="button" class="modal-close" onclick="tutupModalReview()" aria-label="Tutup">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="reviewId">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">Unit Kerja</div>
+            <div class="detail-value" id="valUnitKerja">-</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Pemohon</div>
+            <div class="detail-value" id="valPemohon">-</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Kategori Dokumen</div>
+            <div class="detail-value" id="valKategori">-</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Vendor Target</div>
+            <div class="detail-value" id="valVendor">-</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Tingkat Urgensi</div>
+            <div class="detail-value" id="valUrgensi">-</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Total Estimasi Nominal</div>
+            <div class="detail-value" id="valNominal">-</div>
+          </div>
+          <div class="detail-item full">
+            <div class="detail-label">Nama Material / Pengadaan</div>
+            <div class="detail-value" id="valMaterial">-</div>
+          </div>
+          <div class="detail-item full">
+            <div class="detail-label">Deskripsi Lengkap</div>
+            <div class="detail-value" id="valDeskripsi" style="font-weight: normal; color: #475569;">-</div>
+          </div>
+        </div>
+
+        <!-- LAMPIRAN BERKAS PENDUKUNG -->
+        <div class="attachment-box">
+          <div class="attachment-info">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Berkas_Pendukung_Pengadaan.pdf</span>
+          </div>
+          <a href="#" id="linkDownload" class="btn-download" download>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Unduh Berkas
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-action-reject" onclick="ubahStatus('Ditolak')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          Tolak Pengajuan
+        </button>
+        <button type="button" class="btn-action-approve" onclick="ubahStatus('Disetujui')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Setujui Pengajuan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      if (sidebar) sidebar.classList.toggle('active');
+      if (overlay) overlay.classList.toggle('active');
+    }
+
+    function bukaModalReview(materi) {
+      document.getElementById('reviewId').value = materi._id;
+      document.getElementById('valUnitKerja').textContent = materi.unitKerja || '-';
+      document.getElementById('valPemohon').textContent = materi.pemohon || '-';
+      document.getElementById('valKategori').textContent = materi.kategori || '-';
+      document.getElementById('valVendor').textContent = materi.vendor || '-';
+      document.getElementById('valUrgensi').textContent = materi.urgensi || 'Normal';
+      document.getElementById('valNominal').textContent = 'Rp ' + (Number(materi.totalNominal) || 0).toLocaleString('id-ID');
+      document.getElementById('valMaterial').textContent = materi.namaMaterial || '-';
+      document.getElementById('valDeskripsi').textContent = materi.deskripsi || 'Tidak ada deskripsi tambahan.';
+      
+      // Simulasi link unduh file
+      const linkDownload = document.getElementById('linkDownload');
+      linkDownload.href = materi.fileUrl || '#'; // Ganti dengan path file lampiran jika ada di database
+
+      document.getElementById('modalReview').classList.add('open');
+    }
+
+    function tutupModalReview() {
+      document.getElementById('modalReview').classList.remove('open');
+    }
+
+    // Fungsi untuk memperbarui status secara dinamis via AJAX / Fetch ke Backend
+    async function ubahStatus(statusBaru) {
+      const id = document.getElementById('reviewId').value;
+      if (!id) return;
+
+      try {
+        const response = await fetch(`/materi-approval-admin/update-status/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ statusApproval: statusBaru })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          // Update badge di tabel secara real-time
+          const badge = document.getElementById(`status-badge-${id}`);
+          if (badge) {
+            badge.className = 'badge ' + (statusBaru === 'Disetujui' ? 'status-disetujui' : 'status-ditolak');
+            badge.innerHTML = `<span class="badge-dot"></span>${statusBaru}`;
+          }
+          tutupModalReview();
+          alert(`Pengajuan berhasil diubah statusnya menjadi: ${statusBaru}`);
+          location.reload(); // Refresh halaman untuk memperbarui statistik
+        } else {
+          alert(result.message || 'Gagal memperbarui status pengajuan.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        // Fallback jika belum ada endpoint backend, ubah tampilan secara lokal
+        const badge = document.getElementById(`status-badge-${id}`);
+        if (badge) {
+          badge.className = 'badge ' + (statusBaru === 'Disetujui' ? 'status-disetujui' : 'status-ditolak');
+          badge.innerHTML = `<span class="badge-dot"></span>${statusBaru}`;
+        }
+        tutupModalReview();
+        alert(`Status berhasil diperbarui menjadi ${statusBaru}`);
+      }
+    }
+
+    function filterTabel() {
+      const input = document.getElementById('searchMateri');
+      const select = document.getElementById('filterUrgensi');
+      const resetBtn = document.getElementById('btnResetFilter');
+      const counter = document.getElementById('jumlahTampil');
+      const barisKosong = document.getElementById('barisTidakCocok');
+      if (!input || !select) return;
+
+      const kataKunci = input.value.trim().toLowerCase();
+      const urgensi = select.value;
+      const rows = document.querySelectorAll('.approval-table tbody tr.data-row');
+      let tampil = 0;
+
+      rows.forEach(function (row) {
+        const teks = (row.getAttribute('data-search') || '').toLowerCase();
+        const cocokCari = !kataKunci || teks.indexOf(kataKunci) !== -1;
+        const cocokUrgensi = !urgensi || row.getAttribute('data-urgensi') === urgensi;
+        const cocok = cocokCari && cocokUrgensi;
+        row.style.display = cocok ? '' : 'none';
+        if (cocok) tampil++;
+      });
+
+      if (barisKosong) {
+        barisKosong.style.display = (rows.length > 0 && tampil === 0) ? '' : 'none';
+      }
+
+      if (counter) counter.textContent = tampil;
+      if (resetBtn) resetBtn.style.display = (kataKunci || urgensi) ? 'inline-flex' : 'none';
+    }
+
+    function resetFilter() {
+      const input = document.getElementById('searchMateri');
+      const select = document.getElementById('filterUrgensi');
+      if (input) input.value = '';
+      if (select) select.value = '';
+      filterTabel();
+      if (input) input.focus();
+    }
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') tutupModalReview();
+    });
+  </script>
+</body>
+</html>
