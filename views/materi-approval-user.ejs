@@ -61,7 +61,7 @@
     .page-alert.success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
     .page-alert.error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
 
-    /* BOX INFORMASI PERSETUJUAN (TERPISAH DARI TABEL) */
+    /* BOX INFORMASI PERSETUJUAN */
     .approval-intro {
       background: rgba(255, 255, 255, 0.97);
       border-radius: 14px; padding: 24px 26px;
@@ -89,7 +89,7 @@
       .card-grid.card-grid-approval { grid-template-columns: 1fr; }
     }
 
-    /* PANEL DATA (TERPISAH DARI BOX INFORMASI) */
+    /* PANEL DATA */
     .approval-data-panel {
       background: rgba(255, 255, 255, 0.97);
       backdrop-filter: blur(8px);
@@ -111,7 +111,7 @@
       white-space: nowrap;
     }
 
-    /* TOOLBAR TANPA TOMBOL CARI */
+    /* TOOLBAR */
     .data-toolbar {
       background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
       padding: 14px 16px; display: flex; justify-content: space-between;
@@ -184,10 +184,8 @@
     .urgensi-normal { background: #b4b4b4; color: #172127; }
 
     .status-menunggu { background: #fef3c7; color: #a16207; }
-    .status-ditinjau { background: #dbeafe; color: #1d4ed8; }
     .status-disetujui { background: #dcfce7; color: #15803d; }
     .status-ditolak { background: #fee2e2; color: #b91c1c; }
-    .status-draft { background: #cacaca; color: #475569; }
 
     .empty-state { text-align: center; padding: 48px 20px !important; }
     .empty-state .empty-icon {
@@ -213,7 +211,6 @@
     }
     .approval-footer .count-info { font-size: 12.5px; color: #64748b; }
     .approval-footer .count-info strong { color: #0f172a; font-weight: 700; }
-    .approval-footer .readonly-info { font-size: 11.5px; color: #94a3b8; }
 
     /* MODAL FORM */
     .modal {
@@ -298,7 +295,7 @@
 
   <main class="main-content">
 
-    <!-- SYSTEM BANNER: TOMBOL SIDEBAR DI KIRI -->
+    <!-- SYSTEM BANNER -->
     <div class="system-banner">
       <div class="banner-title-wrap">
         <button class="banner-toggle-btn" type="button" onclick="toggleSidebar()" title="Buka Menu" aria-label="Buka Menu">
@@ -343,7 +340,7 @@
       </div>
     <% } %>
 
-    <!-- BOX INFORMASI PERSETUJUAN (BERDIRI SENDIRI) -->
+    <!-- BOX INFORMASI PERSETUJUAN -->
     <section class="approval-intro">
       <div class="approval-heading">
         <div class="approval-icon">
@@ -353,7 +350,7 @@
           </svg>
         </div>
         <div class="approval-title-wrap">
-          <h2>Persetujuan &amp; Verifikasi Pengadaan</h2>
+          <h2>Persetujuan & Verifikasi Pengadaan</h2>
           <p>Pantau status persetujuan pengajuan pembelian material (PR/PO) dan Laporan Pertanggungjawaban (LPJ). Halaman user hanya untuk melihat status, tanpa tindakan evaluasi atau otorisasi.</p>
         </div>
       </div>
@@ -376,7 +373,7 @@
           <span class="card-unit">Berkas</span>
         </div>
         <div class="card-footer">
-          <span class="text-orange">Termasuk draft</span>
+          <span class="text-orange">Status Aktif</span>
           <span>Perlu Tindakan</span>
         </div>
       </div>
@@ -443,7 +440,7 @@
       </div>
     </section>
 
-    <!-- PANEL DATA (TERPISAH DARI BOX INFORMASI) -->
+    <!-- PANEL DATA -->
     <section class="approval-data-panel">
       <div class="data-panel-head">
         <div>
@@ -468,8 +465,6 @@
             <option value="Kritis">Kritis</option>
             <option value="Tinggi">Tinggi</option>
             <option value="Normal">Normal</option>
-            <option value="Sedang">Sedang</option>
-            <option value="Rendah">Rendah</option>
           </select>
         </div>
         <button type="button" class="btn-reset" id="btnResetFilter" onclick="resetFilter()">Reset</button>
@@ -517,18 +512,14 @@
                    const kelasUrgensi = {
                      'Kritis': 'urgensi-kritis',
                      'Tinggi': 'urgensi-tinggi',
-                     'Sedang': 'urgensi-sedang',
-                     'Normal': 'urgensi-normal',
-                     'Rendah': 'urgensi-rendah'
+                     'Normal': 'urgensi-normal'
                    }[materi.urgensi] || 'urgensi-normal';
 
                    const kelasStatus = {
                      'Menunggu Persetujuan': 'status-menunggu',
-                     'Sedang Ditinjau': 'status-ditinjau',
                      'Disetujui': 'status-disetujui',
-                     'Ditolak': 'status-ditolak',
-                     'Draft': 'status-draft'
-                   }[materi.statusApproval] || 'status-draft';
+                     'Ditolak': 'status-ditolak'
+                   }[materi.statusApproval] || 'status-menunggu';
 
                    const teksCari = [
                      materi.unitKerja,
@@ -546,7 +537,7 @@
                   <td><span class="category-pill"><%= materi.kategori || 'Umum' %></span></td>
                   <td class="cell-nominal">Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
                   <td><span class="badge <%= kelasUrgensi %>"><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span></td>
-                  <td><span class="badge <%= kelasStatus %>"><span class="badge-dot"></span><%= materi.statusApproval || 'Draft' %></span></td>
+                  <td><span class="badge <%= kelasStatus %>"><span class="badge-dot"></span><%= materi.statusApproval || 'Menunggu Persetujuan' %></span></td>
                 </tr>
               <% }); %>
               <tr id="barisTidakCocok" style="display: none;">
@@ -571,7 +562,6 @@
           Menampilkan <strong id="jumlahTampil"><%= typeof listMateri !== 'undefined' && listMateri ? listMateri.length : 0 %></strong>
           dari <strong><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %></strong> pengajuan
         </span>
-        <span class="readonly-info">Halaman read-only &middot; tanpa aksi evaluasi &amp; otorisasi</span>
       </div>
     </section>
   </main>
@@ -582,16 +572,16 @@
       <div class="modal-header">
         <div>
           <h3>Buat Draft Pengajuan Baru</h3>
-          <p>Lengkapi data pengajuan. Draft akan tersimpan dengan status Draft.</p>
+          <p>Lengkapi data pengajuan. Data akan tersimpan dengan status Menunggu Persetujuan.</p>
         </div>
-        <button type="button" class="modal-close" onclick="closeModal()" aria-label="Tutup">&times;</button>
+        <button type="button" class="modal-close" onclick="closeModal()" aria-label="Tutup">×</button>
       </div>
       <form action="/materi-approval-user/add" method="POST">
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-group">
               <label for="inputUnitKerja">Unit Kerja <span class="required">*</span></label>
-              <input type="text" id="inputUnitKerja" name="unitKerja" placeholder="Contoh: Divisi Logistik &amp; Armada" required>
+              <input type="text" id="inputUnitKerja" name="unitKerja" placeholder="Contoh: Divisi Logistik & Armada" required>
             </div>
             <div class="form-group">
               <label for="inputPemohon">Pemohon</label>
@@ -613,8 +603,8 @@
               <label for="inputUrgensi">Tingkat Urgensi</label>
               <select id="inputUrgensi" name="urgensi">
                 <option value="Normal" selected>Normal</option>
-                <option value="Tinggi">Hight</option>
-                <option value="Kritis">Critical</option>
+                <option value="Tinggi">Tinggi</option>
+                <option value="Kritis">Kritis</option>
               </select>
             </div>
             <div class="form-group">
@@ -659,11 +649,13 @@
     }
 
     function openModal() {
-      document.getElementById('modalDraft').classList.add('open');
+      const modal = document.getElementById('modalDraft');
+      if (modal) modal.classList.add('open');
     }
 
     function closeModal() {
-      document.getElementById('modalDraft').classList.remove('open');
+      const modal = document.getElementById('modalDraft');
+      if (modal) modal.classList.remove('open');
     }
 
     function filterTabel() {
@@ -671,6 +663,7 @@
       const select = document.getElementById('filterUrgensi');
       const resetBtn = document.getElementById('btnResetFilter');
       const counter = document.getElementById('jumlahTampil');
+      const barisKosong = document.getElementById('barisTidakCocok');
       if (!input || !select) return;
 
       const kataKunci = input.value.trim().toLowerCase();
@@ -687,7 +680,6 @@
         if (cocok) tampil++;
       });
 
-      const barisKosong = document.getElementById('barisTidakCocok');
       if (barisKosong) {
         barisKosong.style.display = (rows.length > 0 && tampil === 0) ? '' : 'none';
       }
