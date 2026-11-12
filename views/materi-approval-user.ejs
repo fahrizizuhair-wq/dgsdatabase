@@ -285,6 +285,16 @@
       .modal-header { padding: 18px; }
       .modal-footer { padding: 14px 18px; }
     }
+
+    .item-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 36px; gap: 8px; align-items: stretch; margin-bottom: 8px; }
+    .item-row input, .item-row textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 12.5px; }
+    .item-row input[readonly] { background: #f1f5f9; text-align: center; }
+    .item-row textarea { min-height: 40px; line-height: 1.35; resize: vertical; }
+    .item-head { display: grid; grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 36px; gap: 8px; margin-bottom: 6px; font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .3px; }
+    
+    .btn-remove-item { background: #fee2e2; color: #dc2626; border: none; width: 36px; height: 100%; min-height: 40px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #edf2f7; }
+    .btn-cancel { background: #e2e8f0; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #475569; }
   </style>
   <link rel="stylesheet" href="/css/stat-cards.css">
   <link rel="stylesheet" href="/css/sidebar.css">
@@ -631,7 +641,7 @@
             <button type="button" class="btn-remove-item" onclick="removeItemRow(this)"><i class="fa-solid fa-trash"></i></button>
           </div>
         </div>
-        
+
             <div class="form-group full">
               <label for="inputDeskripsi">Deskripsi/Spesifikasi</label>
               <textarea id="inputDeskripsi" name="deskripsi" rows="2" placeholder="Contoh: Pengadaan Semen Portland 500 Sak"></textarea>
