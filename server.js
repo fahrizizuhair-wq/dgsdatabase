@@ -2136,14 +2136,47 @@ app.get('/materi-approval-user', isUserAuthenticated, async (req, res) => {
   }
 });
 
-app.post('/materi-approval-user/add', isUserAuthenticated, async (req, res) => {
+app.post('/materi-approval-user/add', isUserAuthenticated, upload.single('fileLaporan'), async (req, res) => {
   try {
+    await syncReqFilesToGridFS(req);
+
     const {
       unitKerja, pemohon, kategori, vendor, urgensi,
-      namaMaterial, deskripsi, totalNominal
+      namaMaterial, deskripsi, totalNominal, items
     } = req.body;
 
-    if (!unitKerja || !kategori || !vendor || !namaMaterial) {
+    // Parsing items daftar barang
+    let itemList = [];
+    if (Array.isArray(items)) {
+      itemList = items.filter(it => it && (it.diskripsi || it.nama || it.namaBarang));
+    } else if (items && typeof items === 'object') {
+      itemList = Object.values(items).filter(it => it && (it.diskripsi || it.nama || it.namaBarang));
+    }
+
+    const parsedItems = itemList.map((it, idx) => {
+      const diskripsi = String(it.diskripsi || it.nama || it.namaBarang || '').trim();
+      const jumlah = Number(String(it.jumlah || it.qty || '1').replace(/[^\d.-]/g, '')) || 1;
+      const satuan = String(it.satuan || 'Pcs').trim();
+      const hargaSatuan = Number(String(it.hargaSatuan || it.harga || '0').replace(/[^\d.-]/g, '')) || 0;
+      const subtotal = Number(String(it.subtotal || (jumlah * hargaSatuan)).replace(/[^\d.-]/g, '')) || (jumlah * hargaSatuan);
+      return {
+        no: idx + 1,
+        diskripsi,
+        jumlah,
+        satuan,
+        hargaSatuan,
+        subtotal
+      };
+    });
+
+    const calculatedTotal = parsedItems.reduce((acc, curr) => acc + (Number(curr.subtotal) || 0), 0);
+    const finalTotalNominal = calculatedTotal > 0 ? calculatedTotal : Math.max(0, Number(totalNominal) || 0);
+
+    const derivedNamaMaterial = parsedItems.length > 0 
+      ? parsedItems.map(it => it.diskripsi).join(', ') 
+      : String(namaMaterial || '').trim();
+
+    if (!unitKerja || !kategori || !vendor || (!derivedNamaMaterial && parsedItems.length === 0)) {
       return res.redirect('/materi-approval-user?error=1');
     }
 
@@ -2157,12 +2190,18 @@ app.post('/materi-approval-user/add', isUserAuthenticated, async (req, res) => {
       kategori: String(kategori).trim(),
       vendor: String(vendor).trim(),
       urgensi: urgensiValid.includes(urgensi) ? urgensi : 'Normal',
-      namaMaterial: String(namaMaterial).trim(),
+      namaMaterial: derivedNamaMaterial,
       deskripsi: String(deskripsi || '').trim(),
-      totalNominal: Math.max(0, Number(totalNominal) || 0),
+      totalNominal: finalTotalNominal,
       statusApproval: 'Menunggu',
-      diinputOleh: namaPenginput
+      diinputOleh: namaPenginput,
+      items: parsedItems
     });
+
+    if (req.file) {
+      draft.fileUrl = '/uploads/' + req.file.filename;
+      draft.fileName = req.file.originalname;
+    }
 
     await draft.save();
     res.redirect('/materi-approval-user?dibuat=1');

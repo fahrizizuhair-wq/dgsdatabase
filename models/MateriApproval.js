@@ -21,7 +21,15 @@ const materiApprovalSchema = new mongoose.Schema({
     default: 'Menunggu'
   },
   catatan: { type: String, default: '' },
-  diinputOleh: { type: String, default: '' }
+  diinputOleh: { type: String, default: '' },
+  items: [{
+    no: Number,
+    diskripsi: { type: String, default: '' },
+    jumlah: { type: Number, default: 1 },
+    satuan: { type: String, default: 'Pcs' },
+    hargaSatuan: { type: Number, default: 0 },
+    subtotal: { type: Number, default: 0 }
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.models.MateriApproval || mongoose.model('MateriApproval', materiApprovalSchema);
