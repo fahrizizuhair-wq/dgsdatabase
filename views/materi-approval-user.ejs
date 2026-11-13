@@ -777,8 +777,8 @@
                       <td><span class="cell-unit"><%= materi.unitKerja || '-' %></span></td>
                       <td><span class="cell-vendor"><%= materi.vendor || '-' %></span></td>
                       <td>
-                        <span class="category-pill"><%= materi.kategori || 'Umum' %></span>
-                        <span style="font-size: 12px; color: #334155; margin-top: 3px; font-weight: 500;"><%= namaBarangTampil %></span>
+                        <div style="font-size: 11px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 4px;"><%= item.kategori %></div>
+                        <div style="font-size: 14px; font-weight: 500; color: #1e293b;"><%= item.namaMaterial %></div>
                       </td>
                       <td class="cell-nominal">Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
                       <td><span class="badge <%= kelasUrgensi %>"><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span></td>
