@@ -286,7 +286,7 @@
       .modal-footer { padding: 14px 18px; }
     }
 
-    .item-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 36px; gap: 8px; align-items: stretch; margin-bottom: 8px; }
+     .item-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 36px; gap: 8px; align-items: stretch; margin-bottom: 8px; }
     .item-row input, .item-row textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 12.5px; }
     .item-row input[readonly] { background: #f1f5f9; text-align: center; }
     .item-row textarea { min-height: 40px; line-height: 1.35; resize: vertical; }
@@ -617,7 +617,13 @@
                 <option value="Critical">Critical</option>
               </select>
             </div>
-          <div class="item-head">
+            
+           <div style="margin-top: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <label style="font-size: 13px; font-weight: 600; color: #334155;">Daftar Barang</label>
+            <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 12px;" onclick="addItemRow()">+ Tambah Barang</button>
+           </div>
+
+            <div class="item-head">
               <span>No</span>
               <span>Diskripsi</span>
               <span>Jumlah</span>
