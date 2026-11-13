@@ -1492,7 +1492,7 @@ app.get('/materi-approval-admin', async (req, res) => {
     const totalMateri = listMateri.length;
     
     // Hitung statistik
-    const jumlahMenunggu = listMateri.filter(m => m.statusApproval === 'Menunggu Persetujuan' || !m.statusApproval).length;
+    const jumlahMenunggu = listMateri.filter(m => m.statusApproval === 'Menunggu' || m.statusApproval === 'Menunggu Persetujuan' || !m.statusApproval).length;
     const jumlahDisetujui = listMateri.filter(m => m.statusApproval === 'Disetujui').length;
     const jumlahKritis = listMateri.filter(m => m.urgensi === 'Kritis').length;
     const totalNominal = listMateri.reduce((acc, curr) => acc + (Number(curr.totalNominal) || 0), 0);
