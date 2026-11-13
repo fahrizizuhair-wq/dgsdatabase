@@ -12,16 +12,18 @@ const materiApprovalSchema = new mongoose.Schema({
   totalNominal: { type: Number, default: 0 },
   urgensi: {
     type: String,
-    enum: ['Normal', 'High', 'Critical'],
+    enum: ['Rendah', 'Normal', 'Sedang', 'Tinggi', 'High', 'Kritis', 'Critical'],
     default: 'Normal'
   },
   statusApproval: {
     type: String,
-    enum: ['Menunggu', 'Disetujui', 'Ditolak'],
+    enum: ['Draft', 'Menunggu', 'Menunggu Persetujuan', 'Sedang Ditinjau', 'Disetujui', 'Ditolak'],
     default: 'Menunggu'
   },
   catatan: { type: String, default: '' },
   diinputOleh: { type: String, default: '' },
+  fileUrl: { type: String, default: '' },
+  fileName: { type: String, default: '' },
   items: [{
     no: Number,
     diskripsi: { type: String, default: '' },

@@ -50,6 +50,45 @@ const getMimeType = (filename) => {
   return mimeTypes[ext] || 'application/octet-stream';
 };
 
+// Perbaiki nama berkas asli dari multer (busboy membaca nama sebagai latin1)
+function namaBerkasAsli(nama) {
+  if (!nama) return 'berkas';
+  const asli = String(nama);
+  try {
+    const hasil = Buffer.from(asli, 'latin1').toString('utf8');
+    if (hasil.includes('\uFFFD')) return asli;
+    // Karakter kontrol menandakan nama sudah berupa UTF-8 yang benar
+    if (/[\u0000-\u001F]/.test(hasil) && !/[\u0000-\u001F]/.test(asli)) return asli;
+    return hasil;
+  } catch (err) {
+    return asli;
+  }
+}
+
+// Header unduhan agar browser memakai nama dokumen asli
+function headerUnduhan(nama) {
+  const aman = String(nama || 'berkas').replace(/[\r\n"]/g, '_');
+  const cadangan = aman.replace(/[^\x20-\x7E]/g, '_');
+  return `attachment; filename="${cadangan}"; filename*=UTF-8''${encodeURIComponent(aman)}`;
+}
+
+// Prefiks kode pengajuan sesuai kategori dokumen
+function prefiksPengajuan(kategori) {
+  const teks = String(kategori || '').toUpperCase();
+  if (teks.includes('PURCHASE ORDER') || /\(\s*PO\s*\)/.test(teks) || /\bPO\b/.test(teks)) return 'PO';
+  if (teks.includes('PERTANGGUNGJAWABAN') || teks.includes('LPJ')) return 'LPJ';
+  return 'PR';
+}
+
+// Nomor pengajuan memakai tanggal permohonan: PREFIX-YYYY-DDMM
+function nomorPengajuanBaru(kategori, tanggal) {
+  const d = tanggal instanceof Date ? tanggal : new Date(tanggal || Date.now());
+  const tgl = isNaN(d.getTime()) ? new Date() : d;
+  const dd = String(tgl.getDate()).padStart(2, '0');
+  const mm = String(tgl.getMonth() + 1).padStart(2, '0');
+  return `${prefiksPengajuan(kategori)}-${tgl.getFullYear()}-${dd}${mm}`;
+}
+
 // Simpan file lokal ke MongoDB Atlas GridFS
 async function saveFileToGridFS(filename, filePath, mimetype) {
   if (!gridfsBucket || !filePath || !fs.existsSync(filePath)) return;
@@ -221,6 +260,53 @@ app.get('/uploads/:filename', async (req, res) => {
   } catch (err) {
     console.error('Error route /uploads/:filename:', err);
     if (!res.headersSent) res.status(500).send('Terjadi kesalahan saat memuat file.');
+  }
+});
+
+// Unduh berkas pendukung materi approval dengan nama dokumen asli
+app.get('/materi-approval/download/:id', async (req, res) => {
+  try {
+    const materi = await MateriApproval.findById(req.params.id).lean();
+    if (!materi) {
+      return res.status(404).send('Data pengajuan tidak ditemukan.');
+    }
+    if (!materi.fileUrl) {
+      return res.status(404).send('Pengajuan ini tidak memiliki berkas pendukung.');
+    }
+
+    const namaTersimpan = path.basename(String(materi.fileUrl).split('?')[0]);
+    const namaUnduhan = namaBerkasAsli(materi.fileName) || namaTersimpan;
+    const localPath = path.join(__dirname, 'public/uploads', namaTersimpan);
+
+    // 1. File tersedia di disk lokal
+    if (fs.existsSync(localPath)) {
+      res.setHeader('Content-Type', getMimeType(namaTersimpan));
+      res.setHeader('Content-Disposition', headerUnduhan(namaUnduhan));
+      return res.sendFile(localPath);
+    }
+
+    // 2. Fallback ke GridFS
+    if (!gridfsBucket) {
+      return res.status(404).send('Layanan database file sedang bersiap...');
+    }
+
+    const files = await gridfsBucket.find({ filename: namaTersimpan }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).send('Berkas tidak ditemukan di database.');
+    }
+
+    res.setHeader('Content-Type', files[0].contentType || getMimeType(namaTersimpan));
+    res.setHeader('Content-Disposition', headerUnduhan(namaUnduhan));
+
+    const downloadStream = gridfsBucket.openDownloadStreamByName(namaTersimpan);
+    downloadStream.on('error', (err) => {
+      console.error('Error saat mengunduh berkas approval dari GridFS:', err);
+      if (!res.headersSent) res.status(404).send('Gagal mengunduh berkas.');
+    });
+    downloadStream.pipe(res);
+  } catch (err) {
+    console.error('Error route /materi-approval/download/:id:', err);
+    if (!res.headersSent) res.status(500).send('Terjadi kesalahan saat mengunduh berkas.');
   }
 });
 
@@ -1492,9 +1578,10 @@ app.get('/materi-approval-admin', async (req, res) => {
     const totalMateri = listMateri.length;
     
     // Hitung statistik
-    const jumlahMenunggu = listMateri.filter(m => m.statusApproval === 'Menunggu' || m.statusApproval === 'Menunggu Persetujuan' || !m.statusApproval).length;
+    const statusPerluTindakan = ['Draft', 'Menunggu', 'Menunggu Persetujuan', 'Sedang Ditinjau'];
+    const jumlahMenunggu = listMateri.filter(m => !m.statusApproval || statusPerluTindakan.includes(m.statusApproval)).length;
     const jumlahDisetujui = listMateri.filter(m => m.statusApproval === 'Disetujui').length;
-    const jumlahKritis = listMateri.filter(m => m.urgensi === 'Kritis').length;
+    const jumlahKritis = listMateri.filter(m => ['Kritis', 'Critical'].includes(m.urgensi)).length;
     const totalNominal = listMateri.reduce((acc, curr) => acc + (Number(curr.totalNominal) || 0), 0);
 
     res.render('materi-approval-admin', {
@@ -2106,17 +2193,15 @@ app.get('/materi-approval-user', isUserAuthenticated, async (req, res) => {
       .sort({ tanggalPengajuan: -1, createdAt: -1 })
       .lean();
 
-    const statusAktif = ['Draft', 'Menunggu Persetujuan', 'Sedang Ditinjau'];
+    const statusAktif = ['Draft', 'Menunggu', 'Menunggu Persetujuan', 'Sedang Ditinjau'];
     const statusSelesai = ['Disetujui', 'Ditolak'];
 
     const totalMateri = dataMateri.length;
     const totalNominal = dataMateri.reduce((acc, item) => acc + (Number(item.totalNominal) || 0), 0);
-    
-    // PERBAIKAN DI SINI: Ubah listMateri menjadi dataMateri
-    const jumlahMenunggu = dataMateri.filter(m => m.statusApproval === 'Menunggu' || m.statusApproval === 'Menunggu Persetujuan' || !m.statusApproval).length;
+    const jumlahMenunggu = dataMateri.filter(m => !m.statusApproval || statusAktif.includes(m.statusApproval)).length;
     
     const jumlahDisetujui = dataMateri.filter((item) => item.statusApproval === 'Disetujui').length;
-    const jumlahKritis = dataMateri.filter((item) => item.urgensi === 'Kritis' && !statusSelesai.includes(item.statusApproval)).length;
+    const jumlahKritis = dataMateri.filter((item) => ['Kritis', 'Critical'].includes(item.urgensi) && !statusSelesai.includes(item.statusApproval)).length;
 
     res.render('materi-approval-user', {
       listMateri: dataMateri,
@@ -2184,10 +2269,12 @@ app.post('/materi-approval-user/add', isUserAuthenticated, upload.single('fileLa
     }
 
     const namaPenginput = getNamaPenginput(req);
-    const urgensiValid = ['Normal', 'High', 'Critical'];
+    const urgensiValid = ['Rendah', 'Normal', 'Sedang', 'Tinggi', 'High', 'Kritis', 'Critical'];
+    const tanggalPengajuan = new Date();
 
     const draft = new MateriApproval({
-      tanggalPengajuan: new Date(),
+      nomorPengajuan: nomorPengajuanBaru(kategori, tanggalPengajuan),
+      tanggalPengajuan,
       unitKerja: String(unitKerja).trim(),
       pemohon: String(pemohon || namaPenginput).trim(),
       kategori: String(kategori).trim(),
@@ -2203,7 +2290,7 @@ app.post('/materi-approval-user/add', isUserAuthenticated, upload.single('fileLa
 
     if (req.file) {
       draft.fileUrl = '/uploads/' + req.file.filename;
-      draft.fileName = req.file.originalname;
+      draft.fileName = namaBerkasAsli(req.file.originalname);
     }
 
     await draft.save();

@@ -27,7 +27,7 @@
       background-size: cover; z-index: -1; pointer-events: none;
     }
 
-    .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
+    .main-content { flex: 1; padding: 30px; width: 100%; min-width: 0; overflow-x: hidden; }
 
     /* SYSTEM BANNER */
     .system-banner {
@@ -96,7 +96,7 @@
       border-radius: 14px;
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
       padding: 24px;
-      overflow: hidden;
+      overflow: visible;
     }
     .data-panel-head {
       display: flex; justify-content: space-between; align-items: flex-start;
@@ -251,19 +251,20 @@
     }
     .btn-reset:hover { color: #7a1b1b; border-color: #f0c9c9; background: #fff7f7; }
 
-    /* TABEL */
-    .table-responsive { width: 100%; overflow-x: auto; }
-    .approval-table { width: 100%; min-width: 1000px; border-collapse: collapse; }
+    /* TABEL: lebar mengikuti panel, tanpa scroll ke samping */
+    .table-responsive { width: 100%; overflow-x: visible; }
+    .approval-table { width: 100%; border-collapse: collapse; table-layout: auto; }
     .approval-table thead th {
       background: #f8fafc; color: #64748b; font-size: 10.5px; font-weight: 700;
       letter-spacing: 0.7px; text-transform: uppercase; text-align: left;
       padding: 14px 18px; border-top: 1px solid #eef2f7; border-bottom: 1px solid #e2e8f0;
-      white-space: nowrap;
+      white-space: normal; word-break: break-word;
     }
     .approval-table thead th.col-nominal { text-align: right; }
     .approval-table tbody td {
       padding: 16px 18px; border-bottom: 1px solid #f1f5f9;
       font-size: 13px; color: #334155; vertical-align: middle;
+      word-break: break-word; overflow-wrap: anywhere;
     }
     .approval-table tbody tr:last-child td { border-bottom: none; }
     .approval-table tbody tr.data-row { transition: background 0.15s; }
@@ -272,10 +273,11 @@
     .cell-date { display: block; font-weight: 600; color: #0f172a; white-space: nowrap; }
     .cell-unit { font-weight: 600; color: #1e293b; }
     .cell-vendor { color: #334155; }
+    .cell-multi { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .category-pill {
       display: inline-block; padding: 5px 9px; border-radius: 6px;
       background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600;
-      white-space: nowrap;
+      white-space: normal;
     }
     .cell-nominal { text-align: right; font-weight: 700; color: #0f172a; white-space: nowrap; }
 
@@ -490,6 +492,40 @@
       font-size: 16px;
       font-weight: 700;
       color: #7a1b1b;
+    }
+
+    /* TAMPILAN KARTU BERLABEL UNTUK LAYAR SEMPIT (TANPA SCROLL HORIZONTAL) */
+    @media (max-width: 1100px) {
+      .table-responsive { overflow-x: visible; }
+      .approval-table,
+      .approval-table tbody,
+      .approval-table tr,
+      .approval-table td { display: block; width: 100%; }
+      .approval-table thead { display: none; }
+      .approval-table tbody tr.data-row {
+        border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 14px;
+        padding: 6px 2px; background: #ffffff;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+      }
+      .approval-table tbody tr.data-row:hover { background: #ffffff; }
+      .approval-table tbody tr.data-row td {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        gap: 14px; padding: 8px 14px; border-bottom: none; text-align: right;
+      }
+      .approval-table tbody tr.data-row td::before {
+        content: attr(data-label);
+        flex: 0 0 40%; text-align: left;
+        font-size: 10.5px; font-weight: 700; color: #64748b;
+        letter-spacing: 0.5px; text-transform: uppercase; padding-top: 2px;
+      }
+      .approval-table tbody tr.data-row td > * { min-width: 0; }
+      .approval-table tbody tr.data-row td .cell-multi { align-items: flex-end; }
+      .approval-table tbody tr.data-row td .cell-date { white-space: normal; }
+      .approval-table tbody tr:not(.data-row) { display: block; }
+      .approval-table tbody td.empty-state {
+        display: block; text-align: center; padding: 40px 20px !important;
+      }
+      .approval-table tbody td.empty-state::before { content: none; }
     }
 
     @media (max-width: 768px) {
@@ -753,7 +789,10 @@
                       }[materi.urgensi] || 'urgensi-normal';
 
                       const kelasStatus = {
+                        'Draft': 'status-menunggu',
+                        'Menunggu': 'status-menunggu',
                         'Menunggu Persetujuan': 'status-menunggu',
+                        'Sedang Ditinjau': 'status-menunggu',
                         'Disetujui': 'status-disetujui',
                         'Ditolak': 'status-ditolak'
                       }[materi.statusApproval] || 'status-menunggu';
@@ -772,21 +811,23 @@
                         materi.deskripsi
                       ].filter(Boolean).join(' ').toLowerCase();
                   %>
-                    <tr class="data-row" data-urgensi="<%= materi.urgensi || 'Normal' %>" data-search="<%= teksCari %>">
-                      <td><span class="cell-date"><%= tanggalTampil %></span></td>
-                      <td><span class="cell-unit"><%= materi.unitKerja || '-' %></span></td>
-                      <td><span class="cell-vendor"><%= materi.vendor || '-' %></span></td>
-                      <td>
-                        <div style="font-size: 11px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 4px;">
-                          <%= materi.kategori %>
-                        </div>
-                        <div style="font-size: 14px; font-weight: 500; color: #1e293b;">
-                          <%= namaBarangTampil %>
+                    <tr class="data-row" data-urgensi="<%= materi.urgensi || 'Normal' %>" data-status="<%= materi.statusApproval || 'Menunggu' %>" data-search="<%= teksCari %>">
+                      <td data-label="Tanggal"><span class="cell-date"><%= tanggalTampil %></span></td>
+                      <td data-label="Unit Kerja"><span class="cell-unit"><%= materi.unitKerja || '-' %></span></td>
+                      <td data-label="Vendor"><span class="cell-vendor"><%= materi.vendor || '-' %></span></td>
+                      <td data-label="Nama Barang">
+                        <div class="cell-multi">
+                          <div style="font-size: 11px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 4px; align-self: flex-start;">
+                            <%= materi.kategori || 'Umum' %>
+                          </div>
+                          <div style="font-size: 14px; font-weight: 500; color: #1e293b;">
+                            <%= namaBarangTampil %>
+                          </div>
                         </div>
                       </td>
-                      <td class="cell-nominal">Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
-                      <td><span class="badge <%= kelasUrgensi %>"><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span></td>
-                      <td><span class="badge <%= kelasStatus %>"><span class="badge-dot"></span><%= materi.statusApproval || 'Menunggu Persetujuan' %></span></td>
+                      <td class="cell-nominal" data-label="Total Nominal">Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
+                      <td data-label="Urgensi"><span class="badge <%= kelasUrgensi %>"><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span></td>
+                      <td data-label="Status"><span class="badge <%= kelasStatus %>"><span class="badge-dot"></span><%= materi.statusApproval || 'Menunggu' %></span></td>
                     </tr>
                   <% }); %>
               <tr id="barisTidakCocok" style="display: none;">
@@ -1037,6 +1078,24 @@
       }
     }
 
+    let statusFilterAktif = '';
+
+    function normalisasiStatus(status) {
+      const teks = String(status || '').trim().toLowerCase();
+      if (['disetujui', 'approved', 'selesai'].includes(teks)) return 'Disetujui';
+      if (['ditolak', 'rejected'].includes(teks)) return 'Ditolak';
+      return 'Menunggu';
+    }
+
+    function filterStatus(status, tombol) {
+      statusFilterAktif = status || '';
+      document.querySelectorAll('.status-nav-group .nav-btn').forEach(function (btn) {
+        btn.classList.remove('active');
+      });
+      if (tombol) tombol.classList.add('active');
+      filterTabel();
+    }
+
     function filterTabel() {
       const input = document.getElementById('searchMateri');
       const select = document.getElementById('filterUrgensi');
@@ -1054,7 +1113,8 @@
         const teks = (row.getAttribute('data-search') || '').toLowerCase();
         const cocokCari = !kataKunci || teks.indexOf(kataKunci) !== -1;
         const cocokUrgensi = !urgensi || row.getAttribute('data-urgensi') === urgensi;
-        const cocok = cocokCari && cocokUrgensi;
+        const cocokStatus = !statusFilterAktif || normalisasiStatus(row.getAttribute('data-status')) === statusFilterAktif;
+        const cocok = cocokCari && cocokUrgensi && cocokStatus;
         row.style.display = cocok ? '' : 'none';
         if (cocok) tampil++;
       });
