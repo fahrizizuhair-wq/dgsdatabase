@@ -620,13 +620,13 @@
             <% } else { %>
               <% daftarMateri.forEach(function (materi) {
                 const tanggal = materi.tanggalPengajuan ? new Date(materi.tanggalPengajuan) : null;
-                const tanggalTampil = (tanggal && !isNaN(tanggal.getTime()))
+                const tanggalTampil = (tanggal && !isNaN(tanggal.getTime()))  
                   ? tanggal.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
                   : '-';
 
                 const kelasUrgensi = {
-                  'Kritis': 'urgensi-kritis',
-                        'Tinggi': 'urgensi-tinggi',
+                        'Critical': 'urgensi-kritis',
+                        'High': 'urgensi-tinggi',
                         'Normal': 'urgensi-normal'
                       }[materi.urgensi] || 'urgensi-normal';
 
