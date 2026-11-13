@@ -592,7 +592,7 @@
               <th>Tanggal Pengajuan</th>
               <th>Unit Kerja</th>
               <th>Vendor</th>
-              <th>Kategori</th>
+              <th>Nama Barang</th>
               <th class="col-nominal">Total Nominal</th>
               <th>Urgensi</th>
               <th>Status Approval</th>
@@ -619,42 +619,49 @@
               </tr>
             <% } else { %>
               <% daftarMateri.forEach(function (materi) {
-                   const tanggal = materi.tanggalPengajuan ? new Date(materi.tanggalPengajuan) : null;
-                   const tanggalTampil = (tanggal && !isNaN(tanggal.getTime()))
-                     ? tanggal.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-                     : '-';
+                const tanggal = materi.tanggalPengajuan ? new Date(materi.tanggalPengajuan) : null;
+                const tanggalTampil = (tanggal && !isNaN(tanggal.getTime()))
+                  ? tanggal.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+                  : '-';
 
-                   const kelasUrgensi = {
-                     'Kritis': 'urgensi-kritis',
-                     'Tinggi': 'urgensi-tinggi',
-                     'Normal': 'urgensi-normal'
-                   }[materi.urgensi] || 'urgensi-normal';
+                const kelasUrgensi = {
+                  'Kritis': 'urgensi-kritis',
+                        'Tinggi': 'urgensi-tinggi',
+                        'Normal': 'urgensi-normal'
+                      }[materi.urgensi] || 'urgensi-normal';
 
-                   const kelasStatus = {
-                     'Menunggu Persetujuan': 'status-menunggu',
-                     'Disetujui': 'status-disetujui',
-                     'Ditolak': 'status-ditolak'
-                   }[materi.statusApproval] || 'status-menunggu';
+                      const kelasStatus = {
+                        'Menunggu Persetujuan': 'status-menunggu',
+                        'Disetujui': 'status-disetujui',
+                        'Ditolak': 'status-ditolak'
+                      }[materi.statusApproval] || 'status-menunggu';
 
-                   const teksCari = [
-                     materi.unitKerja,
-                     materi.vendor,
-                     materi.kategori,
-                     materi.pemohon,
-                     materi.namaMaterial,
-                     materi.deskripsi
-                   ].filter(Boolean).join(' ').toLowerCase();
-              %>
-                <tr class="data-row" data-urgensi="<%= materi.urgensi || 'Normal' %>" data-search="<%= teksCari %>">
-                  <td><span class="cell-date"><%= tanggalTampil %></span></td>
-                  <td><span class="cell-unit"><%= materi.unitKerja || '-' %></span></td>
-                  <td><span class="cell-vendor"><%= materi.vendor || '-' %></span></td>
-                  <td><span class="category-pill"><%= materi.kategori || 'Umum' %></span></td>
-                  <td class="cell-nominal">Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
-                  <td><span class="badge <%= kelasUrgensi %>"><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span></td>
-                  <td><span class="badge <%= kelasStatus %>"><span class="badge-dot"></span><%= materi.statusApproval || 'Menunggu Persetujuan' %></span></td>
-                </tr>
-              <% }); %>
+                      // Mengambil nama barang (mendukung input single namaMaterial atau multi-item items)
+                      let namaBarangTampil = materi.namaMaterial || '-';
+                      if (materi.items && Array.isArray(materi.items) && materi.items.length > 0) {
+                        namaBarangTampil = materi.items[0].diskripsi || materi.namaMaterial || '-';
+                      }
+
+                      const teksCari = [
+                        materi.unitKerja,
+                        materi.vendor,
+                        materi.pemohon,
+                        namaBarangTampil,
+                        materi.deskripsi
+                      ].filter(Boolean).join(' ').toLowerCase();
+                  %>
+                    <tr class="data-row" data-urgensi="<%= materi.urgensi || 'Normal' %>" data-search="<%= teksCari %>">
+                      <td><span class="cell-date"><%= tanggalTampil %></span></td>
+                      <td><span class="cell-unit"><%= materi.unitKerja || '-' %></span></td>
+                      <td><span class="cell-vendor"><%= materi.vendor || '-' %></span></td>
+                      <td>
+                        <span style="font-weight: 600; color: #0f172a;"><%= namaBarangTampil %></span>
+                      </td>
+                      <td class="cell-nominal">Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
+                      <td><span class="badge <%= kelasUrgensi %>"><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span></td>
+                      <td><span class="badge <%= kelasStatus %>"><span class="badge-dot"></span><%= materi.statusApproval || 'Menunggu Persetujuan' %></span></td>
+                    </tr>
+                  <% }); %>
               <tr id="barisTidakCocok" style="display: none;">
                 <td colspan="7" class="empty-state">
                   <div class="empty-icon">
