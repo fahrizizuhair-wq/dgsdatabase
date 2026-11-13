@@ -2111,7 +2111,7 @@ app.get('/materi-approval-user', isUserAuthenticated, async (req, res) => {
 
     const totalMateri = dataMateri.length;
     const totalNominal = dataMateri.reduce((acc, item) => acc + (Number(item.totalNominal) || 0), 0);
-    const jumlahMenunggu = dataMateri.filter((item) => statusAktif.includes(item.statusApproval)).length;
+    const jumlahMenunggu = listMateri.filter(m => m.statusApproval === 'Menunggu' || m.statusApproval === 'Menunggu Persetujuan' || !m.statusApproval).length;
     const jumlahDisetujui = dataMateri.filter((item) => item.statusApproval === 'Disetujui').length;
     const jumlahKritis = dataMateri.filter((item) => item.urgensi === 'Kritis' && !statusSelesai.includes(item.statusApproval)).length;
 
