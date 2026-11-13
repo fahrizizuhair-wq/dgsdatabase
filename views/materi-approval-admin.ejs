@@ -962,6 +962,15 @@
       if (overlay) overlay.classList.toggle('active');
     }
 
+    // --- FUNGSI BARU: Untuk membuka/menutup dropdown di Sidebar ---
+    function toggleSubmenu(event, element) {
+      event.preventDefault(); // Mencegah pindah halaman jika href="#"
+      const parentItem = element.closest('.menu-item-dropdown');
+      if (parentItem) {
+        parentItem.classList.toggle('open');
+      }
+    }
+
     function bukaModalReview(materi) {
       document.getElementById('reviewId').value = materi._id || '';
 
@@ -993,7 +1002,7 @@
           tglStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
         }
       }
-      document.getElementById('valUnitKerjaDanTgl').textContent = `Diajukan oleh: ${unit} • ${tglStr}`;
+      document.getElementById('valUnitKerjaDanTgl').textContent = `Diajukan oleh: ${unit}\n${tglStr}`;
 
       // Vendor Target
       document.getElementById('valVendor').textContent = materi.vendor || '-';
@@ -1101,7 +1110,6 @@
 
         const result = await response.json();
         if (response.ok) {
-          // Update badge di tabel secara real-time
           const badge = document.getElementById(`status-badge-${id}`);
           if (badge) {
             badge.className = 'badge ' + (statusBaru === 'Disetujui' ? 'status-disetujui' : 'status-ditolak');
@@ -1109,13 +1117,12 @@
           }
           tutupModalReview();
           alert(`Pengajuan berhasil diubah statusnya menjadi: ${statusBaru}`);
-          location.reload(); // Refresh halaman untuk memperbarui statistik
+          location.reload();
         } else {
           alert(result.message || 'Gagal memperbarui status pengajuan.');
         }
       } catch (error) {
         console.error('Error:', error);
-        // Fallback jika belum ada endpoint backend, ubah tampilan secara lokal
         const badge = document.getElementById(`status-badge-${id}`);
         if (badge) {
           badge.className = 'badge ' + (statusBaru === 'Disetujui' ? 'status-disetujui' : 'status-ditolak');
@@ -1146,23 +1153,29 @@
 
     function filterTabel() {
       const input = document.getElementById('searchMateri');
-      const select = document.getElementById('filterUrgensi');
+      const selectUrgensi = document.getElementById('filterUrgensi');
+      const selectKategori = document.getElementById('filterKategori'); // Tambahan filter kategori
       const resetBtn = document.getElementById('btnResetFilter');
       const counter = document.getElementById('jumlahTampil');
       const barisKosong = document.getElementById('barisTidakCocok');
-      if (!input || !select) return;
+      if (!input || !selectUrgensi) return;
 
       const kataKunci = input.value.trim().toLowerCase();
-      const urgensi = select.value;
+      const urgensi = selectUrgensi.value;
+      const kategori = selectKategori ? selectKategori.value.trim().toLowerCase() : '';
       const rows = document.querySelectorAll('.approval-table tbody tr.data-row');
       let tampil = 0;
 
       rows.forEach(function (row) {
         const teks = (row.getAttribute('data-search') || '').toLowerCase();
+        const rowKategori = (row.getAttribute('data-kategori') || '').toLowerCase();
+
         const cocokCari = !kataKunci || teks.indexOf(kataKunci) !== -1;
         const cocokUrgensi = !urgensi || row.getAttribute('data-urgensi') === urgensi;
+        const cocokKategori = !kategori || rowKategori.indexOf(kategori) !== -1 || teks.indexOf(kategori) !== -1;
         const cocokStatus = !statusFilterAktif || normalisasiStatus(row.getAttribute('data-status')) === statusFilterAktif;
-        const cocok = cocokCari && cocokUrgensi && cocokStatus;
+
+        const cocok = cocokCari && cocokUrgensi && cocokKategori && cocokStatus;
         row.style.display = cocok ? '' : 'none';
         if (cocok) tampil++;
       });
@@ -1172,14 +1185,16 @@
       }
 
       if (counter) counter.textContent = tampil;
-      if (resetBtn) resetBtn.style.display = (kataKunci || urgensi) ? 'inline-flex' : 'none';
+      if (resetBtn) resetBtn.style.display = (kataKunci || urgensi || kategori) ? 'inline-flex' : 'none';
     }
 
     function resetFilter() {
       const input = document.getElementById('searchMateri');
-      const select = document.getElementById('filterUrgensi');
+      const selectUrgensi = document.getElementById('filterUrgensi');
+      const selectKategori = document.getElementById('filterKategori');
       if (input) input.value = '';
-      if (select) select.value = '';
+      if (selectUrgensi) selectUrgensi.value = '';
+      if (selectKategori) selectKategori.value = '';
       filterTabel();
       if (input) input.focus();
     }
