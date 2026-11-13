@@ -17,7 +17,7 @@ const materiApprovalSchema = new mongoose.Schema({
   },
   statusApproval: {
     type: String,
-    enum: ['Menunggu', 'Disetujui', 'Ditolak'],
+    enum: ['Menunggu Persetujuan', 'Disetujui', 'Ditolak'],
     default: 'Menunggu'
   },
   catatan: { type: String, default: '' },
