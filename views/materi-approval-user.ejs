@@ -777,6 +777,7 @@
                       <td><span class="cell-unit"><%= materi.unitKerja || '-' %></span></td>
                       <td><span class="cell-vendor"><%= materi.vendor || '-' %></span></td>
                       <td>
+                        <span class="category-pill"><%= materi.kategori || 'Umum' %></span>
                         <span style="font-weight: 600; color: #0f172a;"><%= namaBarangTampil %></span>
                       </td>
                       <td class="cell-nominal">Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
