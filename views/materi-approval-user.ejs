@@ -617,30 +617,25 @@
                 <option value="Critical">Critical</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="inputNominal">Total Estimasi Nominal (IDR)</label>
-              <input type="number" id="inputNominal" name="totalNominal" min="0" step="1000" placeholder="Contoh: 75000000">
+          <div class="item-head">
+              <span>No</span>
+              <span>Diskripsi</span>
+              <span>Jumlah</span>
+              <span>Satuan</span>
+              <span>Keterangan</span>
+              <span></span>
             </div>
-
-            <div class="item-head">
-          <span>No</span>
-          <span>Diskripsi</span>
-          <span>Jumlah</span>
-          <span>Satuan</span>
-          <span>Keterangan</span>
-          <span></span>
-        </div>
-        <small style="display:block; margin:-2px 0 8px; color:#94a3b8; font-size:11px;">Jumlah dan satuan boleh diisi beberapa baris (tekan Enter) untuk barang dengan beberapa kode dalam satu baris.</small>
-        <div id="itemContainer">
-          <div class="item-row">
-            <input type="number" data-field="no" name="items[0][no]" value="1" readonly style="background:#f1f5f9; text-align:center;">
-            <textarea data-field="diskripsi" name="items[0][diskripsi]" placeholder="Nama barang / deskripsi (boleh beberapa baris)..." rows="2" required></textarea>
-            <textarea data-field="jumlah" name="items[0][jumlah]" placeholder="Jml" rows="2" required></textarea>
-            <input type="text" data-field="satuan" name="items[0][satuan]" placeholder="Satuan" required>
-            <textarea data-field="keterangan" name="items[0][keterangan]" placeholder="Keterangan (opsional)..." rows="2"></textarea>
-            <button type="button" class="btn-remove-item" onclick="removeItemRow(this)"><i class="fa-solid fa-trash"></i></button>
-          </div>
-        </div>
+            <small style="display:block; margin:-2px 0 8px; color:#94a3b8; font-size:11px;">Jumlah dan satuan boleh diisi beberapa baris (tekan Enter) untuk barang dengan beberapa kode dalam satu baris.</small>
+            <div id="itemContainer">
+              <div class="item-row">
+                <input type="number" data-field="no" name="items[0][no]" value="1" readonly style="background:#f1f5f9; text-align:center;">
+                <textarea data-field="diskripsi" name="items[0][diskripsi]" placeholder="Nama barang / deskripsi (boleh beberapa baris)..." rows="2" required></textarea>
+                <textarea data-field="jumlah" name="items[0][jumlah]" placeholder="Jml" rows="2" required></textarea>
+                <input type="text" data-field="satuan" name="items[0][satuan]" placeholder="Satuan" required>
+                <textarea data-field="keterangan" name="items[0][keterangan]" placeholder="Keterangan (opsional)..." rows="2"></textarea>
+                <button type="button" class="btn-remove-item" onclick="removeItemRow(this)"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
 
             <div class="form-group full">
               <label for="inputDeskripsi">Deskripsi/Spesifikasi</label>
