@@ -962,12 +962,11 @@
       if (overlay) overlay.classList.toggle('active');
     }
 
-    // --- FUNGSI BARU: Untuk membuka/menutup dropdown di Sidebar ---
-    function toggleSubmenu(event, element) {
-      event.preventDefault(); // Mencegah pindah halaman jika href="#"
-      const parentItem = element.closest('.menu-item-dropdown');
-      if (parentItem) {
-        parentItem.classList.toggle('open');
+    // --- FUNGSI DROPDOWN SIDEBAR (Stok & Barang / Laporan) ---
+    function toggleDropdown(element) {
+      const parentLi = element.closest('.dropdown');
+      if (parentLi) {
+        parentLi.classList.toggle('open');
       }
     }
 
