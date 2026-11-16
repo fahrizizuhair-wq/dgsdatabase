@@ -1686,36 +1686,28 @@
                   </div>
                 </td>
                 <td class="cell-nominal" data-label="Total Nominal"
-                  >Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td
-                >
+                  >Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
                 <td data-label="Urgensi"
                   ><span class="badge <%= kelasUrgensi %>"
                     ><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span
-                  ></td
-                >
+                  ></td>
                 <td data-label="Status"
                   ><span class="badge <%= kelasStatus %>" id="status-badge-<%= materi._id %>"
-                    ><span class="badge-dot"></span><%= materi.statusApproval || 'Menunggu' %></span
-                  ></td
-                >
-                <td data-label="Aksi">
-                  <button type="button" class="btn-review" onclick="bukaModalReview <%- JSON.stringify(materi) %>)">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Review &amp; Otorisasi
-                  </button>
+                  ><span class="badge-dot"></span><%= materi.statusApproval || 'Menunggu' %></span>
                 </td>
+                <td data-label="Aksi">
+                <button 
+                  type="button" 
+                  class="btn-review" 
+                  data-materi="<%= encodeURIComponent(JSON.stringify(materi)) %>" 
+                  onclick="handleKlikReview(this)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  Review & Otorisasi
+                </button>
+              </td>
               </tr>
               <% }); %>
               <tr id="barisTidakCocok" style="display: none">
@@ -1746,8 +1738,7 @@
           <span class="count-info">
             Menampilkan
             <strong id="jumlahTampil"
-              ><%= typeof listMateri !== 'undefined' && listMateri ? listMateri.length : 0 %></strong
-            >
+              ><%= typeof listMateri !== 'undefined' && listMateri ? listMateri.length : 0 %></stron>
             dari <strong><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %></strong> pengajuan
           </span>
         </div>
