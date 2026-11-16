@@ -1077,7 +1077,194 @@
     </style>
     <link rel="stylesheet" href="/css/stat-cards.css" />
     <link rel="stylesheet" href="/css/sidebar.css" />
-  </head>
+
+  <style id="mobile-card-view">
+    /* ============================================================
+       TAMPILAN KARTU MOBILE — HANYA UNTUK LAYAR <= 768px
+       Desktop/laptop tidak berubah.
+       ============================================================ */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 16px !important;
+      }
+      .main-box {
+        padding: 16px !important;
+        overflow: visible !important;
+      }
+      .table-responsive-container,
+      .table-responsive-wrapper,
+      .table-responsive {
+        overflow: visible !important;
+      }
+      
+      /* dasar kartu */
+      .approval-table {
+        min-width: 0 !important;
+        width: 100% !important;
+        border: 0 !important;
+        background: transparent !important;
+      }
+      .approval-table thead {
+        display: none !important;
+      }
+      .approval-table,
+      .approval-table tbody {
+        display: block !important;
+        width: 100% !important;
+      }
+      .approval-table tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 3px 12px;
+        align-items: center;
+        margin: 0 0 10px;
+        padding: 12px 14px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+      }
+      .approval-table tbody td {
+        display: block;
+        padding: 0;
+        border: 0 !important;
+        background: transparent;
+        font-size: 13px;
+        line-height: 1.4;
+        color: #475569;
+        text-align: left !important;
+        vertical-align: middle;
+        white-space: normal;
+      }
+      .approval-table tbody td[colspan] {
+        display: block !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 1 / span 4 !important;
+        padding: 18px 8px !important;
+        text-align: center !important;
+      }
+      .approval-table tbody td .badge {
+        font-size: 10.5px;
+        padding: 4px 9px;
+      }
+      /* tombol aksi kompak */
+      .approval-table tbody td .btn-detail,
+      .approval-table tbody td .btn-edit,
+      .approval-table tbody td .btn-delete,
+      .approval-table tbody td .btn-action,
+      .approval-table tbody td .btn-sub-action {
+        margin: 0 !important;
+        padding: 6px 10px !important;
+        font-size: 11.5px !important;
+        line-height: 1.2;
+        border-radius: 6px;
+        white-space: nowrap;
+      }
+      .approval-table tbody td form {
+        margin: 0 !important;
+        display: inline-flex !important;
+      }
+      
+  
+      
+      .approval-data-panel {
+        padding: 14px !important;
+      }
+      .approval-table tbody tr.data-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-areas:
+          "date status"
+          "title title"
+          "unit vendor"
+          "nominal urgensi";
+        gap: 3px 12px;
+        align-items: center;
+        margin: 0 0 10px !important;
+        padding: 12px 14px !important;
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+      }
+      .approval-table tbody tr.data-row td {
+        display: block !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        text-align: left !important;
+        font-size: 13px;
+      }
+      .approval-table tbody tr.data-row td::before {
+        content: none !important;
+      }
+      .approval-table tbody tr.data-row td:nth-child(1) {
+        grid-area: date;
+        font-size: 11px;
+        font-weight: 600;
+        color: #94a3b8;
+        white-space: nowrap;
+      }
+      .approval-table tbody tr.data-row td:nth-child(2) {
+        grid-area: unit;
+        font-size: 12px;
+        color: #64748b;
+      }
+      .approval-table tbody tr.data-row td:nth-child(2) .cell-unit {
+        font-weight: 600;
+        color: #475569;
+      }
+      .approval-table tbody tr.data-row td:nth-child(3) {
+        grid-area: vendor;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: right !important;
+        font-size: 12px;
+        color: #94a3b8;
+      }
+      .approval-table tbody tr.data-row td:nth-child(4) {
+        grid-area: title;
+      }
+      .approval-table tbody tr.data-row td .cell-multi {
+        align-items: flex-start !important;
+      }
+      .approval-table tbody tr.data-row td:nth-child(4) > .cell-multi > div:nth-child(2) {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        line-height: 1.35;
+      }
+      .approval-table tbody tr.data-row td:nth-child(5) {
+        grid-area: nominal;
+        text-align: left !important;
+        font-size: 15px !important;
+        font-weight: 800 !important;
+        color: #7a1b1b !important;
+        white-space: nowrap;
+      }
+      .approval-table tbody tr.data-row td:nth-child(6) {
+        grid-area: urgensi;
+        justify-self: end;
+      }
+      .approval-table tbody tr.data-row td:nth-child(7) {
+        grid-area: status;
+        justify-self: end;
+        align-self: start;
+      }
+      .approval-table tbody tr.data-row td .badge {
+        font-size: 10.5px;
+        padding: 4px 9px;
+        white-space: normal !important;
+        text-align: center;
+        line-height: 1.25;
+      }
+  
+    }
+  </style>
+
+</head>
   <body>
     <%- include('partials/sidebar-user', { activePage: 'materi-approval' }) %>
 

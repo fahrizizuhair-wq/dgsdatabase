@@ -636,7 +636,155 @@
       }
     </style>
     <link rel="stylesheet" href="/css/stat-cards.css" />
-  </head>
+
+  <style id="mobile-card-view">
+    /* ============================================================
+       TAMPILAN KARTU MOBILE — HANYA UNTUK LAYAR <= 768px
+       Desktop/laptop tidak berubah.
+       ============================================================ */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 16px !important;
+      }
+      .main-box {
+        padding: 16px !important;
+        overflow: visible !important;
+      }
+      .table-responsive-container,
+      .table-responsive-wrapper,
+      .table-responsive {
+        overflow: visible !important;
+      }
+      
+      /* dasar kartu */
+      #itemTable {
+        min-width: 0 !important;
+        width: 100% !important;
+        border: 0 !important;
+        background: transparent !important;
+      }
+      #itemTable thead {
+        display: none !important;
+      }
+      #itemTable,
+      #itemTable tbody {
+        display: block !important;
+        width: 100% !important;
+      }
+      #itemTable tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 3px 12px;
+        align-items: center;
+        margin: 0 0 10px;
+        padding: 12px 14px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+      }
+      #itemTable tbody td {
+        display: block;
+        padding: 0;
+        border: 0 !important;
+        background: transparent;
+        font-size: 13px;
+        line-height: 1.4;
+        color: #475569;
+        text-align: left !important;
+        vertical-align: middle;
+        white-space: normal;
+      }
+      #itemTable tbody td[colspan] {
+        display: block !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 1 / span 4 !important;
+        padding: 18px 8px !important;
+        text-align: center !important;
+      }
+      #itemTable tbody td .badge {
+        font-size: 10.5px;
+        padding: 4px 9px;
+      }
+      /* tombol aksi kompak */
+      #itemTable tbody td .btn-detail,
+      #itemTable tbody td .btn-edit,
+      #itemTable tbody td .btn-delete,
+      #itemTable tbody td .btn-action,
+      #itemTable tbody td .btn-sub-action {
+        margin: 0 !important;
+        padding: 6px 10px !important;
+        font-size: 11.5px !important;
+        line-height: 1.2;
+        border-radius: 6px;
+        white-space: nowrap;
+      }
+      #itemTable tbody td form {
+        margin: 0 !important;
+        display: inline-flex !important;
+      }
+      
+  
+      
+      #itemTable tbody tr {
+        grid-template-areas:
+          "code status"
+          "title title"
+          "price date"
+          "actions actions";
+      }
+      #itemTable tbody td:nth-child(1) {
+        grid-area: date;
+        justify-self: end;
+        font-size: 11px;
+        color: #94a3b8;
+      }
+      #itemTable tbody td:nth-child(2) {
+        grid-area: code;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        color: #94a3b8;
+      }
+      #itemTable tbody td:nth-child(3) {
+        grid-area: title;
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+      #itemTable tbody td:nth-child(9) {
+        grid-area: price;
+        font-size: 14px;
+        font-weight: 800;
+        color: #7a1b1b;
+        white-space: nowrap;
+      }
+      #itemTable tbody td:nth-child(11) {
+        grid-area: status;
+        justify-self: end;
+        align-self: start;
+      }
+      #itemTable tbody td:nth-child(12) {
+        grid-area: actions;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        justify-content: flex-end;
+      }
+      #itemTable tbody td:nth-child(4),
+      #itemTable tbody td:nth-child(5),
+      #itemTable tbody td:nth-child(6),
+      #itemTable tbody td:nth-child(7),
+      #itemTable tbody td:nth-child(8),
+      #itemTable tbody td:nth-child(10) {
+        display: none;
+      }
+  
+    }
+  </style>
+
+</head>
   <body>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 

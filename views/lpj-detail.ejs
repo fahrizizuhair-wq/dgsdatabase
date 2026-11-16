@@ -676,6 +676,235 @@
 
   </style>
   <link rel="stylesheet" href="/css/stat-cards.css">
+
+  <style id="mobile-card-view">
+    /* ============================================================
+       TAMPILAN MOBILE — HANYA UNTUK LAYAR <= 768px
+       ============================================================ */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 14px !important;
+      }
+      .system-banner {
+        padding: 16px !important;
+        gap: 12px !important;
+      }
+      .banner-text h1 {
+        font-size: 17px !important;
+        line-height: 1.3;
+      }
+      .banner-actions {
+        flex-wrap: wrap;
+        width: 100%;
+      }
+      .banner-actions .btn-daftar-lpj,
+      .banner-actions .btn-buat-baru {
+        flex: 1 1 auto;
+        text-align: center;
+      }
+      .workspace-wrapper {
+        padding: 14px !important;
+        border-radius: 12px !important;
+      }
+      .detail-header-card {
+        padding: 16px !important;
+        align-items: flex-start !important;
+      }
+      .detail-title-area h2 {
+        font-size: 17px !important;
+      }
+      .card-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        margin: 16px 0 !important;
+      }
+      .stat-card {
+        padding: 16px 18px !important;
+      }
+      .stat-card .card-value {
+        font-size: 1.35rem !important;
+        white-space: normal !important;
+      }
+      .tab-nav {
+        gap: 8px !important;
+        padding: 8px !important;
+      }
+      .tab-btn {
+        flex: 0 0 auto !important;
+        padding: 10px 14px !important;
+        font-size: 12.5px !important;
+      }
+      .tab-content-card {
+        padding: 14px !important;
+      }
+      .tab-section-head {
+        gap: 10px !important;
+      }
+      .table-responsive {
+        overflow: visible !important;
+      }
+
+      /* ---- Kartu item rincian pengeluaran ---- */
+      .table-rincian,
+      .table-rincian tbody,
+      .table-rincian tr,
+      .table-rincian td {
+        display: block;
+        width: 100%;
+      }
+      .table-rincian thead {
+        display: none;
+      }
+      .table-rincian tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          "date nominal"
+          "uraian uraian"
+          "qty harga"
+          "ket ket"
+          "aksi aksi";
+        gap: 3px 10px;
+        align-items: center;
+        margin: 0 0 10px;
+        padding: 12px 14px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+      }
+      .table-rincian td {
+        padding: 0 !important;
+        border: 0 !important;
+        text-align: left !important;
+        white-space: normal !important;
+        font-size: 12.5px;
+        color: #475569;
+      }
+      .table-rincian td:nth-child(1) {
+        display: none;
+      }
+      .table-rincian td:nth-child(2) {
+        grid-area: date;
+        font-size: 11px;
+        color: #94a3b8;
+        white-space: nowrap !important;
+      }
+      .table-rincian td:nth-child(3) {
+        grid-area: uraian;
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+      .table-rincian td:nth-child(3) strong {
+        color: #0f172a !important;
+      }
+      .table-rincian td:nth-child(4) {
+        grid-area: qty;
+        font-size: 12px;
+        color: #64748b;
+        white-space: nowrap !important;
+      }
+      .table-rincian td:nth-child(4)::before {
+        content: "Qty: ";
+        font-size: 10.5px;
+        font-weight: 600;
+        color: #94a3b8;
+      }
+      .table-rincian td:nth-child(5) {
+        grid-area: harga;
+        justify-self: end;
+        font-size: 12px;
+        color: #64748b;
+        white-space: nowrap !important;
+      }
+      .table-rincian td:nth-child(6) {
+        grid-area: nominal;
+        justify-self: end;
+        font-size: 14px !important;
+        font-weight: 800 !important;
+        color: #b91c1c !important;
+        white-space: nowrap !important;
+      }
+      .table-rincian td:nth-child(7) {
+        grid-area: ket;
+        font-size: 12px;
+        color: #64748b;
+      }
+      .table-rincian td:nth-child(7)::before {
+        content: "Ket: ";
+        font-size: 10.5px;
+        font-weight: 600;
+        color: #94a3b8;
+      }
+      .table-rincian td:nth-child(8) {
+        grid-area: aksi;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        justify-content: flex-end;
+      }
+      .table-rincian td[colspan] {
+        grid-column: 1 / -1 !important;
+        grid-row: 1 !important;
+        padding: 18px !important;
+        text-align: center !important;
+      }
+
+      /* ---- Kartu riwayat pencairan dana ---- */
+      .tab-content-card table.table-bordered,
+      .tab-content-card table.table-bordered tbody,
+      .tab-content-card table.table-bordered tr,
+      .tab-content-card table.table-bordered td {
+        display: block;
+        width: 100%;
+      }
+      .tab-content-card table.table-bordered thead {
+        display: none;
+      }
+      .tab-content-card table.table-bordered tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          "tanggal nominal"
+          "keterangan keterangan";
+        gap: 3px 10px;
+        align-items: center;
+        margin: 0 0 10px;
+        padding: 12px 14px;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px;
+        background: #ffffff;
+      }
+      .tab-content-card table.table-bordered td {
+        padding: 0 !important;
+        border: 0 !important;
+        text-align: left !important;
+        font-size: 12.5px;
+        color: #475569;
+      }
+      .tab-content-card table.table-bordered td:nth-child(1) {
+        display: none;
+      }
+      .tab-content-card table.table-bordered td:nth-child(2) {
+        grid-area: tanggal;
+        font-size: 11px;
+        color: #94a3b8;
+      }
+      .tab-content-card table.table-bordered td:nth-child(3) {
+        grid-area: nominal;
+        justify-self: end;
+        font-weight: 800;
+        color: #b91c1c;
+        white-space: nowrap;
+      }
+      .tab-content-card table.table-bordered td:nth-child(4) {
+        grid-area: keterangan;
+        color: #64748b;
+      }
+    }
+  </style>
+
 </head>
 
 <body>

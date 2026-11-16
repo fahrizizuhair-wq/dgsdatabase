@@ -628,7 +628,183 @@
       }
     </style>
     <link rel="stylesheet" href="/css/stat-cards.css" />
-  </head>
+
+  <style id="mobile-card-view">
+    /* ============================================================
+       TAMPILAN KARTU MOBILE — HANYA UNTUK LAYAR <= 768px
+       Desktop/laptop tidak berubah.
+       ============================================================ */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 16px !important;
+      }
+      .main-box {
+        padding: 16px !important;
+        overflow: visible !important;
+      }
+      .table-responsive-container,
+      .table-responsive-wrapper,
+      .table-responsive {
+        overflow: visible !important;
+      }
+      
+      /* dasar kartu */
+      .report-container table {
+        min-width: 0 !important;
+        width: 100% !important;
+        border: 0 !important;
+        background: transparent !important;
+      }
+      .report-container table thead {
+        display: none !important;
+      }
+      .report-container table,
+      .report-container table tbody {
+        display: block !important;
+        width: 100% !important;
+      }
+      .report-container table tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 3px 12px;
+        align-items: center;
+        margin: 0 0 10px;
+        padding: 12px 14px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+      }
+      .report-container table tbody td {
+        display: block;
+        padding: 0;
+        border: 0 !important;
+        background: transparent;
+        font-size: 13px;
+        line-height: 1.4;
+        color: #475569;
+        text-align: left !important;
+        vertical-align: middle;
+        white-space: normal;
+      }
+      .report-container table tbody td[colspan] {
+        display: block !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 1 / span 4 !important;
+        padding: 18px 8px !important;
+        text-align: center !important;
+      }
+      .report-container table tbody td .badge {
+        font-size: 10.5px;
+        padding: 4px 9px;
+      }
+      /* tombol aksi kompak */
+      .report-container table tbody td .btn-detail,
+      .report-container table tbody td .btn-edit,
+      .report-container table tbody td .btn-delete,
+      .report-container table tbody td .btn-action,
+      .report-container table tbody td .btn-sub-action {
+        margin: 0 !important;
+        padding: 6px 10px !important;
+        font-size: 11.5px !important;
+        line-height: 1.2;
+        border-radius: 6px;
+        white-space: nowrap;
+      }
+      .report-container table tbody td form {
+        margin: 0 !important;
+        display: inline-flex !important;
+      }
+      
+  
+      
+      .main-content {
+        padding: 16px !important;
+      }
+      .report-container {
+        padding: 14px 12px !important;
+        overflow: visible !important;
+      }
+      .report-header {
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+      }
+      .report-header h2 {
+        font-size: 18px !important;
+      }
+      .report-header .btn-action {
+        width: 100%;
+        text-align: center;
+      }
+      .report-container table tbody tr {
+        grid-template-areas:
+          "code jenis"
+          "title actions"
+          "perihal date";
+      }
+      .report-container table tbody td:nth-child(1) {
+        grid-area: code;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        color: #94a3b8;
+      }
+      .report-container table tbody td:nth-child(2) {
+        grid-area: date;
+        justify-self: end;
+        font-size: 11px;
+        color: #94a3b8;
+        white-space: nowrap;
+      }
+      .report-container table tbody td:nth-child(3) {
+        grid-area: title;
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+      .report-container table tbody td:nth-child(4) {
+        grid-area: perihal;
+        min-width: 0;
+      }
+      .report-container table tbody td:nth-child(4) > div:first-child {
+        font-size: 12.5px !important;
+        font-weight: 600 !important;
+        color: #475569;
+      }
+      .report-container table tbody td:nth-child(4) > div:last-child {
+        font-size: 11px !important;
+        color: #94a3b8 !important;
+      }
+      .report-container table tbody td:nth-child(5) {
+        grid-area: jenis;
+        justify-self: end;
+        align-self: start;
+      }
+      .report-container table tbody td:nth-child(7) {
+        grid-area: actions;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        justify-content: flex-end;
+      }
+      .report-container table tbody td:nth-child(7) .action-btns {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 6px !important;
+        justify-content: flex-end !important;
+      }
+      .report-container table tbody td:nth-child(6) {
+        display: none;
+      }
+      .report-container table tbody td[colspan] {
+        grid-row: 1 / span 5 !important;
+      }
+  
+    }
+  </style>
+
+</head>
   <body>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 

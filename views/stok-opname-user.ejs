@@ -541,7 +541,164 @@
       }
     </style>
     <link rel="stylesheet" href="/css/stat-cards.css" />
-  </head>
+
+  <style id="mobile-card-view">
+    /* ============================================================
+       TAMPILAN KARTU MOBILE — HANYA UNTUK LAYAR <= 768px
+       Desktop/laptop tidak berubah.
+       ============================================================ */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 16px !important;
+      }
+      .main-box {
+        padding: 16px !important;
+        overflow: visible !important;
+      }
+      .table-responsive-container,
+      .table-responsive-wrapper,
+      .table-responsive {
+        overflow: visible !important;
+      }
+      
+      /* dasar kartu */
+      #stokTable {
+        min-width: 0 !important;
+        width: 100% !important;
+        border: 0 !important;
+        background: transparent !important;
+      }
+      #stokTable thead {
+        display: none !important;
+      }
+      #stokTable,
+      #stokTable tbody {
+        display: block !important;
+        width: 100% !important;
+      }
+      #stokTable tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 3px 12px;
+        align-items: center;
+        margin: 0 0 10px;
+        padding: 12px 14px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+      }
+      #stokTable tbody td {
+        display: block;
+        padding: 0;
+        border: 0 !important;
+        background: transparent;
+        font-size: 13px;
+        line-height: 1.4;
+        color: #475569;
+        text-align: left !important;
+        vertical-align: middle;
+        white-space: normal;
+      }
+      #stokTable tbody td[colspan] {
+        display: block !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 1 / span 4 !important;
+        padding: 18px 8px !important;
+        text-align: center !important;
+      }
+      #stokTable tbody td .badge {
+        font-size: 10.5px;
+        padding: 4px 9px;
+      }
+      /* tombol aksi kompak */
+      #stokTable tbody td .btn-detail,
+      #stokTable tbody td .btn-edit,
+      #stokTable tbody td .btn-delete,
+      #stokTable tbody td .btn-action,
+      #stokTable tbody td .btn-sub-action {
+        margin: 0 !important;
+        padding: 6px 10px !important;
+        font-size: 11.5px !important;
+        line-height: 1.2;
+        border-radius: 6px;
+        white-space: nowrap;
+      }
+      #stokTable tbody td form {
+        margin: 0 !important;
+        display: inline-flex !important;
+      }
+      
+  
+      
+      #stokTable tbody tr {
+        grid-template-areas:
+          "kategori total"
+          "title title"
+          "masuk keluar";
+      }
+      #stokTable tbody td:nth-child(1) {
+        grid-area: title;
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+      #stokTable tbody td:nth-child(2) {
+        grid-area: kategori;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: #94a3b8;
+      }
+      #stokTable tbody td:nth-child(4) {
+        grid-area: masuk;
+        font-size: 12px;
+        font-weight: 700;
+        color: #15803d;
+        white-space: nowrap;
+      }
+      #stokTable tbody td:nth-child(4)::before {
+        content: "Masuk ";
+        font-size: 10.5px;
+        font-weight: 600;
+        color: #94a3b8;
+      }
+      #stokTable tbody td:nth-child(5) {
+        grid-area: keluar;
+        justify-self: end;
+        font-size: 12px;
+        font-weight: 700;
+        color: #b91c1c;
+        white-space: nowrap;
+      }
+      #stokTable tbody td:nth-child(5)::before {
+        content: "Keluar ";
+        font-size: 10.5px;
+        font-weight: 600;
+        color: #94a3b8;
+      }
+      #stokTable tbody td:nth-child(6) {
+        grid-area: total;
+        justify-self: end;
+        align-self: start;
+        padding: 3px 9px !important;
+        border-radius: 999px;
+        background: #f1f5f9;
+        font-size: 11.5px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+      
+      #stokTable tbody td:nth-child(3),
+      #stokTable tbody td:nth-child(7) {
+        display: none;
+      }
+  
+    }
+  </style>
+
+</head>
   <body>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
