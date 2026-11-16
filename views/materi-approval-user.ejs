@@ -299,11 +299,35 @@
         gap: 6px;
         transition: all 0.2s;
       }
+
+      /* Default aktif (jika tidak ada kelas spesifik) */
       .nav-btn.active {
-        background: #0f172a; /* Warna gelap ala tombol aktif */
+        background: #0f172a;
         color: #fff;
         border-color: #0f172a;
       }
+
+      /* 1. Tombol 'Semua Pengajuan' Saat Aktif (Warna Gelap) */
+      .nav-btn.active.btn-semua {
+        background: #0f172a;
+        color: #fff;
+        border-color: #0f172a;
+      }
+
+      /* 2. Tombol 'Perlu Persetujuan' Saat Aktif (Warna Oranye) */
+      .nav-btn.active.btn-warning {
+        background: #f59e0b !important; /* Oranye */
+        color: #fff !important;
+        border-color: #d97706 !important;
+      }
+
+      /* 3. Tombol 'Disetujui' Saat Aktif (Warna Hijau) */
+      .nav-btn.active.btn-success {
+        background: #10b981 !important; /* Hijau */
+        color: #fff !important;
+        border-color: #059669 !important;
+      }
+
       /* Badge angka di dalam tombol navigasi */
       .badge-count {
         background: #e2e8f0;
@@ -314,8 +338,8 @@
         font-weight: 600;
       }
       .nav-btn.active .badge-count {
-        background: #1e293b;
-        color: #cbd5e1;
+        background: rgba(255, 255, 255, 0.2); /* Efek transparan menyatu dengan tombol aktif */
+        color: #fff;
       }
       .badge-count.warning {
         background: #fef3c7;
@@ -1296,15 +1320,14 @@
         </div>
 
         <div class="filter-nav-container">
-          <!-- Navigasi Status (Kiri) - Tanpa tombol Ditolak -->
           <div class="status-nav-group">
-            <button type="button" class="nav-btn active" onclick="filterStatus('', this)">
+            <button type="button" class="nav-btn active btn-semua" onclick="filterStatus('', this)">
               Semua Pengajuan <span class="badge-count"><%= totalMateri %></span>
             </button>
-            <button type="button" class="nav-btn" onclick="filterStatus('Menunggu', this)">
+            <button type="button" class="nav-btn btn-warning" onclick="filterStatus('Menunggu', this)">
               Perlu Persetujuan <span class="badge-count warning"><%= jumlahMenunggu %></span>
             </button>
-            <button type="button" class="nav-btn" onclick="filterStatus('Disetujui', this)">
+            <button type="button" class="nav-btn btn-success" onclick="filterStatus('Disetujui', this)">
               Disetujui <span class="badge-count success"><%= jumlahDisetujui %></span>
             </button>
           </div>
