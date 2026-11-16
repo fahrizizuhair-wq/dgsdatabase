@@ -952,17 +952,14 @@
                     %>
                     
                     <% if (['disetujui', 'approved', 'selesai'].includes(statusMateri)) { %>
-                      //<!-- Ikon Centang untuk Disetujui -->
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
                         <path d="M20 6 9 17l-5-5"/>
                       </svg>
                     <% } else if (['ditolak', 'rejected'].includes(statusMateri)) { %>
-                      // Ikon Silang untuk Ditolak
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
                         <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
                       </svg>
                     <% } else { %>
-                      //<!-- Ikon Jam untuk Menunggu -->
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
                         <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
                       </svg>
