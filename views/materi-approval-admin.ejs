@@ -52,6 +52,22 @@
     }
     .btn-primary:hover { background-color: #5c1313; }
 
+    /* Sembunyikan sub-menu secara default */
+    .nav-item.dropdown .dropdown-menu {
+      display: none;
+    }
+
+    /* Tampilkan sub-menu saat elemen pembungkus memiliki kelas 'open' */
+    .nav-item.dropdown.open .dropdown-menu {
+      display: block;
+    }
+
+    /* Putar panah saat dropdown terbuka (opsional) */
+    .nav-item.dropdown.open .arrow {
+      transform: rotate(180deg);
+      transition: transform 0.3s ease;
+    }
+
     /* ALERT */
     .page-alert {
       display: flex; align-items: flex-start; gap: 10px; padding: 13px 16px;
@@ -796,7 +812,7 @@
                   <td data-label="Urgensi"><span class="badge <%= kelasUrgensi %>"><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span></td>
                   <td data-label="Status"><span class="badge <%= kelasStatus %>" id="status-badge-<%= materi._id %>"><span class="badge-dot"></span><%= materi.statusApproval || 'Menunggu' %></span></td>
                   <td data-label="Aksi">
-                    <button type="button" class="btn-review" onclick='bukaModalReview(<%- JSON.stringify(materi) %>)'>
+                    <button type="button" class="btn-review" onclick='bukaModalReview<%- JSON.stringify(materi) %>)'>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
@@ -966,7 +982,7 @@
     function toggleDropdown(element) {
       const parentLi = element.closest('.dropdown');
       if (parentLi) {
-        parentLi.classList.toggle('active');
+        parentLi.classList.toggle('open');
       }
     }
 
@@ -1111,8 +1127,23 @@
         if (response.ok) {
           const badge = document.getElementById(`status-badge-${id}`);
           if (badge) {
-            badge.className = 'badge ' + (statusBaru === 'Disetujui' ? 'status-disetujui' : 'status-ditolak');
-            badge.innerHTML = `<span class="badge-dot"></span>${statusBaru}`;
+            let badgeClass = 'status-menunggu';
+            let iconSvg = '';
+
+            const statusLower = statusBaru.toLowerCase();
+            if (statusLower === 'disetujui' || statusLower === 'approved' || statusLower === 'selesai') {
+              badgeClass = 'status-disetujui';
+              iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            } else if (statusLower === 'ditolak' || statusLower === 'rejected') {
+              badgeClass = 'status-ditolak';
+              iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+            } else {
+              badgeClass = 'status-menunggu';
+              iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+            }
+
+            badge.className = 'badge ' + badgeClass;
+            badge.innerHTML = `${iconSvg}<span>${statusBaru}</span>`;
           }
           tutupModalReview();
           alert(`Pengajuan berhasil diubah statusnya menjadi: ${statusBaru}`);
@@ -1122,10 +1153,11 @@
         }
       } catch (error) {
         console.error('Error:', error);
+        // Fallback jika terjadi kendala jaringan
         const badge = document.getElementById(`status-badge-${id}`);
         if (badge) {
           badge.className = 'badge ' + (statusBaru === 'Disetujui' ? 'status-disetujui' : 'status-ditolak');
-          badge.innerHTML = `<span class="badge-dot"></span>${statusBaru}`;
+          badge.innerHTML = `<span>${statusBaru}</span>`;
         }
         tutupModalReview();
         alert(`Status berhasil diperbarui menjadi ${statusBaru}`);
