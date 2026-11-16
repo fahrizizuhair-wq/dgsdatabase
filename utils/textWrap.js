@@ -27,7 +27,9 @@ function wrapLine(line, weight, sizePt, maxWidth) {
 
   const lines = [];
   let current = '';
-  const words = clean.split(/ +/).filter(function (w) { return w !== ''; });
+  const words = clean.split(/ +/).filter(function (w) {
+    return w !== '';
+  });
 
   words.forEach(function (word) {
     const candidate = current === '' ? word : current + ' ' + word;
@@ -68,8 +70,7 @@ function wrapLine(line, weight, sizePt, maxWidth) {
  * Baris baru (\n) tetap dipertahankan sebagai baris terpisah.
  */
 function wrapText(text, weight, sizePt, maxWidth) {
-  const source = String(text === null || text === undefined ? '' : text)
-    .replace(/\r\n?/g, '\n');
+  const source = String(text === null || text === undefined ? '' : text).replace(/\r\n?/g, '\n');
   if (source === '') return [];
   const hasil = [];
   source.split('\n').forEach(function (line) {

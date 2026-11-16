@@ -15,6 +15,7 @@
 %>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <%- include('partials/head') %>
   <meta charset="UTF-8">
@@ -22,36 +23,129 @@
   <title>Workspace - <%= lpj.namaKegiatan %></title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      color: #333; display: flex; min-height: 100vh;
-      position: relative; background-color: #f4f6f9;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #333;
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      background-color: #f4f6f9;
+    }
+
     body::before {
-      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%), 
-                  url('/images/background.jpg') no-repeat center top fixed;
-      background-size: cover; z-index: -1; pointer-events: none;
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%),
+        url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover;
+      z-index: -1;
+      pointer-events: none;
     }
-    .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
-    
+
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      width: 100%;
+      overflow-x: auto;
+    }
+
     /* TOP SYSTEM BANNER */
     .system-banner {
-      background: #fffdfd; color: #ffffff; border-radius: 12px; padding: 22px 24px;
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 15px;
+      background: #fffdfd;
+      color: #ffffff;
+      border-radius: 12px;
+      padding: 22px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      flex-wrap: wrap;
+      gap: 15px;
     }
-    .banner-title-wrap { display: flex; align-items: center; gap: 14px; }
-    .banner-icon { background: #7a1b1b; color: white; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
-    .banner-text span { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #7a1b1b; font-weight: 700; }
-    .banner-text h1 { font-size: 20px; font-weight: 700; color: #000000; margin-top: 2px; }
 
-    .banner-actions { display: flex; gap: 10px; align-items: center; }
-    .btn-daftar-lpj { background: rgb(150, 29, 29); color: white; border: 1px solid rgba(140, 34, 34, 0.201); padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.2s; }
-    .btn-daftar-lpj:hover { background: rgb(72, 13, 13); }
-    .btn-buat-baru { background-color: #7a1b1b; color: white; border: none; padding: 9px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 13px; display: inline-block; }
-    .btn-buat-baru:hover { background-color: #5c1313; }
+    .banner-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .banner-icon {
+      background: #7a1b1b;
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .banner-text span {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #7a1b1b;
+      font-weight: 700;
+    }
+
+    .banner-text h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #000000;
+      margin-top: 2px;
+    }
+
+    .banner-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-daftar-lpj {
+      background: rgb(150, 29, 29);
+      color: white;
+      border: 1px solid rgba(140, 34, 34, 0.201);
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-daftar-lpj:hover {
+      background: rgb(72, 13, 13);
+    }
+
+    .btn-buat-baru {
+      background-color: #7a1b1b;
+      color: white;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 13px;
+      display: inline-block;
+    }
+
+    .btn-buat-baru:hover {
+      background-color: #5c1313;
+    }
 
     /* KOTAK WRAPPER UTAMA BERLATAR BELAKANG PUTIH SAMPAI BAWAH */
     .workspace-wrapper {
@@ -59,53 +153,243 @@
       backdrop-filter: blur(8px);
       border-radius: 14px;
       padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     }
 
     /* DETAIL HEADER CARD */
     .detail-header-card {
-      background: #ffffff; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
       border: 1px solid #e2e8f0;
     }
-    .back-link { font-size: 12.5px; color: #7a1b1b; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; }
-    .detail-title-area h2 { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-    .detail-meta-badges { display: flex; gap: 12px; font-size: 12.5px; color: #64748b; font-weight: 500; align-items: center; flex-wrap: wrap; }
-    .badge-status-green { color: #15803d; font-weight: 600; }
-    
-    .btn-tambah-catatan { background: #ffffff; color: #7a1b1b; border: 1.5px solid #7a1b1b; padding: 9px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
-    .btn-tambah-catatan:hover { background: #7a1b1b; color: #ffffff; }
-    .btn-tambah-nota { background: #ffffff; color: #7a1b1b; border: 1.5px solid #7a1b1b; padding: 9px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
-    .btn-tambah-nota:hover { background: #7a1b1b; color: #ffffff; }
+
+    .back-link {
+      font-size: 12.5px;
+      color: #7a1b1b;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .detail-title-area h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .detail-meta-badges {
+      display: flex;
+      gap: 12px;
+      font-size: 12.5px;
+      color: #64748b;
+      font-weight: 500;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .badge-status-green {
+      color: #15803d;
+      font-weight: 600;
+    }
+
+    .btn-tambah-catatan {
+      background: #ffffff;
+      color: #7a1b1b;
+      border: 1.5px solid #7a1b1b;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-tambah-catatan:hover {
+      background: #7a1b1b;
+      color: #ffffff;
+    }
+
+    .btn-tambah-nota {
+      background: #ffffff;
+      color: #7a1b1b;
+      border: 1.5px solid #7a1b1b;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-tambah-nota:hover {
+      background: #7a1b1b;
+      color: #ffffff;
+    }
 
     /* STATISTIK memakai desain seragam /css/stat-cards.css */
-    .stat-card .card-value { font-size: clamp(1rem, 1.5vw, 1.35rem); white-space: nowrap; }
+    .stat-card .card-value {
+      font-size: clamp(1rem, 1.5vw, 1.35rem);
+      white-space: nowrap;
+    }
 
     /* TAB NAVIGATION */
-    .tab-nav { background: white; border-radius: 12px; padding: 10px; display: flex; gap: 10px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); overflow-x: auto; }
-    .tab-btn { flex: 1; padding: 12px 16px; text-align: center; border-radius: 8px; background: transparent; border: none; font-family: inherit; font-size: 13.5px; font-weight: 600; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; white-space: nowrap; }
-    .tab-btn svg { width: 16px; height: 16px; }
-    .tab-btn:hover { background: #f8fafc; color: #0f172a; }
-    .tab-btn.active { background: #7a1b1b; color: white; box-shadow: 0 2px 8px rgba(122, 27, 27, 0.25); }
+    .tab-nav {
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      text-align: center;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .tab-btn:hover {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .tab-btn.active {
+      background: #7a1b1b;
+      color: white;
+      box-shadow: 0 2px 8px rgba(122, 27, 27, 0.25);
+    }
 
     /* CONTENT TAB CARD */
-    .tab-content-card { background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-    .tab-pane { display: none; }
-    .tab-pane.active { display: block; }
+    .tab-content-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
 
-    .tab-section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
-    .tab-section-head h3 { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-    .tab-section-head p { font-size: 12.5px; color: #64748b; }
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    .tab-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tab-section-head h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .tab-section-head p {
+      font-size: 12.5px;
+      color: #64748b;
+    }
 
     /* TABEL RINCIAN PENGELUARAN */
-    .table-rincian { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-    .table-rincian th { background: #f8fafc; color: #475569; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.5px; padding: 11px 10px; border-bottom: 2px solid #e2e8f0; text-align: left; white-space: nowrap; }
-    .table-rincian td { padding: 11px 10px; border-bottom: 1px solid #eef2f7; vertical-align: top; color: #334155; }
-    .table-rincian tbody tr { cursor: pointer; transition: background 0.15s; }
-    .table-rincian tbody tr:hover { background: #fdf2f2; }
-    .table-rincian .num { text-align: right; white-space: nowrap; }
-    .nota-link { display: inline-flex; align-items: center; gap: 5px; color: #7a1b1b; font-weight: 600; text-decoration: none; font-size: 12px; }
-    .nota-link:hover { text-decoration: underline; }
+    .table-rincian {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    .table-rincian th {
+      background: #f8fafc;
+      color: #475569;
+      text-transform: uppercase;
+      font-size: 10.5px;
+      letter-spacing: 0.5px;
+      padding: 11px 10px;
+      border-bottom: 2px solid #e2e8f0;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .table-rincian td {
+      padding: 11px 10px;
+      border-bottom: 1px solid #eef2f7;
+      vertical-align: top;
+      color: #334155;
+    }
+
+    .table-rincian tbody tr {
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .table-rincian tbody tr:hover {
+      background: #fdf2f2;
+    }
+
+    .table-rincian .num {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .nota-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #7a1b1b;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .nota-link:hover {
+      text-decoration: underline;
+    }
 
     /* ACTION BUTTONS RINCIAN */
     .btn-table-edit {
@@ -122,10 +406,12 @@
       gap: 3px;
       transition: all 0.2s ease;
     }
+
     .btn-table-edit:hover {
       background-color: #334155;
       transform: translateY(-1px);
     }
+
     .btn-table-delete {
       background-color: #dc2626;
       color: #ffffff;
@@ -140,64 +426,262 @@
       gap: 3px;
       transition: all 0.2s ease;
     }
+
     .btn-table-delete:hover {
       background-color: #b91c1c;
       transform: translateY(-1px);
     }
 
     /* EMPTY STATE */
-    .empty-state { text-align: center; padding: 34px 20px; color: #94a3b8; border: 1px dashed #cbd5e1; border-radius: 12px; background: #fbfcfd; font-size: 13px; }
-    .empty-state strong { display: block; color: #475569; margin-bottom: 4px; font-size: 14px; }
+    .empty-state {
+      text-align: center;
+      padding: 34px 20px;
+      color: #94a3b8;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      background: #fbfcfd;
+      font-size: 13px;
+    }
+
+    .empty-state strong {
+      display: block;
+      color: #475569;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
 
     /* VAULT NOTA */
-    .vault-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
-    .vault-card { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column; position: relative; }
-    
+    .vault-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .vault-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
     /* Tombol Hapus X pada Kartu Vault */
     .vault-delete-btn {
-      position: absolute; top: 8px; right: 8px;
-      background: #7a1b1b; color: white;
-      border: none; width: 26px; height: 26px; border-radius: 50%;
-      font-size: 13px; font-weight: bold; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      z-index: 10; transition: background 0.2s, transform 0.2s;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #7a1b1b;
+      color: white;
+      border: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
-    .vault-delete-btn:hover { background: #6b0b0b; transform: scale(1.1); }
 
-    .vault-thumb { height: 130px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    .vault-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .vault-thumb a { display: block; width: 100%; height: 100%; }
-    .vault-file-icon { color: #64748b; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; }
-    .vault-file-icon svg { width: 34px; height: 34px; }
-    .vault-info { padding: 11px 12px 13px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
-    .vault-name { font-size: 12px; font-weight: 600; color: #0f172a; word-break: break-word; }
-    .vault-meta { font-size: 10.5px; color: #94a3b8; }
-    .vault-source { align-self: flex-start; background: #f1f5f9; color: #475569; border-radius: 999px; padding: 2px 8px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
-    .vault-actions { margin-top: auto; padding-top: 4px; }
+    .vault-delete-btn:hover {
+      background: #6b0b0b;
+      transform: scale(1.1);
+    }
+
+    .vault-thumb {
+      height: 130px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .vault-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .vault-thumb a {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .vault-file-icon {
+      color: #64748b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .vault-file-icon svg {
+      width: 34px;
+      height: 34px;
+    }
+
+    .vault-info {
+      padding: 11px 12px 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+    }
+
+    .vault-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f172a;
+      word-break: break-word;
+    }
+
+    .vault-meta {
+      font-size: 10.5px;
+      color: #94a3b8;
+    }
+
+    .vault-source {
+      align-self: flex-start;
+      background: #f1f5f9;
+      color: #475569;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .vault-actions {
+      margin-top: auto;
+      padding-top: 4px;
+    }
 
     /* MODAL STYLING */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
-    .modal-content { background: white; padding: 24px; border-radius: 16px; width: 480px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 1px solid #e2e8f0; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 5px; color: #334155; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 13px; outline: none; background: #fff; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    .btn-cancel { background: #e2e8f0; border: none; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: #334155; }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      width: 480px;
+      max-width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border: 1px solid #e2e8f0;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #334155;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      background: #fff;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: #e2e8f0;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #334155;
+    }
 
     /* UPLOAD NOTA */
-    .upload-box { border: 1.5px dashed #e8a6a6; background: #fffafa; border-radius: 10px; padding: 14px; text-align: center; }
-    .upload-box input[type="file"] { width: 100%; font-size: 12px; color: #64748b; background: #fff; }
-    .upload-hint { font-size: 11px; color: #94a3b8; margin-top: 7px; display: block; }
-    .upload-preview { margin-top: 10px; display: none; }
-    .upload-preview img { max-width: 100%; max-height: 150px; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .upload-box {
+      border: 1.5px dashed #e8a6a6;
+      background: #fffafa;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .upload-box input[type="file"] {
+      width: 100%;
+      font-size: 12px;
+      color: #64748b;
+      background: #fff;
+    }
+
+    .upload-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 7px;
+      display: block;
+    }
+
+    .upload-preview {
+      margin-top: 10px;
+      display: none;
+    }
+
+    .upload-preview img {
+      max-width: 100%;
+      max-height: 150px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
   </style>
   <link rel="stylesheet" href="/css/stat-cards.css">
 </head>
+
 <body>
 
   <main class="main-content">
-    
+
     <!-- TOP BANNER -->
     <div class="system-banner">
       <div class="banner-title-wrap">
@@ -241,7 +725,10 @@
           <div class="card-header">
             <span class="card-title">Kasbon Diterima</span>
             <div class="icon-wrapper icon-blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+              </svg>
             </div>
           </div>
           <div class="card-body">
@@ -257,7 +744,11 @@
           <div class="card-header">
             <span class="card-title">Total Pengeluaran Realis</span>
             <div class="icon-wrapper icon-red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
             </div>
           </div>
           <div class="card-body">
@@ -273,7 +764,10 @@
           <div class="card-header">
             <span class="card-title">Sisa Saldo / Balance</span>
             <div class="icon-wrapper icon-green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
             </div>
           </div>
           <div class="card-body">
@@ -289,33 +783,50 @@
       <!-- MENU TAB NAVIGASI DENGAN SVG ICON -->
       <div class="tab-nav">
         <button class="tab-btn <%= currentTab === 'ringkasan' ? 'active' : '' %>" onclick="switchTab(event, 'ringkasan')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
           Ringkasan
         </button>
         <button class="tab-btn <%= currentTab === 'pencairan' ? 'active' : '' %>" onclick="switchTab(event, 'pencairan')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+            <line x1="1" y1="10" x2="23" y2="10"></line>
+          </svg>
           Pencairan Dana (<%= riwayatPencairan.length %>)
         </button>
         <button class="tab-btn <%= currentTab === 'rincian' ? 'active' : '' %>" onclick="switchTab(event, 'rincian')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
           Rincian Pengeluaran (<%= rincianList.length %>)
         </button>
         <button class="tab-btn <%= currentTab === 'vault' ? 'active' : '' %>" onclick="switchTab(event, 'vault')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
           Vault Nota Digital (<%= vaultList.length %>)
         </button>
       </div>
 
       <!-- KONTEN TAB -->
       <div class="tab-content-card">
-        
+
         <!-- TAB 1: RINGKASAN -->
         <div id="ringkasan" class="tab-pane <%= currentTab === 'ringkasan' ? 'active' : '' %>">
           <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 10px;">Deskripsi & Progress LPJ</h3>
           <p style="color: #475569; font-size: 13.5px; margin-bottom: 20px;">
             <%= lpj.keterangan || 'Laporan pertanggungjawaban ini merangkum seluruh penggunaan anggaran kasbon secara transparan. Semua bukti pengeluaran fisik telah dikonversi ke format digital yang siap diproses oleh auditor.' %>
           </p>
-          
+
           <div style="margin-bottom: 8px; display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
             <span>Realisasi Total Pengeluaran</span>
             <span style="color: #dc2626;"><%= lpj.progressBelanja %>%</span>
@@ -334,33 +845,33 @@
           </div>
 
           <% if (riwayatPencairan.length > 0) { %>
-            <div class="table-responsive" style="overflow-x: auto;">
-              <table class="table table-bordered align-middle" style="font-size: 13px; width: 100%; border-collapse: collapse;">
-                <thead class="table-light" style="background: #f8fafc;">
-                  <tr>
-                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">No</th>
-                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">Tanggal</th>
-                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">Nominal</th>
-                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">Keterangan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% riwayatPencairan.forEach((item, index) => { %>
-                    <tr>
-                      <td style="padding: 10px; border: 1px solid #e2e8f0;"><%= index + 1 %></td>
-                      <td style="padding: 10px; border: 1px solid #e2e8f0;"><%= formatTanggal(item.tanggal) %></td>
-                      <td style="padding: 10px; border: 1px solid #e2e8f0;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
-                      <td style="padding: 10px; border: 1px solid #e2e8f0;"><%= item.keterangan || '-' %></td>
-                    </tr>
-                  <% }) %>
-                </tbody>
-              </table>
-            </div>
+          <div class="table-responsive" style="overflow-x: auto;">
+            <table class="table table-bordered align-middle" style="font-size: 13px; width: 100%; border-collapse: collapse;">
+              <thead class="table-light" style="background: #f8fafc;">
+                <tr>
+                  <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">No</th>
+                  <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">Tanggal</th>
+                  <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">Nominal</th>
+                  <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% riwayatPencairan.forEach((item, index) => { %>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid #e2e8f0;"><%= index + 1 %></td>
+                  <td style="padding: 10px; border: 1px solid #e2e8f0;"><%= formatTanggal(item.tanggal) %></td>
+                  <td style="padding: 10px; border: 1px solid #e2e8f0;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
+                  <td style="padding: 10px; border: 1px solid #e2e8f0;"><%= item.keterangan || '-' %></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
           <% } else { %>
-            <div class="empty-state">
-              <strong>Belum ada riwayat pencairan dana</strong>
-              Pencairan dana untuk kegiatan ini belum dicatat.
-            </div>
+          <div class="empty-state">
+            <strong>Belum ada riwayat pencairan dana</strong>
+            Pencairan dana untuk kegiatan ini belum dicatat.
+          </div>
           <% } %>
         </div>
 
@@ -387,7 +898,10 @@
             <div style="padding: 16px 20px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <div style="background: #fef2f2; color: #dc2626; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                  </svg>
                 </div>
                 <div>
                   <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; text-transform: uppercase;">BIAYA PRODUKSI</h4>
@@ -413,7 +927,7 @@
                 </thead>
                 <tbody>
                   <% if (produksiItems.length > 0) { %>
-                    <% produksiItems.forEach((item, index) => { 
+                  <% produksiItems.forEach((item, index) => { 
                       let tglIso = '';
                       if (item.tanggal) {
                         try {
@@ -427,42 +941,40 @@
                         } catch(e) {}
                       }
                     %>
-                      <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
-                        <td><%= index + 1 %></td>
-                        <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
-                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '' : '' %></td>
-                        <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
-                        <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
-                        <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
-                        <td><%= item.keterangan || '-' %></td>
-                        <td style="white-space: nowrap; text-align: center;" onclick="event.stopPropagation()">
-                          <div style="display: inline-flex; gap: 5px; align-items: center;">
-                            <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)"
-                              data-id="<%= item._id %>"
-                              data-tanggal="<%= tglIso %>"
-                              data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>"
-                              data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>"
-                              data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>"
-                              data-qty="<%= item.qty || 1 %>"
-                              data-harga="<%= item.hargaSatuan || 0 %>"
-                              data-nominal="<%= item.nominal || 0 %>"
-                              data-notapath="<%= item.notaPath || '' %>"
-                              title="Edit Transaksi">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                              Edit
-                            </button>
-                            <form action="/lpj/detail/<%= lpj._id %>/hapus-catatan/<%= item._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item belanja ini?');" style="margin: 0; display: inline;">
-                              <button type="submit" class="btn-table-delete" title="Hapus Transaksi">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                Hapus
-                              </button>
-                            </form>
-                          </div>
-                        </td>
-                      </tr>
-                    <% }) %>
+                  <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
+                    <td><%= index + 1 %></td>
+                    <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
+                    <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '' : '' %></td>
+                    <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
+                    <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
+                    <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
+                    <td><%= item.keterangan || '-' %></td>
+                    <td style="white-space: nowrap; text-align: center;" onclick="event.stopPropagation()">
+                      <div style="display: inline-flex; gap: 5px; align-items: center;">
+                        <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)" data-id="<%= item._id %>" data-tanggal="<%= tglIso %>" data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>" data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>" data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>" data-qty="<%= item.qty || 1 %>" data-harga="<%= item.hargaSatuan || 0 %>" data-nominal="<%= item.nominal || 0 %>" data-notapath="<%= item.notaPath || '' %>" title="Edit Transaksi">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                          Edit
+                        </button>
+                        <form action="/lpj/detail/<%= lpj._id %>/hapus-catatan/<%= item._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item belanja ini?');" style="margin: 0; display: inline;">
+                          <button type="submit" class="btn-table-delete" title="Hapus Transaksi">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Hapus
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }) %>
                   <% } else { %>
-                    <tr><td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada transaksi di kategori ini.</td></tr>
+                  <tr>
+                    <td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada transaksi di kategori ini.</td>
+                  </tr>
                   <% } %>
                 </tbody>
               </table>
@@ -474,7 +986,10 @@
             <div style="padding: 16px 20px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <div style="background: #fef2f2; color: #dc2626; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                  </svg>
                 </div>
                 <div>
                   <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; text-transform: uppercase;">BIAYA OPERASIONAL</h4>
@@ -500,7 +1015,7 @@
                 </thead>
                 <tbody>
                   <% if (operasionalItems.length > 0) { %>
-                    <% operasionalItems.forEach((item, index) => { 
+                  <% operasionalItems.forEach((item, index) => { 
                       let tglIso = '';
                       if (item.tanggal) {
                         try {
@@ -514,42 +1029,40 @@
                         } catch(e) {}
                       }
                     %>
-                      <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
-                        <td><%= index + 1 %></td>
-                        <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
-                        <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '' : '' %></td>
-                        <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
-                        <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
-                        <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
-                        <td><%= item.keterangan || '-' %></td>
-                        <td style="white-space: nowrap; text-align: center;" onclick="event.stopPropagation()">
-                          <div style="display: inline-flex; gap: 5px; align-items: center;">
-                            <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)"
-                              data-id="<%= item._id %>"
-                              data-tanggal="<%= tglIso %>"
-                              data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>"
-                              data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>"
-                              data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>"
-                              data-qty="<%= item.qty || 1 %>"
-                              data-harga="<%= item.hargaSatuan || 0 %>"
-                              data-nominal="<%= item.nominal || 0 %>"
-                              data-notapath="<%= item.notaPath || '' %>"
-                              title="Edit Transaksi">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                              Edit
-                            </button>
-                            <form action="/lpj/detail/<%= lpj._id %>/hapus-catatan/<%= item._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item belanja ini?');" style="margin: 0; display: inline;">
-                              <button type="submit" class="btn-table-delete" title="Hapus Transaksi">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                Hapus
-                              </button>
-                            </form>
-                          </div>
-                        </td>
-                      </tr>
-                    <% }) %>
+                  <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
+                    <td><%= index + 1 %></td>
+                    <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
+                    <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '' : '' %></td>
+                    <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
+                    <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
+                    <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
+                    <td><%= item.keterangan || '-' %></td>
+                    <td style="white-space: nowrap; text-align: center;" onclick="event.stopPropagation()">
+                      <div style="display: inline-flex; gap: 5px; align-items: center;">
+                        <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)" data-id="<%= item._id %>" data-tanggal="<%= tglIso %>" data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>" data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>" data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>" data-qty="<%= item.qty || 1 %>" data-harga="<%= item.hargaSatuan || 0 %>" data-nominal="<%= item.nominal || 0 %>" data-notapath="<%= item.notaPath || '' %>" title="Edit Transaksi">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                          Edit
+                        </button>
+                        <form action="/lpj/detail/<%= lpj._id %>/hapus-catatan/<%= item._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus item belanja ini?');" style="margin: 0; display: inline;">
+                          <button type="submit" class="btn-table-delete" title="Hapus Transaksi">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Hapus
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }) %>
                   <% } else { %>
-                    <tr><td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada transaksi di kategori ini.</td></tr>
+                  <tr>
+                    <td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada transaksi di kategori ini.</td>
+                  </tr>
                   <% } %>
                 </tbody>
               </table>
@@ -569,45 +1082,49 @@
           </div>
 
           <% if (vaultList.length > 0) { %>
-            <div class="vault-grid">
-              <% vaultList.forEach((v) => {
+          <div class="vault-grid">
+            <% vaultList.forEach((v) => {
                    const isFoto = polaFoto.test(String(v.filePath || v.fileName || ''));
               %>
-                <div class="vault-card">
-                  <!-- TOMBOL X UNTUK HAPUS NOTA -->
-                  <form action="/lpj/detail/<%= lpj._id %>/hapus-nota/<%= v._id %>" method="POST" onsubmit="return confirm('Yakin ingin menghapus nota/arsip ini?');">
-                    <button type="submit" class="vault-delete-btn" title="Hapus Nota">✕</button>
-                  </form>
+            <div class="vault-card">
+              <!-- TOMBOL X UNTUK HAPUS NOTA -->
+              <form action="/lpj/detail/<%= lpj._id %>/hapus-nota/<%= v._id %>" method="POST" onsubmit="return confirm('Yakin ingin menghapus nota/arsip ini?');">
+                <button type="submit" class="vault-delete-btn" title="Hapus Nota">✕</button>
+              </form>
 
-                  <div class="vault-thumb">
-                    <% if (isFoto) { %>
-                      <a href="<%= v.filePath %>" target="_blank" rel="noopener">
-                        <img src="<%= v.filePath %>" alt="<%= v.fileName %>" loading="lazy">
-                      </a>
-                    <% } else { %>
-                      <div class="vault-file-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                        <span>DOKUMEN</span>
-                      </div>
-                    <% } %>
-                  </div>
-                  <div class="vault-info">
-                    <span class="vault-source"><%= v.sumber || 'Nota' %></span>
-                    <div class="vault-name"><%= v.fileName || 'Nota' %></div>
-                    <% if (v.keterangan) { %><div class="vault-meta"><%= v.keterangan %></div><% } %>
-                    <div class="vault-meta"><%= formatTanggal(v.uploadedAt) %></div>
-                    <div class="vault-actions">
-                      <a class="nota-link" href="<%= v.filePath %>" target="_blank" rel="noopener">Buka Nota →</a>
-                    </div>
-                  </div>
+              <div class="vault-thumb">
+                <% if (isFoto) { %>
+                <a href="<%= v.filePath %>" target="_blank" rel="noopener">
+                  <img src="<%= v.filePath %>" alt="<%= v.fileName %>" loading="lazy">
+                </a>
+                <% } else { %>
+                <div class="vault-file-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                  </svg>
+                  <span>DOKUMEN</span>
                 </div>
-              <% }); %>
+                <% } %>
+              </div>
+              <div class="vault-info">
+                <span class="vault-source"><%= v.sumber || 'Nota' %></span>
+                <div class="vault-name"><%= v.fileName || 'Nota' %></div>
+                <% if (v.keterangan) { %><div class="vault-meta"><%= v.keterangan %></div><% } %>
+                <div class="vault-meta"><%= formatTanggal(v.uploadedAt) %></div>
+                <div class="vault-actions">
+                  <a class="nota-link" href="<%= v.filePath %>" target="_blank" rel="noopener">Buka Nota →</a>
+                </div>
+              </div>
             </div>
+            <% }); %>
+          </div>
           <% } else { %>
-            <div class="empty-state">
-              <strong>Vault nota masih kosong</strong>
-              Upload foto nota/invoice lewat tombol <b>+ Tambah Nota</b>, atau lampirkan nota saat menambah catatan belanja.
-            </div>
+          <div class="empty-state">
+            <strong>Vault nota masih kosong</strong>
+            Upload foto nota/invoice lewat tombol <b>+ Tambah Nota</b>, atau lampirkan nota saat menambah catatan belanja.
+          </div>
           <% } %>
         </div>
 
@@ -681,7 +1198,7 @@
           <span style="font-size: 12.5px; font-weight: 700; color: #7a1b1b;">Total Otomatis:</span>
           <span id="textTotalOtomatis" style="font-size: 16px; font-weight: 700; color: #7a1b1b;">Rp 0</span>
         </div>
-        
+
         <input type="hidden" id="inputNominalTotal" name="nominal" value="0">
 
         <div class="form-group">
@@ -753,7 +1270,7 @@
           <span style="font-size: 12.5px; font-weight: 700; color: #166534;">Total Otomatis:</span>
           <span id="editTextTotalOtomatis" style="font-size: 16px; font-weight: 700; color: #15803d;">Rp 0</span>
         </div>
-        
+
         <input type="hidden" id="editInputNominalTotal" name="nominal" value="0">
 
         <div class="form-group">
@@ -787,7 +1304,7 @@
       </div>
 
       <form action="/lpj/detail/<%= lpj._id %>/tambah-nota" method="POST" enctype="multipart/form-data">
-        
+
         <!-- Input Nama / Keterangan Nota -->
         <div class="form-group">
           <label>Nama / Keterangan Nota</label>
@@ -851,9 +1368,13 @@
   <script>
     function switchTab(evt, tabName) {
       const panes = document.getElementsByClassName('tab-pane');
-      for (let pane of panes) { pane.classList.remove('active'); }
+      for (let pane of panes) {
+        pane.classList.remove('active');
+      }
       const buttons = document.getElementsByClassName('tab-btn');
-      for (let btn of buttons) { btn.classList.remove('active'); }
+      for (let btn of buttons) {
+        btn.classList.remove('active');
+      }
       const target = document.getElementById(tabName);
       if (target) target.classList.add('active');
       if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
@@ -871,21 +1392,23 @@
       }
       document.getElementById('modalPreviewNota').style.display = 'flex';
     }
+
     function closePreviewNota() {
       document.getElementById('modalPreviewNota').style.display = 'none';
     }
 
     // Fungsi modal tambah catatan belanja
-    function openCatatanModal() { 
+    function openCatatanModal() {
       const tglInput = document.getElementById('inputTanggalCatatan');
       if (tglInput && !tglInput.value) {
         const today = new Date().toISOString().split('T')[0];
         tglInput.value = today;
       }
-      document.getElementById('catatanModal').style.display = 'flex'; 
+      document.getElementById('catatanModal').style.display = 'flex';
     }
-    function closeCatatanModal() { 
-      document.getElementById('catatanModal').style.display = 'none'; 
+
+    function closeCatatanModal() {
+      document.getElementById('catatanModal').style.display = 'none';
     }
 
     // Fungsi modal edit catatan belanja
@@ -967,21 +1490,23 @@
     function openNotaModal() {
       document.getElementById('notaModal').style.display = 'flex';
     }
+
     function closeNotaModal() {
       document.getElementById('notaModal').style.display = 'none';
     }
 
     // Fungsi modal tambah pencairan dana
-    function openPencairanModal() { 
+    function openPencairanModal() {
       const tglInput = document.getElementById('inputTanggalPencairan');
       if (tglInput && !tglInput.value) {
         const today = new Date().toISOString().split('T')[0];
         tglInput.value = today;
       }
-      document.getElementById('modalTambahKasbon').style.display = 'flex'; 
+      document.getElementById('modalTambahKasbon').style.display = 'flex';
     }
-    function closePencairanModal() { 
-      document.getElementById('modalTambahKasbon').style.display = 'none'; 
+
+    function closePencairanModal() {
+      document.getElementById('modalTambahKasbon').style.display = 'none';
     }
 
     // Pratinjau foto nota sebelum diupload
@@ -1014,6 +1539,8 @@
       document.getElementById('textTotalOtomatis').textContent = formatRp.replace('IDR', 'Rp');
       document.getElementById('inputNominalTotal').value = total;
     }
+
   </script>
 </body>
+
 </html>

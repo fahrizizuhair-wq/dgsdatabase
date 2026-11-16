@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <%- include('partials/head') %>
   <meta charset="UTF-8">
@@ -7,66 +8,89 @@
   <title>User Database - Laporan</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    html, body {
-      width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    body { 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      color: #333; display: flex; min-height: 100vh;
-      position: relative; background-color: #f4f6f9;
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #333;
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      background-color: #f4f6f9;
     }
 
     /* DI SINI TEMPAT GRADASI MERAH DI BACKGROUND */
     body::before {
-      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%), 
-                  url('/images/background.jpg') no-repeat center top fixed;
-      background-size: cover; z-index: -1; pointer-events: none;
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%),
+        url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover;
+      z-index: -1;
+      pointer-events: none;
     }
-    
+
     /* SIDEBAR STYLING */
-    .sidebar-overlay { 
-      display: none; 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100vw; 
-      height: 100vh; 
-      background: rgba(15, 23, 42, 0.55); 
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.55);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
-      z-index: 999; 
+      z-index: 999;
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-    .sidebar-overlay.active { 
-      display: block; 
+
+    .sidebar-overlay.active {
+      display: block;
       opacity: 1;
     }
 
     /* SIDEBAR */
-    .sidebar { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 280px; 
-      height: 100vh; 
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100vh;
       background: linear-gradient(180deg, #4d0e0e 0%, #7a1b1b 50%, #3e0b0b 100%);
-      color: white; 
-      padding: 28px 22px; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: space-between; 
-      z-index: 1000; 
-      transform: translateX(-100%); 
-      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); 
-      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25); 
+      color: white;
+      padding: 28px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 1000;
+      transform: translateX(-100%);
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25);
       overflow-y: auto;
     }
-    .sidebar.active { transform: translateX(0); }
+
+    .sidebar.active {
+      transform: translateX(0);
+    }
 
     .sidebar-header {
       display: flex;
@@ -76,11 +100,13 @@
       padding-bottom: 18px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.14);
     }
+
     .brand-wrap {
       display: flex;
       align-items: center;
       gap: 12px;
     }
+
     .brand-logo-img {
       width: 42px;
       height: 42px;
@@ -90,12 +116,14 @@
       border-radius: 10px;
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
+
     .brand-text h2 {
       font-size: 15px;
       font-weight: 700;
       letter-spacing: -0.3px;
       line-height: 1.2;
     }
+
     .brand-text span {
       font-size: 11px;
       text-transform: uppercase;
@@ -103,6 +131,7 @@
       color: rgba(255, 255, 255, 0.7);
       font-weight: 600;
     }
+
     .close-sidebar-btn {
       background: rgba(255, 255, 255, 0.1);
       border: none;
@@ -117,7 +146,10 @@
       font-size: 16px;
       transition: all 0.2s;
     }
-    .close-sidebar-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+    .close-sidebar-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
 
     .sidebar-user-card {
       background: rgba(255, 255, 255, 0.08);
@@ -129,6 +161,7 @@
       align-items: center;
       gap: 12px;
     }
+
     .user-avatar-circle {
       width: 38px;
       height: 38px;
@@ -142,11 +175,13 @@
       font-size: 13px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
+
     .sidebar-user-info h4 {
       font-size: 13px;
       font-weight: 600;
       color: white;
     }
+
     .sidebar-user-info span {
       display: inline-flex;
       align-items: center;
@@ -155,6 +190,7 @@
       color: #86efac;
       font-weight: 500;
     }
+
     .sidebar-user-info span::before {
       content: "";
       width: 6px;
@@ -172,104 +208,126 @@
       color: rgba(255, 255, 255, 0.5);
       margin: 10px 0 10px 8px;
     }
-    .nav-menu { 
-      list-style: none; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 6px; 
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-    .nav-item a { 
-      display: flex; 
+
+    .nav-item a {
+      display: flex;
       align-items: center;
       gap: 12px;
-      padding: 11px 14px; 
-      color: rgba(255, 255, 255, 0.82); 
-      text-decoration: none; 
-      border-radius: 10px; 
-      font-weight: 500; 
-      font-size: 13.5px; 
+      padding: 11px 14px;
+      color: rgba(255, 255, 255, 0.82);
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 13.5px;
       transition: all 0.2s ease;
     }
+
     .nav-item a svg {
       width: 18px;
       height: 18px;
       opacity: 0.8;
       transition: transform 0.2s;
     }
-    .nav-item a:hover { 
-      background-color: rgba(255, 255, 255, 0.12); 
-      color: #ffffff; 
+
+    .nav-item a:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
       transform: translateX(3px);
     }
+
     .nav-item a:hover svg {
       opacity: 1;
       transform: scale(1.1);
     }
-    .nav-item.active a { 
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%); 
-      color: #ffffff; 
+
+    .nav-item.active a {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%);
+      color: #ffffff;
       font-weight: 600;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       border-left: 3px solid #f87171;
     }
-    .nav-item.active a svg { opacity: 1; }
+
+    .nav-item.active a svg {
+      opacity: 1;
+    }
 
     /* DROPDOWN SIDEBAR */
-    .nav-item.dropdown { position: relative; }
-    .dropdown-toggle { 
-      display: flex !important; 
-      justify-content: space-between; 
-      align-items: center; 
+    .nav-item.dropdown {
+      position: relative;
+    }
+
+    .dropdown-toggle {
+      display: flex !important;
+      justify-content: space-between;
+      align-items: center;
       cursor: pointer;
     }
+
     .dropdown-toggle-left {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-    .dropdown-toggle .arrow { 
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-      font-size: 11px; 
+
+    .dropdown-toggle .arrow {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 11px;
       opacity: 0.8;
     }
+
     .dropdown-menu {
-      list-style: none; 
-      max-height: 0; 
-      overflow: hidden; 
+      list-style: none;
+      max-height: 0;
+      overflow: hidden;
       transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      background-color: rgba(50, 10, 10, 0.45); 
-      border-radius: 10px; 
-      margin-top: 4px; 
+      background-color: rgba(50, 10, 10, 0.45);
+      border-radius: 10px;
+      margin-top: 4px;
       padding-left: 10px;
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .dropdown-menu li a { 
-      padding: 9px 14px; 
-      font-size: 13px; 
-      color: rgba(255, 255, 255, 0.75); 
+
+    .dropdown-menu li a {
+      padding: 9px 14px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.75);
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .dropdown-menu li a:hover { 
-      color: #ffffff; 
-      background-color: rgba(255, 255, 255, 0.08); 
+
+    .dropdown-menu li a:hover {
+      color: #ffffff;
+      background-color: rgba(255, 255, 255, 0.08);
     }
-    .nav-item.dropdown.active .dropdown-menu { 
-      max-height: 200px; 
+
+    .nav-item.dropdown.active .dropdown-menu {
+      max-height: 200px;
       padding-top: 6px;
       padding-bottom: 6px;
     }
-    .nav-item.dropdown.active .arrow { transform: rotate(180deg); }
 
-    .sidebar-footer { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 10px; 
+    .nav-item.dropdown.active .arrow {
+      transform: rotate(180deg);
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       margin-top: 25px;
       padding-top: 18px;
       border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
+
     .btn-bottom {
       display: flex;
       align-items: center;
@@ -282,25 +340,84 @@
       border-radius: 8px;
       transition: all 0.2s;
     }
+
     .btn-bottom:hover {
       background: rgba(255, 255, 255, 0.1);
       color: white;
     }
 
     /* MAIN CONTENT */
-    .main-content { flex: 1; padding: 30px; width: 100%; overflow-x: auto; }
-    .header-section h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; color: #ffffff; }
-    .header-section p { color: #ffffff; }
-    
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin: 25px 0; }
-    .card { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 12px; border: 1px solid #eef0f4; backdrop-filter: blur(5px); display: flex; flex-direction: column; justify-content: center; }
-    .card-title { font-size: 14px; color: #666; margin-bottom: 8px; }
-    .card-value { font-size: 26px; font-weight: 700; color: #7a1b1b; }
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .header-section h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #ffffff;
+    }
+
+    .header-section p {
+      color: #ffffff;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin: 25px 0;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #eef0f4;
+      backdrop-filter: blur(5px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .card-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .card-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: #7a1b1b;
+    }
 
     /* REPORT CONTAINER */
-    .report-container { background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 24px; border: 1px solid #eef0f4; backdrop-filter: blur(5px); position: relative; }
-    .report-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-    .report-header h2 { color: #7a1b1b; margin-right: auto; }
+    .report-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #eef0f4;
+      backdrop-filter: blur(5px);
+      position: relative;
+    }
+
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .report-header h2 {
+      color: #7a1b1b;
+      margin-right: auto;
+    }
 
     /* HEADER ACTIONS & FILTER POPOVER STYLING */
     .header-actions-group {
@@ -310,8 +427,24 @@
       position: relative;
     }
 
-    .btn-action { background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; }
-    .btn-action:hover { background-color: #5c1313; }
+    .btn-action {
+      background-color: #7a1b1b;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13.5px;
+    }
+
+    .btn-action:hover {
+      background-color: #5c1313;
+    }
 
     .btn-filter-icon {
       background-color: #ffffff;
@@ -327,21 +460,25 @@
       font-size: 13.5px;
       transition: all 0.2s;
     }
+
     .btn-filter-icon:hover {
       background-color: #f3f4f6;
       border-color: #9ca3af;
     }
 
-    .search-input { 
-      padding: 9px 14px; 
-      border: 1px solid #d1d5db; 
-      border-radius: 8px; 
-      width: 220px; 
-      font-size: 13.5px; 
-      outline: none; 
+    .search-input {
+      padding: 9px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      width: 220px;
+      font-size: 13.5px;
+      outline: none;
       background: white;
     }
-    .search-input:focus { border-color: #7a1b1b; }
+
+    .search-input:focus {
+      border-color: #7a1b1b;
+    }
 
     /* Panel Filter Melayang (Popover) */
     .filter-panel-right {
@@ -352,11 +489,12 @@
       width: 320px;
       background: #ffffff;
       border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
       border: 1px solid #e5e7eb;
       padding: 20px;
       z-index: 100;
     }
+
     .filter-panel-right.active {
       display: block;
     }
@@ -366,16 +504,19 @@
       flex-direction: column;
       gap: 14px;
     }
+
     .filter-group {
       display: flex;
       flex-direction: column;
       gap: 5px;
     }
+
     .filter-group label {
       font-size: 12.5px;
       font-weight: 600;
       color: #374151;
     }
+
     .filter-group select {
       width: 100%;
       padding: 8px 10px;
@@ -385,11 +526,13 @@
       font-family: inherit;
       background-color: #fff;
     }
+
     .filter-actions {
       display: flex;
       gap: 8px;
       margin-top: 4px;
     }
+
     .btn-apply {
       background-color: #7a1b1b;
       color: white;
@@ -401,7 +544,11 @@
       flex: 1;
       font-size: 13px;
     }
-    .btn-apply:hover { background-color: #5c1313; }
+
+    .btn-apply:hover {
+      background-color: #5c1313;
+    }
+
     .btn-reset {
       background-color: #e5e7eb;
       color: #374151;
@@ -414,40 +561,113 @@
       text-align: center;
       font-size: 13px;
     }
-    .btn-reset:hover { background-color: #d1d5db; }
 
-    table { width: 100%; border-collapse: collapse; text-align: left; min-width: 800px; margin-top: 10px; }
-    th, td { padding: 12px 14px; border-bottom: 1px solid #edf0f2; font-size: 13px; vertical-align: middle; }
-    th { background-color: #f8f9fa; color: #555; }
+    .btn-reset:hover {
+      background-color: #d1d5db;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      min-width: 800px;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #edf0f2;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      color: #555;
+    }
 
     /* MODAL */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    .btn-cancel { background: #e0e0e0; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 450px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: #e0e0e0;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
     /* TOMBOL GARIS 3 BACKGROUND PUTIH SOLID AGAR TIDAK BLUR */
-    .toggle-btn { 
-      font-size: 20px; 
-      background: #ffffff !important; 
-      color: #000000 !important; 
-      border: none; 
-      padding: 8px 14px; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      margin-bottom: 20px; 
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    .toggle-btn {
+      font-size: 20px;
+      background: #ffffff !important;
+      color: #000000 !important;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
 
     /* ==========================================
     RESPONSIF MOBILE (Layar di bawah 768px)
     ========================================== */
     @media (max-width: 768px) {
-      .header-container, 
-      .stats-grid, 
+
+      .header-container,
+      .stats-grid,
       .main-box,
       .middle-grid {
         padding-left: 16px !important;
@@ -455,41 +675,51 @@
         margin-left: 0 !important;
         margin-right: 0 !important;
       }
-      .stats-grid, 
+
+      .stats-grid,
       .middle-grid {
         grid-template-columns: 1fr !important;
         gap: 12px !important;
       }
+
       .box-header,
       .actions-toolbar {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 10px !important;
       }
+
       .search-input {
         width: 100% !important;
       }
+
       .main-box {
         overflow-x: auto !important;
       }
+
       table {
         min-width: 600px;
       }
+
       h1 {
         font-size: 22px !important;
       }
+
       .stat-value {
         font-size: 22px !important;
       }
+
       .filter-panel-right {
         width: 100% !important;
         right: 0 !important;
         left: 0 !important;
       }
     }
+
   </style>
   <link rel="stylesheet" href="/css/stat-cards.css">
 </head>
+
 <body>
 
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -659,7 +889,11 @@
   <main class="main-content">
     <header class="header-section">
       <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
       </button>
       <h1>Pusat Laporan & Rekapitulasi</h1>
       <p>Kelola, unggah, dan cetak dokumen laporan database.</p>
@@ -675,7 +909,12 @@
         <div class="card-header">
           <span class="card-title">Total Dokumen Laporan</span>
           <div class="icon-wrapper icon-blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
           </div>
         </div>
         <div class="card-body">
@@ -691,7 +930,10 @@
         <div class="card-header">
           <span class="card-title">Berkas Tersedia</span>
           <div class="icon-wrapper icon-green">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
           </div>
         </div>
         <div class="card-body">
@@ -707,7 +949,11 @@
         <div class="card-header">
           <span class="card-title">Tanpa Berkas</span>
           <div class="icon-wrapper icon-red">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
           </div>
         </div>
         <div class="card-body">
@@ -727,15 +973,19 @@
 
         <!-- KOTAK PENCARIAN DENGAN EVENT ONKEYUP -->
         <input type="text" id="searchInput" class="search-input" onkeyup="filterLaporan()" placeholder="Cari Laporan.....">
-        
+
         <!-- GRUP TOMBOL AKSI -->
         <div class="header-actions-group">
           <button type="button" id="filter-toggle-btn" class="btn-filter-icon" onclick="toggleFilterPanel()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
-              <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
-              <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
-              <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
               <line x1="17" y1="16" x2="23" y2="16"></line>
             </svg>
             <span>Filter Data</span>
@@ -757,13 +1007,13 @@
                   </select>
                 </div>
                 <div class="filter-group">
-                    <label for="status">Status Vendor:</label>
-                    <select name="status" id="status">
-                        <option value="">Semua Status</option>
-                        <option value="Aktif">Aktif</option>
-                        <option value="Review">Review</option>
-                        <option value="Nonaktif">Nonaktif</option>
-                    </select>
+                  <label for="status">Status Vendor:</label>
+                  <select name="status" id="status">
+                    <option value="">Semua Status</option>
+                    <option value="Aktif">Aktif</option>
+                    <option value="Review">Review</option>
+                    <option value="Nonaktif">Nonaktif</option>
+                  </select>
                 </div>
 
                 <div class="filter-actions">
@@ -791,27 +1041,27 @@
         </thead>
         <tbody>
           <% if (!listLaporan || listLaporan.length === 0) { %>
-            <tr>
-              <td colspan="8" style="text-align: center; padding: 20px; color: #888;">Belum ada arsip laporan.</td>
-            </tr>
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 20px; color: #888;">Belum ada arsip laporan.</td>
+          </tr>
           <% } else { %>
-            <!-- DITAMBAHKAN CLASS 'laporan-row' AGAR PENCARIAN BERFUNGSI -->
-            <% listLaporan.forEach((lap, index) => { %>
-              <tr class="laporan-row">
-                <td><%= index + 1 %></td>
-                <td><strong><%= lap.namaDokumen || lap.judul %></strong></td>
-                <td><%= lap.jenis || lap.kategori %></td>
-                <td><%= lap.tujuan || lap.kepada || '-' %></td>
-                <td><%= lap.keterangan || '-' %></td>
-                <td><%= lap.tanggal ? new Date(lap.tanggal).toLocaleDateString('id-ID') : '-' %></td>
-                <td><%= lap.diinputOleh || '-' %></td>
-                <td style="text-align: center;">
-                  <% if (lap.filePath) { %>
-                   <a href="/uploads/<%= lap.cleanName %>" target="_blank" class="btn-action" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Unduh PDF</a>
-                  <% } %>
-                </td>
-              </tr>
-            <% }); %>
+          <!-- DITAMBAHKAN CLASS 'laporan-row' AGAR PENCARIAN BERFUNGSI -->
+          <% listLaporan.forEach((lap, index) => { %>
+          <tr class="laporan-row">
+            <td><%= index + 1 %></td>
+            <td><strong><%= lap.namaDokumen || lap.judul %></strong></td>
+            <td><%= lap.jenis || lap.kategori %></td>
+            <td><%= lap.tujuan || lap.kepada || '-' %></td>
+            <td><%= lap.keterangan || '-' %></td>
+            <td><%= lap.tanggal ? new Date(lap.tanggal).toLocaleDateString('id-ID') : '-' %></td>
+            <td><%= lap.diinputOleh || '-' %></td>
+            <td style="text-align: center;">
+              <% if (lap.filePath) { %>
+              <a href="/uploads/<%= lap.cleanName %>" target="_blank" class="btn-action" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-block;">Unduh PDF</a>
+              <% } %>
+            </td>
+          </tr>
+          <% }); %>
           <% } %>
         </tbody>
       </table>
@@ -856,12 +1106,19 @@
   </div>
 
   <script>
-    function openModal() { document.getElementById('laporanModal').style.display = 'flex'; }
-    function closeModal() { document.getElementById('laporanModal').style.display = 'none'; }
+    function openModal() {
+      document.getElementById('laporanModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('laporanModal').style.display = 'none';
+    }
+
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('active');
       document.getElementById('sidebarOverlay').classList.toggle('active');
     }
+
     function toggleDropdown(element) {
       const parentLi = element.parentElement;
       parentLi.classList.toggle('active');
@@ -877,7 +1134,7 @@
     function filterLaporan() {
       const input = document.getElementById('searchInput').value.toLowerCase();
       const rows = document.getElementsByClassName('laporan-row');
-      
+
       for (let row of rows) {
         const text = row.textContent.toLowerCase();
         if (text.includes(input)) {
@@ -896,6 +1153,8 @@
         panel.classList.remove('active');
       }
     });
+
   </script>
 </body>
+
 </html>

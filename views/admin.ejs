@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <%- include('partials/head') %>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -10,56 +11,88 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; color: #333; display: flex; min-height: 100vh; position: relative; background-color: #f4f6f9; }
-    body::before {
-      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%), 
-                  url('/images/background.jpg') no-repeat center top fixed;
-      background-size: cover; z-index: -1; pointer-events: none;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #333;
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      background-color: #f4f6f9;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%),
+        url('/images/background.jpg') no-repeat center top fixed;
+      background-size: cover;
+      z-index: -1;
+      pointer-events: none;
+    }
+
     /* Sidebar Styling */
-    .sidebar-overlay { 
-      display: none; 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100vw; 
-      height: 100vh; 
-      background: rgba(15, 23, 42, 0.55); 
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.55);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
-      z-index: 999; 
+      z-index: 999;
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-    .sidebar-overlay.active { 
-      display: block; 
+
+    .sidebar-overlay.active {
+      display: block;
       opacity: 1;
     }
 
     /* SIDEBAR */
-    .sidebar { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 280px; 
-      height: 100vh; 
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100vh;
       background: linear-gradient(180deg, #4d0e0e 0%, #7a1b1b 50%, #3e0b0b 100%);
-      color: white; 
-      padding: 28px 22px; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: space-between; 
-      z-index: 1000; 
-      transform: translateX(-100%); 
-      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); 
-      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25); 
+      color: white;
+      padding: 28px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 1000;
+      transform: translateX(-100%);
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25);
       overflow-y: auto;
     }
-    .sidebar.active { transform: translateX(0); }
+
+    .sidebar.active {
+      transform: translateX(0);
+    }
 
     .sidebar-header {
       display: flex;
@@ -69,11 +102,13 @@
       padding-bottom: 18px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.14);
     }
+
     .brand-wrap {
       display: flex;
       align-items: center;
       gap: 12px;
     }
+
     .brand-logo-img {
       width: 42px;
       height: 42px;
@@ -83,12 +118,14 @@
       border-radius: 10px;
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
+
     .brand-text h2 {
       font-size: 15px;
       font-weight: 700;
       letter-spacing: -0.3px;
       line-height: 1.2;
     }
+
     .brand-text span {
       font-size: 11px;
       text-transform: uppercase;
@@ -96,6 +133,7 @@
       color: rgba(255, 255, 255, 0.7);
       font-weight: 600;
     }
+
     .close-sidebar-btn {
       background: rgba(255, 255, 255, 0.1);
       border: none;
@@ -110,7 +148,10 @@
       font-size: 16px;
       transition: all 0.2s;
     }
-    .close-sidebar-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+    .close-sidebar-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
 
     .sidebar-user-card {
       background: rgba(255, 255, 255, 0.08);
@@ -122,6 +163,7 @@
       align-items: center;
       gap: 12px;
     }
+
     .user-avatar-circle {
       width: 38px;
       height: 38px;
@@ -135,11 +177,13 @@
       font-size: 13px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
+
     .sidebar-user-info h4 {
       font-size: 13px;
       font-weight: 600;
       color: white;
     }
+
     .sidebar-user-info span {
       display: inline-flex;
       align-items: center;
@@ -148,6 +192,7 @@
       color: #86efac;
       font-weight: 500;
     }
+
     .sidebar-user-info span::before {
       content: "";
       width: 6px;
@@ -165,112 +210,137 @@
       color: rgba(255, 255, 255, 0.5);
       margin: 10px 0 10px 8px;
     }
-    .nav-menu { 
-      list-style: none; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 6px; 
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
-    .sidebar, .menu-sidebar {
+    .sidebar,
+    .menu-sidebar {
       height: 100vh;
       height: 100dvh;
-      overflow-y: auto !important; /* Memungkinkan sidebar digeser ke bawah jika layar HP pendek */
+      overflow-y: auto !important;
+      /* Memungkinkan sidebar digeser ke bawah jika layar HP pendek */
       -webkit-overflow-scrolling: touch;
-      padding-bottom: 40px; /* Ruang ekstra di bagian bawah agar tombol logout tidak mentok */
+      padding-bottom: 40px;
+      /* Ruang ekstra di bagian bawah agar tombol logout tidak mentok */
     }
-    .nav-item a { 
-      display: flex; 
+
+    .nav-item a {
+      display: flex;
       align-items: center;
       gap: 12px;
-      padding: 11px 14px; 
-      color: rgba(255, 255, 255, 0.82); 
-      text-decoration: none; 
-      border-radius: 10px; 
-      font-weight: 500; 
-      font-size: 13.5px; 
+      padding: 11px 14px;
+      color: rgba(255, 255, 255, 0.82);
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 13.5px;
       transition: all 0.2s ease;
     }
+
     .nav-item a svg {
       width: 18px;
       height: 18px;
       opacity: 0.8;
       transition: transform 0.2s;
     }
-    .nav-item a:hover { 
-      background-color: rgba(255, 255, 255, 0.12); 
-      color: #ffffff; 
+
+    .nav-item a:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
       transform: translateX(3px);
     }
+
     .nav-item a:hover svg {
       opacity: 1;
       transform: scale(1.1);
     }
-    .nav-item.active a { 
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%); 
-      color: #ffffff; 
+
+    .nav-item.active a {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%);
+      color: #ffffff;
       font-weight: 600;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       border-left: 3px solid #f87171;
     }
-    .nav-item.active a svg { opacity: 1; }
+
+    .nav-item.active a svg {
+      opacity: 1;
+    }
 
     /* DROPDOWN SIDEBAR */
-    .nav-item.dropdown { position: relative; }
-    .dropdown-toggle { 
-      display: flex !important; 
-      justify-content: space-between; 
-      align-items: center; 
+    .nav-item.dropdown {
+      position: relative;
+    }
+
+    .dropdown-toggle {
+      display: flex !important;
+      justify-content: space-between;
+      align-items: center;
       cursor: pointer;
     }
+
     .dropdown-toggle-left {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-    .dropdown-toggle .arrow { 
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-      font-size: 11px; 
+
+    .dropdown-toggle .arrow {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 11px;
       opacity: 0.8;
     }
+
     .dropdown-menu {
-      list-style: none; 
-      max-height: 0; 
-      overflow: hidden; 
+      list-style: none;
+      max-height: 0;
+      overflow: hidden;
       transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      background-color: rgba(50, 10, 10, 0.45); 
-      border-radius: 10px; 
-      margin-top: 4px; 
+      background-color: rgba(50, 10, 10, 0.45);
+      border-radius: 10px;
+      margin-top: 4px;
       padding-left: 10px;
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .dropdown-menu li a { 
-      padding: 9px 14px; 
-      font-size: 13px; 
-      color: rgba(255, 255, 255, 0.75); 
+
+    .dropdown-menu li a {
+      padding: 9px 14px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.75);
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .dropdown-menu li a:hover { 
-      color: #ffffff; 
-      background-color: rgba(255, 255, 255, 0.08); 
+
+    .dropdown-menu li a:hover {
+      color: #ffffff;
+      background-color: rgba(255, 255, 255, 0.08);
     }
-    .nav-item.dropdown.active .dropdown-menu { 
-      max-height: 200px; 
+
+    .nav-item.dropdown.active .dropdown-menu {
+      max-height: 200px;
       padding-top: 6px;
       padding-bottom: 6px;
     }
-    .nav-item.dropdown.active .arrow { transform: rotate(180deg); }
 
-    .sidebar-footer { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 10px; 
+    .nav-item.dropdown.active .arrow {
+      transform: rotate(180deg);
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       margin-top: 25px;
       padding-top: 18px;
       border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
+
     .btn-bottom {
       display: flex;
       align-items: center;
@@ -283,20 +353,26 @@
       border-radius: 8px;
       transition: all 0.2s;
     }
+
     .btn-bottom:hover {
       background: rgba(255, 255, 255, 0.1);
       color: white;
     }
 
-    
-    .main-content { flex: 1; padding: 30px; width: 100%; }
-  .header-section,
-  .header-container {
+
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      width: 100%;
+    }
+
+    .header-section,
+    .header-container {
       margin-bottom: 25px;
     }
 
-  .header-section h1,
-  .header-container h1 {
+    .header-section h1,
+    .header-container h1 {
       font-size: 32px !important;
       font-weight: 800 !important;
       color: #ffffff !important;
@@ -304,9 +380,9 @@
       letter-spacing: 0.5px !important;
     }
 
-  .header-section .subtitle,
-  .header-container .subtitle,
-  .header-section p {
+    .header-section .subtitle,
+    .header-container .subtitle,
+    .header-section p {
       font-size: 14.5px !important;
       font-weight: 400 !important;
       color: rgba(255, 255, 255, 0.85) !important;
@@ -314,272 +390,462 @@
       margin: 0 !important;
     }
 
-     .stats-grid-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  width: 100%;
-  max-width: 100%; /* Mengikuti lebar kontainer utama tabel */
-  margin: 20px auto 30px auto; /* Memberikan jarak atas (tidak mentok) dan jarak bawah */
-}
+    .stats-grid-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+      max-width: 100%;
+      /* Mengikuti lebar kontainer utama tabel */
+      margin: 20px auto 30px auto;
+      /* Memberikan jarak atas (tidak mentok) dan jarak bawah */
+    }
 
-/* Desain Kartu Statistik */
-.stats-grid-container .stat-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 20px 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-top: 5px solid transparent;
-}
+    /* Desain Kartu Statistik */
+    .stats-grid-container .stat-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-top: 5px solid transparent;
+    }
 
-/* Warna Garis Aksen Atas Card */
-.stats-grid-container .card-green { border-top-color: #10b981; }
-.stats-grid-container .card-red   { border-top-color: #e11d48; }
-.stats-grid-container .card-blue  { border-top-color: #3b82f6; }
+    /* Warna Garis Aksen Atas Card */
+    .stats-grid-container .card-green {
+      border-top-color: #10b981;
+    }
 
-/* Header, Body, dan Footer Card */
-.stats-grid-container .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
+    .stats-grid-container .card-red {
+      border-top-color: #e11d48;
+    }
 
-.stats-grid-container .card-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+    .stats-grid-container .card-blue {
+      border-top-color: #3b82f6;
+    }
 
-.stats-grid-container .icon-wrapper {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
+    /* Header, Body, dan Footer Card */
+    .stats-grid-container .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
 
-.stats-grid-container .icon-green { background-color: #e6f4ea; color: #10b981; }
-.stats-grid-container .icon-red   { background-color: #fce8e6; color: #e11d48; }
-.stats-grid-container .icon-blue  { background-color: #e8f0fe; color: #3b82f6; }
+    .stats-grid-container .card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-.stats-grid-container .card-body {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin: 15px 0;
-}
+    .stats-grid-container .icon-wrapper {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
 
-.stats-grid-container .card-value {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: #1e293b;
-  line-height: 1;
-}
+    .stats-grid-container .icon-green {
+      background-color: #e6f4ea;
+      color: #10b981;
+    }
 
-.stats-grid-container .card-unit {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #334155;
-}
-  
+    .stats-grid-container .icon-red {
+      background-color: #fce8e6;
+      color: #e11d48;
+    }
+
+    .stats-grid-container .icon-blue {
+      background-color: #e8f0fe;
+      color: #3b82f6;
+    }
+
+    .stats-grid-container .card-body {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 15px 0;
+    }
+
+    .stats-grid-container .card-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #1e293b;
+      line-height: 1;
+    }
+
+    .stats-grid-container .card-unit {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
     .table-container {
-        width: 100%;
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 12px;
-        padding: 20px;
-        border: 1px solid #eef0f4;
-        backdrop-filter: blur(5px);
-        margin-bottom: 20px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #eef0f4;
+      backdrop-filter: blur(5px);
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     /* Bungkus tabel dengan class ini agar bisa digeser horizontal di HP tanpa merusak layout */
     .table-responsive-container {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
-    table, #vendorTable {
-        width: 100%;
-        min-width: 750px; /* Lebar minimum agar kolom tidak saling berhimpitan */
-        border-collapse: collapse;
-        text-align: left;
+    table,
+    #vendorTable {
+      width: 100%;
+      min-width: 750px;
+      /* Lebar minimum agar kolom tidak saling berhimpitan */
+      border-collapse: collapse;
+      text-align: left;
     }
-      .table-responsive-container table {
-        width: 100%;
-        min-width: 600px; /* Memaksa tabel memiliki lebar minimum agar bisa digeser horizontal */
-      }
+
+    .table-responsive-container table {
+      width: 100%;
+      min-width: 600px;
+      /* Memaksa tabel memiliki lebar minimum agar bisa digeser horizontal */
+    }
+
     .table-header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  margin-bottom: 25px;
-  flex-wrap: wrap;
-  gap: 12px;
-  width: 100%;
-}
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 12px;
+      width: 100%;
+    }
 
-.table-header .box-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #7a1b1b !important; /* Warna merah tua */
-  margin-right: auto !important; /* Mendorong semua tombol/search ke sisi kanan */
-  margin-bottom: 0;
-}
+    .table-header .box-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #7a1b1b !important;
+      /* Warna merah tua */
+      margin-right: auto !important;
+      /* Mendorong semua tombol/search ke sisi kanan */
+      margin-bottom: 0;
+    }
 
-.table-header h2,
-.table-header h3 { 
-    font-size: 20px; 
-    font-weight: 700; 
-    color: #7a1b1b !important; /* Memastikan warna teks jadi merah */
-    margin-right: auto !important; /* KUNCI: Mendorong seluruh tombol/search ke sisi kanan */
-    margin-bottom: 0;
-}
+    .table-header h2,
+    .table-header h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #7a1b1b !important;
+      /* Memastikan warna teks jadi merah */
+      margin-right: auto !important;
+      /* KUNCI: Mendorong seluruh tombol/search ke sisi kanan */
+      margin-bottom: 0;
+    }
 
-/* Membungkus atau meratakan elemen pencarian & tombol ke kanan */
-.table-header .search-input,
-.table-header input[type="text"],
-.table-header .btn-add,
-.table-header button,
-.table-header a {
-    /* Elemen-elemen ini akan otomatis terdorong ke kanan karena margin-right: auto pada judul */
-}
+    /* Membungkus atau meratakan elemen pencarian & tombol ke kanan */
+    .table-header .search-input,
+    .table-header input[type="text"],
+    .table-header .btn-add,
+    .table-header button,
+    .table-header a {
+      /* Elemen-elemen ini akan otomatis terdorong ke kanan karena margin-right: auto pada judul */
+    }
 
-.stats-grid-container .card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid #f1f5f9;
-  padding-top: 12px;
-  font-size: 0.82rem;
-  color: #6c7e98;
-}
+    .stats-grid-container .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 12px;
+      font-size: 0.82rem;
+      color: #6c7e98;
+    }
 
-.text-green { color: #10b981; font-weight: 600; }
-    .text-orange { color: #df7e0f; font-weight: 600; }
+    .text-green {
+      color: #10b981;
+      font-weight: 600;
+    }
 
-.footerlink {
-  color: #881337;
+    .text-orange {
+      color: #df7e0f;
+      font-weight: 600;
+    }
+
+    .footerlink {
+      color: #881337;
       font-weight: 700;
       text-decoration: none;
-}
+    }
 
-.footerlink:hover {
-  text-decoration: underline;
-}
+    .footerlink:hover {
+      text-decoration: underline;
+    }
 
-.search-input { 
-    padding: 10px 14px; 
-    border: 1px solid #dde1e5; 
-    border-radius: 8px; 
-    font-size: 14px; 
-    outline: none; 
-    width: 220px; 
-    background: white; 
-}
+    .search-input {
+      padding: 10px 14px;
+      border: 1px solid #dde1e5;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      width: 220px;
+      background: white;
+    }
 
-.btn-add { 
-    background-color: #7a1b1b; 
-    color: white; 
-    border: none; 
-    padding: 10px 18px; 
-    border-radius: 8px; 
-    font-weight: 600; 
-    cursor: pointer; 
-}
+    .btn-add {
+      background-color: #7a1b1b;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
-table { width: 100%; border-collapse: collapse; text-align: left; }
-th, td { padding: 14px 16px; border-bottom: 1px solid #edf0f2; font-size: 14px; }
-th { background-color: #f8f9fa; color: #555; }
-    .vendor-row { cursor: pointer; transition: background-color 0.2s ease; }
-    .vendor-row:hover { background-color: #f8eded; }
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .badge-active { background-color: #e6f4ea; color: #137333; }
-    .badge-review { background-color: #fef7e0; color: #b06000; }
-    .badge-inactive { background-color: #fce8e6; color: #c5221f; }
-    .btn-edit { background-color: #000000; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 4px; }
-    .btn-edit:hover { background-color: #333; }
-    .btn-delete { background-color: #912d2d; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
-    .btn-delete:hover { background-color: #7a2222; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 450px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
-    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
-    textarea.input-lg { width: 100%; min-height: 120px; padding: 12px; font-size: 14px; font-family: inherit; border: 1.5px solid #ccc; border-radius: 8px; box-sizing: border-box; resize: vertical; }
-    textarea.input-lg:focus { border-color: #7a1b1b; outline: none; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    .btn-cancel { background: #e0e0e0; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-    .toggle-btn { font-size: 20px; background: #ffffff; color: rgb(0, 0, 0); border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #edf0f2;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      color: #555;
+    }
+
+    .vendor-row {
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .vendor-row:hover {
+      background-color: #f8eded;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-active {
+      background-color: #e6f4ea;
+      color: #137333;
+    }
+
+    .badge-review {
+      background-color: #fef7e0;
+      color: #b06000;
+    }
+
+    .badge-inactive {
+      background-color: #fce8e6;
+      color: #c5221f;
+    }
+
+    .btn-edit {
+      background-color: #000000;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 4px;
+    }
+
+    .btn-edit:hover {
+      background-color: #333;
+    }
+
+    .btn-delete {
+      background-color: #912d2d;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-delete:hover {
+      background-color: #7a2222;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 450px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+
+    textarea.input-lg {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+
+    textarea.input-lg:focus {
+      border-color: #7a1b1b;
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: #e0e0e0;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .toggle-btn {
+      font-size: 20px;
+      background: #ffffff;
+      color: rgb(0, 0, 0);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
 
     /* ==========================================
    RESPONSIF MOBILE (Layar di bawah 768px)
    ========================================== */
-@media (max-width: 768px) {
-  footer, .footer-custom {
-    padding: 30px 16px 50px 16px !important; /* Tambahkan padding bawah lebih besar agar aman dari bar navigasi HP */
-    height: auto !important;
-  }
-  /* 1. Sesuaikan Padding Kontainer Utama */
-  .header-container, 
-  .stats-grid, 
-  .main-box,
-  .middle-grid {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
+    @media (max-width: 768px) {
 
-  /* 2. Kartu Statistik Menjadi 1 Kolom ke Bawah */
-  .stats-grid, 
-  .middle-grid {
-    grid-template-columns: 1fr !important; /* Bertumpuk vertikal */
-    gap: 12px !important;
-  }
+      footer,
+      .footer-custom {
+        padding: 30px 16px 50px 16px !important;
+        /* Tambahkan padding bawah lebih besar agar aman dari bar navigasi HP */
+        height: auto !important;
+      }
 
-  /* 3. Banner Salam / Top Header */
-  .box-header,
-  .actions-toolbar {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 10px !important;
-  }
+      /* 1. Sesuaikan Padding Kontainer Utama */
+      .header-container,
+      .stats-grid,
+      .main-box,
+      .middle-grid {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
 
-  .search-input {
-    width: 100% !important; /* Input pencarian memenuhi layar */
-  }
+      /* 2. Kartu Statistik Menjadi 1 Kolom ke Bawah */
+      .stats-grid,
+      .middle-grid {
+        grid-template-columns: 1fr !important;
+        /* Bertumpuk vertikal */
+        gap: 12px !important;
+      }
 
-  /* 4. Tabel Agar Bisa Di-scroll Horizontal di HP */
-  .main-box {
-    overflow-x: auto !important; /* Mencegah tabel merusak lebar layar */
-  }
+      /* 3. Banner Salam / Top Header */
+      .box-header,
+      .actions-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
 
-  table {
-    min-width: 600px; /* Menjaga ukuran isi tabel tetap terbaca */
-  }
+      .search-input {
+        width: 100% !important;
+        /* Input pencarian memenuhi layar */
+      }
 
-  /* 5. Ukuran Judul & Teks yang Lebih Pas di HP */
-  h1 {
-    font-size: 22px !important;
-  }
-  
-  .stat-value {
-    font-size: 22px !important;
-  }
-}
-/* Styling kontainer agar tabel bisa di-scroll ke samping di HP */
+      /* 4. Tabel Agar Bisa Di-scroll Horizontal di HP */
+      .main-box {
+        overflow-x: auto !important;
+        /* Mencegah tabel merusak lebar layar */
+      }
+
+      table {
+        min-width: 600px;
+        /* Menjaga ukuran isi tabel tetap terbaca */
+      }
+
+      /* 5. Ukuran Judul & Teks yang Lebih Pas di HP */
+      h1 {
+        font-size: 22px !important;
+      }
+
+      .stat-value {
+        font-size: 22px !important;
+      }
+    }
+
+    /* Styling kontainer agar tabel bisa di-scroll ke samping di HP */
     .table-container {
       width: 100%;
       overflow-x: auto;
@@ -593,160 +859,161 @@ th { background-color: #f8f9fa; color: #555; }
     /* Memaksa tabel memiliki lebar minimum agar kolom tidak saling berhimpitan */
     #vendorTable {
       width: 100%;
-      min-width: 750px; 
+      min-width: 750px;
       border-collapse: collapse;
     }
 
-    #vendorTable th, 
+    #vendorTable th,
     #vendorTable td {
       padding: 12px 15px;
       text-align: left;
-      white-space: nowrap; /* Mencegah teks terpotong ke bawah */
+      white-space: nowrap;
+      /* Mencegah teks terpotong ke bawah */
     }
 
-    * --- CSS TAMBAHAN UNTUK FILTER SLIDE-OUT --- */
-.vendor-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: flex-start;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
+    * --- CSS TAMBAHAN UNTUK FILTER SLIDE-OUT --- */ .vendor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-start;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
 
-.btn-filter-icon {
-    background: #ffffff;
-    border: 1px solid #dde1e5;
-    padding: 10px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    font-size: 14px;
-    color: #333;
-    transition: background 0.2s;
-}
-.btn-filter-icon:hover {
-    background: #f1f3f5;
-}
+    .btn-filter-icon {
+      background: #ffffff;
+      border: 1px solid #dde1e5;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+      transition: background 0.2s;
+    }
 
-.filter-container {
-    position: relative !important;
-    display: inline-block !important;
-}
+    .btn-filter-icon:hover {
+      background: #f1f3f5;
+    }
 
-.filter-panel-right {
-    display: none; 
-    position: absolute !important;
-    right: 0 !important;
-    top: calc(100% + 8px) !important;
-    background: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
-    border-radius: 12px !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-    padding: 20px !important;
-    width: 300px !important;
-    z-index: 9999 !important;
-}
+    .filter-container {
+      position: relative !important;
+      display: inline-block !important;
+    }
 
-.filter-panel-right.active {
-    max-height: 350px;
-    opacity: 1;
-    padding: 20px;
-    border: 1px solid #dde1e5;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
+    .filter-panel-right {
+      display: none;
+      position: absolute !important;
+      right: 0 !important;
+      top: calc(100% + 8px) !important;
+      background: #ffffff !important;
+      border: 1px solid #e5e7eb !important;
+      border-radius: 12px !important;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+      padding: 20px !important;
+      width: 300px !important;
+      z-index: 9999 !important;
+    }
 
-.filter-form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 12px;
-    align-items: flex-end;
-}
+    .filter-panel-right.active {
+      max-height: 350px;
+      opacity: 1;
+      padding: 20px;
+      border: 1px solid #dde1e5;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
 
-.filter-group label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #555;
-}
+    .filter-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      align-items: flex-end;
+    }
 
-.filter-group select {
-    width: 100%;
-    padding: 9px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 13px;
-    font-family: inherit;
-}
+    .filter-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #555;
+    }
 
-.filter-actions {
-    display: flex;
-    gap: 8px;
-}
+    .filter-group select {
+      width: 100%;
+      padding: 9px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+    }
 
-.btn-apply {
-    background: #7a1b1b;
-    color: white;
-    border: none;
-    padding: 9px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 13px;
-}
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+    }
 
-.btn-reset {
-    background: #6c757d;
-    color: white;
-    padding: 9px 14px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    display: inline-block;
-    text-align: center;
-}
+    .btn-apply {
+      background: #7a1b1b;
+      color: white;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
 
-/* Styling Tombol Pagination */
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 24px;
-    padding-bottom: 10px;
-}
+    .btn-reset {
+      background: #6c757d;
+      color: white;
+      padding: 9px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-block;
+      text-align: center;
+    }
 
-.page-btn {
-    padding: 8px 14px;
-    background-color: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-    text-decoration: none;
-    transition: all 0.2s;
-}
+    /* Styling Tombol Pagination */
+    .pagination-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      padding-bottom: 10px;
+    }
 
-.page-btn:hover {
-    background-color: #f3f4f6;
-}
+    .page-btn {
+      padding: 8px 14px;
+      background-color: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
 
-.page-btn.active {
-    background-color: #7a1b1b;
-    color: #ffffff;
-    border-color: #7a1b1b;
-}
+    .page-btn:hover {
+      background-color: #f3f4f6;
+    }
 
+    .page-btn.active {
+      background-color: #7a1b1b;
+      color: #ffffff;
+      border-color: #7a1b1b;
+    }
 
   </style>
 </head>
+
 <body>
 
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -827,7 +1094,7 @@ th { background-color: #f8f9fa; color: #555; }
             <li>
               <a href="/stok-masuk">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 5v14M5 12l7 7 7-7"/>
+                  <path d="M12 5v14M5 12l7 7 7-7" />
                 </svg>
                 <span>Stok Masuk</span>
               </a>
@@ -835,7 +1102,7 @@ th { background-color: #f8f9fa; color: #555; }
             <li>
               <a href="/stok-keluar">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 19V5M5 12l7-7 7 7"/>
+                  <path d="M12 19V5M5 12l7-7 7 7" />
                 </svg>
                 <span>Stok Keluar</span>
               </a>
@@ -843,15 +1110,15 @@ th { background-color: #f8f9fa; color: #555; }
             <li>
               <a href="/stok-opname">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 11l3 3L22 4"/>
-                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                 </svg>
                 <span>Stok Opname</span>
               </a>
             </li>
           </ul>
         </li>
-         <!-- Menu Dropdown Laporan -->
+        <!-- Menu Dropdown Laporan -->
         <li class="nav-item dropdown">
           <a href="javascript:void(0)" class="dropdown-toggle" onclick="toggleDropdown(this)">
             <div class="dropdown-toggle-left">
@@ -894,7 +1161,7 @@ th { background-color: #f8f9fa; color: #555; }
                 <span>Surat Jalan</span>
               </a>
             </li>
-            
+
 
           </ul>
         </li>
@@ -923,7 +1190,7 @@ th { background-color: #f8f9fa; color: #555; }
         </li>
       </ul>
     </div>
-        
+
     <div class="sidebar-footer">
       <a href="/logout" class="btn-bottom">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -939,7 +1206,11 @@ th { background-color: #f8f9fa; color: #555; }
   <main class="main-content">
     <header class="header-section">
       <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
       </button>
       <h1>Data Vendor</h1>
       <p class="subtitle">
@@ -948,170 +1219,182 @@ th { background-color: #f8f9fa; color: #555; }
       </p>
     </header>
 
-     <!-- Statistik Cards -->
-  <div class="stats-grid-container">
-  
-  <!-- Card 1: Total Vendor Aktif -->
-  <div class="stat-card card-green">
-    <div class="card-header">
-      <span class="card-title">TOTAL VENDOR AKTIF</span>
-      <div class="icon-wrapper icon-green">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-      </div>
-    </div>
-    <div class="card-body">
-      <span class="card-value">
-        <%= locals.totalVendorAktif !== undefined ? totalVendorAktif : vendors.filter(v => v.status === 'Aktif').length %>
-      </span>
-      <span class="card-unit">Vendor</span>
-    </div>
-    <div class="card-footer">
-      <span class="text-green">Status Operasional</span>
-      <span class="footer-text">Siap Memenuhi Suplai</span>
-    </div>
-  </div>
+    <!-- Statistik Cards -->
+    <div class="stats-grid-container">
 
-  <!-- Card 2: Total Vendor Tidak Aktif / Review -->
-  <div class="stat-card card-red">
-    <div class="card-header">
-      <span class="card-title">TOTAL VENDOR TIDAK AKTIF / REVIEW</span>
-      <div class="icon-wrapper icon-red">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      <!-- Card 1: Total Vendor Aktif -->
+      <div class="stat-card card-green">
+        <div class="card-header">
+          <span class="card-title">TOTAL VENDOR AKTIF</span>
+          <div class="icon-wrapper icon-green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value">
+            <%= locals.totalVendorAktif !== undefined ? totalVendorAktif : vendors.filter(v => v.status === 'Aktif').length %>
+          </span>
+          <span class="card-unit">Vendor</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-green">Status Operasional</span>
+          <span class="footer-text">Siap Memenuhi Suplai</span>
+        </div>
       </div>
-    </div>
-    <div class="card-body">
-      <span class="card-value">
-        <%= locals.totalVendorTidakAktif !== undefined ? totalVendorTidakAktif : vendors.filter(v => v.status !== 'Aktif').length %>
-      </span>
-      <span class="card-unit">Vendor</span>
-    </div>
-    <div class="card-footer">
-      <span class="text-orange">Butuh Review</span>
-      <span class="footer-text">Dalam Peninjauan</span>
-    </div>
-  </div>
 
-  <!-- Card 3: Kategori Bahan Baku -->
-  <div class="stat-card card-blue">
-    <div class="card-header">
-      <span class="card-title">KATEGORI BAHAN BAKU</span>
-      <div class="icon-wrapper icon-blue">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+      <!-- Card 2: Total Vendor Tidak Aktif / Review -->
+      <div class="stat-card card-red">
+        <div class="card-header">
+          <span class="card-title">TOTAL VENDOR TIDAK AKTIF / REVIEW</span>
+          <div class="icon-wrapper icon-red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value">
+            <%= locals.totalVendorTidakAktif !== undefined ? totalVendorTidakAktif : vendors.filter(v => v.status !== 'Aktif').length %>
+          </span>
+          <span class="card-unit">Vendor</span>
+        </div>
+        <div class="card-footer">
+          <span class="text-orange">Butuh Review</span>
+          <span class="footer-text">Dalam Peninjauan</span>
+        </div>
       </div>
-    </div>
-    <div class="card-body">
-      <span class="card-value">
-        <%= locals.totalKategori !== undefined ? totalKategori : new Set(vendors.map(v => v.kategori)).size %>
-      </span>
-      <span class="card-unit">Kategori</span>
-    </div>
-    <div class="card-footer">
-      <span class="footer-text">Total Jenis Bahan</span>
-      <a href="#katalog" class="footer-link">Lihat Katalog</a>
-    </div>
-  </div>
 
-</div>
+      <!-- Card 3: Kategori Bahan Baku -->
+      <div class="stat-card card-blue">
+        <div class="card-header">
+          <span class="card-title">KATEGORI BAHAN BAKU</span>
+          <div class="icon-wrapper icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <span class="card-value">
+            <%= locals.totalKategori !== undefined ? totalKategori : new Set(vendors.map(v => v.kategori)).size %>
+          </span>
+          <span class="card-unit">Kategori</span>
+        </div>
+        <div class="card-footer">
+          <span class="footer-text">Total Jenis Bahan</span>
+          <a href="#katalog" class="footer-link">Lihat Katalog</a>
+        </div>
+      </div>
+
+    </div>
 
     <section class="table-container">
       <div class="table-header">
         <div class="box-title">Daftar Vendor</div>
-          <input type="text" id="searchInput" class="search-input" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari vendor...">
-          <button class="btn-add" onclick="openModal()">+ Tambah Vendor</button>
-          <a href="/export-vendor-excel" 
-                style="padding: 10px 18px; background-color: #1d6f42; color: white; border-radius: 8px; 
+        <input type="text" id="searchInput" class="search-input" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari vendor...">
+        <button class="btn-add" onclick="openModal()">+ Tambah Vendor</button>
+        <a href="/export-vendor-excel" style="padding: 10px 18px; background-color: #1d6f42; color: white; border-radius: 8px; 
                     text-decoration: none; font-weight: 600; font-size: 14px; display: inline-flex; 
                     align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(29, 111, 66, 0.2);">
-                    <i class="fa-solid fa-file-excel"></i> Export Excel
-          </a>
-          <div class="filter-container">
-    <button type="button" id="filter-toggle-btn" class="btn-filter-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
-            <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
-            <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line>
-            <line x1="17" y1="16" x2="23" y2="16"></line>
-        </svg>
-        <span>Filter Data</span>
-    </button>
+          <i class="fa-solid fa-file-excel"></i> Export Excel
+        </a>
+        <div class="filter-container">
+          <button type="button" id="filter-toggle-btn" class="btn-filter-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            <span>Filter Data</span>
+          </button>
 
-    <!-- PANEL FILTER HARUS DI DALAM SINI AGAR MELAYANG -->
-    <div id="filter-panel" class="filter-panel-right">
-        <form id="filter-form" action="/admin" method="GET"> <!-- Sesuaikan action dengan /admin atau /user -->
-            <div class="filter-form-grid">
+          <!-- PANEL FILTER HARUS DI DALAM SINI AGAR MELAYANG -->
+          <div id="filter-panel" class="filter-panel-right">
+            <form id="filter-form" action="/admin" method="GET"> <!-- Sesuaikan action dengan /admin atau /user -->
+              <div class="filter-form-grid">
                 <div class="filter-group">
-                    <label for="kategori">Kategori:</label>
-                    <select name="kategori" id="kategori">
-                        <option value="">Semua Kategori</option>
-                        <option value="ATK">ATK</option>
-                        <option value="Pakaian">Pakaian</option>
-                        <option value="Kain">Kain</option>
-                        <option value="Elektronik">Elektronik</option>
-                        <option value="Packaging">Packaging</option>
-                        <option value="Percetakan">Percetakan</option>
-                        <option value="Merchandise">Merchandise</option>
-                        <option value="Logistik">Logistik</option>
-                        <option value="Voucher">Voucher</option>
-                        <option value="Rental">Rental</option>
-                    </select>
+                  <label for="kategori">Kategori:</label>
+                  <select name="kategori" id="kategori">
+                    <option value="">Semua Kategori</option>
+                    <option value="ATK">ATK</option>
+                    <option value="Pakaian">Pakaian</option>
+                    <option value="Kain">Kain</option>
+                    <option value="Elektronik">Elektronik</option>
+                    <option value="Packaging">Packaging</option>
+                    <option value="Percetakan">Percetakan</option>
+                    <option value="Merchandise">Merchandise</option>
+                    <option value="Logistik">Logistik</option>
+                    <option value="Voucher">Voucher</option>
+                    <option value="Rental">Rental</option>
+                  </select>
                 </div>
 
                 <div class="filter-group">
-                    <label for="status">Status Vendor:</label>
-                    <select name="status" id="status">
-                        <option value="">Semua Status</option>
-                        <option value="Aktif">Aktif</option>
-                        <option value="Review">Review</option>
-                        <option value="Nonaktif">Nonaktif</option>
-                    </select>
+                  <label for="status">Status Vendor:</label>
+                  <select name="status" id="status">
+                    <option value="">Semua Status</option>
+                    <option value="Aktif">Aktif</option>
+                    <option value="Review">Review</option>
+                    <option value="Nonaktif">Nonaktif</option>
+                  </select>
                 </div>
 
                 <div class="filter-group">
-                    <label for="wilayah">Wilayah:</label>
-                    <select name="wilayah" id="wilayah">
-                        <option value="">Semua Wilayah</option>
-                        <option value="Jakarta">Jakarta</option>
-                        <option value="Bogor">Bogor</option>
-                        <option value="Depok">Depok</option>
-                        <option value="Tanggerang">Tanggerang</option>
-                        <option value="Bekasi">Bekasi</option>
-                        <option value="Garut">Garut</option>
-                        <option value="Bandung">Bandung</option>
-                    </select>
+                  <label for="wilayah">Wilayah:</label>
+                  <select name="wilayah" id="wilayah">
+                    <option value="">Semua Wilayah</option>
+                    <option value="Jakarta">Jakarta</option>
+                    <option value="Bogor">Bogor</option>
+                    <option value="Depok">Depok</option>
+                    <option value="Tanggerang">Tanggerang</option>
+                    <option value="Bekasi">Bekasi</option>
+                    <option value="Garut">Garut</option>
+                    <option value="Bandung">Bandung</option>
+                  </select>
                 </div>
 
                 <div class="filter-actions">
-                    <button type="submit" class="btn-apply">Terapkan</button>
-                    <a href="/admin" class="btn-reset">Reset</a>
+                  <button type="submit" class="btn-apply">Terapkan</button>
+                  <a href="/admin" class="btn-reset">Reset</a>
                 </div>
-            </div>
-        </form>
-    </div>
-</div>
-  
-      <!-- Bungkus tabel dengan div container responsif -->
-      <div class="table-responsive-container">
-        <table id="vendorTable">
-          <thead>
-            <tr>
-              <th>ID Vendor</th>
-              <th>Nama Vendor</th>
-              <th>Wilayah</th>
-              <th>Kategori Supply</th>
-              <th>Kontak</th>
-              <th>Rating</th>
-              <th>Status</th>
-              <th style="text-align: center;">Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="vendorTableBody">
-          <% if (!vendors || vendors.length === 0) { %>
-            <tr>
-              <td colspan="8" style="text-align: center; padding: 20px; color: #888;">Belum ada data vendor.</td>
-            </tr>
-          <% } else { %>
-            <% vendors.forEach((vendor) => { %>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Bungkus tabel dengan div container responsif -->
+        <div class="table-responsive-container">
+          <table id="vendorTable">
+            <thead>
+              <tr>
+                <th>ID Vendor</th>
+                <th>Nama Vendor</th>
+                <th>Wilayah</th>
+                <th>Kategori Supply</th>
+                <th>Kontak</th>
+                <th>Rating</th>
+                <th>Status</th>
+                <th style="text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="vendorTableBody">
+              <% if (!vendors || vendors.length === 0) { %>
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 20px; color: #888;">Belum ada data vendor.</td>
+              </tr>
+              <% } else { %>
+              <% vendors.forEach((vendor) => { %>
               <tr class="vendor-row" data-id="<%= vendor._id %>">
                 <td><strong><%= vendor.idVendor %></strong></td>
                 <td><%= vendor.namaVendor %></td>
@@ -1125,36 +1408,25 @@ th { background-color: #f8f9fa; color: #555; }
                   </span>
                 </td>
                 <td style="text-align: center;">
-                  <button type="button" class="btn-edit" 
-                          data-id="<%= vendor._id %>"
-                          data-idvendor="<%= vendor.idVendor %>"
-                          data-namavendor="<%= vendor.namaVendor %>"
-                          data-wilayah="<%= vendor.wilayah || '' %>"
-                          data-kategori="<%= vendor.kategori %>"
-                          data-kontak="<%= vendor.kontak %>"
-                          data-rating="<%= vendor.rating %>"
-                          data-status="<%= vendor.status %>"
-                          data-deskripsi="<%= vendor.deskripsi || '' %>"
-                          onclick="openEditModalFromBtn(event, this)">Edit</button>
+                  <button type="button" class="btn-edit" data-id="<%= vendor._id %>" data-idvendor="<%= vendor.idVendor %>" data-namavendor="<%= vendor.namaVendor %>" data-wilayah="<%= vendor.wilayah || '' %>" data-kategori="<%= vendor.kategori %>" data-kontak="<%= vendor.kontak %>" data-rating="<%= vendor.rating %>" data-status="<%= vendor.status %>" data-deskripsi="<%= vendor.deskripsi || '' %>" onclick="openEditModalFromBtn(event, this)">Edit</button>
                   <form action="/admin/vendor/delete/<%= vendor._id %>" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus vendor <%= vendor.namaVendor %>?');">
                     <button type="submit" class="btn-delete" onclick="event.stopPropagation();">Hapus</button>
                   </form>
                 </td>
               </tr>
-            <% }); %>
-          <% } %>
-        </tbody>
-      </table>
-      <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
-    <div class="pagination-container">
-        <% for(let i = 1; i <= totalPages; i++) { %>
-            <a href="?page=<%= i %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %><%= typeof kategori !== 'undefined' && kategori ? '&kategori=' + kategori : '' %><%= typeof status !== 'undefined' && status ? '&status=' + status : '' %><%= typeof wilayah !== 'undefined' && wilayah ? '&wilayah=' + wilayah : '' %>" 
-               class="page-btn <%= currentPage === i ? 'active' : '' %>">
-                <%= i %>
+              <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+          <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+          <div class="pagination-container">
+            <% for(let i = 1; i <= totalPages; i++) { %>
+            <a href="?page=<%= i %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %><%= typeof kategori !== 'undefined' && kategori ? '&kategori=' + kategori : '' %><%= typeof status !== 'undefined' && status ? '&status=' + status : '' %><%= typeof wilayah !== 'undefined' && wilayah ? '&wilayah=' + wilayah : '' %>" class="page-btn <%= currentPage === i ? 'active' : '' %>">
+              <%= i %>
             </a>
-        <% } %>
-    </div>
-<% } %>
+            <% } %>
+          </div>
+          <% } %>
     </section>
   </main>
 
@@ -1198,10 +1470,11 @@ th { background-color: #f8f9fa; color: #555; }
         </div>
         <div class="form-group">
           <label>Kontak & PIC</label>
-          <input type="text" name="kontak" placeholder="Masukan Kontak & PIC" required></div>
+          <input type="text" name="kontak" placeholder="Masukan Kontak & PIC" required>
+        </div>
         <div class="form-group">
-            <label>Rating (1 - 5)</label>
-            <input type="number" name="rating" min="1" max="5" value="5" required>
+          <label>Rating (1 - 5)</label>
+          <input type="number" name="rating" min="1" max="5" value="5" required>
         </div>
         <div class="form-group">
           <label>Status</label>
@@ -1286,8 +1559,13 @@ th { background-color: #f8f9fa; color: #555; }
   </div>
 
   <script>
-    function openModal() { document.getElementById('vendorModal').style.display = 'flex'; }
-    function closeModal() { document.getElementById('vendorModal').style.display = 'none'; }
+    function openModal() {
+      document.getElementById('vendorModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('vendorModal').style.display = 'none';
+    }
 
     function openEditModalFromBtn(event, btn) {
       event.stopPropagation(); // Mencegah baris tabel ikut terklik
@@ -1313,7 +1591,9 @@ th { background-color: #f8f9fa; color: #555; }
       document.getElementById('editVendorModal').style.display = 'flex';
     }
 
-    function closeEditModal() { document.getElementById('editVendorModal').style.display = 'none'; }
+    function closeEditModal() {
+      document.getElementById('editVendorModal').style.display = 'none';
+    }
 
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('active');
@@ -1347,106 +1627,107 @@ th { background-color: #f8f9fa; color: #555; }
       parentLi.classList.toggle('active');
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const filterToggleBtn = document.getElementById('filter-toggle-btn');
-        const filterPanel = document.getElementById('filter-panel');
+    document.addEventListener('DOMContentLoaded', function() {
+      const filterToggleBtn = document.getElementById('filter-toggle-btn');
+      const filterPanel = document.getElementById('filter-panel');
 
-        if (filterToggleBtn && filterPanel) {
-            filterToggleBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                filterPanel.style.display = filterPanel.style.display === 'block' ? 'none' : 'block';
-            });
+      if (filterToggleBtn && filterPanel) {
+        filterToggleBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          filterPanel.style.display = filterPanel.style.display === 'block' ? 'none' : 'block';
+        });
 
-            // Menutup panel jika area luar diklik
-            document.addEventListener('click', function (e) {
-                if (!filterPanel.contains(e.target) && e.target !== filterToggleBtn) {
-                    filterPanel.style.display = 'none';
-                }
-            });
+        // Menutup panel jika area luar diklik
+        document.addEventListener('click', function(e) {
+          if (!filterPanel.contains(e.target) && e.target !== filterToggleBtn) {
+            filterPanel.style.display = 'none';
+          }
+        });
 
-            filterPanel.addEventListener('click', function (e) {
-                e.stopPropagation();
-            });
-        }
+        filterPanel.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
     });
 
     let searchTimeout = null;
     const searchInput = document.getElementById('searchInput');
 
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            const query = this.value;
-            
-            const kategori = document.getElementById('kategori') ? document.getElementById('kategori').value : '';
-            const status = document.getElementById('status') ? document.getElementById('status').value : '';
-            const wilayah = document.getElementById('wilayah') ? document.getElementById('wilayah').value : '';
+      searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value;
 
-            // Beri jeda 300ms agar penggetikan terasa mulus
-            searchTimeout = setTimeout(() => {
-                let url = `/admin?search=${encodeURIComponent(query)}`;
-                if (kategori) url += `&kategori=${encodeURIComponent(kategori)}`;
-                if (status) url += `&status=${encodeURIComponent(status)}`;
-                if (wilayah) url += `&wilayah=${encodeURIComponent(wilayah)}`;
+        const kategori = document.getElementById('kategori') ? document.getElementById('kategori').value : '';
+        const status = document.getElementById('status') ? document.getElementById('status').value : '';
+        const wilayah = document.getElementById('wilayah') ? document.getElementById('wilayah').value : '';
 
-                fetch(url)
-                    .then(response => response.text())
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        
-                        const newTbody = doc.getElementById('vendorTableBody');
-                        const newPagination = doc.querySelector('.pagination-container');
-                        
-                        const currentTbody = document.getElementById('vendorTableBody');
-                        if (newTbody && currentTbody) {
-                            currentTbody.innerHTML = newTbody.innerHTML;
-                        }
-                        
-                        const currentPagination = document.querySelector('.pagination-container');
-                        const tableContainer = document.querySelector('.table-container');
-                        
-                        if (newPagination && currentPagination) {
-                            currentPagination.innerHTML = newPagination.innerHTML;
-                        } else if (newPagination && !currentPagination && tableContainer) {
-                            tableContainer.appendChild(newPagination);
-                        } else if (!newPagination && currentPagination) {
-                            currentPagination.remove();
-                        }
+        // Beri jeda 300ms agar penggetikan terasa mulus
+        searchTimeout = setTimeout(() => {
+          let url = `/admin?search=${encodeURIComponent(query)}`;
+          if (kategori) url += `&kategori=${encodeURIComponent(kategori)}`;
+          if (status) url += `&status=${encodeURIComponent(status)}`;
+          if (wilayah) url += `&wilayah=${encodeURIComponent(wilayah)}`;
 
-                        // Jaga kursor tetap fokus di kotak pencarian
-                        const activeInput = document.getElementById('searchInput');
-                        if (activeInput) {
-                            activeInput.focus();
-                            const val = activeInput.value;
-                            activeInput.value = '';
-                            activeInput.value = val;
-                        }
-                    })
-                    .catch(err => console.error('Gagal memuat data pencarian:', err));
-            }, 300);
-        });
+          fetch(url)
+            .then(response => response.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(html, 'text/html');
+
+              const newTbody = doc.getElementById('vendorTableBody');
+              const newPagination = doc.querySelector('.pagination-container');
+
+              const currentTbody = document.getElementById('vendorTableBody');
+              if (newTbody && currentTbody) {
+                currentTbody.innerHTML = newTbody.innerHTML;
+              }
+
+              const currentPagination = document.querySelector('.pagination-container');
+              const tableContainer = document.querySelector('.table-container');
+
+              if (newPagination && currentPagination) {
+                currentPagination.innerHTML = newPagination.innerHTML;
+              } else if (newPagination && !currentPagination && tableContainer) {
+                tableContainer.appendChild(newPagination);
+              } else if (!newPagination && currentPagination) {
+                currentPagination.remove();
+              }
+
+              // Jaga kursor tetap fokus di kotak pencarian
+              const activeInput = document.getElementById('searchInput');
+              if (activeInput) {
+                activeInput.focus();
+                const val = activeInput.value;
+                activeInput.value = '';
+                activeInput.value = val;
+              }
+            })
+            .catch(err => console.error('Gagal memuat data pencarian:', err));
+        }, 300);
+      });
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('success') === 'tambah') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: 'Data vendor baru berhasil ditambahkan.',
-                showConfirmButton: false,
-                timer: 2000, // Pop-up otomatis tertutup dalam 2 detik
-                customClass: {
-                    popup: 'rounded-xl'
-                }
-            });
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('success') === 'tambah') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data vendor baru berhasil ditambahkan.',
+          showConfirmButton: false,
+          timer: 2000, // Pop-up otomatis tertutup dalam 2 detik
+          customClass: {
+            popup: 'rounded-xl'
+          }
+        });
 
-            // Bersihkan URL dari parameter ?success=tambah agar bersih saat refresh
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
+        // Bersihkan URL dari parameter ?success=tambah agar bersih saat refresh
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     });
 
   </script>
 </body>
+
 </html>

@@ -1,651 +1,1032 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Master Database Vendor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="/images/LOGODGS.png">
-    
-   <style>
-/* ============================================================
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Master Database Vendor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="/images/LOGODGS.png">
+
+  <style>
+    /* ============================================================
    LOGIN — RIGHT FORM & CENTERED COPYRIGHT ON LEFT BACKGROUND
    ============================================================ */
-:root {
-  --maroon-900: #4d0e0e;
-  --maroon-800: #5f1414;
-  --maroon-700: #7a1b1b;
-  --maroon-600: #9e2a2b;
-  --maroon-500: #b03a3a;
-  --gold: #c9933b;
-  --ink: #1e293b;
-  --muted: #64748b;
-  --line: #eee6e6;
-  --surface: #ffffff;
-}
+    :root {
+      --maroon-900: #4d0e0e;
+      --maroon-800: #5f1414;
+      --maroon-700: #7a1b1b;
+      --maroon-600: #9e2a2b;
+      --maroon-500: #b03a3a;
+      --gold: #c9933b;
+      --ink: #1e293b;
+      --muted: #64748b;
+      --line: #eee6e6;
+      --surface: #ffffff;
+    }
 
-*, *::before, *::after { box-sizing: border-box; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
 
-html {
-  height: 100%;
-}
+    html {
+      height: 100%;
+    }
 
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  background-color: #f4f6f9;
-  color: var(--ink);
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-font-smoothing: antialiased;
-}
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-color: #f4f6f9;
+      color: var(--ink);
+      position: relative;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-font-smoothing: antialiased;
+    }
 
-/* Shell halaman: navbar kiri atas, form kanan atas, copyright di bawah */
-.login-shell {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(380px, 460px);
-  grid-template-rows: auto 1fr auto;
-  column-gap: 40px;
-  padding: 22px 40px 0;
-  align-items: start; /* Mengunci agar baris atas langsung rata */
-}
+    /* Shell halaman: navbar kiri atas, form kanan atas, copyright di bawah */
+    .login-shell {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(380px, 460px);
+      grid-template-rows: auto 1fr auto;
+      column-gap: 40px;
+      padding: 22px 40px 0;
+      align-items: start;
+      /* Mengunci agar baris atas langsung rata */
+    }
 
-/* Background */  
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: linear-gradient(to left, rgba(122, 27, 27, 0.9) 0%, rgba(122, 27, 27, 0.4) 50%, rgba(255, 255, 255, 0.694) 100%),
-              url('/images/BGLOGIN.png') no-repeat center center fixed;
-  background-size: cover;
-  z-index: -1;
-  pointer-events: none;
-}
+    /* Background */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(to left, rgba(122, 27, 27, 0.9) 0%, rgba(122, 27, 27, 0.4) 50%, rgba(255, 255, 255, 0.694) 100%),
+        url('/images/BGLOGIN.png') no-repeat center center fixed;
+      background-size: cover;
+      z-index: -1;
+      pointer-events: none;
+    }
 
-/* Ornamen ambient */
-.bg-orb {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.6;
-}
-.orb-1 { width: 420px; height: 420px; top: -140px; right: -100px; background: radial-gradient(circle, rgba(122, 27, 27, 0.6) 0%, transparent 70%); }
-.orb-2 { width: 360px; height: 360px; bottom: -120px; left: -100px; background: radial-gradient(circle, rgba(201, 147, 59, 0.38) 0%, transparent 70%); }
+    /* Ornamen ambient */
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.6;
+    }
 
-/* Layout di kanan — form tetap di bagian atas */
-.auth-page {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  align-self: start;
-  width: 100%;
-  max-width: 460px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 8px;
-  padding-top: 0; /* Form sejajar dengan navbar kiri atas */
-  position: relative;
-  z-index: 1;
-}
+    .orb-1 {
+      width: 420px;
+      height: 420px;
+      top: -140px;
+      right: -100px;
+      background: radial-gradient(circle, rgba(122, 27, 27, 0.6) 0%, transparent 70%);
+    }
 
-/* Kartu utama mentok atas-bawah */
-.auth-card {
-  width: 100%;
-  position: relative;
-  padding: 22px 30px 20px; 
-  border-radius: 24px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 30px 60px -20px rgba(35, 10, 10, 0.5);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  overflow: hidden;
-}
-.auth-card::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--maroon-700) 0%, var(--gold) 50%, var(--maroon-700) 100%);
-}
+    .orb-2 {
+      width: 360px;
+      height: 360px;
+      bottom: -120px;
+      left: -100px;
+      background: radial-gradient(circle, rgba(201, 147, 59, 0.38) 0%, transparent 70%);
+    }
 
-/* Header brand */
-.auth-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.brand-row {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  min-width: 0;
-}
-.brand-logo {
-  width: 44px;
-  height: 44px;
-  flex: 0 0 auto;
-  border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid #f3e6e6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-.brand-logo img { width: 100%; height: 100%; object-fit: contain; padding: 5px; display: block; }
-.brand-eyebrow { font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--maroon-700); margin-bottom: 1px; }
-.brand-text h1 { font-size: 14px; font-weight: 800; color: #2a1212; }
-.head-badge { padding: 4px 9px; border-radius: 999px; background: #fdf2f2; border: 1px solid #f2dada; color: var(--maroon-700); font-size: 9px; font-weight: 800; }
-.badge-dot { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; }
+    /* Layout di kanan — form tetap di bagian atas */
+    .auth-page {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: start;
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 8px;
+      padding-top: 0;
+      /* Form sejajar dengan navbar kiri atas */
+      position: relative;
+      z-index: 1;
+    }
 
-/* Intro */
-.auth-intro { margin-bottom: 12px; }
-.auth-intro h2 { font-size: 20.5px; font-weight: 800; line-height: 1.15; color: #2a1212; }
-.auth-intro h2 span { background: linear-gradient(120deg, var(--maroon-700) 0%, var(--maroon-500) 60%, var(--gold) 120%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.auth-intro p { margin-top: 3px; font-size: 12px; line-height: 1.4; color: var(--muted); }
+    /* Kartu utama mentok atas-bawah */
+    .auth-card {
+      width: 100%;
+      position: relative;
+      padding: 22px 30px 20px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 30px 60px -20px rgba(35, 10, 10, 0.5);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      overflow: hidden;
+    }
 
-/* Role switch */
-.role-switch {
-  position: relative; display: flex; padding: 3px; border-radius: 12px; background: #f4f0f0; border: 1px solid #ece3e3; margin-bottom: 12px;
-}
-.role-slider {
-  position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 9px; background: #ffffff; box-shadow: 0 2px 8px rgba(122, 27, 27, 0.14); transition: transform 0.3s ease;
-}
-.role-btn {
-  position: relative; z-index: 1; flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 6px; border: none; border-radius: 9px; background: transparent; font-family: inherit; font-size: 12px; font-weight: 700; color: #8d7c7c; cursor: pointer;
-}
-.role-btn svg { width: 14px; height: 14px; }
-.role-btn.active { color: var(--maroon-700); }
+    .auth-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--maroon-700) 0%, var(--gold) 50%, var(--maroon-700) 100%);
+    }
 
-/* Form */
-.auth-form { display: flex; flex-direction: column; gap: 9px; }
-.field label { display: block; margin-bottom: 3px; font-size: 11px; font-weight: 700; color: #5b4a4a; }
-.input-wrap {
-  position: relative; display: flex; align-items: center; border-radius: 11px; background: #fbfafa; border: 1.5px solid var(--line);
-}
-.input-wrap:focus-within { background: #ffffff; border-color: rgba(122, 27, 27, 0.45); box-shadow: 0 0 0 3px rgba(122, 27, 27, 0.08); }
-.input-wrap > svg { width: 16px; height: 16px; margin-left: 12px; color: #a99494; }
-.input-wrap input {
-  flex: 1; min-width: 0; border: none; outline: none; background: transparent; padding: 9px 12px; font-family: inherit; font-size: 13.5px; color: var(--ink);
-}
-.eye-btn { display: flex; align-items: center; justify-content: center; height: 100%; padding: 0 12px; border: none; background: transparent; color: #a99494; cursor: pointer; }
+    /* Header brand */
+    .auth-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
 
-.form-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: -1px; }
-.remember { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); }
-.remember input { width: 13px; height: 13px; accent-color: var(--maroon-700); }
-.link-muted { font-size: 11.5px; font-weight: 700; color: var(--maroon-700); text-decoration: none; }
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
 
-.btn-primary {
-  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px 16px; border: none; border-radius: 11px; background: linear-gradient(135deg, var(--maroon-700) 0%, var(--maroon-500) 100%); color: #ffffff; font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 18px -6px rgba(122, 27, 27, 0.5);
-}
-.btn-primary svg { width: 15px; height: 15px; }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 auto;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #f3e6e6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
 
-/* Divider */
-.divider {
-  display: flex; align-items: center; gap: 10px; margin: 10px 0 8px; font-size: 9.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #b3a4a4;
-}
-.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #ece3e3; }
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 5px;
+      display: block;
+    }
 
-/* Guest */
-.btn-guest {
-  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px 16px; border-radius: 11px; border: 1.5px solid var(--line); background: #ffffff; color: #5b4a4a; font-size: 12.5px; font-weight: 700; text-decoration: none;
-}
-.btn-guest > svg:first-child { width: 15px; height: 15px; color: var(--maroon-700); }
-.btn-guest .guest-arrow { width: 13px; height: 13px; margin-left: auto; color: #b3a4a4; }
+    .brand-eyebrow {
+      font-size: 8.5px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--maroon-700);
+      margin-bottom: 1px;
+    }
 
-/* Footer card */
-.auth-foot { margin-top: 10px; text-align: center; font-size: 11.5px; color: var(--muted); }
-.auth-foot a { color: var(--maroon-700); font-weight: 800; text-decoration: none; }
+    .brand-text h1 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #2a1212;
+    }
+
+    .head-badge {
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #fdf2f2;
+      border: 1px solid #f2dada;
+      color: var(--maroon-700);
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    /* Intro */
+    .auth-intro {
+      margin-bottom: 12px;
+    }
+
+    .auth-intro h2 {
+      font-size: 20.5px;
+      font-weight: 800;
+      line-height: 1.15;
+      color: #2a1212;
+    }
+
+    .auth-intro h2 span {
+      background: linear-gradient(120deg, var(--maroon-700) 0%, var(--maroon-500) 60%, var(--gold) 120%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .auth-intro p {
+      margin-top: 3px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+
+    /* Role switch */
+    .role-switch {
+      position: relative;
+      display: flex;
+      padding: 3px;
+      border-radius: 12px;
+      background: #f4f0f0;
+      border: 1px solid #ece3e3;
+      margin-bottom: 12px;
+    }
+
+    .role-slider {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      border-radius: 9px;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(122, 27, 27, 0.14);
+      transition: transform 0.3s ease;
+    }
+
+    .role-btn {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 6px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      color: #8d7c7c;
+      cursor: pointer;
+    }
+
+    .role-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .role-btn.active {
+      color: var(--maroon-700);
+    }
+
+    /* Form */
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #5b4a4a;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      border-radius: 11px;
+      background: #fbfafa;
+      border: 1.5px solid var(--line);
+    }
+
+    .input-wrap:focus-within {
+      background: #ffffff;
+      border-color: rgba(122, 27, 27, 0.45);
+      box-shadow: 0 0 0 3px rgba(122, 27, 27, 0.08);
+    }
+
+    .input-wrap>svg {
+      width: 16px;
+      height: 16px;
+      margin-left: 12px;
+      color: #a99494;
+    }
+
+    .input-wrap input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 9px 12px;
+      font-family: inherit;
+      font-size: 13.5px;
+      color: var(--ink);
+    }
+
+    .eye-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 0 12px;
+      border: none;
+      background: transparent;
+      color: #a99494;
+      cursor: pointer;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: -1px;
+    }
+
+    .remember {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .remember input {
+      width: 13px;
+      height: 13px;
+      accent-color: var(--maroon-700);
+    }
+
+    .link-muted {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--maroon-700);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 11px 16px;
+      border: none;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--maroon-700) 0%, var(--maroon-500) 100%);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 18px -6px rgba(122, 27, 27, 0.5);
+    }
+
+    .btn-primary svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0 8px;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #b3a4a4;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #ece3e3;
+    }
+
+    /* Guest */
+    .btn-guest {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 11px;
+      border: 1.5px solid var(--line);
+      background: #ffffff;
+      color: #5b4a4a;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .btn-guest>svg:first-child {
+      width: 15px;
+      height: 15px;
+      color: var(--maroon-700);
+    }
+
+    .btn-guest .guest-arrow {
+      width: 13px;
+      height: 13px;
+      margin-left: auto;
+      color: #b3a4a4;
+    }
+
+    /* Footer card */
+    .auth-foot {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .auth-foot a {
+      color: var(--maroon-700);
+      font-weight: 800;
+      text-decoration: none;
+    }
 
 
-/* Navbar sederhana di area kiri atas */
-.login-nav {
-  grid-column: 1;
-  grid-row: 1;
-  justify-self: center;
-  align-self: start;
-  display: flex;
-  align-items: center;
-  
-  /* Padding tipis atas-bawah agar pas rapat dengan teks, renggang di samping */
-  padding: 5px 6px; 
-  
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12); /* Semi transparan gelap/terang */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  z-index: 2;
-}
+    /* Navbar sederhana di area kiri atas */
+    .login-nav {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: center;
+      align-self: start;
+      display: flex;
+      align-items: center;
 
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: #2a1212;
-  min-width: 0;
-}
+      /* Padding tipis atas-bawah agar pas rapat dengan teks, renggang di samping */
+      padding: 5px 6px;
 
-.nav-brand img {
-  width: 34px;
-  height: 34px;
-  padding: 4px;
-  border-radius: 9px;
-  background: #ffffff;
-  border: 1px solid #f3e6e6;
-  object-fit: contain;
-  flex: 0 0 auto;
-}
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      /* Semi transparan gelap/terang */
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 2;
+    }
 
-.nav-brand strong {
-  display: block;
-  font-size: 12.5px;
-  font-weight: 800;
-  line-height: 1.2;
-  white-space: nowrap;
-}
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #2a1212;
+      min-width: 0;
+    }
 
-.nav-brand small {
-  display: block;
-  margin-top: 1px;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--maroon-700);
-  white-space: nowrap;
-}
+    .nav-brand img {
+      width: 34px;
+      height: 34px;
+      padding: 4px;
+      border-radius: 9px;
+      background: #ffffff;
+      border: 1px solid #f3e6e6;
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
 
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 100px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+    .nav-brand strong {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 800;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
 
-.nav-links a {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 14px; /* Padding rapat atas-bawah, lebar ke samping */
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #ffffff;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
+    .nav-brand small {
+      display: block;
+      margin-top: 1px;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--maroon-700);
+      white-space: nowrap;
+    }
 
-.nav-links a:hover {
-  color: #ffffff;
-  background: rgba(151, 49, 49, 0.957);
-  box-shadow: 0 2px 8px rgba(157, 33, 33, 0.1);
-}
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 100px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
 
-.copyright {
-  grid-column: 1 / -1;
-  grid-row: 3;
-  justify-self: center;
-  align-self: end;
-  margin: 30px 0 18px;
-  padding: 6px 16px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid rgba(122, 27, 27, 0.12);
-  font-size: 11px;
-  color: #5b4a4a;
-  text-align: center;
-  white-space: nowrap;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 10;
-}
-.copyright strong {
-  color: rgb(151, 44, 44);
-} 
+    .nav-links a {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      /* Padding rapat atas-bawah, lebar ke samping */
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #ffffff;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
 
-.hero-text {
-  grid-column: 1;
-  grid-row: 1;
-  justify-self: center;
-  align-self: center;
-  margin-top: 180px;
-  transform: translateY(20px);
-  color: #ffffff;
-  z-index: 2;
-}
+    .nav-links a:hover {
+      color: #ffffff;
+      background: rgba(151, 49, 49, 0.957);
+      box-shadow: 0 2px 8px rgba(157, 33, 33, 0.1);
+    }
 
-.hero-text h1 {
-  font-family: 'Montserrat', sans-serif !important;
-  font-weight: 750 !important;
-  font-style: normal !important;
-  font-size: 35px;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: px;
-  letter-spacing: -0.5px;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-}
+    .copyright {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      justify-self: center;
+      align-self: end;
+      margin: 30px 0 18px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(122, 27, 27, 0.12);
+      font-size: 11px;
+      color: #5b4a4a;
+      text-align: center;
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10;
+    }
 
-.hero-text h2 {
-  font-family: 'Montserrat', sans-serif !important;
-  font-weight: 650 !important;
-  font-style: normal !important;
-  font-size: 27px;
-  font-weight: 500;
-  color: rgba(255, 255, 255);
-  letter-spacing: 0.3px;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
-}
+    .copyright strong {
+      color: rgb(151, 44, 44);
+    }
 
-/* ============================================================
+    .hero-text {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: center;
+      align-self: center;
+      margin-top: 180px;
+      transform: translateY(20px);
+      color: #ffffff;
+      z-index: 2;
+    }
+
+    .hero-text h1 {
+      font-family: 'Montserrat', sans-serif !important;
+      font-weight: 750 !important;
+      font-style: normal !important;
+      font-size: 35px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: px;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-text h2 {
+      font-family: 'Montserrat', sans-serif !important;
+      font-weight: 650 !important;
+      font-style: normal !important;
+      font-size: 27px;
+      font-weight: 500;
+      color: rgba(255, 255, 255);
+      letter-spacing: 0.3px;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ============================================================
    MODAL AUTH — Buat Akun Admin/User, Lupa Password, Reset
    ============================================================ */
-@keyframes modalFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@keyframes modalPopIn {
-  from { opacity: 0; transform: translateY(14px) scale(0.985); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+      }
 
-#modalLogin {
-  animation: modalFadeIn 0.18s ease both;
-}
+      to {
+        opacity: 1;
+      }
+    }
 
-.modal-card {
-  position: relative;
-  width: 100%;
-  max-width: 420px;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
-  padding: 28px 28px 24px;
-  border-radius: 22px;
-  background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 30px 70px -20px rgba(35, 10, 10, 0.55);
-  animation: modalPopIn 0.22s ease both;
-  scrollbar-width: thin;
-  scrollbar-color: #d9c7c7 transparent;
-}
-.modal-card::-webkit-scrollbar { width: 8px; }
-.modal-card::-webkit-scrollbar-thumb { background: #d9c7c7; border-radius: 999px; }
-.modal-card::-webkit-scrollbar-track { background: transparent; }
+    @keyframes modalPopIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.985);
+      }
 
-.modal-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: #f6eeee;
-  color: #8a6a6a;
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease;
-  z-index: 3;
-}
-.modal-close:hover { background: #f0dede; color: #7a1b1b; }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
 
-.modal-head {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin: 2px 0 20px;
-  padding-right: 30px;
-}
+    #modalLogin {
+      animation: modalFadeIn 0.18s ease both;
+    }
 
-.modal-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 13px;
-  flex: 0 0 auto;
-}
-.modal-icon svg { width: 22px; height: 22px; }
-.icon-admin { background: #fdeaea; color: #cf3939; }
-.icon-user  { background: #f7eeee; color: #7a1b1b; }
-.icon-lupa  { background: #fdf3e2; color: #b07a21; }
-.icon-reset { background: #e9f7ee; color: #1f9d55; }
+    .modal-card {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      padding: 28px 28px 24px;
+      border-radius: 22px;
+      background: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 30px 70px -20px rgba(35, 10, 10, 0.55);
+      animation: modalPopIn 0.22s ease both;
+      scrollbar-width: thin;
+      scrollbar-color: #d9c7c7 transparent;
+    }
 
-.modal-head h3 {
-  margin: 0 0 4px;
-  font-size: 19px;
-  font-weight: 800;
-  line-height: 1.2;
-  color: #2a1212;
-}
-.modal-head p {
-  margin: 0;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: #7a6a6a;
-}
+    .modal-card::-webkit-scrollbar {
+      width: 8px;
+    }
 
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
-}
+    .modal-card::-webkit-scrollbar-thumb {
+      background: #d9c7c7;
+      border-radius: 999px;
+    }
 
-.modal-field label {
-  display: block;
-  margin: 0 0 5px;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: #6b5a5a;
-}
+    .modal-card::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-.modal-input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  background: #fbf8f8;
-  border: 1px solid #e8dede;
-  border-radius: 11px;
-  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-}
-.modal-input-wrap:focus-within {
-  background: #ffffff;
-  border-color: rgba(122, 27, 27, 0.45);
-  box-shadow: 0 0 0 3px rgba(122, 27, 27, 0.08);
-}
-.modal-input-wrap > svg {
-  width: 16px;
-  height: 16px;
-  margin-left: 12px;
-  flex: 0 0 auto;
-  color: #b09c9c;
-  pointer-events: none;
-}
-.modal-input-wrap input {
-  flex: 1;
-  min-width: 0;
-  padding: 12px;
-  border: none;
-  background: transparent;
-  font: inherit;
-  font-size: 13.5px;
-  color: #2a1212;
-  outline: none;
-}
-.modal-input-wrap input::placeholder { color: #b5a5a5; }
-.modal-input-wrap.is-code {
-  background: #fffdfd;
-  border: 1.5px dashed #c9a3a3;
-}
-.modal-input-wrap.is-code:focus-within {
-  border-style: solid;
-  border-color: #7a1b1b;
-}
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: #f6eeee;
+      color: #8a6a6a;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease;
+      z-index: 3;
+    }
 
-.modal-eye {
-  display: flex;
-  align-items: center;
-  align-self: stretch;
-  padding: 0 12px;
-  border: none;
-  background: transparent;
-  color: #a89494;
-  cursor: pointer;
-}
-.modal-eye:hover { color: #7a1b1b; }
+    .modal-close:hover {
+      background: #f0dede;
+      color: #7a1b1b;
+    }
 
-.modal-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: -4px;
-}
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 2px 0 20px;
+      padding-right: 30px;
+    }
 
-.modal-link {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #7a1b1b;
-  text-decoration: none;
-}
-.modal-link:hover { text-decoration: underline; }
-.modal-link.is-admin { color: #cf3939; }
+    .modal-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 13px;
+      flex: 0 0 auto;
+    }
 
-.modal-submit {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 5px;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 11px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: filter 0.18s ease, transform 0.12s ease;
-}
-.modal-submit:hover { filter: brightness(1.06); }
-.modal-submit:active { transform: translateY(1px); }
-.modal-submit:disabled { opacity: 0.65; cursor: progress; }
-.btn-admin { background: #cf3939; }
-.btn-user  { background: #7a1b1b; }
-.btn-lupa  { background: #b07a21; }
-.btn-reset { background: #1f9d55; }
+    .modal-icon svg {
+      width: 22px;
+      height: 22px;
+    }
 
-.modal-switch {
-  margin: 4px 0 0;
-  text-align: center;
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: #7a6a6a;
-}
-.modal-switch a {
-  color: #7a1b1b;
-  font-weight: 800;
-  text-decoration: none;
-}
-.modal-switch a:hover { text-decoration: underline; }
-.modal-switch.is-admin a { color: #cf3939; }
+    .icon-admin {
+      background: #fdeaea;
+      color: #cf3939;
+    }
 
-.modal-guest {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 14px;
-  padding: 12px;
-  border: 1px solid #e8dede;
-  border-radius: 11px;
-  background: #faf7f7;
-  color: #5b4a4a;
-  font-size: 13px;
-  font-weight: 700;
-  text-decoration: none;
-  transition: background 0.18s ease;
-}
-.modal-guest:hover { background: #f4ecec; }
+    .icon-user {
+      background: #f7eeee;
+      color: #7a1b1b;
+    }
 
-@media (max-width: 560px) {
-  .modal-card {
-    max-height: calc(100vh - 24px);
-    padding: 24px 18px 20px;
-    border-radius: 18px;
-  }
-  .modal-head { gap: 10px; padding-right: 26px; }
-  .modal-head h3 { font-size: 17px; }
-  .modal-head p { font-size: 12px; }
-}
+    .icon-lupa {
+      background: #fdf3e2;
+      color: #b07a21;
+    }
 
-/* Responsive: di bawah 820px navbar & form ditumpuk (tidak muat berdampingan) */
-@media (max-width: 820px) {
-  .login-shell {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    min-height: calc(100vh + 70px);
-    padding: 16px 16px 0;
-    row-gap: 8px;
-  }
-  .login-nav {
-  grid-column: 1;
-  grid-row: 1;
-  justify-self: start;
-  flex-wrap: wrap;
-  padding: 20px 24px; 
+    .icon-reset {
+      background: #e9f7ee;
+      color: #1f9d55;
+    }
 
-}
-  .auth-page {
-    grid-column: 1;
-    grid-row: 2;
-    justify-self: center;
-    align-self: start;
-    width: 100%;
-    max-width: 460px;
-    padding-top: 8px;
-  }
-  .copyright {
-    grid-column: 1;
-    grid-row: 3;
-    margin: 22px 0 14px;
-    white-space: normal;
-  }
-}
+    .modal-head h3 {
+      margin: 0 0 4px;
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.2;
+      color: #2a1212;
+    }
 
-@media (max-width: 560px) {
-  .login-nav { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .nav-links { flex-wrap: wrap; }
-  .nav-brand strong { font-size: 11.5px; }
-}
-</style>
+    .modal-head p {
+      margin: 0;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #7a6a6a;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .modal-field label {
+      display: block;
+      margin: 0 0 5px;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: #6b5a5a;
+    }
+
+    .modal-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #fbf8f8;
+      border: 1px solid #e8dede;
+      border-radius: 11px;
+      transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .modal-input-wrap:focus-within {
+      background: #ffffff;
+      border-color: rgba(122, 27, 27, 0.45);
+      box-shadow: 0 0 0 3px rgba(122, 27, 27, 0.08);
+    }
+
+    .modal-input-wrap>svg {
+      width: 16px;
+      height: 16px;
+      margin-left: 12px;
+      flex: 0 0 auto;
+      color: #b09c9c;
+      pointer-events: none;
+    }
+
+    .modal-input-wrap input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      font: inherit;
+      font-size: 13.5px;
+      color: #2a1212;
+      outline: none;
+    }
+
+    .modal-input-wrap input::placeholder {
+      color: #b5a5a5;
+    }
+
+    .modal-input-wrap.is-code {
+      background: #fffdfd;
+      border: 1.5px dashed #c9a3a3;
+    }
+
+    .modal-input-wrap.is-code:focus-within {
+      border-style: solid;
+      border-color: #7a1b1b;
+    }
+
+    .modal-eye {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      padding: 0 12px;
+      border: none;
+      background: transparent;
+      color: #a89494;
+      cursor: pointer;
+    }
+
+    .modal-eye:hover {
+      color: #7a1b1b;
+    }
+
+    .modal-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -4px;
+    }
+
+    .modal-link {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #7a1b1b;
+      text-decoration: none;
+    }
+
+    .modal-link:hover {
+      text-decoration: underline;
+    }
+
+    .modal-link.is-admin {
+      color: #cf3939;
+    }
+
+    .modal-submit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 5px;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 11px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: filter 0.18s ease, transform 0.12s ease;
+    }
+
+    .modal-submit:hover {
+      filter: brightness(1.06);
+    }
+
+    .modal-submit:active {
+      transform: translateY(1px);
+    }
+
+    .modal-submit:disabled {
+      opacity: 0.65;
+      cursor: progress;
+    }
+
+    .btn-admin {
+      background: #cf3939;
+    }
+
+    .btn-user {
+      background: #7a1b1b;
+    }
+
+    .btn-lupa {
+      background: #b07a21;
+    }
+
+    .btn-reset {
+      background: #1f9d55;
+    }
+
+    .modal-switch {
+      margin: 4px 0 0;
+      text-align: center;
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: #7a6a6a;
+    }
+
+    .modal-switch a {
+      color: #7a1b1b;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .modal-switch a:hover {
+      text-decoration: underline;
+    }
+
+    .modal-switch.is-admin a {
+      color: #cf3939;
+    }
+
+    .modal-guest {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid #e8dede;
+      border-radius: 11px;
+      background: #faf7f7;
+      color: #5b4a4a;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.18s ease;
+    }
+
+    .modal-guest:hover {
+      background: #f4ecec;
+    }
+
+    @media (max-width: 560px) {
+      .modal-card {
+        max-height: calc(100vh - 24px);
+        padding: 24px 18px 20px;
+        border-radius: 18px;
+      }
+
+      .modal-head {
+        gap: 10px;
+        padding-right: 26px;
+      }
+
+      .modal-head h3 {
+        font-size: 17px;
+      }
+
+      .modal-head p {
+        font-size: 12px;
+      }
+    }
+
+    /* Responsive: di bawah 820px navbar & form ditumpuk (tidak muat berdampingan) */
+    @media (max-width: 820px) {
+      .login-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        min-height: calc(100vh + 70px);
+        padding: 16px 16px 0;
+        row-gap: 8px;
+      }
+
+      .login-nav {
+        grid-column: 1;
+        grid-row: 1;
+        justify-self: start;
+        flex-wrap: wrap;
+        padding: 20px 24px;
+
+      }
+
+      .auth-page {
+        grid-column: 1;
+        grid-row: 2;
+        justify-self: center;
+        align-self: start;
+        width: 100%;
+        max-width: 460px;
+        padding-top: 8px;
+      }
+
+      .copyright {
+        grid-column: 1;
+        grid-row: 3;
+        margin: 22px 0 14px;
+        white-space: normal;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .login-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+      }
+
+      .nav-brand strong {
+        font-size: 11.5px;
+      }
+    }
+
+  </style>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <body>
 
   <!-- Ornamen ambient -->
@@ -665,623 +1046,633 @@ body::before {
       <h1>Selamat Datang!</h1>
       <h2>Portal Internal Management System</h2>
     </div>
- 
+
     <main class="auth-page">
 
-    <!-- PANEL LOGIN MODERN -->
-    <section class="auth-card" id="authCard">
+      <!-- PANEL LOGIN MODERN -->
+      <section class="auth-card" id="authCard">
 
-      <header class="auth-head">
-        <div class="brand-row">
-          <div class="brand-logo">
-            <img src="/images/dgs.png" alt="Logo DGS">
+        <header class="auth-head">
+          <div class="brand-row">
+            <div class="brand-logo">
+              <img src="/images/dgs.png" alt="Logo DGS">
+            </div>
+            <div class="brand-text">
+              <span class="brand-eyebrow">Warehouse System</span>
+              <h1>Dian Giri Saputra</h1>
+            </div>
           </div>
-          <div class="brand-text">
-            <span class="brand-eyebrow">Warehouse System</span>
-            <h1>Dian Giri Saputra</h1>
+          <div class="head-badge">
+            <span class="badge-dot"></span>
+            Secure Portal
           </div>
+        </header>
+
+        <div class="auth-intro">
+          <h2>Selamat Datang <span>Kembali</span></h2>
+          <p>Pilih tipe akun dan masuk untuk mengelola data vendor, harga dasar, serta stok barang dalam satu sistem terintegrasi.</p>
         </div>
-        <div class="head-badge">
-          <span class="badge-dot"></span>
-          Secure Portal
-        </div>
-      </header>
 
-      <div class="auth-intro">
-        <h2>Selamat Datang <span>Kembali</span></h2>
-        <p>Pilih tipe akun dan masuk untuk mengelola data vendor, harga dasar, serta stok barang dalam satu sistem terintegrasi.</p>
-      </div>
+        <!-- Switch role User / Admin -->
+        <div class="role-switch" role="tablist" aria-label="Pilih tipe akun">
+          <span class="role-slider" id="roleSlider" aria-hidden="true"></span>
 
-      <!-- Switch role User / Admin -->
-      <div class="role-switch" role="tablist" aria-label="Pilih tipe akun">
-        <span class="role-slider" id="roleSlider" aria-hidden="true"></span>
-
-        <button type="button" id="roleBtnUser" class="role-btn active" role="tab" aria-selected="true" onclick="setRole('user')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span>User</span>
-        </button>
-
-        <button type="button" id="roleBtnAdmin" class="role-btn" role="tab" aria-selected="false" onclick="setRole('admin')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            <path d="M9 12l2 2 4-4"></path>
-          </svg>
-          <span>Admin</span>
-        </button>
-      </div>
-
-      <!-- Form login langsung di halaman -->
-      <form id="formLoginUtama" class="auth-form" onsubmit="prosesLoginUtama(event)">
-        <div class="field">
-          <label for="loginUsername" id="loginUsernameLabel">Username User</label>
-          <div class="input-wrap">
+          <button type="button" id="roleBtnUser" class="role-btn active" role="tab" aria-selected="true" onclick="setRole('user')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            <input type="text" id="loginUsername" name="username" placeholder="Masukkan username user" autocomplete="username" required>
-          </div>
-        </div>
+            <span>User</span>
+          </button>
 
-        <div class="field">
-          <label for="loginPassword">Password</label>
-          <div class="input-wrap">
+          <button type="button" id="roleBtnAdmin" class="role-btn" role="tab" aria-selected="false" onclick="setRole('admin')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <path d="M9 12l2 2 4-4"></path>
             </svg>
-            <input type="password" id="loginPassword" name="password" placeholder="Masukkan password" autocomplete="current-password" required>
-            <button type="button" class="eye-btn" onclick="togglePassword('loginPassword', 'iconLoginPass')" aria-label="Tampilkan password">
-              <i id="iconLoginPass" class="fa-solid fa-eye"></i>
-            </button>
+            <span>Admin</span>
+          </button>
+        </div>
+
+        <!-- Form login langsung di halaman -->
+        <form id="formLoginUtama" class="auth-form" onsubmit="prosesLoginUtama(event)">
+          <div class="field">
+            <label for="loginUsername" id="loginUsernameLabel">Username User</label>
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <input type="text" id="loginUsername" name="username" placeholder="Masukkan username user" autocomplete="username" required>
+            </div>
           </div>
-        </div>
 
-        <div class="form-row">
-          <label class="remember" for="rememberMe">
-            <input type="checkbox" id="rememberMe">
-            <span>Ingat saya</span>
-          </label>
-          <a href="javascript:void(0)" class="link-muted" onclick="tampilLupaPassword(roleAktif)">
-            Lupa password?
-          </a>
-        </div>
+          <div class="field">
+            <label for="loginPassword">Password</label>
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <input type="password" id="loginPassword" name="password" placeholder="Masukkan password" autocomplete="current-password" required>
+              <button type="button" class="eye-btn" onclick="togglePassword('loginPassword', 'iconLoginPass')" aria-label="Tampilkan password">
+                <i id="iconLoginPass" class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
 
-        <button type="submit" class="btn-primary" id="btnLoginUtama">
-          <span id="btnLoginText">Masuk sebagai User</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
+          <div class="form-row">
+            <label class="remember" for="rememberMe">
+              <input type="checkbox" id="rememberMe">
+              <span>Ingat saya</span>
+            </label>
+            <a href="javascript:void(0)" class="link-muted" onclick="tampilLupaPassword(roleAktif)">
+              Lupa password?
+            </a>
+          </div>
+
+          <button type="submit" class="btn-primary" id="btnLoginUtama">
+            <span id="btnLoginText">Masuk sebagai User</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </form>
+
+        <div class="divider"><span>atau akses cepat</span></div>
+
+        <a href="/dashboard-guest" class="btn-guest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
           </svg>
-        </button>
-      </form>
+          <span>Masuk sebagai Guest (Tamu)</span>
+          <svg class="guest-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </a>
 
-      <div class="divider"><span>atau akses cepat</span></div>
-
-      <a href="/dashboard-guest" class="btn-guest">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-          <circle cx="12" cy="12" r="3"></circle>
-        </svg>
-        <span>Masuk sebagai Guest (Tamu)</span>
-        <svg class="guest-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </a>
-
-      <p class="auth-foot">
-        Belum punya akun?
-        <a href="javascript:void(0)" onclick="bukaRegisterAktif()">Daftar sekarang</a>
-      </p>
-    </section>
+        <p class="auth-foot">
+          Belum punya akun?
+          <a href="javascript:void(0)" onclick="bukaRegisterAktif()">Daftar sekarang</a>
+        </p>
+      </section>
     </main>
 
     <p class="copyright">&copy; 2026 <strong>Dian Giri Saputra</strong>. All Rights Reserved.</p>
   </div>
 
-    <!-- MODAL POP-UP FORM LOGIN & REGISTER -->
-    <div id="modalLogin" onclick="tutupLoginLuar(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;">
-        <div class="modal-card">
-            <button type="button" class="modal-close" onclick="tutupLogin()" aria-label="Tutup formulir">&times;</button>
-            
-            <% if (typeof error !== 'undefined') { %>
-                <script>setTimeout(() => { document.getElementById('modalLogin').style.display = 'flex'; }, 100);</script>
-                <div style="background-color: rgba(255, 235, 233, 0.9); color: #ff3b30; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; border: 1px solid #ffccd5; text-align: left;">
-                    ⚠️ <%= error %>
-                </div>
-            <% } %>
+  <!-- MODAL POP-UP FORM LOGIN & REGISTER -->
+  <div id="modalLogin" onclick="tutupLoginLuar(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;">
+    <div class="modal-card">
+      <button type="button" class="modal-close" onclick="tutupLogin()" aria-label="Tutup formulir">&times;</button>
 
-           <div class="auth-container">
-    <!-- FORM 1A: LOGIN ADMIN -->
-    <div id="boxLoginAdmin" class="modal-box" style="display: none;">
-        <header class="modal-head">
+      <% if (typeof error !== 'undefined') { %>
+      <script>
+        setTimeout(() => {
+          document.getElementById('modalLogin').style.display = 'flex';
+        }, 100);
+
+      </script>
+      <div style="background-color: rgba(255, 235, 233, 0.9); color: #ff3b30; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; border: 1px solid #ffccd5; text-align: left;">
+        ⚠️ <%= error %>
+      </div>
+      <% } %>
+
+      <div class="auth-container">
+        <!-- FORM 1A: LOGIN ADMIN -->
+        <div id="boxLoginAdmin" class="modal-box" style="display: none;">
+          <header class="modal-head">
             <div class="modal-icon icon-admin">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    <path d="M9 12l2 2 4-4"></path>
-                </svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="M9 12l2 2 4-4"></path>
+              </svg>
             </div>
             <div>
-                <h3>Verifikasi Admin</h3>
-                <p>Masukkan kredensial akun administrator Anda.</p>
+              <h3>Verifikasi Admin</h3>
+              <p>Masukkan kredensial akun administrator Anda.</p>
             </div>
-        </header>
+          </header>
 
-        <form class="modal-form" onsubmit="prosesLogin(event, 'admin')">
+          <form class="modal-form" onsubmit="prosesLogin(event, 'admin')">
             <div class="modal-field">
-                <label for="adminLoginUsername">Username Admin</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    <input type="text" id="adminLoginUsername" name="username" placeholder="Masukkan username admin" autocomplete="username" required>
-                </div>
+              <label for="adminLoginUsername">Username Admin</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" id="adminLoginUsername" name="username" placeholder="Masukkan username admin" autocomplete="username" required>
+              </div>
             </div>
 
             <div class="modal-field">
-                <label for="adminPassword">Password</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <input type="password" id="adminPassword" name="password" placeholder="Masukkan password admin" autocomplete="current-password" required>
-                    <button type="button" class="modal-eye" onclick="togglePassword('adminPassword', 'iconAdminPass')" aria-label="Tampilkan password">
-                        <i id="iconAdminPass" class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
+              <label for="adminPassword">Password</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="adminPassword" name="password" placeholder="Masukkan password admin" autocomplete="current-password" required>
+                <button type="button" class="modal-eye" onclick="togglePassword('adminPassword', 'iconAdminPass')" aria-label="Tampilkan password">
+                  <i id="iconAdminPass" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
             </div>
 
             <div class="modal-row">
-                <a href="javascript:void(0)" class="modal-link is-admin" onclick="tampilLupaPassword('admin')">Lupa Password?</a>
+              <a href="javascript:void(0)" class="modal-link is-admin" onclick="tampilLupaPassword('admin')">Lupa Password?</a>
             </div>
 
             <button type="submit" id="btnSubmitAdmin" class="modal-submit btn-admin">Masuk Sebagai Admin</button>
 
             <p class="modal-switch is-admin">Belum punya akun admin? <a href="javascript:void(0)" onclick="bukaRegisterAdmin()">Buat Akun Admin &rarr;</a></p>
-        </form>
-    </div>
+          </form>
+        </div>
 
-    <!-- FORM 1B: REGISTER ADMIN -->
-    <div id="boxRegisterAdmin" class="modal-box" style="display: none;">
-        <header class="modal-head">
+        <!-- FORM 1B: REGISTER ADMIN -->
+        <div id="boxRegisterAdmin" class="modal-box" style="display: none;">
+          <header class="modal-head">
             <div class="modal-icon icon-admin">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <line x1="19" y1="8" x2="19" y2="14"></line>
-                    <line x1="22" y1="11" x2="16" y2="11"></line>
-                </svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <line x1="19" y1="8" x2="19" y2="14"></line>
+                <line x1="22" y1="11" x2="16" y2="11"></line>
+              </svg>
             </div>
             <div>
-                <h3>Buat Akun Admin</h3>
-                <p>Daftarkan akun administrator baru untuk kontrol sistem.</p>
+              <h3>Buat Akun Admin</h3>
+              <p>Daftarkan akun administrator baru untuk kontrol sistem.</p>
             </div>
-        </header>
+          </header>
 
-        <form class="modal-form" onsubmit="prosesRegisterAdmin(event)">
+          <form class="modal-form" onsubmit="prosesRegisterAdmin(event)">
             <div class="modal-field">
-                <label for="adminRegUsername">Username Admin</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    <input type="text" id="adminRegUsername" placeholder="Masukkan username admin baru" autocomplete="username" required>
-                </div>
-            </div>
-
-            <div class="modal-field">
-                <label for="adminRegPassword">Password Admin</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <input type="password" id="adminRegPassword" placeholder="Buat password admin baru" autocomplete="new-password" required>
-                    <button type="button" class="modal-eye" onclick="togglePassword('adminRegPassword', 'iconAdminRegPass')" aria-label="Tampilkan password">
-                        <i id="iconAdminRegPass" class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
+              <label for="adminRegUsername">Username Admin</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" id="adminRegUsername" placeholder="Masukkan username admin baru" autocomplete="username" required>
+              </div>
             </div>
 
             <div class="modal-field">
-                <label for="adminRegConfirmPassword">Konfirmasi Password</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <input type="password" id="adminRegConfirmPassword" placeholder="Ulangi password admin" autocomplete="new-password" required>
-                    <button type="button" class="modal-eye" onclick="togglePassword('adminRegConfirmPassword', 'iconAdminRegConfirm')" aria-label="Tampilkan konfirmasi password">
-                        <i id="iconAdminRegConfirm" class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
+              <label for="adminRegPassword">Password Admin</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="adminRegPassword" placeholder="Buat password admin baru" autocomplete="new-password" required>
+                <button type="button" class="modal-eye" onclick="togglePassword('adminRegPassword', 'iconAdminRegPass')" aria-label="Tampilkan password">
+                  <i id="iconAdminRegPass" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
             </div>
 
             <div class="modal-field">
-                <label for="adminRegKodeRahasia">Kode Verifikasi</label>
-                <div class="modal-input-wrap is-code">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                    </svg>
-                    <input type="text" id="adminRegKodeRahasia" name="kodeRahasia" placeholder="Masukkan kode verifikasi pendaftaran" required>
-                </div>
+              <label for="adminRegConfirmPassword">Konfirmasi Password</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="adminRegConfirmPassword" placeholder="Ulangi password admin" autocomplete="new-password" required>
+                <button type="button" class="modal-eye" onclick="togglePassword('adminRegConfirmPassword', 'iconAdminRegConfirm')" aria-label="Tampilkan konfirmasi password">
+                  <i id="iconAdminRegConfirm" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="modal-field">
+              <label for="adminRegKodeRahasia">Kode Verifikasi</label>
+              <div class="modal-input-wrap is-code">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                </svg>
+                <input type="text" id="adminRegKodeRahasia" name="kodeRahasia" placeholder="Masukkan kode verifikasi pendaftaran" required>
+              </div>
             </div>
 
             <button type="submit" id="btnRegisterAdmin" class="modal-submit btn-admin">Daftar Akun Admin</button>
 
             <p class="modal-switch is-admin">Sudah punya akun admin? <a href="javascript:void(0)" onclick="bukaLoginAdmin()">&larr; Masuk Admin</a></p>
-        </form>
-    </div>
+          </form>
+        </div>
 
-    <!-- FORM 2A: LOGIN USER -->
-    <div id="boxLoginUser" class="modal-box" style="display: none;">
-        <header class="modal-head">
+        <!-- FORM 2A: LOGIN USER -->
+        <div id="boxLoginUser" class="modal-box" style="display: none;">
+          <header class="modal-head">
             <div class="modal-icon icon-user">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
             </div>
             <div>
-                <h3>Login Akun User</h3>
-                <p>Masukkan username dan password akun user Anda.</p>
+              <h3>Login Akun User</h3>
+              <p>Masukkan username dan password akun user Anda.</p>
             </div>
-        </header>
+          </header>
 
-        <form class="modal-form" onsubmit="prosesLogin(event, 'user')">
+          <form class="modal-form" onsubmit="prosesLogin(event, 'user')">
             <div class="modal-field">
-                <label for="userLoginUsername">Username User</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    <input type="text" id="userLoginUsername" name="username" placeholder="Masukkan username user" autocomplete="username" required>
-                </div>
+              <label for="userLoginUsername">Username User</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" id="userLoginUsername" name="username" placeholder="Masukkan username user" autocomplete="username" required>
+              </div>
             </div>
 
             <div class="modal-field">
-                <label for="userPassword">Password</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <input type="password" id="userPassword" name="password" placeholder="Masukkan password user" autocomplete="current-password" required>
-                    <button type="button" class="modal-eye" onclick="togglePassword('userPassword', 'iconUserPass')" aria-label="Tampilkan password">
-                        <i id="iconUserPass" class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
+              <label for="userPassword">Password</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="userPassword" name="password" placeholder="Masukkan password user" autocomplete="current-password" required>
+                <button type="button" class="modal-eye" onclick="togglePassword('userPassword', 'iconUserPass')" aria-label="Tampilkan password">
+                  <i id="iconUserPass" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
             </div>
 
             <div class="modal-row">
-                <a href="javascript:void(0)" class="modal-link" onclick="tampilLupaPassword('user')">Lupa Password?</a>
+              <a href="javascript:void(0)" class="modal-link" onclick="tampilLupaPassword('user')">Lupa Password?</a>
             </div>
 
             <button type="submit" id="btnSubmitUser" class="modal-submit btn-user">Masuk Ke Dashboard</button>
 
             <p class="modal-switch">Belum punya akun user? <a href="javascript:void(0)" onclick="bukaRegisterUser()">Buat Akun User &rarr;</a></p>
-        </form>
+          </form>
 
-        <a href="/dashboard-guest" class="modal-guest">
+          <a href="/dashboard-guest" class="modal-guest">
             <i class="fa-solid fa-eye"></i>
             <span>Masuk sebagai Guest (Tamu)</span>
-        </a>
-    </div>
+          </a>
+        </div>
 
-    <!-- FORM 2B: REGISTER USER -->
-    <div id="boxRegisterUser" class="modal-box" style="display: none;">
-        <header class="modal-head">
+        <!-- FORM 2B: REGISTER USER -->
+        <div id="boxRegisterUser" class="modal-box" style="display: none;">
+          <header class="modal-head">
             <div class="modal-icon icon-user">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <line x1="19" y1="8" x2="19" y2="14"></line>
-                    <line x1="22" y1="11" x2="16" y2="11"></line>
-                </svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <line x1="19" y1="8" x2="19" y2="14"></line>
+                <line x1="22" y1="11" x2="16" y2="11"></line>
+              </svg>
             </div>
             <div>
-                <h3>Buat Akun User</h3>
-                <p>Daftarkan akun user baru untuk akses operasional.</p>
+              <h3>Buat Akun User</h3>
+              <p>Daftarkan akun user baru untuk akses operasional.</p>
             </div>
-        </header>
+          </header>
 
-        <form class="modal-form" onsubmit="prosesRegisterUser(event)">
+          <form class="modal-form" onsubmit="prosesRegisterUser(event)">
             <div class="modal-field">
-                <label for="userRegNama">Nama Lengkap <span style="font-weight:600; text-transform:none; letter-spacing:0;">(opsional)</span></label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    <input type="text" id="userRegNama" placeholder="Masukkan nama lengkap" autocomplete="name">
-                </div>
-            </div>
-
-            <div class="modal-field">
-                <label for="userRegUsername">Username User</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    <input type="text" id="userRegUsername" placeholder="Masukkan username user baru" autocomplete="username" required>
-                </div>
+              <label for="userRegNama">Nama Lengkap <span style="font-weight:600; text-transform:none; letter-spacing:0;">(opsional)</span></label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" id="userRegNama" placeholder="Masukkan nama lengkap" autocomplete="name">
+              </div>
             </div>
 
             <div class="modal-field">
-                <label for="userRegPassword">Password User</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <input type="password" id="userRegPassword" placeholder="Buat password user baru" autocomplete="new-password" required>
-                    <button type="button" class="modal-eye" onclick="togglePassword('userRegPassword', 'iconUserRegPass')" aria-label="Tampilkan password">
-                        <i id="iconUserRegPass" class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
+              <label for="userRegUsername">Username User</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" id="userRegUsername" placeholder="Masukkan username user baru" autocomplete="username" required>
+              </div>
             </div>
 
             <div class="modal-field">
-                <label for="userRegConfirmPassword">Konfirmasi Password</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <input type="password" id="userRegConfirmPassword" placeholder="Ulangi password user" autocomplete="new-password" required>
-                    <button type="button" class="modal-eye" onclick="togglePassword('userRegConfirmPassword', 'iconUserRegConfirm')" aria-label="Tampilkan konfirmasi password">
-                        <i id="iconUserRegConfirm" class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
+              <label for="userRegPassword">Password User</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="userRegPassword" placeholder="Buat password user baru" autocomplete="new-password" required>
+                <button type="button" class="modal-eye" onclick="togglePassword('userRegPassword', 'iconUserRegPass')" aria-label="Tampilkan password">
+                  <i id="iconUserRegPass" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
             </div>
 
             <div class="modal-field">
-                <label for="userRegKodeRahasia">Kode Verifikasi</label>
-                <div class="modal-input-wrap is-code">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                    </svg>
-                    <input type="text" id="userRegKodeRahasia" name="kodeRahasia" placeholder="Masukkan kode verifikasi pendaftaran" required>
-                </div>
+              <label for="userRegConfirmPassword">Konfirmasi Password</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="userRegConfirmPassword" placeholder="Ulangi password user" autocomplete="new-password" required>
+                <button type="button" class="modal-eye" onclick="togglePassword('userRegConfirmPassword', 'iconUserRegConfirm')" aria-label="Tampilkan konfirmasi password">
+                  <i id="iconUserRegConfirm" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="modal-field">
+              <label for="userRegKodeRahasia">Kode Verifikasi</label>
+              <div class="modal-input-wrap is-code">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                </svg>
+                <input type="text" id="userRegKodeRahasia" name="kodeRahasia" placeholder="Masukkan kode verifikasi pendaftaran" required>
+              </div>
             </div>
 
             <button type="submit" id="btnRegisterUser" class="modal-submit btn-user">Daftar Akun User</button>
 
             <p class="modal-switch">Sudah punya akun user? <a href="javascript:void(0)" onclick="bukaLoginUser()">&larr; Masuk User</a></p>
-        </form>
-    </div>
+          </form>
+        </div>
 
-    <!-- FORM 3: LUPA PASSWORD -->
-    <div id="boxLupaPassword" class="modal-box" style="display: none;">
-        <header class="modal-head">
+        <!-- FORM 3: LUPA PASSWORD -->
+        <div id="boxLupaPassword" class="modal-box" style="display: none;">
+          <header class="modal-head">
             <div class="modal-icon icon-lupa">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="7.5" cy="15.5" r="5.5"></circle>
-                    <path d="M11.5 11.5L20 3"></path>
-                    <path d="M17 6l3 3"></path>
-                    <path d="M15 8l3 3"></path>
-                </svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="7.5" cy="15.5" r="5.5"></circle>
+                <path d="M11.5 11.5L20 3"></path>
+                <path d="M17 6l3 3"></path>
+                <path d="M15 8l3 3"></path>
+              </svg>
             </div>
             <div>
-                <h3 id="judulLupaPassword">Lupa Password</h3>
-                <p>Masukkan username dan kode pemulihan 4 digit akun Anda.</p>
+              <h3 id="judulLupaPassword">Lupa Password</h3>
+              <p>Masukkan username dan kode pemulihan 4 digit akun Anda.</p>
             </div>
-        </header>
+          </header>
 
-        <form class="modal-form" onsubmit="prosesVerifikasiUser(event)">
+          <form class="modal-form" onsubmit="prosesVerifikasiUser(event)">
             <input type="hidden" id="roleLupaPassword" value="admin">
 
             <div class="modal-field">
-                <label for="inputUsernameLupa">Username</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    <input type="text" id="inputUsernameLupa" placeholder="Masukkan username Anda" autocomplete="username" required>
-                </div>
+              <label for="inputUsernameLupa">Username</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" id="inputUsernameLupa" placeholder="Masukkan username Anda" autocomplete="username" required>
+              </div>
             </div>
 
             <div class="modal-field">
-                <label for="inputKodePemulihan">Kode Pemulihan (4 digit)</label>
-                <div class="modal-input-wrap is-code">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        <circle cx="12" cy="16" r="1"></circle>
-                    </svg>
-                    <input type="text" id="inputKodePemulihan" placeholder="Contoh: 4821" inputmode="numeric" maxlength="4" pattern="\d{4}" autocomplete="one-time-code" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)" required>
-                </div>
+              <label for="inputKodePemulihan">Kode Pemulihan (4 digit)</label>
+              <div class="modal-input-wrap is-code">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  <circle cx="12" cy="16" r="1"></circle>
+                </svg>
+                <input type="text" id="inputKodePemulihan" placeholder="Contoh: 4821" inputmode="numeric" maxlength="4" pattern="\d{4}" autocomplete="one-time-code" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)" required>
+              </div>
             </div>
 
             <button type="submit" id="btnVerifLupa" class="modal-submit btn-lupa">Lanjutkan &amp; Verifikasi</button>
 
             <p class="modal-switch"><a href="javascript:void(0)" onclick="kembaliKeLoginRole()">&larr; Kembali ke Form Login</a></p>
-        </form>
-    </div>
+          </form>
+        </div>
 
-    <!-- FORM 4: UBAH PASSWORD BARU -->
-    <div id="boxResetPassword" class="modal-box" style="display: none;">
-        <header class="modal-head">
+        <!-- FORM 4: UBAH PASSWORD BARU -->
+        <div id="boxResetPassword" class="modal-box" style="display: none;">
+          <header class="modal-head">
             <div class="modal-icon icon-reset">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
             </div>
             <div>
-                <h3 id="judulResetPassword">Ubah Password Baru</h3>
-                <p>Buat password baru. Password akan langsung diperbarui ke database.</p>
+              <h3 id="judulResetPassword">Ubah Password Baru</h3>
+              <p>Buat password baru. Password akan langsung diperbarui ke database.</p>
             </div>
-        </header>
+          </header>
 
-        <form class="modal-form" onsubmit="prosesResetPassword(event)">
+          <form class="modal-form" onsubmit="prosesResetPassword(event)">
             <input type="hidden" id="hiddenUsernameReset">
             <input type="hidden" id="hiddenRoleReset">
             <input type="hidden" id="hiddenRecoveryCodeReset">
 
             <div class="modal-field">
-                <label for="newPassword">Password Baru</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <input type="password" name="newPassword" id="newPassword" placeholder="Minimal 4 karakter" autocomplete="new-password" required>
-                    <button type="button" class="modal-eye" onclick="togglePassword('newPassword', 'iconNewPass')" aria-label="Tampilkan password baru">
-                        <i id="iconNewPass" class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
+              <label for="newPassword">Password Baru</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" name="newPassword" id="newPassword" placeholder="Minimal 4 karakter" autocomplete="new-password" required>
+                <button type="button" class="modal-eye" onclick="togglePassword('newPassword', 'iconNewPass')" aria-label="Tampilkan password baru">
+                  <i id="iconNewPass" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
             </div>
 
             <div class="modal-field">
-                <label for="confirmPassword">Konfirmasi Password Baru</label>
-                <div class="modal-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Ulangi password baru" autocomplete="new-password" required>
-                    <button type="button" class="modal-eye" onclick="togglePassword('confirmPassword', 'iconConfirmPass')" aria-label="Tampilkan konfirmasi password">
-                        <i id="iconConfirmPass" class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
+              <label for="confirmPassword">Konfirmasi Password Baru</label>
+              <div class="modal-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Ulangi password baru" autocomplete="new-password" required>
+                <button type="button" class="modal-eye" onclick="togglePassword('confirmPassword', 'iconConfirmPass')" aria-label="Tampilkan konfirmasi password">
+                  <i id="iconConfirmPass" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
             </div>
 
             <button type="submit" id="btnSimpanPassBaru" class="modal-submit btn-reset">Simpan Password Baru</button>
 
             <p class="modal-switch"><a href="javascript:void(0)" onclick="kembaliKeLoginRole()">Batal</a></p>
-        </form>
-    </div>
-</div>
+          </form>
+        </div>
+      </div>
 
-    <script>
-    let roleAktif = 'admin'; // 'admin' atau 'user'
+      <script>
+        let roleAktif = 'admin'; // 'admin' atau 'user'
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        if (urlParams.get('error') === 'Unauthorized') {
+        document.addEventListener("DOMContentLoaded", function() {
+          const urlParams = new URLSearchParams(window.location.search);
+
+          if (urlParams.get('error') === 'Unauthorized') {
             window.history.replaceState({}, document.title, window.location.pathname);
 
             Swal.fire({
-                icon: 'warning',
-                title: 'Akses Ditolak!',
-                text: 'Silakan login terlebih dahulu untuk mengakses dashboard.',
-                confirmButtonColor: '#7a1b1b',
-                confirmButtonText: 'Mengerti'
+              icon: 'warning',
+              title: 'Akses Ditolak!',
+              text: 'Silakan login terlebih dahulu untuk mengakses dashboard.',
+              confirmButtonColor: '#7a1b1b',
+              confirmButtonText: 'Mengerti'
             });
+          }
+        });
+
+        function sembunyikanSemuaBox() {
+          document.getElementById('boxLoginAdmin').style.display = 'none';
+          document.getElementById('boxRegisterAdmin').style.display = 'none';
+          document.getElementById('boxLoginUser').style.display = 'none';
+          document.getElementById('boxRegisterUser').style.display = 'none';
+          document.getElementById('boxLupaPassword').style.display = 'none';
+          document.getElementById('boxResetPassword').style.display = 'none';
         }
-    });
 
-    function sembunyikanSemuaBox() {
-        document.getElementById('boxLoginAdmin').style.display = 'none';
-        document.getElementById('boxRegisterAdmin').style.display = 'none';
-        document.getElementById('boxLoginUser').style.display = 'none';
-        document.getElementById('boxRegisterUser').style.display = 'none';
-        document.getElementById('boxLupaPassword').style.display = 'none';
-        document.getElementById('boxResetPassword').style.display = 'none';
-    }
+        function bukaLoginAdmin() {
+          roleAktif = 'admin';
+          document.getElementById('modalLogin').style.display = 'flex';
+          sembunyikanSemuaBox();
+          document.getElementById('boxLoginAdmin').style.display = 'block';
+        }
 
-    function bukaLoginAdmin() {
-        roleAktif = 'admin';
-        document.getElementById('modalLogin').style.display = 'flex';
-        sembunyikanSemuaBox();
-        document.getElementById('boxLoginAdmin').style.display = 'block';
-    }
+        function bukaRegisterAdmin() {
+          roleAktif = 'admin';
+          document.getElementById('modalLogin').style.display = 'flex';
+          sembunyikanSemuaBox();
+          document.getElementById('boxRegisterAdmin').style.display = 'block';
+        }
 
-    function bukaRegisterAdmin() {
-        roleAktif = 'admin';
-        document.getElementById('modalLogin').style.display = 'flex';
-        sembunyikanSemuaBox();
-        document.getElementById('boxRegisterAdmin').style.display = 'block';
-    }
+        function bukaLoginUser() {
+          roleAktif = 'user';
+          document.getElementById('modalLogin').style.display = 'flex';
+          sembunyikanSemuaBox();
+          document.getElementById('boxLoginUser').style.display = 'block';
+        }
 
-    function bukaLoginUser() {
-        roleAktif = 'user';
-        document.getElementById('modalLogin').style.display = 'flex';
-        sembunyikanSemuaBox();
-        document.getElementById('boxLoginUser').style.display = 'block';
-    }
+        function bukaRegisterUser() {
+          roleAktif = 'user';
+          document.getElementById('modalLogin').style.display = 'flex';
+          sembunyikanSemuaBox();
+          document.getElementById('boxRegisterUser').style.display = 'block';
+        }
 
-    function bukaRegisterUser() {
-        roleAktif = 'user';
-        document.getElementById('modalLogin').style.display = 'flex';
-        sembunyikanSemuaBox();
-        document.getElementById('boxRegisterUser').style.display = 'block';
-    }
+        function tutupLogin() {
+          document.getElementById('modalLogin').style.display = 'none';
+        }
 
-    function tutupLogin() {
-        document.getElementById('modalLogin').style.display = 'none';
-    }
+        function tutupLoginLuar(e) {
+          if (e.target.id === 'modalLogin') tutupLogin();
+        }
 
-    function tutupLoginLuar(e) {
-        if (e.target.id === 'modalLogin') tutupLogin();
-    }
+        function tampilLupaPassword(role) {
+          roleAktif = role || 'admin';
+          document.getElementById('modalLogin').style.display = 'flex';
+          sembunyikanSemuaBox();
+          document.getElementById('boxLupaPassword').style.display = 'block';
+          document.getElementById('roleLupaPassword').value = roleAktif;
 
-    function tampilLupaPassword(role) {
-        roleAktif = role || 'admin';
-        document.getElementById('modalLogin').style.display = 'flex';
-        sembunyikanSemuaBox();
-        document.getElementById('boxLupaPassword').style.display = 'block';
-        document.getElementById('roleLupaPassword').value = roleAktif;
-
-        const judul = document.getElementById('judulLupaPassword');
-        const btnVerif = document.getElementById('btnVerifLupa');
-        if (roleAktif === 'admin') {
+          const judul = document.getElementById('judulLupaPassword');
+          const btnVerif = document.getElementById('btnVerifLupa');
+          if (roleAktif === 'admin') {
             judul.textContent = "Lupa Password Admin";
             judul.style.color = "#cf3939";
             btnVerif.style.backgroundColor = "#cf3939";
-        } else {
+          } else {
             judul.textContent = "Lupa Password User";
             judul.style.color = "#7a1b1b";
             btnVerif.style.backgroundColor = "#7a1b1b";
+          }
         }
-    }
 
-    function kembaliKeLoginRole() {
-        if (roleAktif === 'user') {
+        function kembaliKeLoginRole() {
+          if (roleAktif === 'user') {
             bukaLoginUser();
-        } else {
+          } else {
             bukaLoginAdmin();
+          }
         }
-    }
 
-    // PROSES LOGIN (ADMIN / USER)
-    async function prosesLogin(event, role) {
-        event.preventDefault();
-        const username = event.target.username.value.trim();
-        const password = event.target.password.value;
+        // PROSES LOGIN (ADMIN / USER)
+        async function prosesLogin(event, role) {
+          event.preventDefault();
+          const username = event.target.username.value.trim();
+          const password = event.target.password.value;
 
-        if (!username || !password) {
+          if (!username || !password) {
             Swal.fire({
-                icon: 'warning',
-                title: 'Data Belum Lengkap',
-                text: 'Silakan isi username dan password!',
-                confirmButtonColor: '#7a1b1b'
+              icon: 'warning',
+              title: 'Data Belum Lengkap',
+              text: 'Silakan isi username dan password!',
+              confirmButtonColor: '#7a1b1b'
             });
             return;
-        }
+          }
 
-        const endpoint = (role === 'user') ? '/login-user' : '/login-admin';
-        const btn = (role === 'user') ? document.getElementById('btnSubmitUser') : document.getElementById('btnSubmitAdmin');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
-        btn.disabled = true;
+          const endpoint = (role === 'user') ? '/login-user' : '/login-admin';
+          const btn = (role === 'user') ? document.getElementById('btnSubmitUser') : document.getElementById('btnSubmitAdmin');
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+          btn.disabled = true;
 
-        try {
+          try {
             const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                username,
+                password
+              })
             });
 
             const result = await response.json();
@@ -1289,73 +1680,80 @@ body::before {
             btn.disabled = false;
 
             if (result.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Login Berhasil!',
-                    text: 'Selamat datang, mengalihkan ke dashboard...',
-                    timer: 1500,
-                    showConfirmButton: false
-                }).then(() => {
-                    window.location.href = result.redirect;
-                });
+              Swal.fire({
+                icon: 'success',
+                title: 'Login Berhasil!',
+                text: 'Selamat datang, mengalihkan ke dashboard...',
+                timer: 1500,
+                showConfirmButton: false
+              }).then(() => {
+                window.location.href = result.redirect;
+              });
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Login Gagal',
-                    text: result.message || 'Username atau password salah!',
-                    confirmButtonColor: '#dc3545'
-                });
+              Swal.fire({
+                icon: 'error',
+                title: 'Login Gagal',
+                text: result.message || 'Username atau password salah!',
+                confirmButtonColor: '#dc3545'
+              });
             }
-        } catch (err) {
+          } catch (err) {
             console.error("Login Error:", err);
             btn.innerHTML = originalText;
             btn.disabled = false;
             Swal.fire({
-                icon: 'error',
-                title: 'Kesalahan Sistem',
-                text: 'Terjadi gangguan koneksi ke server.',
-                confirmButtonColor: '#dc3545'
+              icon: 'error',
+              title: 'Kesalahan Sistem',
+              text: 'Terjadi gangguan koneksi ke server.',
+              confirmButtonColor: '#dc3545'
             });
+          }
         }
-    }
 
-    // PROSES REGISTER ADMIN
-    async function prosesRegisterAdmin(event) {
-        event.preventDefault();
-        const username = document.getElementById('adminRegUsername').value.trim();
-        const password = document.getElementById('adminRegPassword').value;
-        const confirmPassword = document.getElementById('adminRegConfirmPassword').value;
-        const kodeRahasia = document.getElementById('adminRegKodeRahasia').value.trim();
+        // PROSES REGISTER ADMIN
+        async function prosesRegisterAdmin(event) {
+          event.preventDefault();
+          const username = document.getElementById('adminRegUsername').value.trim();
+          const password = document.getElementById('adminRegPassword').value;
+          const confirmPassword = document.getElementById('adminRegConfirmPassword').value;
+          const kodeRahasia = document.getElementById('adminRegKodeRahasia').value.trim();
 
-        if (password !== confirmPassword) {
+          if (password !== confirmPassword) {
             Swal.fire({
-                icon: 'warning',
-                title: 'Perhatian',
-                text: 'Konfirmasi password tidak cocok!',
-                confirmButtonColor: '#ffc107'
+              icon: 'warning',
+              title: 'Perhatian',
+              text: 'Konfirmasi password tidak cocok!',
+              confirmButtonColor: '#ffc107'
             });
             return;
-        }
+          }
 
-        if (!kodeRahasia) {
+          if (!kodeRahasia) {
             Swal.fire({
-                icon: 'warning',
-                title: 'Kode Verifikasi Kosong',
-                text: 'Masukkan kode verifikasi pendaftaran terlebih dahulu.',
-                confirmButtonColor: '#ffc107'
+              icon: 'warning',
+              title: 'Kode Verifikasi Kosong',
+              text: 'Masukkan kode verifikasi pendaftaran terlebih dahulu.',
+              confirmButtonColor: '#ffc107'
             });
             return;
-        }
+          }
 
-        const btn = document.getElementById('btnRegisterAdmin');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mendaftarkan...';
-        btn.disabled = true;
+          const btn = document.getElementById('btnRegisterAdmin');
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mendaftarkan...';
+          btn.disabled = true;
 
-        try {
+          try {
             const response = await fetch('/register-admin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, confirmPassword, kodeRahasia })
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                username,
+                password,
+                confirmPassword,
+                kodeRahasia
+              })
             });
 
             const result = await response.json();
@@ -1363,50 +1761,50 @@ body::before {
             btn.disabled = false;
 
             if (result.success) {
-                tampilkanKodePemulihan(result, username, 'admin', () => {
-                    bukaLoginAdmin();
-                    document.getElementById('adminLoginUsername').value = username;
-                    event.target.reset();
-                });
+              tampilkanKodePemulihan(result, username, 'admin', () => {
+                bukaLoginAdmin();
+                document.getElementById('adminLoginUsername').value = username;
+                event.target.reset();
+              });
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Mendaftar',
-                    text: result.message,
-                    confirmButtonColor: '#dc3545'
-                });
+              Swal.fire({
+                icon: 'error',
+                title: 'Gagal Mendaftar',
+                text: result.message,
+                confirmButtonColor: '#dc3545'
+              });
             }
-        } catch (err) {
+          } catch (err) {
             console.error("Register Admin Error:", err);
             btn.innerHTML = 'Daftar Akun Admin';
             btn.disabled = false;
             Swal.fire({
-                icon: 'error',
-                title: 'Kesalahan Sistem',
-                text: 'Terjadi gangguan saat membuat akun admin.',
-                confirmButtonColor: '#dc3545'
+              icon: 'error',
+              title: 'Kesalahan Sistem',
+              text: 'Terjadi gangguan saat membuat akun admin.',
+              confirmButtonColor: '#dc3545'
             });
+          }
         }
-    }
 
-    // ============================================================
-    //  TAMPILKAN KODE PEMULIHAN 4 DIGIT SETELAH REGISTRASI
-    // ============================================================
-    function escHtml(str) {
-        return String(str == null ? '' : str)
+        // ============================================================
+        //  TAMPILKAN KODE PEMULIHAN 4 DIGIT SETELAH REGISTRASI
+        // ============================================================
+        function escHtml(str) {
+          return String(str == null ? '' : str)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
-    }
+        }
 
-    function tampilkanKodePemulihan(result, username, role, lanjut) {
-        const kode = String(result.recoveryCode || '');
-        const roleLabel = (result.role || role) === 'admin' ? 'Admin' : 'User';
-        const warna = (result.role || role) === 'admin' ? '#cf3939' : '#7a1b1b';
+        function tampilkanKodePemulihan(result, username, role, lanjut) {
+          const kode = String(result.recoveryCode || '');
+          const roleLabel = (result.role || role) === 'admin' ? 'Admin' : 'User';
+          const warna = (result.role || role) === 'admin' ? '#cf3939' : '#7a1b1b';
 
-        Swal.fire({
+          Swal.fire({
             icon: 'success',
             title: 'Akun Berhasil Dibuat!',
             html: `
@@ -1429,98 +1827,106 @@ body::before {
             confirmButtonColor: warna,
             allowOutsideClick: false,
             allowEscapeKey: false
-        }).then(() => {
+          }).then(() => {
             if (typeof lanjut === 'function') lanjut();
-        });
-    }
+          });
+        }
 
-    // PROSES REGISTER USER
-    async function prosesRegisterUser(event) {
-    event.preventDefault();
+        // PROSES REGISTER USER
+        async function prosesRegisterUser(event) {
+          event.preventDefault();
 
-    const namaLengkap = document.getElementById('userRegNama').value;
-    const username = document.getElementById('userRegUsername').value.trim();
-    const password = document.getElementById('userRegPassword').value;
-    const confirmPassword = document.getElementById('userRegConfirmPassword').value;
+          const namaLengkap = document.getElementById('userRegNama').value;
+          const username = document.getElementById('userRegUsername').value.trim();
+          const password = document.getElementById('userRegPassword').value;
+          const confirmPassword = document.getElementById('userRegConfirmPassword').value;
 
-    // Ambil nilai dari input kode verifikasi pendaftaran
-    const kodeRahasia = document.getElementById('userRegKodeRahasia').value.trim();
+          // Ambil nilai dari input kode verifikasi pendaftaran
+          const kodeRahasia = document.getElementById('userRegKodeRahasia').value.trim();
 
-    const btn = document.getElementById('btnRegisterUser');
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mendaftarkan...';
-    btn.disabled = true;
+          const btn = document.getElementById('btnRegisterUser');
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mendaftarkan...';
+          btn.disabled = true;
 
-    try {
-        const response = await fetch('/register-user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+          try {
+            const response = await fetch('/register-user', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
                 namaLengkap,
                 username,
                 password,
                 confirmPassword,
                 kodeRahasia
-            })
-        });
+              })
+            });
 
-        const result = await response.json();
-        btn.innerHTML = 'Daftar Akun User';
-        btn.disabled = false;
+            const result = await response.json();
+            btn.innerHTML = 'Daftar Akun User';
+            btn.disabled = false;
 
-        if (response.ok && result.success) {
-            tampilkanKodePemulihan(result, username, 'user', () => {
+            if (response.ok && result.success) {
+              tampilkanKodePemulihan(result, username, 'user', () => {
                 bukaLoginUser(); // Kembali ke form login
                 document.getElementById('userLoginUsername').value = username;
                 event.target.reset();
-            });
-        } else {
-            Swal.fire({
+              });
+            } else {
+              Swal.fire({
                 icon: 'error',
                 title: 'Gagal Mendaftar',
                 text: result.message || 'Gagal mendaftarkan akun.',
                 confirmButtonColor: '#dc3545'
-            });
-        }
-    } catch (err) {
-        console.error('Error:', err);
-        btn.innerHTML = 'Daftar Akun User';
-        btn.disabled = false;
-        Swal.fire({
-            icon: 'error',
-            title: 'Kesalahan Server',
-            text: 'Terjadi kesalahan koneksi ke server.',
-            confirmButtonColor: '#dc3545'
-        });
-    }
-}
-
-    // VERIFIKASI USERNAME + KODE PEMULIHAN (LUPA PASSWORD)
-    async function prosesVerifikasiUser(event) {
-        event.preventDefault();
-        const valUser = document.getElementById('inputUsernameLupa').value.trim();
-        const role = document.getElementById('roleLupaPassword').value;
-        const kode = document.getElementById('inputKodePemulihan').value.trim();
-
-        if (valUser === '') return;
-        if (!/^\d{4}$/.test(kode)) {
+              });
+            }
+          } catch (err) {
+            console.error('Error:', err);
+            btn.innerHTML = 'Daftar Akun User';
+            btn.disabled = false;
             Swal.fire({
-                icon: 'warning',
-                title: 'Kode Pemulihan Tidak Valid',
-                text: 'Masukkan kode pemulihan 4 digit (angka).',
-                confirmButtonColor: '#ffc107'
+              icon: 'error',
+              title: 'Kesalahan Server',
+              text: 'Terjadi kesalahan koneksi ke server.',
+              confirmButtonColor: '#dc3545'
+            });
+          }
+        }
+
+        // VERIFIKASI USERNAME + KODE PEMULIHAN (LUPA PASSWORD)
+        async function prosesVerifikasiUser(event) {
+          event.preventDefault();
+          const valUser = document.getElementById('inputUsernameLupa').value.trim();
+          const role = document.getElementById('roleLupaPassword').value;
+          const kode = document.getElementById('inputKodePemulihan').value.trim();
+
+          if (valUser === '') return;
+          if (!/^\d{4}$/.test(kode)) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Kode Pemulihan Tidak Valid',
+              text: 'Masukkan kode pemulihan 4 digit (angka).',
+              confirmButtonColor: '#ffc107'
             });
             return;
-        }
+          }
 
-        const btn = document.getElementById('btnVerifLupa');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa...';
-        btn.disabled = true;
+          const btn = document.getElementById('btnVerifLupa');
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa...';
+          btn.disabled = true;
 
-        try {
+          try {
             const response = await fetch('/forgot-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: valUser, role, recoveryCode: kode })
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                username: valUser,
+                role,
+                recoveryCode: kode
+              })
             });
 
             const result = await response.json();
@@ -1528,21 +1934,21 @@ body::before {
             btn.disabled = false;
 
             if (result.success) {
-                document.getElementById('hiddenUsernameReset').value = result.username || valUser;
-                document.getElementById('hiddenRoleReset').value = result.role || role;
-                document.getElementById('hiddenRecoveryCodeReset').value = result.recoveryCode || kode;
+              document.getElementById('hiddenUsernameReset').value = result.username || valUser;
+              document.getElementById('hiddenRoleReset').value = result.role || role;
+              document.getElementById('hiddenRecoveryCodeReset').value = result.recoveryCode || kode;
 
-                const lanjutKeReset = () => {
-                    sembunyikanSemuaBox();
-                    document.getElementById('boxResetPassword').style.display = 'block';
-                };
+              const lanjutKeReset = () => {
+                sembunyikanSemuaBox();
+                document.getElementById('boxResetPassword').style.display = 'block';
+              };
 
-                if (result.legacy) {
-                    // Akun lama belum punya kode: kode baru dibuat, tampilkan sekali
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Kode Pemulihan Baru',
-                        html: `
+              if (result.legacy) {
+                // Akun lama belum punya kode: kode baru dibuat, tampilkan sekali
+                Swal.fire({
+                  icon: 'info',
+                  title: 'Kode Pemulihan Baru',
+                  html: `
                             <p style="margin:0 0 12px;color:#5b4a4a;font-size:13px;line-height:1.5">
                                 Akun ini belum memiliki kode pemulihan. Kode baru telah dibuat:
                             </p>
@@ -1553,62 +1959,70 @@ body::before {
                                 <b>Simpan kode ini.</b> Kode diperlukan untuk mereset password di masa depan.
                             </p>
                         `,
-                        confirmButtonText: 'Simpan & Lanjutkan',
-                        confirmButtonColor: '#b07a21',
-                        allowOutsideClick: false
-                    }).then(lanjutKeReset);
-                } else {
-                    lanjutKeReset();
-                }
+                  confirmButtonText: 'Simpan & Lanjutkan',
+                  confirmButtonColor: '#b07a21',
+                  allowOutsideClick: false
+                }).then(lanjutKeReset);
+              } else {
+                lanjutKeReset();
+              }
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Verifikasi Gagal',
-                    text: result.message || 'Akun tidak terdaftar di database!',
-                    confirmButtonColor: '#dc3545'
-                });
+              Swal.fire({
+                icon: 'error',
+                title: 'Verifikasi Gagal',
+                text: result.message || 'Akun tidak terdaftar di database!',
+                confirmButtonColor: '#dc3545'
+              });
             }
-        } catch (err) {
+          } catch (err) {
             console.error("Error:", err);
             btn.innerHTML = 'Lanjutkan & Verifikasi';
             btn.disabled = false;
             Swal.fire({
-                icon: 'error',
-                title: 'Kesalahan Server',
-                text: "Terjadi kesalahan saat memeriksa akun.",
-                confirmButtonColor: '#dc3545'
+              icon: 'error',
+              title: 'Kesalahan Server',
+              text: "Terjadi kesalahan saat memeriksa akun.",
+              confirmButtonColor: '#dc3545'
             });
+          }
         }
-    }
 
-    // PROSES RESET PASSWORD BARU
-    async function prosesResetPassword(event) {
-        event.preventDefault();
-        const username = document.getElementById('hiddenUsernameReset').value;
-        const role = document.getElementById('hiddenRoleReset').value;
-        const recoveryCode = document.getElementById('hiddenRecoveryCodeReset').value;
-        const newPassword = event.target.newPassword.value;
-        const confirmPassword = event.target.confirmPassword.value;
+        // PROSES RESET PASSWORD BARU
+        async function prosesResetPassword(event) {
+          event.preventDefault();
+          const username = document.getElementById('hiddenUsernameReset').value;
+          const role = document.getElementById('hiddenRoleReset').value;
+          const recoveryCode = document.getElementById('hiddenRecoveryCodeReset').value;
+          const newPassword = event.target.newPassword.value;
+          const confirmPassword = event.target.confirmPassword.value;
 
-        if (newPassword !== confirmPassword) {
+          if (newPassword !== confirmPassword) {
             Swal.fire({
-                icon: 'warning',
-                title: 'Perhatian',
-                text: "Konfirmasi password tidak cocok!",
-                confirmButtonColor: '#ffc107'
+              icon: 'warning',
+              title: 'Perhatian',
+              text: "Konfirmasi password tidak cocok!",
+              confirmButtonColor: '#ffc107'
             });
             return;
-        }
+          }
 
-        const btn = document.getElementById('btnSimpanPassBaru');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-        btn.disabled = true;
+          const btn = document.getElementById('btnSimpanPassBaru');
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+          btn.disabled = true;
 
-        try {
+          try {
             const response = await fetch('/reset-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, role, recoveryCode, newPassword, confirmPassword })
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                username,
+                role,
+                recoveryCode,
+                newPassword,
+                confirmPassword
+              })
             });
 
             const result = await response.json();
@@ -1616,205 +2030,215 @@ body::before {
             btn.disabled = false;
 
             if (result.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil Diperbarui!',
-                    text: result.message,
-                    confirmButtonText: 'Masuk Sekarang',
-                    confirmButtonColor: '#28a745'
-                }).then(() => {
-                    kembaliKeLoginRole();
-                    event.target.reset();
-                    document.getElementById('inputKodePemulihan').value = '';
-                });
+              Swal.fire({
+                icon: 'success',
+                title: 'Berhasil Diperbarui!',
+                text: result.message,
+                confirmButtonText: 'Masuk Sekarang',
+                confirmButtonColor: '#28a745'
+              }).then(() => {
+                kembaliKeLoginRole();
+                event.target.reset();
+                document.getElementById('inputKodePemulihan').value = '';
+              });
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Menyimpan',
-                    text: result.message,
-                    confirmButtonColor: '#dc3545'
-                });
+              Swal.fire({
+                icon: 'error',
+                title: 'Gagal Menyimpan',
+                text: result.message,
+                confirmButtonColor: '#dc3545'
+              });
             }
-        } catch (err) {
+          } catch (err) {
             console.error("Error:", err);
             btn.innerHTML = 'Simpan Password Baru';
             btn.disabled = false;
             Swal.fire({
-                icon: 'error',
-                title: 'Kesalahan Server',
-                text: "Terjadi kesalahan pada server.",
-                confirmButtonColor: '#dc3545'
+              icon: 'error',
+              title: 'Kesalahan Server',
+              text: "Terjadi kesalahan pada server.",
+              confirmButtonColor: '#dc3545'
             });
+          }
         }
-    }
 
-    function togglePassword(inputId, iconId) {
-        const inputField = document.getElementById(inputId);
-        const iconField = document.getElementById(iconId);
+        function togglePassword(inputId, iconId) {
+          const inputField = document.getElementById(inputId);
+          const iconField = document.getElementById(iconId);
 
-        if (inputField.type === "password") {
+          if (inputField.type === "password") {
             inputField.type = "text";
             iconField.classList.remove("fa-eye");
             iconField.classList.add("fa-eye-slash");
-        } else {
+          } else {
             inputField.type = "password";
             iconField.classList.remove("fa-eye-slash");
             iconField.classList.add("fa-eye");
+          }
         }
-    }
-</script>
-  <script>
-    /* ============================================================
+
+      </script>
+      <script>
+        /* ============================================================
        LOGIN UTAMA — ROLE SWITCH, REMEMBER ME, & SUBMIT
        ============================================================ */
-    document.addEventListener('DOMContentLoaded', function () {
-      // User sebagai pilihan default
-      setRole('user');
+        document.addEventListener('DOMContentLoaded', function() {
+          // User sebagai pilihan default
+          setRole('user');
 
-      // Prefill username jika sebelumnya memilih "Ingat saya"
-      try {
-        const remembered = localStorage.getItem('dgs_remember_username');
-        const rememberBox = document.getElementById('rememberMe');
-        const usernameInput = document.getElementById('loginUsername');
-        if (remembered && rememberBox && usernameInput) {
-          usernameInput.value = remembered;
-          rememberBox.checked = true;
-        }
-      } catch (err) {
-        // localStorage tidak tersedia — abaikan
-      }
-
-      // Fokus otomatis ke field username
-      const usernameField = document.getElementById('loginUsername');
-      if (usernameField) {
-        setTimeout(function () { usernameField.focus(); }, 400);
-      }
-    });
-
-    function setRole(role) {
-      roleAktif = role;
-      const isUser = role === 'user';
-
-      const btnUser = document.getElementById('roleBtnUser');
-      const btnAdmin = document.getElementById('roleBtnAdmin');
-      const slider = document.getElementById('roleSlider');
-      const label = document.getElementById('loginUsernameLabel');
-      const usernameInput = document.getElementById('loginUsername');
-      const btnText = document.getElementById('btnLoginText');
-
-      if (btnUser) {
-        btnUser.classList.toggle('active', isUser);
-        btnUser.setAttribute('aria-selected', String(isUser));
-      }
-      if (btnAdmin) {
-        btnAdmin.classList.toggle('active', !isUser);
-        btnAdmin.setAttribute('aria-selected', String(!isUser));
-      }
-      if (slider) {
-        slider.style.transform = isUser ? 'translateX(0)' : 'translateX(100%)';
-      }
-      if (label) {
-        label.textContent = isUser ? 'Username User' : 'Username Admin';
-      }
-      if (usernameInput) {
-        usernameInput.placeholder = isUser ? 'Masukkan username user' : 'Masukkan username admin';
-      }
-      if (btnText) {
-        btnText.textContent = isUser ? 'Masuk sebagai User' : 'Masuk sebagai Admin';
-      }
-    }
-
-    function bukaRegisterAktif() {
-      if (roleAktif === 'admin') {
-        bukaRegisterAdmin();
-      } else {
-        bukaRegisterUser();
-      }
-    }
-
-    async function prosesLoginUtama(event) {
-      event.preventDefault();
-
-      const usernameInput = document.getElementById('loginUsername');
-      const passwordInput = document.getElementById('loginPassword');
-      const btn = document.getElementById('btnLoginUtama');
-      const btnText = document.getElementById('btnLoginText');
-      const rememberBox = document.getElementById('rememberMe');
-
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value;
-
-      if (!username || !password) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Data Belum Lengkap',
-          text: 'Silakan isi username dan password terlebih dahulu.',
-          confirmButtonColor: '#7a1b1b'
-        });
-        return;
-      }
-
-      const role = roleAktif;
-      const endpoint = (role === 'user') ? '/login-user' : '/login-admin';
-      const originalText = btnText ? btnText.textContent : 'Masuk';
-
-      if (btnText) btnText.textContent = 'Memproses...';
-      if (btn) btn.disabled = true;
-
-      try {
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: username, password: password })
-        });
-
-        const result = await response.json();
-
-        if (btnText) btnText.textContent = originalText;
-        if (btn) btn.disabled = false;
-
-        if (result.success) {
+          // Prefill username jika sebelumnya memilih "Ingat saya"
           try {
-            if (rememberBox && rememberBox.checked) {
-              localStorage.setItem('dgs_remember_username', username);
-            } else {
-              localStorage.removeItem('dgs_remember_username');
+            const remembered = localStorage.getItem('dgs_remember_username');
+            const rememberBox = document.getElementById('rememberMe');
+            const usernameInput = document.getElementById('loginUsername');
+            if (remembered && rememberBox && usernameInput) {
+              usernameInput.value = remembered;
+              rememberBox.checked = true;
             }
           } catch (err) {
-            // abaikan jika localStorage diblokir
+            // localStorage tidak tersedia — abaikan
           }
 
-          Swal.fire({
-            icon: 'success',
-            title: 'Login Berhasil!',
-            text: 'Selamat datang, mengalihkan ke dashboard...',
-            timer: 1500,
-            timerProgressBar: true,
-            showConfirmButton: false
-          }).then(function () {
-            window.location.href = result.redirect;
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Login Gagal',
-            text: result.message || 'Username atau password salah!',
-            confirmButtonColor: '#dc3545'
-          });
-        }
-      } catch (err) {
-        console.error('Login Error:', err);
-        if (btnText) btnText.textContent = originalText;
-        if (btn) btn.disabled = false;
-        Swal.fire({
-          icon: 'error',
-          title: 'Kesalahan Sistem',
-          text: 'Terjadi gangguan koneksi ke server.',
-          confirmButtonColor: '#dc3545'
+          // Fokus otomatis ke field username
+          const usernameField = document.getElementById('loginUsername');
+          if (usernameField) {
+            setTimeout(function() {
+              usernameField.focus();
+            }, 400);
+          }
         });
-      }
-    }
-  </script>
+
+        function setRole(role) {
+          roleAktif = role;
+          const isUser = role === 'user';
+
+          const btnUser = document.getElementById('roleBtnUser');
+          const btnAdmin = document.getElementById('roleBtnAdmin');
+          const slider = document.getElementById('roleSlider');
+          const label = document.getElementById('loginUsernameLabel');
+          const usernameInput = document.getElementById('loginUsername');
+          const btnText = document.getElementById('btnLoginText');
+
+          if (btnUser) {
+            btnUser.classList.toggle('active', isUser);
+            btnUser.setAttribute('aria-selected', String(isUser));
+          }
+          if (btnAdmin) {
+            btnAdmin.classList.toggle('active', !isUser);
+            btnAdmin.setAttribute('aria-selected', String(!isUser));
+          }
+          if (slider) {
+            slider.style.transform = isUser ? 'translateX(0)' : 'translateX(100%)';
+          }
+          if (label) {
+            label.textContent = isUser ? 'Username User' : 'Username Admin';
+          }
+          if (usernameInput) {
+            usernameInput.placeholder = isUser ? 'Masukkan username user' : 'Masukkan username admin';
+          }
+          if (btnText) {
+            btnText.textContent = isUser ? 'Masuk sebagai User' : 'Masuk sebagai Admin';
+          }
+        }
+
+        function bukaRegisterAktif() {
+          if (roleAktif === 'admin') {
+            bukaRegisterAdmin();
+          } else {
+            bukaRegisterUser();
+          }
+        }
+
+        async function prosesLoginUtama(event) {
+          event.preventDefault();
+
+          const usernameInput = document.getElementById('loginUsername');
+          const passwordInput = document.getElementById('loginPassword');
+          const btn = document.getElementById('btnLoginUtama');
+          const btnText = document.getElementById('btnLoginText');
+          const rememberBox = document.getElementById('rememberMe');
+
+          const username = usernameInput.value.trim();
+          const password = passwordInput.value;
+
+          if (!username || !password) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Data Belum Lengkap',
+              text: 'Silakan isi username dan password terlebih dahulu.',
+              confirmButtonColor: '#7a1b1b'
+            });
+            return;
+          }
+
+          const role = roleAktif;
+          const endpoint = (role === 'user') ? '/login-user' : '/login-admin';
+          const originalText = btnText ? btnText.textContent : 'Masuk';
+
+          if (btnText) btnText.textContent = 'Memproses...';
+          if (btn) btn.disabled = true;
+
+          try {
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                username: username,
+                password: password
+              })
+            });
+
+            const result = await response.json();
+
+            if (btnText) btnText.textContent = originalText;
+            if (btn) btn.disabled = false;
+
+            if (result.success) {
+              try {
+                if (rememberBox && rememberBox.checked) {
+                  localStorage.setItem('dgs_remember_username', username);
+                } else {
+                  localStorage.removeItem('dgs_remember_username');
+                }
+              } catch (err) {
+                // abaikan jika localStorage diblokir
+              }
+
+              Swal.fire({
+                icon: 'success',
+                title: 'Login Berhasil!',
+                text: 'Selamat datang, mengalihkan ke dashboard...',
+                timer: 1500,
+                timerProgressBar: true,
+                showConfirmButton: false
+              }).then(function() {
+                window.location.href = result.redirect;
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Login Gagal',
+                text: result.message || 'Username atau password salah!',
+                confirmButtonColor: '#dc3545'
+              });
+            }
+          } catch (err) {
+            console.error('Login Error:', err);
+            if (btnText) btnText.textContent = originalText;
+            if (btn) btn.disabled = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Kesalahan Sistem',
+              text: 'Terjadi gangguan koneksi ke server.',
+              confirmButtonColor: '#dc3545'
+            });
+          }
+        }
+
+      </script>
 
 </body>
+
 </html>

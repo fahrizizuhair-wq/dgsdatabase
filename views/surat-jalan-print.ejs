@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak <%= suratJalan.jenisSurat || 'Surat Jalan' %> <%= suratJalan.noSuratJalan %></title>
-  <!-- Library html2pdf untuk unduh otomatis -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <%
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cetak <%= suratJalan.jenisSurat || 'Surat Jalan' %> <%= suratJalan.noSuratJalan %></title>
+    <!-- Library html2pdf untuk unduh otomatis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <%
     function rapiNamaPerusahaan(nama) {
       if (!nama) return 'PT Dian Giri Saputra';
       let s = String(nama).replace(/\./g, '. ').replace(/\s+/g, ' ').trim();
@@ -179,384 +179,475 @@
       calculatedTableHeight = Math.max(140, (maxItemBottom - (225.21 + alamatExtraOffset)) + 12); 
     }
   %>
-  <style>
-    @page { size: A4; margin: 0; }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: #e5e7eb; }
-    body {
-      font-family: Calibri, Carlito, 'Segoe UI', Arial, sans-serif;
-      color: #000;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .page-wrap { padding: 24px 0 40px; }
-    .page {
-      position: relative;
-      width: 595.28pt;
-      height: 841.89pt;
-      margin: 0 auto;
-      background: #fff;
-      overflow: hidden;
-      box-shadow: 0 2px 18px rgba(0, 0, 0, 0.25);
-    }
-    .toolbar {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      z-index: 999;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      background: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: 13px;
-      color: #334155;
-    }
-    .toolbar button {
-      border: none;
-      border-radius: 7px;
-      padding: 9px 16px;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .toolbar .btn-print { background: #7a1b1b; color: #fff; }
-    .toolbar .btn-print:hover { background: #5c1313; }
-    .toolbar .btn-close { background: #e2e8f0; color: #475569; }
-    .toolbar .hint { color: #64748b; font-size: 12px; }
-
-    .txt {
-      position: absolute;
-      white-space: nowrap;
-      font-size: 7.5pt;
-      line-height: 7.5pt;
-    }
-    .b { font-weight: 700; }
-    .small { font-size: 6.8pt; line-height: 6.8pt; }
-
-    .letterhead {
-      position: absolute;
-      left: 70.26pt;
-      top: 54pt;
-      width: 294.1pt;
-      height: 52.3pt;
-    }
-
-    .chk {
-      position: absolute;
-      width: 7.5pt;
-      height: 7.5pt;
-      border: 0.55pt solid #000;
-      background: #fff;
-    }
-    .chk svg { display: block; width: 100%; height: 100%; }
-
-    .title-underline {
-      position: absolute;
-      left: 426.43pt;
-      top: 108.1pt;
-      width: 35.99pt;
-      height: 0;
-      border-top: 0.425pt solid #000;
-    }
-
-    .tbl-border {
-      position: absolute;
-      left: 70.05pt;
-      top: <%= (225.21 + alamatExtraOffset).toFixed(3) %>pt;
-      width: 455.11pt;
-      border: 0.42pt solid #000;
-    }
-    .tbl-headline {
-      position: absolute;
-      left: 69.84pt;
-      top: <%= (235.42 + alamatExtraOffset).toFixed(3) %>pt;
-      width: 455.32pt;
-      height: 0;
-      border-top: 0.42pt solid #000;
-    }
-    .tbl-vline {
-      position: absolute;
-      top: <%= (225.21 + alamatExtraOffset).toFixed(3) %>pt;
-      width: 0;
-      border-left: 0.42pt solid #000;
-    }
-    .col-th {
-      position: absolute;
-      font-size: 7.5pt;
-      line-height: 7.5pt;
-      font-weight: 700;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .col-no {
-      position: absolute;
-      left: 70.45pt;
-      width: 41pt;
-      font-size: 7.5pt;
-      line-height: 7.5pt;
-      font-weight: 700;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .desc-title {
-      position: absolute;
-      left: 113.58pt;
-      font-size: 8.0pt;
-      line-height: 8.0pt;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .desc-line {
-      position: absolute;
-      left: 113.58pt;
-      font-size: 7.5pt;
-      line-height: 7.5pt;
-      white-space: pre;
-    }
-    .col-jml {
-      position: absolute;
-      left: 239.20pt;
-      width: 40pt;
-      font-size: 7.5pt;
-      line-height: 7.5pt;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .col-sat {
-      position: absolute;
-      left: 278.70pt;
-      width: 45pt;
-      font-size: 7.5pt;
-      line-height: 7.5pt;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .col-ket {
-      position: absolute;
-      left: 323.10pt;
-      width: 201.11pt;
-      font-size: 6.8pt;
-      line-height: 6.8pt;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    .sig-title {
-      position: absolute;
-      width: 110pt;
-      font-size: 7.5pt;
-      font-weight: 700;
-      line-height: 7.5pt;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .sig-line {
-      position: absolute;
-      width: 110pt;
-      font-size: 7.5pt;
-      line-height: 7.5pt;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .sig-name {
-      display: inline-flex;
-      justify-content: space-between;
-      gap: 14pt;
-      min-width: 60pt;
-      font-weight: 700;
-    }
-    .sig-name.right { min-width: 70pt; }
-
-    @media print {
-      html, body { background: #fff !important; }
-      .no-print { display: none !important; }
-      .page-wrap { padding: 0 !important; }
+    <style>
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #e5e7eb;
+      }
+      body {
+        font-family: Calibri, Carlito, 'Segoe UI', Arial, sans-serif;
+        color: #000;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .page-wrap {
+        padding: 24px 0 40px;
+      }
       .page {
+        position: relative;
         width: 595.28pt;
         height: 841.89pt;
-        margin: 0 !important;
-        box-shadow: none !important;
-        page-break-after: avoid;
-        break-after: avoid;
+        margin: 0 auto;
+        background: #fff;
+        overflow: hidden;
+        box-shadow: 0 2px 18px rgba(0, 0, 0, 0.25);
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="page-wrap">
-    <div class="page">
-      <!-- KOP / LETTERHEAD -->
-      <img class="letterhead" src="/images/surat-jalan-header.png" alt="Kop Surat PT Dian Giri Saputra">
+      .toolbar {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 13px;
+        color: #334155;
+      }
+      .toolbar button {
+        border: none;
+        border-radius: 7px;
+        padding: 9px 16px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .toolbar .btn-print {
+        background: #7a1b1b;
+        color: #fff;
+      }
+      .toolbar .btn-print:hover {
+        background: #5c1313;
+      }
+      .toolbar .btn-close {
+        background: #e2e8f0;
+        color: #475569;
+      }
+      .toolbar .hint {
+        color: #64748b;
+        font-size: 12px;
+      }
 
-      <!-- CHECKBOX JENIS PENGIRIMAN -->
-      <div class="chk" style="left: 424.35pt; top: 73.75pt;">
-        <% if (isDokumen) { %>
-        <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.6 5.2 L3.9 7.5 L8.5 2.1" fill="none" stroke="#000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      .txt {
+        position: absolute;
+        white-space: nowrap;
+        font-size: 7.5pt;
+        line-height: 7.5pt;
+      }
+      .b {
+        font-weight: 700;
+      }
+      .small {
+        font-size: 6.8pt;
+        line-height: 6.8pt;
+      }
+
+      .letterhead {
+        position: absolute;
+        left: 70.26pt;
+        top: 54pt;
+        width: 294.1pt;
+        height: 52.3pt;
+      }
+
+      .chk {
+        position: absolute;
+        width: 7.5pt;
+        height: 7.5pt;
+        border: 0.55pt solid #000;
+        background: #fff;
+      }
+      .chk svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .title-underline {
+        position: absolute;
+        left: 426.43pt;
+        top: 108.1pt;
+        width: 35.99pt;
+        height: 0;
+        border-top: 0.425pt solid #000;
+      }
+
+      .tbl-border {
+        position: absolute;
+        left: 70.05pt;
+        top: <%= (225.21 + alamatExtraOffset).toFixed(3) %>pt;
+        width: 455.11pt;
+        border: 0.42pt solid #000;
+      }
+      .tbl-headline {
+        position: absolute;
+        left: 69.84pt;
+        top: <%= (235.42 + alamatExtraOffset).toFixed(3) %>pt;
+        width: 455.32pt;
+        height: 0;
+        border-top: 0.42pt solid #000;
+      }
+      .tbl-vline {
+        position: absolute;
+        top: <%= (225.21 + alamatExtraOffset).toFixed(3) %>pt;
+        width: 0;
+        border-left: 0.42pt solid #000;
+      }
+      .col-th {
+        position: absolute;
+        font-size: 7.5pt;
+        line-height: 7.5pt;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .col-no {
+        position: absolute;
+        left: 70.45pt;
+        width: 41pt;
+        font-size: 7.5pt;
+        line-height: 7.5pt;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .desc-title {
+        position: absolute;
+        left: 113.58pt;
+        font-size: 8pt;
+        line-height: 8pt;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .desc-line {
+        position: absolute;
+        left: 113.58pt;
+        font-size: 7.5pt;
+        line-height: 7.5pt;
+        white-space: pre;
+      }
+      .col-jml {
+        position: absolute;
+        left: 239.2pt;
+        width: 40pt;
+        font-size: 7.5pt;
+        line-height: 7.5pt;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .col-sat {
+        position: absolute;
+        left: 278.7pt;
+        width: 45pt;
+        font-size: 7.5pt;
+        line-height: 7.5pt;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .col-ket {
+        position: absolute;
+        left: 323.1pt;
+        width: 201.11pt;
+        font-size: 6.8pt;
+        line-height: 6.8pt;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .sig-title {
+        position: absolute;
+        width: 110pt;
+        font-size: 7.5pt;
+        font-weight: 700;
+        line-height: 7.5pt;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .sig-line {
+        position: absolute;
+        width: 110pt;
+        font-size: 7.5pt;
+        line-height: 7.5pt;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .sig-name {
+        display: inline-flex;
+        justify-content: space-between;
+        gap: 14pt;
+        min-width: 60pt;
+        font-weight: 700;
+      }
+      .sig-name.right {
+        min-width: 70pt;
+      }
+
+      @media print {
+        html,
+        body {
+          background: #fff !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .page-wrap {
+          padding: 0 !important;
+        }
+        .page {
+          width: 595.28pt;
+          height: 841.89pt;
+          margin: 0 !important;
+          box-shadow: none !important;
+          page-break-after: avoid;
+          break-after: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrap">
+      <div class="page">
+        <!-- KOP / LETTERHEAD -->
+        <img class="letterhead" src="/images/surat-jalan-header.png" alt="Kop Surat PT Dian Giri Saputra" />
+
+        <!-- CHECKBOX JENIS PENGIRIMAN -->
+        <div class="chk" style="left: 424.35pt; top: 73.75pt">
+          <% if (isDokumen) { %>
+          <svg viewBox="0 0 10 10" aria-hidden="true">
+            <path
+              d="M1.6 5.2 L3.9 7.5 L8.5 2.1"
+              fill="none"
+              stroke="#000"
+              stroke-width="1.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <% } %>
+        </div>
+        <div class="txt" style="left: 489.75pt; top: <%= T(73.75) %>pt">Dokumen</div>
+
+        <div class="chk" style="left: 424.35pt; top: 83.74pt">
+          <% if (!isDokumen) { %>
+          <svg viewBox="0 0 10 10" aria-hidden="true">
+            <path
+              d="M1.6 5.2 L3.9 7.5 L8.5 2.1"
+              fill="none"
+              stroke="#000"
+              stroke-width="1.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <% } %>
+        </div>
+        <div class="txt" style="left: 489.75pt; top: <%= T(83.74) %>pt">Barang</div>
+
+        <!-- JUDUL DINAMIS (SURAT JALAN / TANDA TERIMA) -->
+        <div class="txt b" style="left: 426.43pt; top: <%= T(102.49) %>pt"><%= jenisSuratTampil %></div>
+        <div class="title-underline"></div>
+
+        <!-- INFO KIRI: PENERIMA -->
+        <div class="txt b" style="left: 71.51pt; top: <%= T(121.24) %>pt">Kepada Yth,</div>
+        <div class="txt b" style="left: 113.58pt; top: <%= T(121.24) %>pt">:</div>
+        <div class="txt b" style="left: 116.84pt; top: <%= T(121.24) %>pt"><%= kepadaYthTampil %></div>
+
+        <% if (tampilkanBarisPenerima) { %>
+        <div class="txt b" style="left: 116.52pt; top: <%= T(131.23) %>pt"><%= namaPenerimaTampil %></div>
         <% } %>
-      </div>
-      <div class="txt" style="left: 489.75pt; top: <%= T(73.75) %>pt;">Dokumen</div>
 
-      <div class="chk" style="left: 424.35pt; top: 83.74pt;">
-        <% if (!isDokumen) { %>
-        <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.6 5.2 L3.9 7.5 L8.5 2.1" fill="none" stroke="#000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="txt b" style="left: 71.51pt; top: <%= T(141.23) %>pt">No. Telepon</div>
+        <div class="txt b" style="left: 113.58pt; top: <%= T(141.23) %>pt">:</div>
+        <div class="txt b" style="left: 116.84pt; top: <%= T(141.23) %>pt"><%= suratJalan.noTelepon || '-' %></div>
+
+        <div class="txt b" style="left: 71.51pt; top: <%= T(151.24) %>pt">Alamat</div>
+        <div class="txt b" style="left: 113.58pt; top: <%= T(151.23) %>pt">:</div>
+        <% alamatLines.forEach(function (line, i) { %>
+        <div
+          class="txt b"
+          style="left: <%= i === 0 ? '116.84' : '116.52' %>pt; top: <%= T(151.23 + (i * ALAMAT_PITCH)) %>pt;"
+          ><%= line %></div
+        >
+        <% }); %>
+
+        <div class="txt b" style="left: 71.51pt; top: <%= T(198.72 + alamatExtraOffset) %>pt">Perihal</div>
+        <div class="txt b" style="left: 113.58pt; top: <%= T(198.72 + alamatExtraOffset) %>pt">:</div>
+        <div class="txt b" style="left: 116.84pt; top: <%= T(198.72 + alamatExtraOffset) %>pt"
+          ><%= suratJalan.perihal || '-' %></div
+        >
+
+        <div class="txt b" style="left: 71.51pt; top: <%= T(208.72 + alamatExtraOffset) %>pt">Pekerjaaan</div>
+        <div class="txt b" style="left: 113.58pt; top: <%= T(208.72 + alamatExtraOffset) %>pt">:</div>
+        <div class="txt b" style="left: 116.84pt; top: <%= T(208.72 + alamatExtraOffset) %>pt"
+          ><%= suratJalan.pekerjaan || '-' %></div
+        >
+
+        <!-- INFO KANAN -->
+        <div class="txt b" style="left: 323.95pt; top: <%= T(121.24) %>pt">Tanggal</div>
+        <div class="txt b" style="left: 368.53pt; top: <%= T(121.24) %>pt">:</div>
+        <div class="txt small" style="left: 376.44pt; top: <%= T5(121.78) %>pt"><%= tanggalTampil %></div>
+
+        <div class="txt b" style="left: 323.95pt; top: <%= T(141.23) %>pt">No. Surat Jalan</div>
+        <div class="txt b" style="left: 368.53pt; top: <%= T(141.23) %>pt">:</div>
+        <div class="txt" style="left: 376.44pt; top: <%= T(141.23) %>pt"><%= suratJalan.noSuratJalan %></div>
+
+        <!-- KODE -->
+        <div class="txt small" style="left: 504.73pt; top: <%= T5(218.42 + alamatExtraOffset) %>pt"
+          ><%= kodeSurat %></div
+        >
+
+        <!-- TABEL BARANG -->
+        <div class="tbl-border" style="height: <%= calculatedTableHeight %>pt"></div>
+        <div class="tbl-headline"></div>
+        <div class="tbl-vline" style="left: 111.05pt; height: <%= calculatedTableHeight %>pt"></div>
+        <div class="tbl-vline" style="left: 239.05pt; height: <%= calculatedTableHeight %>pt"></div>
+        <div class="tbl-vline" style="left: 279.05pt; height: <%= calculatedTableHeight %>pt"></div>
+        <div class="tbl-vline" style="left: 324.05pt; height: <%= calculatedTableHeight %>pt"></div>
+
+        <div class="col-th" style="left: 70.45pt; width: 41pt; top: <%= T(227.46 + alamatExtraOffset) %>pt">No</div>
+        <div class="col-th" style="left: 111.05pt; width: 128pt; top: <%= T(227.46 + alamatExtraOffset) %>pt"
+          >Diskripsi</div
+        >
+        <div class="col-th" style="left: 239.2pt; width: 40pt; top: <%= T(227.46 + alamatExtraOffset) %>pt">Jumlah</div>
+        <div class="col-th" style="left: 278.7pt; width: 45pt; top: <%= T(227.46 + alamatExtraOffset) %>pt">Satuan</div>
+        <div class="col-th" style="left: 323.1pt; width: 201.11pt; top: <%= T(227.46 + alamatExtraOffset) %>pt"
+          >Keterangan</div
+        >
+
+        <% posisiItem.forEach(function (it) { %>
+        <div class="col-no" style="top: <%= T(it.numberY) %>pt"><%= it.index + 1 %></div>
+        <% it.titleLines.forEach(function (line, i) { %>
+        <% if (line !== '') { %>
+        <div class="desc-title" style="top: <%= T7(it.titleY + (i * 11)) %>pt"><%= line %></div>
         <% } %>
+        <% }); %>
+        <% it.bodyVisuals.forEach(function (visual) { %>
+        <% if (visual.text !== '') { %>
+        <div class="desc-line" style="top: <%= T(visual.y) %>pt"><%= visual.text %></div>
+        <% } %>
+        <% }); %>
+        <% it.jumlahLines.forEach(function (line, i) { %>
+        <div class="col-jml" style="top: <%= T(it.jumlahYs[i]) %>pt"><%= line %></div>
+        <% }); %>
+        <% it.satuanLines.forEach(function (line, i) { %>
+        <div class="col-sat" style="top: <%= T(it.satuanYs[i]) %>pt"><%= line %></div>
+        <% }); %>
+        <% it.ketLines.forEach(function (line, i) { %>
+        <div class="col-ket" style="top: <%= T5(it.ketYs[i]) %>pt"><%= line %></div>
+        <% }); %>
+        <% }); %>
+
+        <!-- KETERANGAN KODE BARANG -->
+        <% if (kodeBarangList && kodeBarangList.length > 0) { %>
+        <div
+          style="
+            position: absolute;
+            left: 71.51pt;
+            top: <%= (232.21 + alamatExtraOffset + calculatedTableHeight + 12).toFixed(3) %>pt;
+            font-size: 7.5pt;
+            line-height: 11pt;
+          "
+        >
+          <div style="font-weight: 700; margin-bottom: 2pt">Keterangan Kode Barang:</div>
+          <% kodeBarangList.forEach(function (kb) { %>
+          <div
+            ><span style="font-weight: 700"><%= kb.namaBarang %></span> : <span><%= kb.kodeBarang %></span></div
+          >
+          <% }) %>
+        </div>
+        <% } %>
+
+        <!-- TANDA TANGAN -->
+        <% const sigTop = Math.max(620, 232.21 + alamatExtraOffset + calculatedTableHeight + (kodeBarangList.length > 0
+        ? (35 + (kodeBarangList.length * 11)) : 20)); %>
+        <div class="sig-title" style="left: 99pt; top: <%= T(sigTop) %>pt">Yang Menyerahkan,</div>
+        <div class="sig-line" style="left: 99pt; top: <%= T(sigTop + 45) %>pt">
+          <span class="sig-name"
+            ><span>(</span><span><%= namaPenyerahTampil %></span><span>)</span></span
+          >
+        </div>
+        <div class="sig-line b" style="left: 99pt; top: <%= T(sigTop + 58) %>pt"><%= namaPerusahaanTampil %></div>
+
+        <div class="sig-title" style="left: 347.4pt; top: <%= T(sigTop) %>pt">Penerima,</div>
+        <div class="sig-line" style="left: 347.4pt; top: <%= T(sigTop + 45) %>pt">
+          <span class="sig-name right"
+            ><span>(</span><span><%= namaPenerimaTampil %></span><span>)</span></span
+          >
+        </div>
+        <div class="sig-line b" style="left: 347.4pt; top: <%= T(sigTop + 58) %>pt"><%= kepadaYthTampil %></div>
       </div>
-      <div class="txt" style="left: 489.75pt; top: <%= T(83.74) %>pt;">Barang</div>
-
-      <!-- JUDUL DINAMIS (SURAT JALAN / TANDA TERIMA) -->
-      <div class="txt b" style="left: 426.43pt; top: <%= T(102.49) %>pt;"><%= jenisSuratTampil %></div>
-      <div class="title-underline"></div>
-
-      <!-- INFO KIRI: PENERIMA -->
-      <div class="txt b" style="left: 71.51pt; top: <%= T(121.24) %>pt;">Kepada Yth,</div>
-      <div class="txt b" style="left: 113.58pt; top: <%= T(121.24) %>pt;">:</div>
-      <div class="txt b" style="left: 116.84pt; top: <%= T(121.24) %>pt;"><%= kepadaYthTampil %></div>
-
-      <% if (tampilkanBarisPenerima) { %>
-      <div class="txt b" style="left: 116.52pt; top: <%= T(131.23) %>pt;"><%= namaPenerimaTampil %></div>
-      <% } %>
-
-      <div class="txt b" style="left: 71.51pt; top: <%= T(141.23) %>pt;">No. Telepon</div>
-      <div class="txt b" style="left: 113.58pt; top: <%= T(141.23) %>pt;">:</div>
-      <div class="txt b" style="left: 116.84pt; top: <%= T(141.23) %>pt;"><%= suratJalan.noTelepon || '-' %></div>
-
-      <div class="txt b" style="left: 71.51pt; top: <%= T(151.24) %>pt;">Alamat</div>
-      <div class="txt b" style="left: 113.58pt; top: <%= T(151.23) %>pt;">:</div>
-      <% alamatLines.forEach(function (line, i) { %>
-      <div class="txt b" style="left: <%= i === 0 ? '116.84' : '116.52' %>pt; top: <%= T(151.23 + (i * ALAMAT_PITCH)) %>pt;"><%= line %></div>
-      <% }); %>
-
-      <div class="txt b" style="left: 71.51pt; top: <%= T(198.72 + alamatExtraOffset) %>pt;">Perihal</div>
-      <div class="txt b" style="left: 113.58pt; top: <%= T(198.72 + alamatExtraOffset) %>pt;">:</div>
-      <div class="txt b" style="left: 116.84pt; top: <%= T(198.72 + alamatExtraOffset) %>pt;"><%= suratJalan.perihal || '-' %></div>
-
-      <div class="txt b" style="left: 71.51pt; top: <%= T(208.72 + alamatExtraOffset) %>pt;">Pekerjaaan</div>
-      <div class="txt b" style="left: 113.58pt; top: <%= T(208.72 + alamatExtraOffset) %>pt;">:</div>
-      <div class="txt b" style="left: 116.84pt; top: <%= T(208.72 + alamatExtraOffset) %>pt;"><%= suratJalan.pekerjaan || '-' %></div>
-
-      <!-- INFO KANAN -->
-      <div class="txt b" style="left: 323.95pt; top: <%= T(121.24) %>pt;">Tanggal</div>
-      <div class="txt b" style="left: 368.53pt; top: <%= T(121.24) %>pt;">:</div>
-      <div class="txt small" style="left: 376.44pt; top: <%= T5(121.78) %>pt;"><%= tanggalTampil %></div>
-
-      <div class="txt b" style="left: 323.95pt; top: <%= T(141.23) %>pt;">No. Surat Jalan</div>
-      <div class="txt b" style="left: 368.53pt; top: <%= T(141.23) %>pt;">:</div>
-      <div class="txt" style="left: 376.44pt; top: <%= T(141.23) %>pt;"><%= suratJalan.noSuratJalan %></div>
-
-      <!-- KODE -->
-      <div class="txt small" style="left: 504.73pt; top: <%= T5(218.42 + alamatExtraOffset) %>pt;"><%= kodeSurat %></div>
-
-      <!-- TABEL BARANG -->
-      <div class="tbl-border" style="height: <%= calculatedTableHeight %>pt;"></div>
-      <div class="tbl-headline"></div>
-      <div class="tbl-vline" style="left: 111.05pt; height: <%= calculatedTableHeight %>pt;"></div>
-      <div class="tbl-vline" style="left: 239.05pt; height: <%= calculatedTableHeight %>pt;"></div>
-      <div class="tbl-vline" style="left: 279.05pt; height: <%= calculatedTableHeight %>pt;"></div>
-      <div class="tbl-vline" style="left: 324.05pt; height: <%= calculatedTableHeight %>pt;"></div>
-
-      <div class="col-th" style="left: 70.45pt; width: 41pt; top: <%= T(227.46 + alamatExtraOffset) %>pt;">No</div>
-      <div class="col-th" style="left: 111.05pt; width: 128pt; top: <%= T(227.46 + alamatExtraOffset) %>pt;">Diskripsi</div>
-      <div class="col-th" style="left: 239.20pt; width: 40pt; top: <%= T(227.46 + alamatExtraOffset) %>pt;">Jumlah</div>
-      <div class="col-th" style="left: 278.70pt; width: 45pt; top: <%= T(227.46 + alamatExtraOffset) %>pt;">Satuan</div>
-      <div class="col-th" style="left: 323.10pt; width: 201.11pt; top: <%= T(227.46 + alamatExtraOffset) %>pt;">Keterangan</div>
-
-      <% posisiItem.forEach(function (it) { %>
-      <div class="col-no" style="top: <%= T(it.numberY) %>pt;"><%= it.index + 1 %></div>
-      <% it.titleLines.forEach(function (line, i) { %>
-      <% if (line !== '') { %>
-      <div class="desc-title" style="top: <%= T7(it.titleY + (i * 11.0)) %>pt;"><%= line %></div>
-      <% } %>
-      <% }); %>
-      <% it.bodyVisuals.forEach(function (visual) { %>
-      <% if (visual.text !== '') { %>
-      <div class="desc-line" style="top: <%= T(visual.y) %>pt;"><%= visual.text %></div>
-      <% } %>
-      <% }); %>
-      <% it.jumlahLines.forEach(function (line, i) { %>
-      <div class="col-jml" style="top: <%= T(it.jumlahYs[i]) %>pt;"><%= line %></div>
-      <% }); %>
-      <% it.satuanLines.forEach(function (line, i) { %>
-      <div class="col-sat" style="top: <%= T(it.satuanYs[i]) %>pt;"><%= line %></div>
-      <% }); %>
-      <% it.ketLines.forEach(function (line, i) { %>
-      <div class="col-ket" style="top: <%= T5(it.ketYs[i]) %>pt;"><%= line %></div>
-      <% }); %>
-      <% }); %>
-
-      <!-- KETERANGAN KODE BARANG -->
-      <% if (kodeBarangList && kodeBarangList.length > 0) { %>
-      <div style="position: absolute; left: 71.51pt; top: <%= (232.21 + alamatExtraOffset + calculatedTableHeight + 12).toFixed(3) %>pt; font-size: 7.5pt; line-height: 11pt;">
-        <div style="font-weight: 700; margin-bottom: 2pt;">Keterangan Kode Barang:</div>
-        <% kodeBarangList.forEach(function (kb) { %>
-        <div><span style="font-weight: 700;"><%= kb.namaBarang %></span> : <span><%= kb.kodeBarang %></span></div>
-        <% }) %>
-      </div>
-      <% } %>
-
-      <!-- TANDA TANGAN -->
-      <% 
-        const sigTop = Math.max(620, 232.21 + alamatExtraOffset + calculatedTableHeight + (kodeBarangList.length > 0 ? (35 + (kodeBarangList.length * 11)) : 20));
-      %>
-      <div class="sig-title" style="left: 99pt; top: <%= T(sigTop) %>pt;">Yang Menyerahkan,</div>
-      <div class="sig-line" style="left: 99pt; top: <%= T(sigTop + 45) %>pt;">
-        <span class="sig-name"><span>(</span><span><%= namaPenyerahTampil %></span><span>)</span></span>
-      </div>
-      <div class="sig-line b" style="left: 99pt; top: <%= T(sigTop + 58) %>pt;"><%= namaPerusahaanTampil %></div>
-
-      <div class="sig-title" style="left: 347.4pt; top: <%= T(sigTop) %>pt;">Penerima,</div>
-      <div class="sig-line" style="left: 347.4pt; top: <%= T(sigTop + 45) %>pt;">
-        <span class="sig-name right"><span>(</span><span><%= namaPenerimaTampil %></span><span>)</span></span>
-      </div>
-      <div class="sig-line b" style="left: 347.4pt; top: <%= T(sigTop + 58) %>pt;"><%= kepadaYthTampil %></div>
     </div>
-  </div>
 
-  <div class="toolbar no-print">
-    <span class="hint">Pilih <strong>Save as PDF</strong>, ukuran A4, margin <strong>None</strong>.</span>
-    <button type="button" class="btn-print" onclick="window.print()">Cetak / Simpan PDF</button>
-    <button type="button" class="btn-close" onclick="window.close()">Tutup</button>
-  </div>
+    <div class="toolbar no-print">
+      <span class="hint">Pilih <strong>Save as PDF</strong>, ukuran A4, margin <strong>None</strong>.</span>
+      <button type="button" class="btn-print" onclick="window.print()">Cetak / Simpan PDF</button>
+      <button type="button" class="btn-close" onclick="window.close()">Tutup</button>
+    </div>
 
-  <script>
-    window.addEventListener('load', function () {
-      const urlParams = new URLSearchParams(window.location.search);
-      var img = document.querySelector('.letterhead');
+    <script>
+      window.addEventListener('load', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        var img = document.querySelector('.letterhead');
 
-      var prosesCetakAtauDownload = function () {
-        setTimeout(function () {
-          // Jika dibuka dari tombol "Unduh PDF" (?download=true), langsung download PDF secara instan
-          if (urlParams.has('download')) {
-            const element = document.querySelector('.page');
-            const opt = {
-              margin:       0,
-              filename:     '<%= (suratJalan.jenisSurat || "Surat-Jalan").replace(/\s+/g, "-") %>-<%= suratJalan.noSuratJalan.replace(/\//g, "-") %>.pdf',
-              image:        { type: 'jpeg', quality: 0.98 },
-              html2canvas:  { scale: 2, useCORS: true },
-              jsPDF:        { unit: 'pt', format: 'a4', orientation: 'portrait' }
-            };
+        var prosesCetakAtauDownload = function () {
+          setTimeout(function () {
+            // Jika dibuka dari tombol "Unduh PDF" (?download=true), langsung download PDF secara instan
+            if (urlParams.has('download')) {
+              const element = document.querySelector('.page');
+              const opt = {
+                margin: 0,
+                filename:
+                  '<%= (suratJalan.jenisSurat || "Surat-Jalan").replace(/\s+/g, "-") %>-<%= suratJalan.noSuratJalan.replace(/\//g, "-") %>.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+              };
 
-            html2pdf().from(element).set(opt).save().then(() => {
-              setTimeout(() => window.close(), 1000);
-            });
-          } else {
-            // Jika dibuka biasa lewat tombol "Cetak", tampilkan dialog print browser
-            window.print();
-          }
-        }, 350);
-      };
+              html2pdf()
+                .from(element)
+                .set(opt)
+                .save()
+                .then(() => {
+                  setTimeout(() => window.close(), 1000);
+                });
+            } else {
+              // Jika dibuka biasa lewat tombol "Cetak", tampilkan dialog print browser
+              window.print();
+            }
+          }, 350);
+        };
 
-      if (img && !img.complete) {
-        img.addEventListener('load', prosesCetakAtauDownload);
-        img.addEventListener('error', prosesCetakAtauDownload);
-      } else {
-        prosesCetakAtauDownload();
-      }
-    });
-  </script>
-</body>
+        if (img && !img.complete) {
+          img.addEventListener('load', prosesCetakAtauDownload);
+          img.addEventListener('error', prosesCetakAtauDownload);
+        } else {
+          prosesCetakAtauDownload();
+        }
+      });
+    </script>
+  </body>
 </html>

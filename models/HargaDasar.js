@@ -1,6 +1,7 @@
-  const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-  const hargaDasarSchema = new mongoose.Schema({
+const hargaDasarSchema = new mongoose.Schema(
+  {
     idBarang: { type: String, required: true, unique: true },
     namaBarang: { type: String, required: true },
     namaMerk: { type: String, required: true },
@@ -12,7 +13,9 @@
     status: { type: String, default: 'Pending' },
     tanggal: { type: Date, default: Date.now },
     diinputOleh: { type: String, default: '' },
-    gambar: [String] // <-- TAMBAHKAN BARIS INI (Array untuk menyimpan banyak nama file foto)
-  }, { timestamps: true, collection: 'harga_dasar' });
+    gambar: [String], // <-- TAMBAHKAN BARIS INI (Array untuk menyimpan banyak nama file foto)
+  },
+  { timestamps: true, collection: 'harga_dasar' },
+);
 
-  module.exports = mongoose.model('HargaDasar', hargaDasarSchema);
+module.exports = mongoose.model('HargaDasar', hargaDasarSchema);

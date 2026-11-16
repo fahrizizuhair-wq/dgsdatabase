@@ -97,7 +97,7 @@ function siapkanData(lpj) {
     .map((row) => ({
       tanggal: toDate(row.tanggal),
       nominal: Number(row.nominal) || 0,
-      keterangan: String(row.keterangan || '').trim()
+      keterangan: String(row.keterangan || '').trim(),
     }))
     .sort((a, b) => (a.tanggal ? a.tanggal.getTime() : 0) - (b.tanggal ? b.tanggal.getTime() : 0));
 
@@ -113,7 +113,7 @@ function siapkanData(lpj) {
         keterangan: String(row.keterangan || '').trim(),
         qty,
         hargaSatuan: harga,
-        nominal
+        nominal,
       };
     })
     .sort((a, b) => (a.tanggal ? a.tanggal.getTime() : 0) - (b.tanggal ? b.tanggal.getTime() : 0));
@@ -121,8 +121,7 @@ function siapkanData(lpj) {
   const grupProduksi = rincian.filter((row) => normalisasiKategori(row.kategori) === 'produksi');
   const grupOperasional = rincian.filter((row) => normalisasiKategori(row.kategori) === 'operasional');
 
-  const totalPencairan = pencairan.reduce((total, row) => total + row.nominal, 0)
-    || (Number(lpj.anggaranKasbon) || 0);
+  const totalPencairan = pencairan.reduce((total, row) => total + row.nominal, 0) || Number(lpj.anggaranKasbon) || 0;
   const totalPengeluaran = rincian.reduce((total, row) => total + row.nominal, 0);
 
   // Rekap barang untuk bagian bawah template
@@ -138,9 +137,7 @@ function siapkanData(lpj) {
   });
   const rekapBarang = Array.from(rekapMap.values());
 
-  const notaVault = Array.isArray(lpj.vaultNota)
-    ? lpj.vaultNota.filter((nota) => nota && nota.filePath).length
-    : 0;
+  const notaVault = Array.isArray(lpj.vaultNota) ? lpj.vaultNota.filter((nota) => nota && nota.filePath).length : 0;
   const notaRincian = Array.isArray(lpj.rincianPengeluaran)
     ? lpj.rincianPengeluaran.filter((baris) => baris && baris.notaPath).length
     : 0;
@@ -152,7 +149,7 @@ function siapkanData(lpj) {
     totalPencairan,
     totalPengeluaran,
     rekapBarang,
-    jumlahNota: notaVault + notaRincian
+    jumlahNota: notaVault + notaRincian,
   };
 }
 
@@ -170,7 +167,7 @@ async function buildLpjWorkbook(lpj) {
   workbook.calcProperties.fullCalcOnLoad = true;
 
   const ws = workbook.addWorksheet('LPJ', {
-    views: [{ showGridLines: false, zoomScale: 100 }]
+    views: [{ showGridLines: false, zoomScale: 100 }],
   });
 
   ws.columns = COLUMN_WIDTHS.map((width) => ({ width }));
@@ -183,7 +180,7 @@ async function buildLpjWorkbook(lpj) {
     horizontalCentered: false,
     verticalCentered: false,
     showGridLines: false,
-    margins: { left: 0.4, right: 0.4, top: 0.5, bottom: 0.2, header: 0, footer: 0 }
+    margins: { left: 0.4, right: 0.4, top: 0.5, bottom: 0.2, header: 0, footer: 0 },
   });
 
   const data = siapkanData(lpj);
@@ -196,9 +193,11 @@ async function buildLpjWorkbook(lpj) {
     font: FONT_TITLE,
     fill: FILL_NONE,
     border: BORDER_NONE,
-    align: ALIGN_CENTER
+    align: ALIGN_CENTER,
   });
-  [2, 3, 4].forEach((row) => { ws.getRow(row).height = 30; });
+  [2, 3, 4].forEach((row) => {
+    ws.getRow(row).height = 30;
+  });
   ws.getRow(5).height = 19.5;
 
   let row = 6;
@@ -240,10 +239,16 @@ async function buildLpjWorkbook(lpj) {
 
   // Total kasbon
   writeMerged(ws, row, 1, row, 6, 'Total Kasbon', { font: FONT_BOLD, align: ALIGN_CENTER });
-  writeCell(ws, row, 7, {
-    formula: `SUM(G${barisPencairanPertama}:G${barisPencairanTerakhir})`,
-    result: data.totalPencairan
-  }, { font: FONT_BOLD, align: ALIGN_RIGHT, numFmt: RUPIAH });
+  writeCell(
+    ws,
+    row,
+    7,
+    {
+      formula: `SUM(G${barisPencairanPertama}:G${barisPencairanTerakhir})`,
+      result: data.totalPencairan,
+    },
+    { font: FONT_BOLD, align: ALIGN_RIGHT, numFmt: RUPIAH },
+  );
   const barisTotalKasbon = row;
   ws.getRow(row).height = 17.25;
   row += 1;
@@ -257,39 +262,39 @@ async function buildLpjWorkbook(lpj) {
   const barisHeaderPengeluaran2 = row + 1;
   writeMerged(ws, barisHeaderPengeluaran, 1, barisHeaderPengeluaran2, 1, 'No.', {
     font: FONT_BOLD,
-    align: ALIGN_CENTER
+    align: ALIGN_CENTER,
   });
   writeMerged(ws, barisHeaderPengeluaran, 2, barisHeaderPengeluaran2, 2, 'Tanggal', {
     font: FONT_BOLD,
-    align: ALIGN_CENTER
+    align: ALIGN_CENTER,
   });
   writeMerged(ws, barisHeaderPengeluaran, 3, barisHeaderPengeluaran2, 3, 'Uraian', {
     font: FONT_BOLD,
-    align: ALIGN_CENTER
+    align: ALIGN_CENTER,
   });
   writeMerged(ws, barisHeaderPengeluaran, 4, barisHeaderPengeluaran, 6, 'Pemakaian', {
     font: FONT_BOLD,
     align: ALIGN_CENTER,
-    numFmt: RUPIAH_HEADER
+    numFmt: RUPIAH_HEADER,
   });
   writeCell(ws, barisHeaderPengeluaran2, 4, 'Qty', {
     font: FONT_BOLD,
     align: ALIGN_CENTER,
-    numFmt: QTY_FMT
+    numFmt: QTY_FMT,
   });
   writeCell(ws, barisHeaderPengeluaran2, 5, 'Satuan', {
     font: FONT_BOLD,
     align: ALIGN_CENTER,
-    numFmt: RUPIAH
+    numFmt: RUPIAH,
   });
   writeCell(ws, barisHeaderPengeluaran2, 6, 'Harga', {
     font: FONT_BOLD,
     align: ALIGN_CENTER,
-    numFmt: RUPIAH
+    numFmt: RUPIAH,
   });
   writeMerged(ws, barisHeaderPengeluaran, 7, barisHeaderPengeluaran2, 7, 'Keterangan', {
     font: FONT_BOLD,
-    align: ALIGN_CENTER
+    align: ALIGN_CENTER,
   });
   ws.getRow(barisHeaderPengeluaran).height = 17.25;
   ws.getRow(barisHeaderPengeluaran2).height = 17.25;
@@ -298,7 +303,7 @@ async function buildLpjWorkbook(lpj) {
   // Grup biaya: BIAYA PRODUKSI lalu BIAYA OPERASIONAL
   const grup = [
     { label: 'BIAYA PRODUKSI', rows: data.grupProduksi },
-    { label: 'BIAYA OPERASIONAL', rows: data.grupOperasional }
+    { label: 'BIAYA OPERASIONAL', rows: data.grupOperasional },
   ].filter((item) => item.rows.length > 0);
   if (grup.length === 0) grup.push({ label: 'BIAYA PRODUKSI', rows: [] });
 
@@ -335,7 +340,7 @@ async function buildLpjWorkbook(lpj) {
       writeCell(ws, row, 7, baris.keterangan, {});
       setHeight(ws, row, [
         { col: 3, text: baris.namaItem },
-        { col: 7, text: baris.keterangan }
+        { col: 7, text: baris.keterangan },
       ]);
       row += 1;
     });
@@ -345,7 +350,7 @@ async function buildLpjWorkbook(lpj) {
     if (barisAkhirItem >= barisAwalItem) {
       selTotalGrup.value = {
         formula: `SUM(F${barisAwalItem}:F${barisAkhirItem})`,
-        result: totalGrup
+        result: totalGrup,
       };
     } else {
       selTotalGrup.value = 0;
@@ -359,7 +364,7 @@ async function buildLpjWorkbook(lpj) {
   styleCell(selTotalKeseluruhan, { font: FONT_BOLD, align: ALIGN_RIGHT, numFmt: RUPIAH });
   selTotalKeseluruhan.value = {
     formula: totalPerGrup.map((item) => `F${item.baris}`).join('+') || '0',
-    result: data.totalPengeluaran
+    result: data.totalPengeluaran,
   };
   writeCell(ws, row, 7, '', {});
   const barisTotalKeseluruhan = row;
@@ -374,7 +379,7 @@ async function buildLpjWorkbook(lpj) {
   styleCell(ws.getCell(row, 7), { font: FONT_BOLD, align: ALIGN_RIGHT, numFmt: RUPIAH });
   selBalance.value = {
     formula: `G${barisTotalKasbon}-F${barisTotalKeseluruhan}`,
-    result: data.totalPencairan - data.totalPengeluaran
+    result: data.totalPencairan - data.totalPengeluaran,
   };
   ws.getRow(row).height = 17.25;
   row += 2;
@@ -383,7 +388,7 @@ async function buildLpjWorkbook(lpj) {
   writeMerged(ws, row, 1, row, 2, 'Summary LPJ', {
     font: FONT_SECTION,
     border: BORDER_NONE,
-    align: ALIGN_LEFT
+    align: ALIGN_LEFT,
   });
   ws.getRow(row).height = 19.5;
   row += 1;
@@ -418,14 +423,18 @@ async function buildLpjWorkbook(lpj) {
     font: FONT_BOLD,
     fill: FILL_YELLOW,
     align: ALIGN_RIGHT,
-    numFmt: RUPIAH
+    numFmt: RUPIAH,
   });
   writeCell(ws, row, 7, '', { border: BORDER_NONE });
   ws.getRow(row).height = 19.5;
   row += 2;
 
   // ---------- SUPPORTING DOCUMENTS ----------
-  writeMerged(ws, row, 5, row, 7, 'Supporting Documents:', { font: FONT_SECTION, border: BORDER_NONE, align: ALIGN_LEFT });
+  writeMerged(ws, row, 5, row, 7, 'Supporting Documents:', {
+    font: FONT_SECTION,
+    border: BORDER_NONE,
+    align: ALIGN_LEFT,
+  });
   ws.getRow(row).height = 19.5;
   row += 1;
 
@@ -433,7 +442,7 @@ async function buildLpjWorkbook(lpj) {
     { label: 'Lembar LPJ', ada: true },
     { label: 'FC Kasbon', ada: data.pencairan.length > 0 },
     { label: 'Bukti Transfer Bank (Cash)', ada: data.pencairan.length > 0 },
-    { label: 'Invoice/Nota', ada: data.jumlahNota > 0 }
+    { label: 'Invoice/Nota', ada: data.jumlahNota > 0 },
   ];
   dokumen.forEach((item) => {
     writeMerged(ws, row, 5, row, 6, item.label, { border: BORDER_BOX, align: ALIGN_LEFT });
@@ -471,25 +480,33 @@ async function buildLpjWorkbook(lpj) {
     writeCell(ws, row, 3, `${totalQty.toLocaleString('id-ID')} pcs`, {
       font: FONT_BOLD,
       fill: FILL_CREAM,
-      align: ALIGN_CENTER
+      align: ALIGN_CENTER,
     });
-    writeMerged(ws, row, 4, row, 7, {
-      formula: `SUM(D${barisRekapAwal}:D${row - 1})`,
-      result: data.totalPengeluaran
-    }, { font: FONT_BOLD, fill: FILL_CREAM, align: ALIGN_RIGHT, numFmt: RUPIAH });
+    writeMerged(
+      ws,
+      row,
+      4,
+      row,
+      7,
+      {
+        formula: `SUM(D${barisRekapAwal}:D${row - 1})`,
+        result: data.totalPengeluaran,
+      },
+      { font: FONT_BOLD, fill: FILL_CREAM, align: ALIGN_RIGHT, numFmt: RUPIAH },
+    );
     ws.getRow(row).height = 19.5;
     row += 1;
   }
 
   // ---------- GAMBAR (logo header dari template) ----------
-  const media = (template.model && Array.isArray(template.model.media)) ? template.model.media : [];
+  const media = template.model && Array.isArray(template.model.media) ? template.model.media : [];
   const gambar = source && typeof source.getImages === 'function' ? source.getImages() : [];
   gambar.forEach((image) => {
     const berkas = media[image.imageId];
     if (!berkas || !berkas.buffer) return;
     const imageId = workbook.addImage({
       buffer: berkas.buffer,
-      extension: (berkas.extension || 'png').replace('jpeg', 'jpg')
+      extension: (berkas.extension || 'png').replace('jpeg', 'jpg'),
     });
     const range = image.range || {};
     const anchor = { tl: { col: (range.tl && range.tl.col) || 0, row: (range.tl && range.tl.row) || 0 } };

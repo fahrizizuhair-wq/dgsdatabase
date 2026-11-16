@@ -1,220 +1,263 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
+  <head>
     <%- include('partials/head') %>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Katalog - <%= vendor.namaVendor %></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: #333; 
-            padding: 40px; 
-            background-color: #f4f6f9; 
-            min-height: 100vh; 
-            position: relative; 
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body::before {
-            content: ""; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100vw; 
-            height: 100vh;
-            background: linear-gradient(to bottom, rgba(122, 27, 27, 0.85) 0%, rgba(122, 27, 27, 0.1) 40%, rgba(244, 246, 249, 0.88) 100%), 
-                        url('/images/background.jpg') no-repeat center top fixed;
-            background-size: cover; 
-            z-index: -1; 
-            pointer-events: none;
-        }
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #333;
+        padding: 40px;
+        background-color: #f4f6f9;
+        min-height: 100vh;
+        position: relative;
+      }
 
-        .container { 
-            max-width: 750px; 
-            margin: 0 auto; 
-            background: rgba(255, 255, 255, 0.95); 
-            padding: 35px; 
-            border-radius: 12px; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
-        }
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background:
+          linear-gradient(
+            to bottom,
+            rgba(122, 27, 27, 0.85) 0%,
+            rgba(122, 27, 27, 0.1) 40%,
+            rgba(244, 246, 249, 0.88) 100%
+          ),
+          url('/images/background.jpg') no-repeat center top fixed;
+        background-size: cover;
+        z-index: -1;
+        pointer-events: none;
+      }
 
-        .back-link { 
-            display: inline-block; 
-            margin-bottom: 20px; 
-            color: #7a1b1b; 
-            text-decoration: none; 
-            font-weight: 600; 
-        }
-        .back-link:hover { text-decoration: underline; }
-        
-        h1 { 
-            color: #7a1b1b; 
-            margin-bottom: 25px; 
-            font-size: 24px; 
-            border-bottom: 2px solid #eee; 
-            padding-bottom: 10px; 
-        }
-        
-        /* STYLING SLIDER FOTO PERSIS SEPERTI DETAIL VENDOR */
-        .slider-container { 
-            position: relative; 
-            max-width: 450px; 
-            margin: 0 auto 12px auto; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
-            background: #000; 
-        }
-        
-        .slide { 
-            display: none; 
-            text-align: center; 
-        }
-        
-        .slide.active { 
-            display: block; 
-        }
-        
-        .slide img { 
-            width: 100%; 
-            max-height: 320px; 
-            object-fit: contain; 
-            display: block; 
-            margin: 0 auto; 
-            cursor: pointer; 
-        }
-        
-        .slider-btn { 
-            position: absolute; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            background: rgba(0, 0, 0, 0.6); 
-            color: white; 
-            border: none; 
-            width: 40px; 
-            height: 40px; 
-            cursor: pointer; 
-            font-size: 20px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            transition: background 0.2s; 
-            z-index: 10; 
-        }
-        
-        .slider-btn:hover { background: rgba(0, 0, 0, 0.9); }
-        .prev-btn { left: 12px; }
-        .next-btn { right: 12px; }
-        
-        .slider-counter { 
-            text-align: center; 
-            font-size: 12px; 
-            font-weight: 600; 
-            color: #7a6a6a; 
-            margin-bottom: 22px; 
-        }
+      .container {
+        max-width: 750px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 35px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      }
 
-        .foto-empty { 
-            text-align: center; 
-            padding: 28px; 
-            margin-bottom: 24px; 
-            border: 1px dashed #d9c7c7; 
-            border-radius: 10px; 
-            background: #faf7f7; 
-            color: #8a7a7a; 
-            font-size: 13px; 
-        }
+      .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #7a1b1b;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .back-link:hover {
+        text-decoration: underline;
+      }
 
-        /* MODAL POP-UP LIGHTBOX */
-        .img-modal {
-            display: none; 
-            position: fixed; 
-            z-index: 9999; 
-            top: 0; 
-            left: 0;
-            width: 100vw; 
-            height: 100vh; 
-            background: rgba(0, 0, 0, 0.85);
-            align-items: center; 
-            justify-content: center; 
-            padding: 20px;
-        }
-        
-        .img-modal img {
-            max-width: 90%; 
-            max-height: 90vh; 
-            object-fit: contain;
-            border-radius: 6px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-        
-        .img-modal-close {
-            position: absolute; 
-            top: 20px; 
-            right: 30px; 
-            color: #fff;
-            font-size: 35px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            background: none; 
-            border: none;
-        }
+      h1 {
+        color: #7a1b1b;
+        margin-bottom: 25px;
+        font-size: 24px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+      }
 
-        /* Layout 2 Kolom */
-        .details-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 20px; 
-            margin-bottom: 20px; 
-        }
-        
-        .detail-group { margin-bottom: 15px; }
-        .detail-group.full-width { grid-column: span 2; }
-        
-        .detail-label { 
-            font-size: 12px; 
-            color: #666; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            margin-bottom: 4px; 
-        }
-        
-        .detail-value { 
-            font-size: 16px; 
-            color: #222; 
-            font-weight: 500; 
-        }
+      /* STYLING SLIDER FOTO PERSIS SEPERTI DETAIL VENDOR */
+      .slider-container {
+        position: relative;
+        max-width: 450px;
+        margin: 0 auto 12px auto;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        background: #000;
+      }
 
-        .badge { 
-            display: inline-block; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 13px; 
-            font-weight: 600; 
-        }
-        .badge-active { background-color: #e6f4ea; color: #137333; }
+      .slide {
+        display: none;
+        text-align: center;
+      }
 
-        @media (max-width: 768px) {
-            body { padding: 20px 14px; }
-            .container { padding: 22px 18px; }
-            .details-grid { grid-template-columns: 1fr; }
-            .detail-group.full-width { grid-column: span 1; }
-            h1 { font-size: 20px; }
+      .slide.active {
+        display: block;
+      }
+
+      .slide img {
+        width: 100%;
+        max-height: 320px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+        cursor: pointer;
+      }
+
+      .slider-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        font-size: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        z-index: 10;
+      }
+
+      .slider-btn:hover {
+        background: rgba(0, 0, 0, 0.9);
+      }
+      .prev-btn {
+        left: 12px;
+      }
+      .next-btn {
+        right: 12px;
+      }
+
+      .slider-counter {
+        text-align: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: #7a6a6a;
+        margin-bottom: 22px;
+      }
+
+      .foto-empty {
+        text-align: center;
+        padding: 28px;
+        margin-bottom: 24px;
+        border: 1px dashed #d9c7c7;
+        border-radius: 10px;
+        background: #faf7f7;
+        color: #8a7a7a;
+        font-size: 13px;
+      }
+
+      /* MODAL POP-UP LIGHTBOX */
+      .img-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .img-modal img {
+        max-width: 90%;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 6px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      .img-modal-close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: #fff;
+        font-size: 35px;
+        font-weight: bold;
+        cursor: pointer;
+        background: none;
+        border: none;
+      }
+
+      /* Layout 2 Kolom */
+      .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .detail-group {
+        margin-bottom: 15px;
+      }
+      .detail-group.full-width {
+        grid-column: span 2;
+      }
+
+      .detail-label {
+        font-size: 12px;
+        color: #666;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+
+      .detail-value {
+        font-size: 16px;
+        color: #222;
+        font-weight: 500;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .badge-active {
+        background-color: #e6f4ea;
+        color: #137333;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 20px 14px;
         }
+        .container {
+          padding: 22px 18px;
+        }
+        .details-grid {
+          grid-template-columns: 1fr;
+        }
+        .detail-group.full-width {
+          grid-column: span 1;
+        }
+        h1 {
+          font-size: 20px;
+        }
+      }
     </style>
-</head>
-<body>
-  <div class="container">
-    <a href="<%= typeof backUrl !== 'undefined' ? backUrl : '/data-bahan-kain' %>" class="back-link">&larr; Kembali ke Data Bahan Kain</a>
+  </head>
+  <body>
+    <div class="container">
+      <a href="<%= typeof backUrl !== 'undefined' ? backUrl : '/data-bahan-kain' %>" class="back-link"
+        >&larr; Kembali ke Data Bahan Kain</a
+      >
 
-    <h1>Katalog Vendor: <%= vendor.namaVendor %></h1>
+      <h1
+        >Katalog Vendor:
+        <%= vendor.namaVendor %></h1
+      >
 
-    <% 
+      <% 
         let fotoList = [];
         if (vendor.foto) {
           if (Array.isArray(vendor.foto)) {
@@ -226,114 +269,137 @@
         const fotoCount = fotoList.length;
     %>
 
-    <% if (fotoCount > 0) { %>
+      <% if (fotoCount > 0) { %>
       <div class="slider-container">
         <% fotoList.forEach(function(fotoName, index) { %>
-          <div class="slide <%= index === 0 ? 'active' : '' %>">
-            <img src="<%= /^https?:\/\//i.test(fotoName) ? fotoName : (fotoName.charAt(0) === '/' ? fotoName : '/uploads/' + fotoName) %>" alt="Foto katalog <%= index + 1 %>" onclick="openModal(this.src)" title="Klik untuk memperbesar">
-          </div>
+        <div class="slide <%= index === 0 ? 'active' : '' %>">
+          <img
+            src="<%= /^https?:\/\//i.test(fotoName) ? fotoName : (fotoName.charAt(0) === '/' ? fotoName : '/uploads/' + fotoName) %>"
+            alt="Foto katalog <%= index + 1 %>"
+            onclick="openModal(this.src)"
+            title="Klik untuk memperbesar"
+          />
+        </div>
         <% }); %>
 
         <% if (fotoCount > 1) { %>
-          <button type="button" class="slider-btn prev-btn" onclick="changeSlide(-1)" aria-label="Foto sebelumnya">&#10094;</button>
-          <button type="button" class="slider-btn next-btn" onclick="changeSlide(1)" aria-label="Foto berikutnya">&#10095;</button>
+        <button type="button" class="slider-btn prev-btn" onclick="changeSlide(-1)" aria-label="Foto sebelumnya"
+          >&#10094;</button
+        >
+        <button type="button" class="slider-btn next-btn" onclick="changeSlide(1)" aria-label="Foto berikutnya"
+          >&#10095;</button
+        >
         <% } %>
       </div>
 
       <div class="slider-counter">
-        <span id="slideNow">1</span> / <%= fotoCount %> foto <span style="font-weight: normal; color: #999;">(Klik foto untuk memperbesar)</span>
+        <span id="slideNow">1</span> /
+        <%= fotoCount %>
+        foto <span style="font-weight: normal; color: #999">(Klik foto untuk memperbesar)</span>
       </div>
-    <% } else { %>
+      <% } else { %>
       <div class="foto-empty">Belum ada foto dokumentasi untuk katalog vendor ini.</div>
-    <% } %>
+      <% } %>
 
-    <!-- MODAL POP-UP FOTO -->
-    <div id="photoModal" class="img-modal" onclick="closeModal()">
-      <button type="button" class="img-modal-close" onclick="closeModal()">&times;</button>
-      <img id="modalImg" src="" alt="Ukuran Penuh">
-    </div>
-
-    <div class="details-grid">
-      <div class="detail-group">
-        <div class="detail-label">ID Vendor</div>
-        <div class="detail-value"><strong><%= vendor.idVendor %></strong></div>
+      <!-- MODAL POP-UP FOTO -->
+      <div id="photoModal" class="img-modal" onclick="closeModal()">
+        <button type="button" class="img-modal-close" onclick="closeModal()">&times;</button>
+        <img id="modalImg" src="" alt="Ukuran Penuh" />
       </div>
 
-      <div class="detail-group">
-        <div class="detail-label">Nama Vendor</div>
-        <div class="detail-value"><%= vendor.namaVendor %></div>
-      </div>
+      <div class="details-grid">
+        <div class="detail-group">
+          <div class="detail-label">ID Vendor</div>
+          <div class="detail-value"
+            ><strong><%= vendor.idVendor %></strong></div
+          >
+        </div>
 
-      <div class="detail-group">
-        <div class="detail-label">Wilayah / Kota</div>
-        <div class="detail-value"><%= vendor.wilayah || '-' %></div>
-      </div>
+        <div class="detail-group">
+          <div class="detail-label">Nama Vendor</div>
+          <div class="detail-value"><%= vendor.namaVendor %></div>
+        </div>
 
-      <div class="detail-group">
-        <div class="detail-label">Kategori Supply</div>
-        <div class="detail-value"><%= vendor.kategoriSupply || vendor.kategori || '-' %></div>
-      </div>
+        <div class="detail-group">
+          <div class="detail-label">Wilayah / Kota</div>
+          <div class="detail-value"><%= vendor.wilayah || '-' %></div>
+        </div>
 
-      <div class="detail-group">
-        <div class="detail-label">Kontak / PIC</div>
-        <div class="detail-value"><%= vendor.kontak || '-' %></div>
-      </div>
+        <div class="detail-group">
+          <div class="detail-label">Kategori Supply</div>
+          <div class="detail-value"><%= vendor.kategoriSupply || vendor.kategori || '-' %></div>
+        </div>
 
-      <div class="detail-group">
-        <div class="detail-label">Rating</div>
-        <div class="detail-value">⭐ <%= vendor.rating || '-' %></div>
-      </div>
+        <div class="detail-group">
+          <div class="detail-label">Kontak / PIC</div>
+          <div class="detail-value"><%= vendor.kontak || '-' %></div>
+        </div>
 
-      <div class="detail-group full-width">
-        <div class="detail-label">Diinput Oleh</div>
-        <div class="detail-value"><%= vendor.diinputOleh || '-' %></div>
-      </div>
+        <div class="detail-group">
+          <div class="detail-label">Rating</div>
+          <div class="detail-value">⭐ <%= vendor.rating || '-' %></div>
+        </div>
 
-      <div class="detail-group full-width">
-        <div class="detail-label">Status</div>
-        <div class="detail-value">
-          <span class="badge badge-active"><%= vendor.status || 'Aktif' %></span>
+        <div class="detail-group full-width">
+          <div class="detail-label">Diinput Oleh</div>
+          <div class="detail-value"><%= vendor.diinputOleh || '-' %></div>
+        </div>
+
+        <div class="detail-group full-width">
+          <div class="detail-label">Status</div>
+          <div class="detail-value">
+            <span class="badge badge-active"><%= vendor.status || 'Aktif' %></span>
+          </div>
+        </div>
+
+        <div class="detail-group full-width">
+          <div class="detail-label">Deskripsi / Catatan Vendor</div>
+          <div
+            class="detail-value"
+            style="
+              white-space: pre-line;
+              background: #fafafa;
+              padding: 12px;
+              border-radius: 6px;
+              border: 1px solid #eee;
+            "
+            ><%= vendor.deskripsi || 'Tidak ada deskripsi.' %></div
+          >
         </div>
       </div>
-
-      <div class="detail-group full-width">
-        <div class="detail-label">Deskripsi / Catatan Vendor</div>
-        <div class="detail-value" style="white-space: pre-line; background: #fafafa; padding: 12px; border-radius: 6px; border: 1px solid #eee;"><%= vendor.deskripsi || 'Tidak ada deskripsi.' %></div>
-      </div>
     </div>
-  </div>
 
-  <script>
-    let slideIndex = 0;
-    const slides = document.querySelectorAll('.slide');
-    const slideNow = document.getElementById('slideNow');
+    <script>
+      let slideIndex = 0;
+      const slides = document.querySelectorAll('.slide');
+      const slideNow = document.getElementById('slideNow');
 
-    function showSlide(n) {
-      if (slides.length === 0) return;
-      if (n >= slides.length) slideIndex = 0;
-      else if (n < 0) slideIndex = slides.length - 1;
-      else slideIndex = n;
+      function showSlide(n) {
+        if (slides.length === 0) return;
+        if (n >= slides.length) slideIndex = 0;
+        else if (n < 0) slideIndex = slides.length - 1;
+        else slideIndex = n;
 
-      slides.forEach(slide => slide.classList.remove('active'));
-      slides[slideIndex].classList.add('active');
-      if (slideNow) slideNow.textContent = slideIndex + 1;
-    }
+        slides.forEach((slide) => slide.classList.remove('active'));
+        slides[slideIndex].classList.add('active');
+        if (slideNow) slideNow.textContent = slideIndex + 1;
+      }
 
-    function changeSlide(n) {
-      showSlide(slideIndex + n);
-    }
+      function changeSlide(n) {
+        showSlide(slideIndex + n);
+      }
 
-    // Fungsi Pop-up Modal Foto
-    function openModal(imgSrc) {
-      const modal = document.getElementById('photoModal');
-      const modalImg = document.getElementById('modalImg');
-      modal.style.display = 'flex';
-      modalImg.src = imgSrc;
-    }
+      // Fungsi Pop-up Modal Foto
+      function openModal(imgSrc) {
+        const modal = document.getElementById('photoModal');
+        const modalImg = document.getElementById('modalImg');
+        modal.style.display = 'flex';
+        modalImg.src = imgSrc;
+      }
 
-    function closeModal() {
-      document.getElementById('photoModal').style.display = 'none';
-    }
-  </script>
-</body>
+      function closeModal() {
+        document.getElementById('photoModal').style.display = 'none';
+      }
+    </script>
+  </body>
 </html>

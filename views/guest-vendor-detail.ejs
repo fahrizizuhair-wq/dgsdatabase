@@ -7,7 +7,14 @@
 
 <div class="detail-topbar">
   <a href="/guest/vendor" class="btn-back">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
       <line x1="19" y1="12" x2="5" y2="12"></line>
       <polyline points="12 19 5 12 12 5"></polyline>
     </svg>
@@ -51,7 +58,14 @@
     </div>
 
     <p class="readonly-note">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
       </svg>
@@ -65,30 +79,34 @@
 
     <% if (fotoUrls && fotoUrls.length > 0) { %>
     <div class="photo-grid">
-        <% fotoUrls.forEach(function (src, index) { %>
-            <button type="button" class="photo-thumb" onclick="openLightbox('<%= index %>')" aria-label="Buka foto">
-                <img src="<%= src %>" alt="Foto vendor" onerror="this.closest('.photo-thumb').style.display='none'">
-            </button>
-        <% }) %>
+      <% fotoUrls.forEach(function (src, index) { %>
+      <button type="button" class="photo-thumb" onclick="openLightbox('<%= index %>')" aria-label="Buka foto">
+        <img src="<%= src %>" alt="Foto vendor" onerror="this.closest('.photo-thumb').style.display = 'none'" />
+      </button>
+      <% }) %>
     </div>
-<% } else { %>
+    <% } else { %>
     <div class="empty-state">Belum ada foto untuk vendor ini.</div>
-<% } %>
+    <% } %>
   </aside>
 </section>
 
 <div class="lightbox" id="lightbox" onclick="closeLightboxOnBackdrop(event)">
   <button type="button" class="lightbox-close" onclick="closeLightbox()" aria-label="Tutup">&times;</button>
-  <button type="button" class="lightbox-nav lightbox-prev" onclick="moveLightbox(-1)" aria-label="Foto sebelumnya">&#10094;</button>
-  <img id="lightboxImage" src="" alt="Foto vendor">
-  <button type="button" class="lightbox-nav lightbox-next" onclick="moveLightbox(1)" aria-label="Foto berikutnya">&#10095;</button>
+  <button type="button" class="lightbox-nav lightbox-prev" onclick="moveLightbox(-1)" aria-label="Foto sebelumnya"
+    >&#10094;</button
+  >
+  <img id="lightboxImage" src="" alt="Foto vendor" />
+  <button type="button" class="lightbox-nav lightbox-next" onclick="moveLightbox(1)" aria-label="Foto berikutnya"
+    >&#10095;</button
+  >
   <span class="lightbox-count" id="lightboxCount"></span>
 </div>
 
 <script>
   const rawImages = '<%- JSON.stringify(fotoUrls || []) %>';
-    const galleryImages = JSON.parse(rawImages.replace(/</g, '\\u003c'));
-    let lightboxIndex = 0;
+  const galleryImages = JSON.parse(rawImages.replace(/</g, '\\u003c'));
+  let lightboxIndex = 0;
 
   function renderLightbox() {
     const image = document.getElementById('lightboxImage');
@@ -96,7 +114,7 @@
     if (!image || galleryImages.length === 0) return;
 
     image.src = galleryImages[lightboxIndex];
-    if (count) count.textContent = (lightboxIndex + 1) + ' / ' + galleryImages.length;
+    if (count) count.textContent = lightboxIndex + 1 + ' / ' + galleryImages.length;
   }
 
   function openLightbox(index) {

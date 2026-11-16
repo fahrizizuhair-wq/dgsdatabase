@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
-const DataBahanKainSchema = new mongoose.Schema({
+const DataBahanKainSchema = new mongoose.Schema(
+  {
     idVendor: { type: String, required: true },
     vendorId: { type: String, required: true },
     namaVendor: { type: String, required: true },
@@ -11,7 +12,9 @@ const DataBahanKainSchema = new mongoose.Schema({
     deskripsi: { type: String, default: '-' },
     foto: [{ type: String }], // Menyimpan array path file foto
     status: { type: String, default: 'Aktif' },
-    diinputOleh: { type: String, default: '' }
-}, { timestamps: true });
+    diinputOleh: { type: String, default: '' },
+  },
+  { timestamps: true },
+);
 
 module.exports = mongoose.model('DataBahanKain', DataBahanKainSchema);

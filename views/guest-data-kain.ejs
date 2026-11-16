@@ -10,8 +10,17 @@
     <div class="card-header">
       <span class="card-title">Total Data Kain</span>
       <div class="icon-wrapper icon-blue">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+          ></path>
           <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
           <line x1="12" y1="22.08" x2="12" y2="12"></line>
         </svg>
@@ -31,7 +40,14 @@
     <div class="card-header">
       <span class="card-title">Data Aktif</span>
       <div class="icon-wrapper icon-green">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
           <polyline points="22 4 12 14.01 9 11.01"></polyline>
         </svg>
@@ -51,7 +67,14 @@
     <div class="card-header">
       <span class="card-title">Data Review</span>
       <div class="icon-wrapper icon-red">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <circle cx="12" cy="12" r="10"></circle>
           <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
@@ -71,8 +94,14 @@
 <section class="main-box">
   <div class="box-header">
     <div class="box-title">Daftar Data Kain</div>
-    <input type="search" class="search-input" placeholder="Cari data kain..." aria-label="Cari data kain"
-           data-table-search="#kainTable" data-empty="kainEmpty">
+    <input
+      type="search"
+      class="search-input"
+      placeholder="Cari data kain..."
+      aria-label="Cari data kain"
+      data-table-search="#kainTable"
+      data-empty="kainEmpty"
+    />
   </div>
 
   <div class="table-wrap">
@@ -88,25 +117,27 @@
       </thead>
       <tbody>
         <% if (!items || items.length === 0) { %>
-          <tr>
-            <td colspan="5">
-              <div class="empty-state">Belum ada data kain yang ditambahkan.</div>
-            </td>
-          </tr>
+        <tr>
+          <td colspan="5">
+            <div class="empty-state">Belum ada data kain yang ditambahkan.</div>
+          </td>
+        </tr>
         <% } else { %>
-          <% items.forEach(function (item) { %>
-            <tr data-row>
-              <td><span class="code-chip"><%= item.idVendor || '-' %></span></td>
-              <td class="strong"><%= item.namaVendor || '-' %></td>
-              <td><%= item.wilayah || '-' %></td>
-              <td><span class="tag"><%= item.kategoriSupply || 'Bahan Kain' %></span></td>
-              <td>
-                <span class="badge <%= item.status === 'Aktif' ? 'badge-aktif' : (item.status === 'Review' ? 'badge-review' : 'badge-nonaktif') %>">
-                  <%= item.status || 'Aktif' %>
-                </span>
-              </td>
-            </tr>
-          <% }); %>
+        <% items.forEach(function (item) { %>
+        <tr data-row>
+          <td><span class="code-chip"><%= item.idVendor || '-' %></span></td>
+          <td class="strong"><%= item.namaVendor || '-' %></td>
+          <td><%= item.wilayah || '-' %></td>
+          <td><span class="tag"><%= item.kategoriSupply || 'Bahan Kain' %></span></td>
+          <td>
+            <span
+              class="badge <%= item.status === 'Aktif' ? 'badge-aktif' : (item.status === 'Review' ? 'badge-review' : 'badge-nonaktif') %>"
+            >
+              <%= item.status || 'Aktif' %>
+            </span>
+          </td>
+        </tr>
+        <% }); %>
         <% } %>
       </tbody>
     </table>

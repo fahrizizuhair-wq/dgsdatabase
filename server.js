@@ -2,20 +2,22 @@
 //  DEPENDENCIES
 // ============================================================
 require('dotenv').config();
-const dns      = require('dns');
-try { dns.setServers(['8.8.8.8', '8.8.4.4']); } catch (e) {}
-const express  = require('express');
+const dns = require('dns');
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+} catch (e) {}
+const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const session  = require('express-session');
+const session = require('express-session');
 const { MongoStore } = require('connect-mongo');
-const multer   = require('multer');
-const path     = require('path');
-const fs       = require('fs');
-const crypto   = require('crypto');
-const bcrypt   = require('bcrypt');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 const puppeteer = require('puppeteer');
-const ExcelJS  = require('exceljs');
+const ExcelJS = require('exceljs');
 const { wrapText } = require('./utils/textWrap');
 const PORT = process.env.PORT || 3000;
 
@@ -35,17 +37,17 @@ let gridfsBucket = null;
 const getMimeType = (filename) => {
   const ext = path.extname(filename).toLowerCase();
   const mimeTypes = {
-    '.pdf':  'application/pdf',
-    '.jpg':  'image/jpeg',
+    '.pdf': 'application/pdf',
+    '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
     '.jfif': 'image/jpeg',
-    '.png':  'image/png',
+    '.png': 'image/png',
     '.webp': 'image/webp',
     '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    '.xls':  'application/vnd.ms-excel',
-    '.doc':  'application/msword',
+    '.xls': 'application/vnd.ms-excel',
+    '.doc': 'application/msword',
     '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    '.txt':  'text/plain'
+    '.txt': 'text/plain',
   };
   return mimeTypes[ext] || 'application/octet-stream';
 };
@@ -98,10 +100,11 @@ async function saveFileToGridFS(filename, filePath, mimetype) {
 
     return new Promise((resolve, reject) => {
       const uploadStream = gridfsBucket.openUploadStream(filename, {
-        contentType: mimetype || getMimeType(filename)
+        contentType: mimetype || getMimeType(filename),
       });
       const readStream = fs.createReadStream(filePath);
-      readStream.pipe(uploadStream)
+      readStream
+        .pipe(uploadStream)
         .on('finish', () => resolve(true))
         .on('error', (err) => reject(err));
     });
@@ -133,9 +136,9 @@ async function syncLocalUploadsToMongo() {
     const uploadDir = path.join(__dirname, 'public/uploads');
     if (!fs.existsSync(uploadDir)) return;
 
-    const filesOnDisk = fs.readdirSync(uploadDir).filter(f => !f.startsWith('.'));
+    const filesOnDisk = fs.readdirSync(uploadDir).filter((f) => !f.startsWith('.'));
     const existingInDb = await gridfsBucket.find({}, { projection: { filename: 1 } }).toArray();
-    const existingSet = new Set(existingInDb.map(d => d.filename));
+    const existingSet = new Set(existingInDb.map((d) => d.filename));
 
     let count = 0;
     for (const filename of filesOnDisk) {
@@ -162,29 +165,32 @@ async function syncLocalUploadsToMongo() {
 // ============================================================
 //  MODEL IMPORTS
 // ============================================================
-const Admin         = require('./models/Admin');
-const Vendor        = require('./models/Vendor');
-const HargaDasar    = require('./models/HargaDasar');
-const Laporan       = require('./models/Laporan');
-const StokMasuk     = require('./models/StokMasuk');
-const StokKeluar    = require('./models/StokKeluar');
-const StokOpname    = require('./models/StokOpname');
+const Admin = require('./models/Admin');
+const Vendor = require('./models/Vendor');
+const HargaDasar = require('./models/HargaDasar');
+const Laporan = require('./models/Laporan');
+const StokMasuk = require('./models/StokMasuk');
+const StokKeluar = require('./models/StokKeluar');
+const StokOpname = require('./models/StokOpname');
 const DataBahanKain = require('./models/DataBahanKain');
-const User          = require('./models/User');
-const SuratJalan    = require('./models/SuratJalan');
-const Lpj           = require('./models/Lpj');
+const User = require('./models/User');
+const SuratJalan = require('./models/SuratJalan');
+const Lpj = require('./models/Lpj');
 const MateriApproval = require('./models/MateriApproval');
 const { buildLpjWorkbook } = require('./utils/lpj-excel');
 
 // ============================================================
 //  DATABASE CONNECTION
 // ============================================================
-const mongoUri = process.env.MONGO_URI || 'mongodb+srv://fahrizizuhair_db_user:QTzFx9ErXbkYCf5O@cluster0.xp4d3tt.mongodb.net/kiosk_sblk_db?retryWrites=true&w=majority';
-mongoose.connect(mongoUri)
+const mongoUri =
+  process.env.MONGO_URI ||
+  'mongodb+srv://fahrizizuhair_db_user:QTzFx9ErXbkYCf5O@cluster0.xp4d3tt.mongodb.net/kiosk_sblk_db?retryWrites=true&w=majority';
+mongoose
+  .connect(mongoUri)
   .then(async () => {
     console.log('Berhasil terhubung ke database MongoDB Atlas');
     gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
-      bucketName: 'uploads'
+      bucketName: 'uploads',
     });
     console.log('GridFS Cloud Storage aktif: File & foto tersimpan permanen di cloud');
     setTimeout(syncLocalUploadsToMongo, 3000);
@@ -203,7 +209,7 @@ mongoose.connect(mongoUri)
           namaLengkap: 'Dian Giri Saputra',
           username: 'user',
           password: hashedUserPass,
-          role: 'user'
+          role: 'user',
         });
         console.log('Akun default User dibuat');
       }
@@ -211,8 +217,7 @@ mongoose.connect(mongoUri)
       console.error('Error inisialisasi akun bawaan:', seedErr);
     }
   })
-  .catch(err => console.error('Koneksi MongoDB gagal:', err));
-
+  .catch((err) => console.error('Koneksi MongoDB gagal:', err));
 
 // Rute Pengambilan File Upload (Disk Cache + MongoDB Atlas GridFS Fallback)
 app.get('/uploads/:filename', async (req, res) => {
@@ -322,23 +327,25 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, 'file-' + uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
-const upload         = multer({ storage });
+const upload = multer({ storage });
 const uploadMultiple = upload.array('foto'); // DIPERBAIKI: Koma menggantung dihapus
 
 // Session
-app.use(session({
+app.use(
+  session({
     secret: 'rahasia-negara-perusahaan-dgs',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ 
-        mongoUrl: mongoUri
+    store: MongoStore.create({
+      mongoUrl: mongoUri,
     }),
-    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 24 jam
-}));
+    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 }, // 24 jam
+  }),
+);
 
 // ============================================================
 //  MIDDLEWARE AUTH
@@ -346,8 +353,8 @@ app.use(session({
 const isAdminAuthenticated = (req, res, next) => {
   res.set({
     'Cache-Control': 'no-store, no-cache, must-revalidate, private',
-    'Pragma':        'no-cache',
-    'Expires':       '0'
+    Pragma: 'no-cache',
+    Expires: '0',
   });
   if (req.session && req.session.isAdmin) {
     return next();
@@ -358,8 +365,8 @@ const isAdminAuthenticated = (req, res, next) => {
 const isUserAuthenticated = (req, res, next) => {
   res.set({
     'Cache-Control': 'no-store, no-cache, must-revalidate, private',
-    'Pragma':        'no-cache',
-    'Expires':       '0'
+    Pragma: 'no-cache',
+    Expires: '0',
   });
   if (req.session && (req.session.isUser || req.session.isAdmin)) {
     return next();
@@ -389,8 +396,8 @@ app.get('/', async (req, res) => {
   try {
     res.set({
       'Cache-Control': 'no-store, no-cache, must-revalidate, private',
-      'Pragma':        'no-cache',
-      'Expires':       '0'
+      Pragma: 'no-cache',
+      Expires: '0',
     });
     res.render('login');
   } catch (err) {
@@ -413,7 +420,7 @@ app.post('/login-admin', async (req, res) => {
     // Fallback seed admin jika belum ada
     if (!admin) {
       const adminCount = await Admin.countDocuments();
-      if (adminCount === 0 && (trimmedUsername.toLowerCase() === 'admin')) {
+      if (adminCount === 0 && trimmedUsername.toLowerCase() === 'admin') {
         const hashedPassword = await bcrypt.hash('admin123', 10);
         admin = await Admin.create({ username: trimmedUsername, password: hashedPassword });
       }
@@ -473,9 +480,14 @@ app.post('/login-user', async (req, res) => {
     // Fallback seed user jika belum ada
     if (!user) {
       const userCount = await User.countDocuments();
-      if (userCount === 0 && (trimmedUsername.toLowerCase() === 'user')) {
+      if (userCount === 0 && trimmedUsername.toLowerCase() === 'user') {
         const hashedPassword = await bcrypt.hash('user123', 10);
-        user = await User.create({ namaLengkap: 'Dian Giri Saputra', username: trimmedUsername, password: hashedPassword, role: 'user' });
+        user = await User.create({
+          namaLengkap: 'Dian Giri Saputra',
+          username: trimmedUsername,
+          password: hashedPassword,
+          role: 'user',
+        });
       }
     }
 
@@ -503,7 +515,7 @@ app.post('/login-user', async (req, res) => {
         id: user._id,
         username: user.username,
         namaLengkap: user.namaLengkap || user.username,
-        role: 'user'
+        role: 'user',
       };
       return req.session.save((err) => {
         if (err) console.error('Gagal menyimpan sesi user:', err);
@@ -577,7 +589,9 @@ app.post('/register-admin', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Username dan password admin wajib diisi!' });
     }
     if (!kodeRahasia || kodeRahasia.trim() !== KODE_VERIFIKASI_PENDAFTARAN) {
-      return res.status(400).json({ success: false, message: 'Kode verifikasi pendaftaran salah! Silakan periksa kembali.' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Kode verifikasi pendaftaran salah! Silakan periksa kembali.' });
     }
     const trimmedUsername = username.trim();
     if (password !== confirmPassword) {
@@ -589,7 +603,9 @@ app.post('/register-admin', async (req, res) => {
 
     const existingAdmin = await Admin.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
     if (existingAdmin) {
-      return res.status(400).json({ success: false, message: 'Username admin sudah terdaftar, silakan gunakan username lain!' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Username admin sudah terdaftar, silakan gunakan username lain!' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -601,7 +617,7 @@ app.post('/register-admin', async (req, res) => {
       message: 'Akun Admin berhasil dibuat! Silakan masuk dengan kredensial baru Anda.',
       username: admin.username,
       role: 'admin',
-      recoveryCode
+      recoveryCode,
     });
   } catch (err) {
     console.error('Error saat register admin:', err);
@@ -609,8 +625,7 @@ app.post('/register-admin', async (req, res) => {
   }
 });
 
-
-  // 4. REGISTER USER (AJAX / JSON) DENGAN KODE VERIFIKASI
+// 4. REGISTER USER (AJAX / JSON) DENGAN KODE VERIFIKASI
 app.post('/register-user', async (req, res) => {
   try {
     const { namaLengkap, username, password, confirmPassword, kodeRahasia } = req.body;
@@ -621,7 +636,9 @@ app.post('/register-user', async (req, res) => {
 
     // Cek apakah kode verifikasi diisi dan sesuai
     if (!kodeRahasia || kodeRahasia.trim() !== KODE_VERIFIKASI_PENDAFTARAN) {
-      return res.status(400).json({ success: false, message: 'Kode verifikasi pendaftaran salah! Silakan periksa kembali.' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Kode verifikasi pendaftaran salah! Silakan periksa kembali.' });
     }
 
     const trimmedUsername = username.trim();
@@ -634,15 +651,17 @@ app.post('/register-user', async (req, res) => {
 
     const existingUser = await User.findOne({ username: new RegExp('^' + trimmedUsername + '$', 'i') });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'Username user sudah terdaftar, silakan gunakan username lain!' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Username user sudah terdaftar, silakan gunakan username lain!' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
-      namaLengkap: (namaLengkap && namaLengkap.trim()) ? namaLengkap.trim() : trimmedUsername,
+      namaLengkap: namaLengkap && namaLengkap.trim() ? namaLengkap.trim() : trimmedUsername,
       username: trimmedUsername,
       password: hashedPassword,
-      role: 'user'
+      role: 'user',
     });
     const recoveryCode = await simpanKodePemulihan(user);
 
@@ -651,7 +670,7 @@ app.post('/register-user', async (req, res) => {
       message: 'Akun User berhasil didaftarkan! Silakan masuk dengan akun baru Anda.',
       username: user.username,
       role: 'user',
-      recoveryCode
+      recoveryCode,
     });
   } catch (err) {
     console.error('Error saat register user:', err);
@@ -683,7 +702,7 @@ app.post('/forgot-password', async (req, res) => {
         recoveryCode: kodeBaru,
         message: 'Akun ini belum memiliki kode pemulihan. Kode baru telah dibuat, mohon simpan.',
         username: akun.username,
-        role: roleAkun
+        role: roleAkun,
       });
     }
 
@@ -697,7 +716,7 @@ app.post('/forgot-password', async (req, res) => {
       success: true,
       message: 'Akun ditemukan dan kode pemulihan valid.',
       username: akun.username,
-      role: roleAkun
+      role: roleAkun,
     });
   } catch (err) {
     console.error('Error pada /forgot-password:', err);
@@ -812,20 +831,18 @@ app.get('/logout', (req, res) => {
 // ============================================================
 app.get('/dashboard', isUserAuthenticated, async (req, res) => {
   try {
-    const totalVendor     = await Vendor.countDocuments();
+    const totalVendor = await Vendor.countDocuments();
     const totalHargaDasar = await HargaDasar.countDocuments();
-    const stokMasukList   = await StokMasuk.find();
-    const totalStokMasuk  = stokMasukList.reduce(
-      (acc, item) => acc + (Number(item.jumlah) || Number(item.qty) || 0), 0
-    );
-    
-    res.render('dashboard', { 
-      totalVendor, 
-      totalHargaDasar, 
-      totalStokMasuk, 
-      stokMasukList, 
+    const stokMasukList = await StokMasuk.find();
+    const totalStokMasuk = stokMasukList.reduce((acc, item) => acc + (Number(item.jumlah) || Number(item.qty) || 0), 0);
+
+    res.render('dashboard', {
+      totalVendor,
+      totalHargaDasar,
+      totalStokMasuk,
+      stokMasukList,
       currentUser: req.session.user,
-      user: req.session.user // <-- Tambahin baris ini supaya EJS yang pakai 'user' langsung terbaca tanpa ubah kode ejs!
+      user: req.session.user, // <-- Tambahin baris ini supaya EJS yang pakai 'user' langsung terbaca tanpa ubah kode ejs!
     });
   } catch (err) {
     console.error(err);
@@ -835,26 +852,24 @@ app.get('/dashboard', isUserAuthenticated, async (req, res) => {
 
 app.get('/dashboard-admin', isAuthenticated, async (req, res) => {
   try {
-    const totalVendor     = await Vendor.countDocuments();
+    const totalVendor = await Vendor.countDocuments();
     const totalHargaDasar = await HargaDasar.countDocuments();
-    const stokMasukList   = await StokMasuk.find();
-    const totalStokMasuk  = stokMasukList.reduce(
-      (acc, item) => acc + (Number(item.jumlah) || Number(item.qty) || 0), 0
-    );
+    const stokMasukList = await StokMasuk.find();
+    const totalStokMasuk = stokMasukList.reduce((acc, item) => acc + (Number(item.jumlah) || Number(item.qty) || 0), 0);
 
     // Statistik per bulan (Jan–Jun) untuk grafik
     let statistikPerBulan = [0, 0, 0, 0, 0, 0];
-    stokMasukList.forEach(item => {
+    stokMasukList.forEach((item) => {
       if (item.tanggal) {
         const bulan = new Date(item.tanggal).getMonth(); // 0 = Jan
         if (bulan >= 0 && bulan < 6) {
-          statistikPerBulan[bulan] += (Number(item.jumlah) || Number(item.qty) || 0);
+          statistikPerBulan[bulan] += Number(item.jumlah) || Number(item.qty) || 0;
         }
       }
     });
 
     const totalVolumeSemester = statistikPerBulan.reduce((a, b) => a + b, 0);
-    const rataRataBulan       = Math.round(totalVolumeSemester / 6);
+    const rataRataBulan = Math.round(totalVolumeSemester / 6);
 
     res.render('dashboard-admin', {
       totalVendor,
@@ -864,7 +879,7 @@ app.get('/dashboard-admin', isAuthenticated, async (req, res) => {
       totalVolumeSemester,
       rataRataBulan,
       currentUser: req.session.user,
-      user: req.session.user // <-- Tambahkan baris ini agar profil/sapaan admin di sidebar ikut tampil normal
+      user: req.session.user, // <-- Tambahkan baris ini agar profil/sapaan admin di sidebar ikut tampil normal
     });
   } catch (err) {
     console.error(err);
@@ -877,41 +892,52 @@ app.get('/dashboard-admin', isAuthenticated, async (req, res) => {
 // ============================================================
 app.get('/admin', isAuthenticated, async (req, res) => {
   try {
-    const perPage  = 20;
-    const page     = parseInt(req.query.page) || 1;
-    const search   = req.query.search   || '';
+    const perPage = 20;
+    const page = parseInt(req.query.page) || 1;
+    const search = req.query.search || '';
     const kategori = req.query.kategori || '';
-    const status   = req.query.status   || '';
-    const wilayah  = req.query.wilayah  || '';
+    const status = req.query.status || '';
+    const wilayah = req.query.wilayah || '';
 
     let query = {};
     if (search) {
       query.$or = [
-        { idVendor:   { $regex: search, $options: 'i' } },
+        { idVendor: { $regex: search, $options: 'i' } },
         { namaVendor: { $regex: search, $options: 'i' } },
-        { kategori:   { $regex: search, $options: 'i' } },
-        { wilayah:    { $regex: search, $options: 'i' } },
-        { kontak:     { $regex: search, $options: 'i' } }
+        { kategori: { $regex: search, $options: 'i' } },
+        { wilayah: { $regex: search, $options: 'i' } },
+        { kontak: { $regex: search, $options: 'i' } },
       ];
     }
     if (kategori) query.kategori = kategori;
-    if (status)   query.status   = status;
-    if (wilayah)  query.wilayah  = wilayah;
+    if (status) query.status = status;
+    if (wilayah) query.wilayah = wilayah;
 
-    const vendors    = await Vendor.find(query).sort({ idVendor: 1 }).skip((page - 1) * perPage).limit(perPage);
-    const totalData  = await Vendor.countDocuments(query);
+    const vendors = await Vendor.find(query)
+      .sort({ idVendor: 1 })
+      .skip((page - 1) * perPage)
+      .limit(perPage);
+    const totalData = await Vendor.countDocuments(query);
     const totalPages = Math.ceil(totalData / perPage);
 
-    const totalVendorAktif      = await Vendor.countDocuments({ status: 'Aktif' });
+    const totalVendorAktif = await Vendor.countDocuments({ status: 'Aktif' });
     const totalVendorTidakAktif = await Vendor.countDocuments({ status: { $ne: 'Aktif' } });
-    const kategoriList          = await Vendor.distinct('kategori');
-    const totalKategori         = kategoriList.length;
-    const nextIdVendor          = 'VND-' + String(await Vendor.countDocuments() + 1).padStart(3, '0');
+    const kategoriList = await Vendor.distinct('kategori');
+    const totalKategori = kategoriList.length;
+    const nextIdVendor = 'VND-' + String((await Vendor.countDocuments()) + 1).padStart(3, '0');
 
     res.render('admin', {
-      vendors, currentPage: page, totalPages,
-      totalVendorAktif, totalVendorTidakAktif, totalKategori,
-      nextIdVendor, search, kategori, status, wilayah
+      vendors,
+      currentPage: page,
+      totalPages,
+      totalVendorAktif,
+      totalVendorTidakAktif,
+      totalKategori,
+      nextIdVendor,
+      search,
+      kategori,
+      status,
+      wilayah,
     });
   } catch (err) {
     console.error('Gagal memuat data admin:', err);
@@ -923,16 +949,19 @@ app.post('/admin/vendor/add', upload.array('foto', 10), async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
     const { idVendor, namaVendor, wilayah, kategori, kontak, rating, status, deskripsi } = req.body;
-    const fotoFiles = req.files ? req.files.map(f => f.filename) : [];
+    const fotoFiles = req.files ? req.files.map((f) => f.filename) : [];
 
     const newVendor = new Vendor({
-      idVendor:   idVendor   ? idVendor.toUpperCase()   : '',
+      idVendor: idVendor ? idVendor.toUpperCase() : '',
       namaVendor: namaVendor || '',
-      wilayah:    wilayah    || '',
-      kategori, kontak, rating, status,
-      deskripsi:  deskripsi  || '',
+      wilayah: wilayah || '',
+      kategori,
+      kontak,
+      rating,
+      status,
+      deskripsi: deskripsi || '',
       diinputOleh: getNamaPenginput(req),
-      foto:       fotoFiles
+      foto: fotoFiles,
     });
 
     await newVendor.save();
@@ -959,14 +988,17 @@ app.post('/admin/vendor/edit/:id', upload.array('foto', 10), async (req, res) =>
     const { idVendor, namaVendor, wilayah, kategori, kontak, rating, status, deskripsi } = req.body;
 
     const updateData = {
-      idVendor:   idVendor   ? idVendor.toUpperCase()            : '',
+      idVendor: idVendor ? idVendor.toUpperCase() : '',
       namaVendor: namaVendor || '',
-      wilayah:    wilayah    || '',
-      kategori, kontak, rating, status,
-      deskripsi:  deskripsi  ? deskripsi.toUpperCase()           : ''
+      wilayah: wilayah || '',
+      kategori,
+      kontak,
+      rating,
+      status,
+      deskripsi: deskripsi ? deskripsi.toUpperCase() : '',
     };
     if (req.files && req.files.length > 0) {
-      updateData.foto = req.files.map(f => f.filename);
+      updateData.foto = req.files.map((f) => f.filename);
     }
 
     await Vendor.findByIdAndUpdate(req.params.id, updateData);
@@ -992,7 +1024,7 @@ app.post('/admin/vendor/delete/:id', async (req, res) => {
 // ============================================================
 app.get('/harga-dasar', isAuthenticated, async (req, res) => {
   try {
-    const items     = await HargaDasar.find().sort({ tanggal: -1, _id: -1 });
+    const items = await HargaDasar.find().sort({ tanggal: -1, _id: -1 });
     const totalItem = await HargaDasar.countDocuments();
     res.render('harga-dasar', { items, totalItem });
   } catch (err) {
@@ -1023,20 +1055,25 @@ app.post('/harga-dasar/add', uploadMultiple, async (req, res) => {
 
     const existing = await HargaDasar.findOne({ idBarang });
     if (existing) {
-      return res.status(400).send(`<script>alert('Gagal! ID Barang "${idBarang}" sudah terdaftar.'); window.history.back();</script>`);
+      return res
+        .status(400)
+        .send(`<script>alert('Gagal! ID Barang "${idBarang}" sudah terdaftar.'); window.history.back();</script>`);
     }
 
-    const fotoBarang = req.files ? req.files.map(f => f.filename) : [];
+    const fotoBarang = req.files ? req.files.map((f) => f.filename) : [];
     const newItem = new HargaDasar({
-      idBarang, namaBarang, namaMerk, spesifikasi,
-      qty:     Number(qty)   || 1,
-      harga:   Number(harga) || 0,
-      final:   Number(final) || 0,
+      idBarang,
+      namaBarang,
+      namaMerk,
+      spesifikasi,
+      qty: Number(qty) || 1,
+      harga: Number(harga) || 0,
+      final: Number(final) || 0,
       keterangan,
-      status:  status  || 'Pending',
+      status: status || 'Pending',
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
       diinputOleh: getNamaPenginput(req),
-      gambar:  fotoBarang
+      gambar: fotoBarang,
     });
 
     await newItem.save();
@@ -1053,16 +1090,19 @@ app.post('/harga-dasar/edit/:id', uploadMultiple, async (req, res) => {
     const { idBarang, namaBarang, namaMerk, spesifikasi, qty, harga, final, keterangan, status, tanggal } = req.body;
 
     const updateData = {
-      idBarang, namaBarang, namaMerk, spesifikasi,
-      qty:     Number(qty)   || 1,
-      harga:   Number(harga) || 0,
-      final:   Number(final) || 0,
+      idBarang,
+      namaBarang,
+      namaMerk,
+      spesifikasi,
+      qty: Number(qty) || 1,
+      harga: Number(harga) || 0,
+      final: Number(final) || 0,
       keterangan,
-      status:  status  || 'Pending',
-      tanggal: tanggal ? new Date(tanggal) : Date.now()
+      status: status || 'Pending',
+      tanggal: tanggal ? new Date(tanggal) : Date.now(),
     };
     if (req.files && req.files.length > 0) {
-      updateData.gambar = req.files.map(f => f.filename);
+      updateData.gambar = req.files.map((f) => f.filename);
     }
 
     await HargaDasar.findByIdAndUpdate(req.params.id, updateData);
@@ -1089,9 +1129,9 @@ app.post('/harga-dasar/delete/:id', async (req, res) => {
 app.get('/stok-masuk', isAuthenticated, async (req, res) => {
   try {
     // Urutkan berdasarkan data yang paling baru diinput ke database
-    const listStokMasuk  = await StokMasuk.find().sort({ createdAt: -1 });
+    const listStokMasuk = await StokMasuk.find().sort({ createdAt: -1 });
     const totalTransaksi = listStokMasuk.length;
-    const totalQtyMasuk  = listStokMasuk.reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
+    const totalQtyMasuk = listStokMasuk.reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
     res.render('stok-masuk', { listStokMasuk, totalTransaksi, totalQtyMasuk });
   } catch (err) {
     console.error(err);
@@ -1099,34 +1139,40 @@ app.get('/stok-masuk', isAuthenticated, async (req, res) => {
   }
 });
 
-  app.post('/stok-masuk/add', upload.array('foto', 10), async (req, res) => {
-    try {
-      await syncReqFilesToGridFS(req);
-      const { idTransaksi, namaBarang, namaMerk, jumlah, supplier, tanggal, status, keterangan } = req.body;
+app.post('/stok-masuk/add', upload.array('foto', 10), async (req, res) => {
+  try {
+    await syncReqFilesToGridFS(req);
+    const { idTransaksi, namaBarang, namaMerk, jumlah, supplier, tanggal, status, keterangan } = req.body;
 
-      const existing = await StokMasuk.findOne({ idTransaksi });
-      if (existing) {
-        return res.status(400).send(`<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`);
-      }
-
-      const newItem = new StokMasuk({
-        idTransaksi, namaBarang, namaMerk,
-        jumlah:  Number(jumlah) || 0,
-        supplier,
-        tanggal: tanggal ? new Date(tanggal) : Date.now(),
-        status:  status  || 'Selesai',
-        keterangan,
-        foto: req.files ? req.files.map(f => f.filename) : [],
-        diinputOleh: getNamaPenginput(req)
-      });
-
-      await newItem.save();
-      res.redirect('/stok-masuk');
-    } catch (err) {
-      console.error(err);
-      res.status(500).send('Gagal menambah data stok masuk.');
+    const existing = await StokMasuk.findOne({ idTransaksi });
+    if (existing) {
+      return res
+        .status(400)
+        .send(
+          `<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`,
+        );
     }
-  });
+
+    const newItem = new StokMasuk({
+      idTransaksi,
+      namaBarang,
+      namaMerk,
+      jumlah: Number(jumlah) || 0,
+      supplier,
+      tanggal: tanggal ? new Date(tanggal) : Date.now(),
+      status: status || 'Selesai',
+      keterangan,
+      foto: req.files ? req.files.map((f) => f.filename) : [],
+      diinputOleh: getNamaPenginput(req),
+    });
+
+    await newItem.save();
+    res.redirect('/stok-masuk');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal menambah data stok masuk.');
+  }
+});
 
 app.get('/stok-masuk/detail/:id', isUserAuthenticated, async (req, res) => {
   try {
@@ -1153,19 +1199,21 @@ app.post('/stok-masuk/edit/:id', upload.array('foto', 10), async (req, res) => {
     }
 
     const hapusFoto = [].concat(req.body.hapusFoto || []);
-    let foto = (existing.foto || []).filter(f => !hapusFoto.includes(f));
+    let foto = (existing.foto || []).filter((f) => !hapusFoto.includes(f));
     if (req.files && req.files.length > 0) {
-      foto = foto.concat(req.files.map(f => f.filename));
+      foto = foto.concat(req.files.map((f) => f.filename));
     }
 
     await StokMasuk.findByIdAndUpdate(req.params.id, {
-      idTransaksi, namaBarang, namaMerk,
-      jumlah:  Number(jumlah) || 0,
+      idTransaksi,
+      namaBarang,
+      namaMerk,
+      jumlah: Number(jumlah) || 0,
       supplier,
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
-      status:  status  || 'Selesai',
+      status: status || 'Selesai',
       keterangan,
-      foto
+      foto,
     });
 
     res.redirect('/stok-masuk');
@@ -1207,18 +1255,24 @@ app.post('/stok-keluar/add', upload.array('foto', 10), async (req, res) => {
 
     const existing = await StokKeluar.findOne({ idTransaksi });
     if (existing) {
-      return res.status(400).send(`<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`);
+      return res
+        .status(400)
+        .send(
+          `<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`,
+        );
     }
 
     const newItem = new StokKeluar({
-      idTransaksi, namaBarang, namaMerk,
-      jumlah:  Number(jumlah) || 0,
+      idTransaksi,
+      namaBarang,
+      namaMerk,
+      jumlah: Number(jumlah) || 0,
       tujuan,
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
-      status:  status  || 'Selesai',
+      status: status || 'Selesai',
       keterangan,
-      foto: req.files ? req.files.map(f => f.filename) : [],
-      diinputOleh: getNamaPenginput(req)
+      foto: req.files ? req.files.map((f) => f.filename) : [],
+      diinputOleh: getNamaPenginput(req),
     });
 
     await newItem.save();
@@ -1254,19 +1308,21 @@ app.post('/stok-keluar/edit/:id', upload.array('foto', 10), async (req, res) => 
     }
 
     const hapusFoto = [].concat(req.body.hapusFoto || []);
-    let foto = (existing.foto || []).filter(f => !hapusFoto.includes(f));
+    let foto = (existing.foto || []).filter((f) => !hapusFoto.includes(f));
     if (req.files && req.files.length > 0) {
-      foto = foto.concat(req.files.map(f => f.filename));
+      foto = foto.concat(req.files.map((f) => f.filename));
     }
 
     await StokKeluar.findByIdAndUpdate(req.params.id, {
-      idTransaksi, namaBarang, namaMerk,
-      jumlah:  Number(jumlah) || 0,
+      idTransaksi,
+      namaBarang,
+      namaMerk,
+      jumlah: Number(jumlah) || 0,
       tujuan,
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
-      status:  status  || 'Selesai',
+      status: status || 'Selesai',
       keterangan,
-      foto
+      foto,
     });
 
     res.redirect('/stok-keluar');
@@ -1292,7 +1348,7 @@ app.post('/stok-keluar/delete/:id', async (req, res) => {
 app.get('/stok-opname', isAuthenticated, async (req, res) => {
   try {
     const listStokOpname = await StokOpname.find().sort({ namaBarang: 1 });
-    const totalOpname    = listStokOpname.length;
+    const totalOpname = listStokOpname.length;
     res.render('stok-opname', { listStokOpname, totalOpname });
   } catch (err) {
     console.error(err);
@@ -1305,11 +1361,12 @@ app.post('/stok-opname/add', async (req, res) => {
     const { namaBarang, kategori, stokAwal, stokMasuk, stokKeluar } = req.body;
 
     const newItem = new StokOpname({
-      namaBarang, kategori,
-      stokAwal:   Number(stokAwal)   || 0,
-      stokMasuk:  Number(stokMasuk)  || 0,
+      namaBarang,
+      kategori,
+      stokAwal: Number(stokAwal) || 0,
+      stokMasuk: Number(stokMasuk) || 0,
       stokKeluar: Number(stokKeluar) || 0,
-      diinputOleh: getNamaPenginput(req)
+      diinputOleh: getNamaPenginput(req),
     });
 
     await newItem.save();
@@ -1325,10 +1382,11 @@ app.post('/stok-opname/edit/:id', async (req, res) => {
     const { namaBarang, kategori, stokAwal, stokMasuk, stokKeluar } = req.body;
 
     await StokOpname.findByIdAndUpdate(req.params.id, {
-      namaBarang, kategori,
-      stokAwal:   Number(stokAwal)   || 0,
-      stokMasuk:  Number(stokMasuk)  || 0,
-      stokKeluar: Number(stokKeluar) || 0
+      namaBarang,
+      kategori,
+      stokAwal: Number(stokAwal) || 0,
+      stokMasuk: Number(stokMasuk) || 0,
+      stokKeluar: Number(stokKeluar) || 0,
     });
 
     res.redirect('/stok-opname');
@@ -1353,9 +1411,8 @@ app.post('/stok-opname/delete/:id', async (req, res) => {
 // ============================================================
 app.get('/laporan', async (req, res) => {
   try {
-
     const selectedJenis = req.query.jenis || '';
-    
+
     let filter = {};
     if (selectedJenis !== '') {
       filter.jenis = selectedJenis;
@@ -1364,16 +1421,16 @@ app.get('/laporan', async (req, res) => {
     const rawListLaporan = await Laporan.find(filter).sort({ _id: -1 }).lean();
     const totalLaporan = await Laporan.countDocuments(filter);
 
-    const listLaporan = rawListLaporan.map(item => ({
+    const listLaporan = rawListLaporan.map((item) => ({
       ...item,
-      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
+      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : '',
     }));
 
-    res.render('laporan', { 
-      listLaporan, 
-      totalLaporan, 
+    res.render('laporan', {
+      listLaporan,
+      totalLaporan,
       role: req.session.role || 'admin',
-      selectedJenis 
+      selectedJenis,
     });
   } catch (err) {
     console.error(err);
@@ -1389,13 +1446,13 @@ app.post('/laporan/add', upload.single('fileLaporan'), async (req, res) => {
     const filePath = req.file ? '/uploads/' + req.file.filename : '';
 
     const newLaporan = new Laporan({
-      namaDokumen, 
-      keterangan, 
-      jenis, 
+      namaDokumen,
+      keterangan,
+      jenis,
       tujuan,
       filePath,
       tanggal: new Date(),
-      diinputOleh: getNamaPenginput(req)
+      diinputOleh: getNamaPenginput(req),
     });
 
     await newLaporan.save();
@@ -1428,7 +1485,7 @@ app.post('/laporan/edit/:id', upload.single('fileLaporan'), async (req, res) => 
       namaDokumen,
       jenis,
       tujuan,
-      keterangan
+      keterangan,
     };
 
     // HANYA update data file jika user benar-benar memilih file baru
@@ -1449,126 +1506,156 @@ app.post('/laporan/edit/:id', upload.single('fileLaporan'), async (req, res) => 
 
 // 1. RUTE SURAT JALAN VERSI ADMIN
 app.get('/surat-jalan-admin', async (req, res) => {
-    try {
-        const daftarSurat = await SuratJalan.find().sort({ createdAt: -1 });
-        res.render('surat-jalan-admin', {
-            user: req.session.user || { username: 'Admin' },
-            suratJalans: daftarSurat,
-            daftarSurat: daftarSurat
-        });
-    } catch (err) {
-        console.error("Error fetching admin surat jalan:", err);
-        res.status(500).send("Terjadi kesalahan pada server");
-    }
+  try {
+    const daftarSurat = await SuratJalan.find().sort({ createdAt: -1 });
+    res.render('surat-jalan-admin', {
+      user: req.session.user || { username: 'Admin' },
+      suratJalans: daftarSurat,
+      daftarSurat: daftarSurat,
+    });
+  } catch (err) {
+    console.error('Error fetching admin surat jalan:', err);
+    res.status(500).send('Terjadi kesalahan pada server');
+  }
 });
 
 app.post('/surat-jalan-admin/add', async (req, res) => {
-    try {
-        const { jenisSurat, noSuratJalan, tanggal, namaPerusahaan, kepadaYth, namaPenerima, namaPenyerah, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items, kodeBarangList } = req.body;
-        
-        const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username)) ? 
-                         (req.session.user.namaLengkap || req.session.user.username) : 'Administrator';
+  try {
+    const {
+      jenisSurat,
+      noSuratJalan,
+      tanggal,
+      namaPerusahaan,
+      kepadaYth,
+      namaPenerima,
+      namaPenyerah,
+      noTelepon,
+      alamat,
+      perihal,
+      pekerjaan,
+      jenisKirim,
+      items,
+      kodeBarangList,
+    } = req.body;
 
-        const daftarItem = (Array.isArray(items) ? items : [items])
-            .filter(item => item && (item.diskripsi || item.jumlah))
-            .map((item, index) => ({
-                no: index + 1,
-                diskripsi: item.diskripsi || '',
-                jumlah: item.jumlah === undefined || item.jumlah === null ? '' : String(item.jumlah).trim(),
-                satuan: item.satuan || '',
-                keterangan: item.keterangan || ''
-            }));
+    const namaUser =
+      req.session.user && (req.session.user.namaLengkap || req.session.user.username)
+        ? req.session.user.namaLengkap || req.session.user.username
+        : 'Administrator';
 
-        const daftarKodeBarang = (Array.isArray(kodeBarangList) ? kodeBarangList : [kodeBarangList])
-            .filter(kb => kb && (kb.namaBarang || kb.kodeBarang))
-            .map((kb, index) => ({
-                no: index + 1,
-                namaBarang: kb.namaBarang || '',
-                kodeBarang: kb.kodeBarang || ''
-            }));
+    const daftarItem = (Array.isArray(items) ? items : [items])
+      .filter((item) => item && (item.diskripsi || item.jumlah))
+      .map((item, index) => ({
+        no: index + 1,
+        diskripsi: item.diskripsi || '',
+        jumlah: item.jumlah === undefined || item.jumlah === null ? '' : String(item.jumlah).trim(),
+        satuan: item.satuan || '',
+        keterangan: item.keterangan || '',
+      }));
 
-        const suratBaru = new SuratJalan({
-            jenisSurat: jenisSurat || 'Surat Jalan',
-            noSuratJalan,
-            tanggal: tanggal || Date.now(),
-            namaPerusahaan,
-            kepadaYth,
-            namaPenerima: namaPenerima || '',
-            namaPenyerah: namaPenyerah || '',
-            noTelepon,
-            alamat,
-            perihal,
-            pekerjaan,
-            jenisKirim: jenisKirim || 'Barang',
-            items: daftarItem,
-            kodeBarangList: daftarKodeBarang,
-            diinputOleh: namaUser
-        });
+    const daftarKodeBarang = (Array.isArray(kodeBarangList) ? kodeBarangList : [kodeBarangList])
+      .filter((kb) => kb && (kb.namaBarang || kb.kodeBarang))
+      .map((kb, index) => ({
+        no: index + 1,
+        namaBarang: kb.namaBarang || '',
+        kodeBarang: kb.kodeBarang || '',
+      }));
 
-        await suratBaru.save();
-        res.redirect('/surat-jalan-admin');
-    } catch (err) {
-        console.error("Error menyimpan surat jalan admin:", err);
-        res.status(500).send("Gagal menyimpan Surat Jalan: " + err.message);
-    }
+    const suratBaru = new SuratJalan({
+      jenisSurat: jenisSurat || 'Surat Jalan',
+      noSuratJalan,
+      tanggal: tanggal || Date.now(),
+      namaPerusahaan,
+      kepadaYth,
+      namaPenerima: namaPenerima || '',
+      namaPenyerah: namaPenyerah || '',
+      noTelepon,
+      alamat,
+      perihal,
+      pekerjaan,
+      jenisKirim: jenisKirim || 'Barang',
+      items: daftarItem,
+      kodeBarangList: daftarKodeBarang,
+      diinputOleh: namaUser,
+    });
+
+    await suratBaru.save();
+    res.redirect('/surat-jalan-admin');
+  } catch (err) {
+    console.error('Error menyimpan surat jalan admin:', err);
+    res.status(500).send('Gagal menyimpan Surat Jalan: ' + err.message);
+  }
 });
-
 
 app.post('/surat-jalan-admin/edit/:id', async (req, res) => {
-    try {
-        const { jenisSurat, noSuratJalan, tanggal, namaPerusahaan, kepadaYth, namaPenerima, namaPenyerah, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items, kodeBarangList } = req.body;
+  try {
+    const {
+      jenisSurat,
+      noSuratJalan,
+      tanggal,
+      namaPerusahaan,
+      kepadaYth,
+      namaPenerima,
+      namaPenyerah,
+      noTelepon,
+      alamat,
+      perihal,
+      pekerjaan,
+      jenisKirim,
+      items,
+      kodeBarangList,
+    } = req.body;
 
-        const daftarItem = (Array.isArray(items) ? items : [items])
-            .filter(item => item && (item.diskripsi || item.jumlah))
-            .map((item, index) => ({
-                no: index + 1,
-                diskripsi: item.diskripsi || '',
-                jumlah: item.jumlah === undefined || item.jumlah === null ? '' : String(item.jumlah).trim(),
-                satuan: item.satuan || '',
-                keterangan: item.keterangan || ''
-            }));
+    const daftarItem = (Array.isArray(items) ? items : [items])
+      .filter((item) => item && (item.diskripsi || item.jumlah))
+      .map((item, index) => ({
+        no: index + 1,
+        diskripsi: item.diskripsi || '',
+        jumlah: item.jumlah === undefined || item.jumlah === null ? '' : String(item.jumlah).trim(),
+        satuan: item.satuan || '',
+        keterangan: item.keterangan || '',
+      }));
 
-        const daftarKodeBarang = (Array.isArray(kodeBarangList) ? kodeBarangList : [kodeBarangList])
-            .filter(kb => kb && (kb.namaBarang || kb.kodeBarang))
-            .map((kb, index) => ({
-                no: index + 1,
-                namaBarang: kb.namaBarang || '',
-                kodeBarang: kb.kodeBarang || ''
-            }));
+    const daftarKodeBarang = (Array.isArray(kodeBarangList) ? kodeBarangList : [kodeBarangList])
+      .filter((kb) => kb && (kb.namaBarang || kb.kodeBarang))
+      .map((kb, index) => ({
+        no: index + 1,
+        namaBarang: kb.namaBarang || '',
+        kodeBarang: kb.kodeBarang || '',
+      }));
 
-        await SuratJalan.findByIdAndUpdate(req.params.id, {
-            jenisSurat: jenisSurat || 'Surat Jalan',
-            noSuratJalan,
-            tanggal: tanggal || Date.now(),
-            namaPerusahaan,
-            kepadaYth,
-            namaPenerima: namaPenerima || '',
-            namaPenyerah: namaPenyerah || '',
-            noTelepon,
-            alamat,
-            perihal,
-            pekerjaan,
-            jenisKirim: jenisKirim || 'Barang',
-            items: daftarItem,
-            kodeBarangList: daftarKodeBarang
-        });
+    await SuratJalan.findByIdAndUpdate(req.params.id, {
+      jenisSurat: jenisSurat || 'Surat Jalan',
+      noSuratJalan,
+      tanggal: tanggal || Date.now(),
+      namaPerusahaan,
+      kepadaYth,
+      namaPenerima: namaPenerima || '',
+      namaPenyerah: namaPenyerah || '',
+      noTelepon,
+      alamat,
+      perihal,
+      pekerjaan,
+      jenisKirim: jenisKirim || 'Barang',
+      items: daftarItem,
+      kodeBarangList: daftarKodeBarang,
+    });
 
-        res.redirect('/surat-jalan-admin');
-    } catch (err) {
-        console.error("Error mengupdate surat jalan admin:", err);
-        res.status(500).send("Gagal mengupdate Surat Jalan: " + err.message);
-    }
+    res.redirect('/surat-jalan-admin');
+  } catch (err) {
+    console.error('Error mengupdate surat jalan admin:', err);
+    res.status(500).send('Gagal mengupdate Surat Jalan: ' + err.message);
+  }
 });
 
-
 app.post('/surat-jalan-admin/delete/:id', async (req, res) => {
-    try {
-        await SuratJalan.findByIdAndDelete(req.params.id);
-        res.redirect('/surat-jalan-admin');
-    } catch (err) {
-        console.error("Error menghapus surat jalan admin:", err);
-        res.status(500).send("Gagal menghapus Surat Jalan");
-    }
+  try {
+    await SuratJalan.findByIdAndDelete(req.params.id);
+    res.redirect('/surat-jalan-admin');
+  } catch (err) {
+    console.error('Error menghapus surat jalan admin:', err);
+    res.status(500).send('Gagal menghapus Surat Jalan');
+  }
 });
 
 // Route untuk menampilkan halaman Materi Approval Admin
@@ -1576,12 +1663,14 @@ app.get('/materi-approval-admin', async (req, res) => {
   try {
     const listMateri = await MateriApproval.find().sort({ tanggalPengajuan: -1 });
     const totalMateri = listMateri.length;
-    
+
     // Hitung statistik
     const statusPerluTindakan = ['Draft', 'Menunggu', 'Menunggu Persetujuan', 'Sedang Ditinjau'];
-    const jumlahMenunggu = listMateri.filter(m => !m.statusApproval || statusPerluTindakan.includes(m.statusApproval)).length;
-    const jumlahDisetujui = listMateri.filter(m => m.statusApproval === 'Disetujui').length;
-    const jumlahKritis = listMateri.filter(m => ['Kritis', 'Critical'].includes(m.urgensi)).length;
+    const jumlahMenunggu = listMateri.filter(
+      (m) => !m.statusApproval || statusPerluTindakan.includes(m.statusApproval),
+    ).length;
+    const jumlahDisetujui = listMateri.filter((m) => m.statusApproval === 'Disetujui').length;
+    const jumlahKritis = listMateri.filter((m) => ['Kritis', 'Critical'].includes(m.urgensi)).length;
     const totalNominal = listMateri.reduce((acc, curr) => acc + (Number(curr.totalNominal) || 0), 0);
 
     res.render('materi-approval-admin', {
@@ -1591,11 +1680,11 @@ app.get('/materi-approval-admin', async (req, res) => {
       jumlahDisetujui,
       jumlahKritis,
       totalNominal,
-      user: req.session.user || null
+      user: req.session.user || null,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Terjadi kesalahan pada server");
+    res.status(500).send('Terjadi kesalahan pada server');
   }
 });
 
@@ -1609,11 +1698,7 @@ app.post('/materi-approval-admin/update-status/:id', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Status tidak valid.' });
     }
 
-    const updated = await MateriApproval.findByIdAndUpdate(
-      id, 
-      { statusApproval }, 
-      { new: true }
-    );
+    const updated = await MateriApproval.findByIdAndUpdate(id, { statusApproval }, { new: true });
 
     if (!updated) {
       return res.status(404).json({ success: false, message: 'Data pengajuan tidak ditemukan.' });
@@ -1631,42 +1716,53 @@ app.post('/materi-approval-admin/update-status/:id', async (req, res) => {
 // ============================================================
 app.get('/user', async (req, res) => {
   try {
-    const perPage  = 20;
-    const page     = parseInt(req.query.page) || 1;
-    const search   = req.query.search   || '';
+    const perPage = 20;
+    const page = parseInt(req.query.page) || 1;
+    const search = req.query.search || '';
     const kategori = req.query.kategori || '';
-    const status   = req.query.status   || '';
-    const wilayah  = req.query.wilayah  || '';
+    const status = req.query.status || '';
+    const wilayah = req.query.wilayah || '';
 
     let query = {};
     if (search) {
       query.$or = [
-        { idVendor:   { $regex: search, $options: 'i' } },
+        { idVendor: { $regex: search, $options: 'i' } },
         { namaVendor: { $regex: search, $options: 'i' } },
-        { kategori:   { $regex: search, $options: 'i' } },
-        { wilayah:    { $regex: search, $options: 'i' } },
-        { kontak:     { $regex: search, $options: 'i' } }
+        { kategori: { $regex: search, $options: 'i' } },
+        { wilayah: { $regex: search, $options: 'i' } },
+        { kontak: { $regex: search, $options: 'i' } },
       ];
     }
     if (kategori) query.kategori = kategori;
-    if (status)   query.status   = status;
-    if (wilayah)  query.wilayah  = wilayah;
+    if (status) query.status = status;
+    if (wilayah) query.wilayah = wilayah;
 
-    const vendors     = await Vendor.find(query).sort({ idVendor: 1 }).skip((page - 1) * perPage).limit(perPage);
-    const totalData   = await Vendor.countDocuments(query);
-    const totalPages =  Math.ceil(totalData / perPage);
+    const vendors = await Vendor.find(query)
+      .sort({ idVendor: 1 })
+      .skip((page - 1) * perPage)
+      .limit(perPage);
+    const totalData = await Vendor.countDocuments(query);
+    const totalPages = Math.ceil(totalData / perPage);
 
-    const totalVendorAktif      = await Vendor.countDocuments({ status: 'Aktif' });
+    const totalVendorAktif = await Vendor.countDocuments({ status: 'Aktif' });
     const totalVendorTidakAktif = await Vendor.countDocuments({ status: { $ne: 'Aktif' } });
-    const kategoriList          = await Vendor.distinct('kategori');
-    const totalKategori         = kategoriList.length;
-    const nextIdVendor          = 'VND-' + String(await Vendor.countDocuments() + 1).padStart(3, '0');
+    const kategoriList = await Vendor.distinct('kategori');
+    const totalKategori = kategoriList.length;
+    const nextIdVendor = 'VND-' + String((await Vendor.countDocuments()) + 1).padStart(3, '0');
 
     res.render('user', {
-      vendors, currentPage: page, totalPages,
-      totalVendorAktif, totalVendorTidakAktif, totalKategori,
-      nextIdVendor, search, kategori, status, wilayah,
-      role: req.session.role
+      vendors,
+      currentPage: page,
+      totalPages,
+      totalVendorAktif,
+      totalVendorTidakAktif,
+      totalKategori,
+      nextIdVendor,
+      search,
+      kategori,
+      status,
+      wilayah,
+      role: req.session.role,
     });
   } catch (err) {
     console.error('Gagal memuat data user:', err);
@@ -1678,16 +1774,18 @@ app.post('/user/vendor/add', upload.array('foto', 10), async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
     const { idVendor, namaVendor, wilayah, kategori, kontak, rating, status, deskripsi } = req.body;
-    const fotoFiles = req.files ? req.files.map(f => f.filename) : [];
+    const fotoFiles = req.files ? req.files.map((f) => f.filename) : [];
 
     const newVendor = new Vendor({
-      idVendor:   idVendor   ? idVendor.toUpperCase() : '',
+      idVendor: idVendor ? idVendor.toUpperCase() : '',
       namaVendor: namaVendor || '',
-      wilayah:    wilayah    || '',
-      kategori, kontak, rating,
-      status:    status    || 'Review',
+      wilayah: wilayah || '',
+      kategori,
+      kontak,
+      rating,
+      status: status || 'Review',
       deskripsi: deskripsi || '',
-      foto:      fotoFiles
+      foto: fotoFiles,
     });
 
     await newVendor.save();
@@ -1715,15 +1813,15 @@ app.get('/harga-dasar-user', async (req, res) => {
   try {
     const items = await HargaDasar.find().sort({ tanggal: -1, _id: -1 }).lean();
     const totalItem = items.length;
-    const totalReady = items.filter(i => i.status === 'Ready').length;
-    const totalPending = items.filter(i => i.status === 'Pending').length;
-    
+    const totalReady = items.filter((i) => i.status === 'Ready').length;
+    const totalPending = items.filter((i) => i.status === 'Pending').length;
+
     // Kirim semua variabel yang dibutuhkan oleh view EJS
-    res.render('harga-dasar-user', { 
-      items, 
-      totalItem, 
-      totalReady, 
-      totalPending 
+    res.render('harga-dasar-user', {
+      items,
+      totalItem,
+      totalReady,
+      totalPending,
     });
   } catch (err) {
     console.error(err);
@@ -1748,10 +1846,10 @@ app.post('/harga-dasar-user/add', async (req, res) => {
 app.get('/stok-masuk-user', async (req, res) => {
   try {
     // Urutkan juga untuk halaman user agar sama persis
-    const listStokMasuk  = await StokMasuk.find().sort({ createdAt: -1 });
+    const listStokMasuk = await StokMasuk.find().sort({ createdAt: -1 });
     const totalTransaksi = listStokMasuk.length;
-    const totalQtyMasuk  = listStokMasuk.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
-    
+    const totalQtyMasuk = listStokMasuk.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
+
     res.render('stok-masuk-user', { listStokMasuk, totalTransaksi, totalQtyMasuk });
   } catch (err) {
     console.error(err);
@@ -1766,18 +1864,24 @@ app.post('/stok-masuk-user/add', upload.array('foto', 10), async (req, res) => {
 
     const existing = await StokMasuk.findOne({ idTransaksi });
     if (existing) {
-      return res.status(400).send(`<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`);
+      return res
+        .status(400)
+        .send(
+          `<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`,
+        );
     }
 
     const newItem = new StokMasuk({
-      idTransaksi, namaBarang, namaMerk,
-      jumlah:  Number(jumlah) || 0,
+      idTransaksi,
+      namaBarang,
+      namaMerk,
+      jumlah: Number(jumlah) || 0,
       supplier,
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
-      status:  status  || 'Selesai',
+      status: status || 'Selesai',
       keterangan,
-      foto: req.files ? req.files.map(f => f.filename) : [],
-      diinputOleh: getNamaPenginput(req)
+      foto: req.files ? req.files.map((f) => f.filename) : [],
+      diinputOleh: getNamaPenginput(req),
     });
 
     await newItem.save();
@@ -1788,15 +1892,15 @@ app.post('/stok-masuk-user/add', upload.array('foto', 10), async (req, res) => {
   }
 });
 
-  // ============================================================
-  //  RUTE: STOK KELUAR – USER
-  // ============================================================
-  app.get('/stok-keluar-user', async (req, res) => {
+// ============================================================
+//  RUTE: STOK KELUAR – USER
+// ============================================================
+app.get('/stok-keluar-user', async (req, res) => {
   try {
     const listStokKeluar = await StokKeluar.find().sort({ _id: -1 });
     const totalTransaksi = listStokKeluar.length;
     const totalQtyKeluar = listStokKeluar.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
-    
+
     res.render('stok-keluar-user', { listStokKeluar, totalTransaksi, totalQtyKeluar });
   } catch (err) {
     console.error(err);
@@ -1811,18 +1915,24 @@ app.post('/stok-keluar-user/add', upload.array('foto', 10), async (req, res) => 
 
     const existing = await StokKeluar.findOne({ idTransaksi });
     if (existing) {
-      return res.status(400).send(`<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`);
+      return res
+        .status(400)
+        .send(
+          `<script>alert('Gagal! ID Transaksi "${idTransaksi}" sudah terdaftar.'); window.history.back();</script>`,
+        );
     }
 
     const newItem = new StokKeluar({
-      idTransaksi, namaBarang, namaMerk,
-      jumlah:  Number(jumlah) || 0,
+      idTransaksi,
+      namaBarang,
+      namaMerk,
+      jumlah: Number(jumlah) || 0,
       tujuan,
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
-      status:  status  || 'Selesai',
+      status: status || 'Selesai',
       keterangan,
-      foto: req.files ? req.files.map(f => f.filename) : [],
-      diinputOleh: getNamaPenginput(req)
+      foto: req.files ? req.files.map((f) => f.filename) : [],
+      diinputOleh: getNamaPenginput(req),
     });
 
     await newItem.save();
@@ -1839,8 +1949,8 @@ app.post('/stok-keluar-user/add', upload.array('foto', 10), async (req, res) => 
 app.get('/stok-opname-user', async (req, res) => {
   try {
     const listStokOpname = await StokOpname.find().sort({ _id: -1 });
-    const totalOpname    = listStokOpname.length;
-    
+    const totalOpname = listStokOpname.length;
+
     res.render('stok-opname-user', { listStokOpname, totalOpname });
   } catch (err) {
     console.error(err);
@@ -1859,32 +1969,31 @@ app.post('/stok-opname-user/add', async (req, res) => {
   }
 });
 
-  // ============================================================
+// ============================================================
 //  RUTE: LAPORAN – USER
 // ============================================================
 app.get('/laporan-user', async (req, res) => {
   try {
-
     const selectedJenis = req.query.jenis || '';
-  
+
     let filter = {};
     if (selectedJenis !== '') {
       filter.jenis = selectedJenis;
     }
 
     const rawListLaporan = await Laporan.find(filter).sort({ _id: -1 }).lean();
-    const totalLaporan = await Laporan.countDocuments({}); 
+    const totalLaporan = await Laporan.countDocuments({});
 
-    const listLaporan = rawListLaporan.map(item => ({
+    const listLaporan = rawListLaporan.map((item) => ({
       ...item,
-      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
+      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : '',
     }));
 
-    res.render('laporan-user', { 
-      listLaporan, 
-      totalLaporan, 
+    res.render('laporan-user', {
+      listLaporan,
+      totalLaporan,
       role: req.session.role || 'user',
-      selectedJenis 
+      selectedJenis,
     });
   } catch (err) {
     console.error(err);
@@ -1899,13 +2008,13 @@ app.post('/laporan-user/add', upload.single('fileLaporan'), async (req, res) => 
     const filePath = req.file ? req.file.filename : '';
 
     const newLaporan = new Laporan({
-      namaDokumen, 
-      keterangan, 
-      jenis, 
-      tujuan, 
+      namaDokumen,
+      keterangan,
+      jenis,
+      tujuan,
       filePath,
       tanggal: new Date(),
-      diinputOleh: getNamaPenginput(req)
+      diinputOleh: getNamaPenginput(req),
     });
 
     await newLaporan.save();
@@ -1918,109 +2027,124 @@ app.post('/laporan-user/add', upload.single('fileLaporan'), async (req, res) => 
 
 // Route Halaman Surat Jalan (User)
 app.get('/surat-jalan-user', async (req, res) => {
-    try {
-        const suratJalans = await SuratJalan.find().sort({ createdAt: -1 });
-        
-        res.render('surat-jalan-user', { 
-            user: req.session.user || { username: 'User' },
-            suratJalans: suratJalans 
-        });
-    } catch (err) {
-        console.error("Error fetching surat jalan:", err);
-        res.render('surat-jalan-user', { 
-            user: req.session.user || { username: 'User' },
-            suratJalans: [] 
-        });
-    }
+  try {
+    const suratJalans = await SuratJalan.find().sort({ createdAt: -1 });
+
+    res.render('surat-jalan-user', {
+      user: req.session.user || { username: 'User' },
+      suratJalans: suratJalans,
+    });
+  } catch (err) {
+    console.error('Error fetching surat jalan:', err);
+    res.render('surat-jalan-user', {
+      user: req.session.user || { username: 'User' },
+      suratJalans: [],
+    });
+  }
 });
 
 app.post('/surat-jalan-user/add', async (req, res) => {
-    try {
-        const { jenisSurat, noSuratJalan, tanggal, namaPerusahaan, kepadaYth, namaPenerima, namaPenyerah, noTelepon, alamat, perihal, pekerjaan, jenisKirim, items, kodeBarangList } = req.body;
-        
-        const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username)) ? 
-                         (req.session.user.namaLengkap || req.session.user.username) : 'User Operasional';
+  try {
+    const {
+      jenisSurat,
+      noSuratJalan,
+      tanggal,
+      namaPerusahaan,
+      kepadaYth,
+      namaPenerima,
+      namaPenyerah,
+      noTelepon,
+      alamat,
+      perihal,
+      pekerjaan,
+      jenisKirim,
+      items,
+      kodeBarangList,
+    } = req.body;
 
-        const daftarItem = (Array.isArray(items) ? items : [items])
-            .filter(item => item && (item.diskripsi || item.jumlah))
-            .map((item, index) => ({
-                no: index + 1,
-                diskripsi: item.diskripsi || '',
-                jumlah: item.jumlah === undefined || item.jumlah === null ? '' : String(item.jumlah).trim(),
-                satuan: item.satuan || '',
-                keterangan: item.keterangan || ''
-            }));
+    const namaUser =
+      req.session.user && (req.session.user.namaLengkap || req.session.user.username)
+        ? req.session.user.namaLengkap || req.session.user.username
+        : 'User Operasional';
 
-        const daftarKodeBarang = (Array.isArray(kodeBarangList) ? kodeBarangList : [kodeBarangList])
-            .filter(kb => kb && (kb.namaBarang || kb.kodeBarang))
-            .map((kb, index) => ({
-                no: index + 1,
-                namaBarang: kb.namaBarang || '',
-                kodeBarang: kb.kodeBarang || ''
-            }));
+    const daftarItem = (Array.isArray(items) ? items : [items])
+      .filter((item) => item && (item.diskripsi || item.jumlah))
+      .map((item, index) => ({
+        no: index + 1,
+        diskripsi: item.diskripsi || '',
+        jumlah: item.jumlah === undefined || item.jumlah === null ? '' : String(item.jumlah).trim(),
+        satuan: item.satuan || '',
+        keterangan: item.keterangan || '',
+      }));
 
-        const suratBaru = new SuratJalan({
-            jenisSurat: jenisSurat || 'Surat Jalan',
-            noSuratJalan,
-            tanggal: tanggal || Date.now(),
-            namaPerusahaan,
-            kepadaYth,
-            namaPenerima: namaPenerima || '',
-            namaPenyerah: namaPenyerah || '',
-            noTelepon,
-            alamat,
-            perihal,
-            pekerjaan,
-            jenisKirim: jenisKirim || 'Barang',
-            items: daftarItem,
-            kodeBarangList: daftarKodeBarang,
-            diinputOleh: namaUser
-        });
+    const daftarKodeBarang = (Array.isArray(kodeBarangList) ? kodeBarangList : [kodeBarangList])
+      .filter((kb) => kb && (kb.namaBarang || kb.kodeBarang))
+      .map((kb, index) => ({
+        no: index + 1,
+        namaBarang: kb.namaBarang || '',
+        kodeBarang: kb.kodeBarang || '',
+      }));
 
-        await suratBaru.save();
-        res.redirect('/surat-jalan-user');
-    } catch (err) {
-        console.error("Error menyimpan surat jalan:", err);
-        res.status(500).send("Gagal menyimpan Surat Jalan: " + err.message);
-    }
+    const suratBaru = new SuratJalan({
+      jenisSurat: jenisSurat || 'Surat Jalan',
+      noSuratJalan,
+      tanggal: tanggal || Date.now(),
+      namaPerusahaan,
+      kepadaYth,
+      namaPenerima: namaPenerima || '',
+      namaPenyerah: namaPenyerah || '',
+      noTelepon,
+      alamat,
+      perihal,
+      pekerjaan,
+      jenisKirim: jenisKirim || 'Barang',
+      items: daftarItem,
+      kodeBarangList: daftarKodeBarang,
+      diinputOleh: namaUser,
+    });
+
+    await suratBaru.save();
+    res.redirect('/surat-jalan-user');
+  } catch (err) {
+    console.error('Error menyimpan surat jalan:', err);
+    res.status(500).send('Gagal menyimpan Surat Jalan: ' + err.message);
+  }
 });
 
 // Route Menampilkan Detail Surat Jalan
 app.get('/surat-jalan/detail/:id', async (req, res) => {
-    try {
-        const suratJalan = await SuratJalan.findById(req.params.id);
-        if (!suratJalan) {
-            return res.status(404).send("Data Surat Jalan tidak ditemukan.");
-        }
-        res.render('surat-jalan-detail', { 
-            user: req.session.user || { username: 'User' },
-            suratJalan: suratJalan 
-        });
-    } catch (err) {
-        console.error("Error fetching detail surat jalan:", err);
-        res.status(500).send("Terjadi kesalahan pada server");
+  try {
+    const suratJalan = await SuratJalan.findById(req.params.id);
+    if (!suratJalan) {
+      return res.status(404).send('Data Surat Jalan tidak ditemukan.');
     }
+    res.render('surat-jalan-detail', {
+      user: req.session.user || { username: 'User' },
+      suratJalan: suratJalan,
+    });
+  } catch (err) {
+    console.error('Error fetching detail surat jalan:', err);
+    res.status(500).send('Terjadi kesalahan pada server');
+  }
 });
 
 // Route Menampilkan Halaman Cetak Surat Jalan (PDF / Print View)
 app.get('/surat-jalan/cetak/:id', async (req, res) => {
-    try {
-        const suratJalan = await SuratJalan.findById(req.params.id);
-        if (!suratJalan) {
-            return res.status(404).send("Data Surat Jalan tidak ditemukan.");
-        }
-        if (suratJalan.namaPerusahaan && suratJalan.namaPerusahaan.toUpperCase().includes('PUSPITA')) {
-            return res.render('surat-jalan-print-puspita', { suratJalan, wrapText });
-        }
-
-        res.render('surat-jalan-print', { suratJalan, wrapText });
-
-    } catch (err) {
-        console.error("Error mencetak surat jalan:", err);
-        res.status(500).send("Gagal mencetak Surat Jalan: " + err.message);
+  try {
+    const suratJalan = await SuratJalan.findById(req.params.id);
+    if (!suratJalan) {
+      return res.status(404).send('Data Surat Jalan tidak ditemukan.');
     }
-});
+    if (suratJalan.namaPerusahaan && suratJalan.namaPerusahaan.toUpperCase().includes('PUSPITA')) {
+      return res.render('surat-jalan-print-puspita', { suratJalan, wrapText });
+    }
 
+    res.render('surat-jalan-print', { suratJalan, wrapText });
+  } catch (err) {
+    console.error('Error mencetak surat jalan:', err);
+    res.status(500).send('Gagal mencetak Surat Jalan: ' + err.message);
+  }
+});
 
 // ==========================================
 // RUTE LPJ LAPORAN PERTANGGUNGJAWABAN
@@ -2042,11 +2166,12 @@ async function getLpjDashboardData(query) {
 
   // Perhitungan otomatis progress belanja tiap LPJ.
   // Jika LPJ sudah punya rincian pengeluaran, total dihitung dari rincian.
-  const listLpj = rawListLpj.map(item => {
+  const listLpj = rawListLpj.map((item) => {
     const rincian = Array.isArray(item.rincianPengeluaran) ? item.rincianPengeluaran : [];
-    const pengeluaran = rincian.length > 0
-      ? rincian.reduce((acc, row) => acc + (Number(row.nominal) || 0), 0)
-      : (item.totalPengeluaran || 0);
+    const pengeluaran =
+      rincian.length > 0
+        ? rincian.reduce((acc, row) => acc + (Number(row.nominal) || 0), 0)
+        : item.totalPengeluaran || 0;
     const anggaran = item.anggaranKasbon || 0;
     let progress = anggaran > 0 ? Math.round((pengeluaran / anggaran) * 100) : 0;
     if (progress > 100) progress = 100;
@@ -2057,7 +2182,7 @@ async function getLpjDashboardData(query) {
       totalPengeluaran: pengeluaran,
       sisaSaldo: anggaran - pengeluaran,
       progressBelanja: progress,
-      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
+      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : '',
     };
   });
 
@@ -2074,7 +2199,7 @@ async function getLpjDashboardData(query) {
     totalPengeluaran,
     totalSisaSaldo,
     search,
-    statusFilter
+    statusFilter,
   };
 }
 
@@ -2082,9 +2207,10 @@ async function getLpjDashboardData(query) {
 async function simpanLpjBaru(req, redirectTo) {
   const { namaKegiatan, kategori, status, anggaranKasbon, keterangan, tanggal } = req.body;
 
-  const namaUser = (req.session.user && (req.session.user.namaLengkap || req.session.user.username))
-    || req.session.adminUser
-    || 'Administrator';
+  const namaUser =
+    (req.session.user && (req.session.user.namaLengkap || req.session.user.username)) ||
+    req.session.adminUser ||
+    'Administrator';
 
   const nominalKasbon = Number(anggaranKasbon) || 0;
 
@@ -2109,11 +2235,16 @@ async function simpanLpjBaru(req, redirectTo) {
     keterangan: keterangan || '',
     diinputOleh: namaUser,
     // Masukkan otomatis sebagai riwayat pencairan awal jika ada nilainya
-    riwayatPencairan: nominalKasbon > 0 ? [{
-      tanggal: tanggalLpj,
-      nominal: nominalKasbon,
-      keterangan: keterangan || 'Pencairan Kasbon Awal'
-    }] : []
+    riwayatPencairan:
+      nominalKasbon > 0
+        ? [
+            {
+              tanggal: tanggalLpj,
+              nominal: nominalKasbon,
+              keterangan: keterangan || 'Pencairan Kasbon Awal',
+            },
+          ]
+        : [],
   });
 
   await newLpj.save();
@@ -2136,7 +2267,7 @@ app.get('/lpj-admin', isAdminAuthenticated, async (req, res) => {
       ...data,
       role: 'admin',
       adminUser: req.session.adminUser,
-      user: req.session.user
+      user: req.session.user,
     });
   } catch (err) {
     console.error(err);
@@ -2166,7 +2297,7 @@ app.get('/lpj-user', isUserAuthenticated, async (req, res) => {
     res.render('lpj-user', {
       ...data,
       role: 'user',
-      user: req.session.user
+      user: req.session.user,
     });
   } catch (err) {
     console.error(err);
@@ -2189,19 +2320,19 @@ app.post('/lpj-user/add', isUserAuthenticated, async (req, res) => {
 // ==========================================
 app.get('/materi-approval-user', isUserAuthenticated, async (req, res) => {
   try {
-    const dataMateri = await MateriApproval.find()
-      .sort({ tanggalPengajuan: -1, createdAt: -1 })
-      .lean();
+    const dataMateri = await MateriApproval.find().sort({ tanggalPengajuan: -1, createdAt: -1 }).lean();
 
     const statusAktif = ['Draft', 'Menunggu', 'Menunggu Persetujuan', 'Sedang Ditinjau'];
     const statusSelesai = ['Disetujui', 'Ditolak'];
 
     const totalMateri = dataMateri.length;
     const totalNominal = dataMateri.reduce((acc, item) => acc + (Number(item.totalNominal) || 0), 0);
-    const jumlahMenunggu = dataMateri.filter(m => !m.statusApproval || statusAktif.includes(m.statusApproval)).length;
-    
+    const jumlahMenunggu = dataMateri.filter((m) => !m.statusApproval || statusAktif.includes(m.statusApproval)).length;
+
     const jumlahDisetujui = dataMateri.filter((item) => item.statusApproval === 'Disetujui').length;
-    const jumlahKritis = dataMateri.filter((item) => ['Kritis', 'Critical'].includes(item.urgensi) && !statusSelesai.includes(item.statusApproval)).length;
+    const jumlahKritis = dataMateri.filter(
+      (item) => ['Kritis', 'Critical'].includes(item.urgensi) && !statusSelesai.includes(item.statusApproval),
+    ).length;
 
     res.render('materi-approval-user', {
       listMateri: dataMateri,
@@ -2215,8 +2346,8 @@ app.get('/materi-approval-user', isUserAuthenticated, async (req, res) => {
       role: 'user',
       user: req.session.user || {
         username: req.session.adminUser || 'User',
-        namaLengkap: req.session.adminUser || 'User'
-      }
+        namaLengkap: req.session.adminUser || 'User',
+      },
     });
   } catch (err) {
     console.error('Gagal memuat materi approval user:', err);
@@ -2228,17 +2359,14 @@ app.post('/materi-approval-user/add', isUserAuthenticated, upload.single('fileLa
   try {
     await syncReqFilesToGridFS(req);
 
-    const {
-      unitKerja, pemohon, kategori, vendor, urgensi,
-      namaMaterial, deskripsi, totalNominal, items
-    } = req.body;
+    const { unitKerja, pemohon, kategori, vendor, urgensi, namaMaterial, deskripsi, totalNominal, items } = req.body;
 
     // Parsing items daftar barang
     let itemList = [];
     if (Array.isArray(items)) {
-      itemList = items.filter(it => it && (it.diskripsi || it.nama || it.namaBarang));
+      itemList = items.filter((it) => it && (it.diskripsi || it.nama || it.namaBarang));
     } else if (items && typeof items === 'object') {
-      itemList = Object.values(items).filter(it => it && (it.diskripsi || it.nama || it.namaBarang));
+      itemList = Object.values(items).filter((it) => it && (it.diskripsi || it.nama || it.namaBarang));
     }
 
     const parsedItems = itemList.map((it, idx) => {
@@ -2246,23 +2374,23 @@ app.post('/materi-approval-user/add', isUserAuthenticated, upload.single('fileLa
       const jumlah = Number(String(it.jumlah || it.qty || '1').replace(/[^\d.-]/g, '')) || 1;
       const satuan = String(it.satuan || 'Pcs').trim();
       const hargaSatuan = Number(String(it.hargaSatuan || it.harga || '0').replace(/[^\d.-]/g, '')) || 0;
-      const subtotal = Number(String(it.subtotal || (jumlah * hargaSatuan)).replace(/[^\d.-]/g, '')) || (jumlah * hargaSatuan);
+      const subtotal =
+        Number(String(it.subtotal || jumlah * hargaSatuan).replace(/[^\d.-]/g, '')) || jumlah * hargaSatuan;
       return {
         no: idx + 1,
         diskripsi,
         jumlah,
         satuan,
         hargaSatuan,
-        subtotal
+        subtotal,
       };
     });
 
     const calculatedTotal = parsedItems.reduce((acc, curr) => acc + (Number(curr.subtotal) || 0), 0);
     const finalTotalNominal = calculatedTotal > 0 ? calculatedTotal : Math.max(0, Number(totalNominal) || 0);
 
-    const derivedNamaMaterial = parsedItems.length > 0 
-      ? parsedItems.map(it => it.diskripsi).join(', ') 
-      : String(namaMaterial || '').trim();
+    const derivedNamaMaterial =
+      parsedItems.length > 0 ? parsedItems.map((it) => it.diskripsi).join(', ') : String(namaMaterial || '').trim();
 
     if (!unitKerja || !kategori || !vendor || (!derivedNamaMaterial && parsedItems.length === 0)) {
       return res.redirect('/materi-approval-user?error=1');
@@ -2285,7 +2413,7 @@ app.post('/materi-approval-user/add', isUserAuthenticated, upload.single('fileLa
       totalNominal: finalTotalNominal,
       statusApproval: 'Menunggu',
       diinputOleh: namaPenginput,
-      items: parsedItems
+      items: parsedItems,
     });
 
     if (req.file) {
@@ -2302,19 +2430,28 @@ app.post('/materi-approval-user/add', isUserAuthenticated, upload.single('fileLa
 });
 
 // Hapus LPJ
-app.post(['/lpj-user/hapus/:id', '/lpj-user/delete/:id', '/lpj-admin/hapus/:id', '/lpj-admin/delete/:id', '/lpj/hapus/:id', '/lpj/delete/:id'], async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Lpj.findByIdAndDelete(id);
-    const kembali = req.path.startsWith('/lpj-admin') || (req.session && req.session.isAdmin)
-      ? '/lpj-admin'
-      : '/lpj-user';
-    res.redirect(kembali);
-  } catch (err) {
-    console.error('Error saat menghapus LPJ:', err);
-    res.status(500).send('Gagal menghapus data LPJ: ' + err.message);
-  }
-});
+app.post(
+  [
+    '/lpj-user/hapus/:id',
+    '/lpj-user/delete/:id',
+    '/lpj-admin/hapus/:id',
+    '/lpj-admin/delete/:id',
+    '/lpj/hapus/:id',
+    '/lpj/delete/:id',
+  ],
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      await Lpj.findByIdAndDelete(id);
+      const kembali =
+        req.path.startsWith('/lpj-admin') || (req.session && req.session.isAdmin) ? '/lpj-admin' : '/lpj-user';
+      res.redirect(kembali);
+    } catch (err) {
+      console.error('Error saat menghapus LPJ:', err);
+      res.status(500).send('Gagal menghapus data LPJ: ' + err.message);
+    }
+  },
+);
 
 // Menghitung ulang total pengeluaran, sisa saldo, dan progress dari rincian belanja
 function sinkronTotalLpj(lpj) {
@@ -2344,9 +2481,10 @@ app.get('/lpj/detail/:id', async (req, res) => {
     const vault = Array.isArray(lpj.vaultNota) ? lpj.vaultNota : [];
 
     const kasbon = Number(lpj.anggaranKasbon) || 0;
-    const pengeluaran = rincian.length > 0
-      ? rincian.reduce((acc, row) => acc + (Number(row.nominal) || 0), 0)
-      : (Number(lpj.totalPengeluaran) || 0);
+    const pengeluaran =
+      rincian.length > 0
+        ? rincian.reduce((acc, row) => acc + (Number(row.nominal) || 0), 0)
+        : Number(lpj.totalPengeluaran) || 0;
     const sisaSaldo = kasbon - pengeluaran;
 
     let progress = kasbon > 0 ? Math.round((pengeluaran / kasbon) * 100) : 0;
@@ -2361,25 +2499,25 @@ app.get('/lpj/detail/:id', async (req, res) => {
 
     // Gabungkan seluruh nota: nota dari catatan belanja + upload manual di vault
     const vaultItems = [];
-    rincian.forEach(item => {
+    rincian.forEach((item) => {
       if (item.notaPath) {
         vaultItems.push({
           filePath: item.notaPath,
           fileName: item.notaNama || 'Nota pengeluaran',
           uploadedAt: item.tanggal || lpj.createdAt || new Date(),
           sumber: 'Rincian Belanja',
-          keterangan: item.namaItem || ''
+          keterangan: item.namaItem || '',
         });
       }
     });
-    vault.forEach(item => {
+    vault.forEach((item) => {
       if (item.filePath) {
         vaultItems.push({
           filePath: item.filePath,
           fileName: item.fileName || 'Nota',
           uploadedAt: item.uploadedAt || lpj.createdAt || new Date(),
           sumber: 'Vault Manual',
-          keterangan: item.diinputOleh || ''
+          keterangan: item.diinputOleh || '',
         });
       }
     });
@@ -2398,10 +2536,10 @@ app.get('/lpj/detail/:id', async (req, res) => {
       totalRincian: rincian.length,
       totalNota: vaultItems.length,
       activeTab,
-      role: req.session.isAdmin ? 'admin' : (req.session.isUser ? 'user' : 'guest'),
-      lpjBasePath: (req.session && req.session.isAdmin) ? '/lpj-admin' : '/lpj-user',
+      role: req.session.isAdmin ? 'admin' : req.session.isUser ? 'user' : 'guest',
+      lpjBasePath: req.session && req.session.isAdmin ? '/lpj-admin' : '/lpj-user',
       adminUser: req.session.adminUser,
-      user: req.session.user
+      user: req.session.user,
     });
   } catch (err) {
     console.error(err);
@@ -2421,12 +2559,13 @@ app.get('/lpj/export-excel/:id', async (req, res) => {
 
     const workbook = await buildLpjWorkbook(lpj);
 
-    const namaBerkas = String(lpj.namaKegiatan || 'LPJ')
-      .replace(/[^\x20-\x7E]/g, '')
-      .replace(/[\\/:*?"<>|]/g, '')
-      .trim()
-      .replace(/\s+/g, '_')
-      .slice(0, 80) || 'LPJ';
+    const namaBerkas =
+      String(lpj.namaKegiatan || 'LPJ')
+        .replace(/[^\x20-\x7E]/g, '')
+        .replace(/[\\/:*?"<>|]/g, '')
+        .trim()
+        .replace(/\s+/g, '_')
+        .slice(0, 80) || 'LPJ';
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="LPJ_${namaBerkas}.xlsx"`);
@@ -2453,7 +2592,7 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
 
     const qtyAngka = Number(qty) || 0;
     const hargaAngka = Number(hargaSatuan) || 0;
-    const nominalAngka = Number(nominal) || (qtyAngka * hargaAngka);
+    const nominalAngka = Number(nominal) || qtyAngka * hargaAngka;
 
     let tanggalCatatan = new Date();
     if (tanggal) {
@@ -2476,7 +2615,7 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
       hargaSatuan: hargaAngka,
       nominal: nominalAngka,
       notaPath: req.file ? '/uploads/' + req.file.filename : '',
-      notaNama: req.file ? req.file.originalname : ''
+      notaNama: req.file ? req.file.originalname : '',
     });
 
     sinkronTotalLpj(lpj);
@@ -2502,7 +2641,7 @@ app.post('/lpj/detail/:id/edit-catatan/:itemId', upload.single('nota'), async (r
 
     const qtyAngka = Number(qty) || 0;
     const hargaAngka = Number(hargaSatuan) || 0;
-    const nominalAngka = Number(nominal) || (qtyAngka * hargaAngka);
+    const nominalAngka = Number(nominal) || qtyAngka * hargaAngka;
 
     let tanggalCatatan = new Date();
     if (tanggal) {
@@ -2516,8 +2655,9 @@ app.post('/lpj/detail/:id/edit-catatan/:itemId', upload.single('nota'), async (r
     }
 
     if (Array.isArray(lpj.rincianPengeluaran)) {
-      const item = (typeof lpj.rincianPengeluaran.id === 'function' ? lpj.rincianPengeluaran.id(itemId) : null)
-        || lpj.rincianPengeluaran.find(r => String(r._id) === String(itemId));
+      const item =
+        (typeof lpj.rincianPengeluaran.id === 'function' ? lpj.rincianPengeluaran.id(itemId) : null) ||
+        lpj.rincianPengeluaran.find((r) => String(r._id) === String(itemId));
 
       if (item) {
         item.tanggal = tanggalCatatan;
@@ -2553,7 +2693,7 @@ app.post(['/lpj/detail/:id/hapus-catatan/:itemId', '/lpj/detail/:id/delete-catat
     if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
 
     if (Array.isArray(lpj.rincianPengeluaran)) {
-      lpj.rincianPengeluaran = lpj.rincianPengeluaran.filter(r => String(r._id) !== String(itemId));
+      lpj.rincianPengeluaran = lpj.rincianPengeluaran.filter((r) => String(r._id) !== String(itemId));
     }
 
     sinkronTotalLpj(lpj);
@@ -2591,7 +2731,7 @@ app.post('/lpj/detail/:id/tambah-pencairan', async (req, res) => {
     lpj.riwayatPencairan.push({
       tanggal: tanggalPencairan,
       nominal: nominalAngka,
-      keterangan: keterangan || ''
+      keterangan: keterangan || '',
     });
 
     // Tambah juga ke total anggaran kasbon jika pencairan baru menambah dana
@@ -2613,7 +2753,7 @@ app.post('/lpj/detail/:id/hapus-nota/:notaId', async (req, res) => {
     const { id, notaId } = req.params;
     const lpj = await Lpj.findById(id);
     if (lpj && Array.isArray(lpj.vaultNota)) {
-      lpj.vaultNota = lpj.vaultNota.filter(v => String(v._id) !== String(notaId));
+      lpj.vaultNota = lpj.vaultNota.filter((v) => String(v._id) !== String(notaId));
       await lpj.save();
     }
     res.redirect('/lpj/detail/' + id + '?tab=vault');
@@ -2640,7 +2780,7 @@ app.post('/lpj/detail/:id/tambah-nota', upload.single('nota'), async (req, res) 
       filePath: '/uploads/' + req.file.filename,
       fileName: req.file.originalname,
       uploadedAt: new Date(),
-      diinputOleh: getNamaPenginput(req)
+      diinputOleh: getNamaPenginput(req),
     });
 
     await lpj.save();
@@ -2660,40 +2800,40 @@ app.post('/lpj/detail/:id/tambah-nota', upload.single('nota'), async (req, res) 
 app.get('/export-vendor-excel', async (req, res) => {
   try {
     const dataVendor = await Vendor.find({});
-    const workbook   = new ExcelJS.Workbook();
-    const worksheet  = workbook.addWorksheet('Data Vendor');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Data Vendor');
 
     worksheet.columns = [
-      { header: 'No',          key: 'no',         width: 8  },
-      { header: 'ID Vendor',   key: 'idVendor',   width: 15 },
+      { header: 'No', key: 'no', width: 8 },
+      { header: 'ID Vendor', key: 'idVendor', width: 15 },
       { header: 'Nama Vendor', key: 'namaVendor', width: 25 },
-      { header: 'Wilayah',     key: 'wilayah',    width: 20 },
-      { header: 'Kategori',    key: 'kategori',   width: 20 },
-      { header: 'Kontak',      key: 'kontak',     width: 18 },
-      { header: 'Rating',      key: 'rating',     width: 10 },
-      { header: 'Status',      key: 'status',     width: 12 },
-      { header: 'Deskripsi',   key: 'deskripsi',  width: 30 }
+      { header: 'Wilayah', key: 'wilayah', width: 20 },
+      { header: 'Kategori', key: 'kategori', width: 20 },
+      { header: 'Kontak', key: 'kontak', width: 18 },
+      { header: 'Rating', key: 'rating', width: 10 },
+      { header: 'Status', key: 'status', width: 12 },
+      { header: 'Deskripsi', key: 'deskripsi', width: 30 },
     ];
 
     dataVendor.forEach((vendor, index) => {
       worksheet.addRow({
-        no:         index + 1,
-        idVendor:   vendor.idVendor   || '-',
+        no: index + 1,
+        idVendor: vendor.idVendor || '-',
         namaVendor: vendor.namaVendor || '-',
-        wilayah:    vendor.wilayah    || '-',
-        kategori:   vendor.kategori   || '-',
-        kontak:     vendor.kontak     || '-',
-        rating:     vendor.rating != null ? vendor.rating : '-',
-        status:     vendor.status     || '-',
-        deskripsi:  vendor.deskripsi  || '-'
+        wilayah: vendor.wilayah || '-',
+        kategori: vendor.kategori || '-',
+        kontak: vendor.kontak || '-',
+        rating: vendor.rating != null ? vendor.rating : '-',
+        status: vendor.status || '-',
+        deskripsi: vendor.deskripsi || '-',
       });
     });
 
-    const headerRow   = worksheet.getRow(1);
-    headerRow.font    = { bold: true, size: 12 };
-    headerRow.height  = 24;
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, size: 12 };
+    headerRow.height = 24;
 
-    res.setHeader('Content-Type',        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=Data_Vendor_Kiosk.xlsx');
     await workbook.xlsx.write(res);
     res.end();
@@ -2707,51 +2847,49 @@ app.get('/export-vendor-excel', async (req, res) => {
 app.get('/export-harga-dasar-excel', async (req, res) => {
   try {
     const dataHargaDasar = await HargaDasar.find({});
-    const workbook       = new ExcelJS.Workbook();
-    const worksheet      = workbook.addWorksheet('Data Harga Dasar');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Data Harga Dasar');
 
     worksheet.columns = [
-      { header: 'No',          key: 'no',          width: 8  },
-      { header: 'ID Barang',   key: 'idBarang',    width: 15 },
-      { header: 'Nama Barang', key: 'namaBarang',  width: 25 },
-      { header: 'Nama Merk',   key: 'namaMerk',    width: 20 },
+      { header: 'No', key: 'no', width: 8 },
+      { header: 'ID Barang', key: 'idBarang', width: 15 },
+      { header: 'Nama Barang', key: 'namaBarang', width: 25 },
+      { header: 'Nama Merk', key: 'namaMerk', width: 20 },
       { header: 'Spesifikasi', key: 'spesifikasi', width: 30 },
-      { header: 'Qty',         key: 'qty',         width: 10 },
-      { header: 'Harga',       key: 'harga',       width: 15 },
-      { header: 'Final',       key: 'final',       width: 15 },
-      { header: 'Status',      key: 'status',      width: 15 },
-      { header: 'Keterangan',  key: 'keterangan',  width: 25 },
-      { header: 'Tanggal',     key: 'tanggal',     width: 20 }
+      { header: 'Qty', key: 'qty', width: 10 },
+      { header: 'Harga', key: 'harga', width: 15 },
+      { header: 'Final', key: 'final', width: 15 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Keterangan', key: 'keterangan', width: 25 },
+      { header: 'Tanggal', key: 'tanggal', width: 20 },
     ];
 
     dataHargaDasar.forEach((item, index) => {
-      const formattedDate = item.tanggal
-        ? new Date(item.tanggal).toLocaleDateString('id-ID')
-        : '-';
+      const formattedDate = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-';
 
       worksheet.addRow({
-        no:          index + 1,
-        idBarang:    item.idBarang    || '-',
-        namaBarang:  item.namaBarang  || '-',
-        namaMerk:    item.namaMerk    || '-',
+        no: index + 1,
+        idBarang: item.idBarang || '-',
+        namaBarang: item.namaBarang || '-',
+        namaMerk: item.namaMerk || '-',
         spesifikasi: item.spesifikasi || '-',
-        qty:         item.qty   != null ? item.qty   : 1,
-        harga:       item.harga != null ? item.harga : 0,
-        final:       item.final != null ? item.final : 0,
-        status:      item.status      || '-',
-        keterangan:  item.keterangan  || '-',
-        tanggal:     formattedDate
+        qty: item.qty != null ? item.qty : 1,
+        harga: item.harga != null ? item.harga : 0,
+        final: item.final != null ? item.final : 0,
+        status: item.status || '-',
+        keterangan: item.keterangan || '-',
+        tanggal: formattedDate,
       });
     });
 
     worksheet.getColumn('harga').numFmt = '#,##0';
     worksheet.getColumn('final').numFmt = '#,##0';
 
-    const headerRow   = worksheet.getRow(1);
-    headerRow.font    = { bold: true, size: 12 };
-    headerRow.height  = 24;
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, size: 12 };
+    headerRow.height = 24;
 
-    res.setHeader('Content-Type',        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=Data_Harga_Dasar_Kiosk.xlsx');
     await workbook.xlsx.write(res);
     return res.end();
@@ -2765,42 +2903,41 @@ app.get('/export-harga-dasar-excel', async (req, res) => {
 
 // Route khusus untuk Download PDF secara langsung
 app.get('/surat-jalan/download-pdf/:id', async (req, res) => {
-    try {
-        const suratJalan = await SuratJalan.findById(req.params.id);
-        if (!suratJalan) {
-            return res.status(404).send("Data tidak ditemukan.");
-        }
-
-        // Render template EJS menjadi HTML string
-        const html = await res.app.render('surat-jalan-print', { suratJalan });
-
-        // Jalankan browser headless puppeteer untuk mencetak PDF
-        const browser = await puppeteer.launch({ 
-            headless: 'new',
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-        
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' }
-        });
-
-        await browser.close();
-
-        // Kirim response file PDF ke browser
-        const fileName = `${(suratJalan.jenisSurat || 'Surat-Jalan').replace(/\s+/g, '-')}-${suratJalan.noSuratJalan.replace(/\//g, '-')}.pdf`;
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-        res.send(pdfBuffer);
-
-    } catch (err) {
-        console.error("Error generating PDF:", err);
-        res.status(500).send("Gagal mengunduh PDF: " + err.message);
+  try {
+    const suratJalan = await SuratJalan.findById(req.params.id);
+    if (!suratJalan) {
+      return res.status(404).send('Data tidak ditemukan.');
     }
+
+    // Render template EJS menjadi HTML string
+    const html = await res.app.render('surat-jalan-print', { suratJalan });
+
+    // Jalankan browser headless puppeteer untuk mencetak PDF
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+    const page = await browser.newPage();
+
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' },
+    });
+
+    await browser.close();
+
+    // Kirim response file PDF ke browser
+    const fileName = `${(suratJalan.jenisSurat || 'Surat-Jalan').replace(/\s+/g, '-')}-${suratJalan.noSuratJalan.replace(/\//g, '-')}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error('Error generating PDF:', err);
+    res.status(500).send('Gagal mengunduh PDF: ' + err.message);
+  }
 });
 
 // ============================================================
@@ -2811,10 +2948,10 @@ app.get('/vendors', async (req, res) => {
     const { search, kategori, status, wilayah } = req.query;
     let query = {};
 
-    if (search)                   query.namaVendor = { $regex: search, $options: 'i' };
-    if (kategori && kategori !== '') query.kategori  = kategori;
-    if (status   && status   !== '') query.status    = status;
-    if (wilayah  && wilayah  !== '') query.wilayah   = wilayah;
+    if (search) query.namaVendor = { $regex: search, $options: 'i' };
+    if (kategori && kategori !== '') query.kategori = kategori;
+    if (status && status !== '') query.status = status;
+    if (wilayah && wilayah !== '') query.wilayah = wilayah;
 
     const vendors = await Vendor.find(query);
     res.json({ success: true, data: vendors });
@@ -2828,33 +2965,32 @@ app.get('/vendors', async (req, res) => {
 //  RUTE: DATA BAHAN KAIN – USER
 // ============================================================
 app.get('/data-bahan-kain', async (req, res) => {
-    try {
-        // Ambil semua data vendor untuk tabel
-        const listVendor = await DataBahanKain.find().sort({ _id: -1 });
+  try {
+    // Ambil semua data vendor untuk tabel
+    const listVendor = await DataBahanKain.find().sort({ _id: -1 });
 
-        // Cari vendor terakhir untuk menentukan ID otomatis selanjutnya
-        const lastVendor = await DataBahanKain.findOne().sort({ _id: -1 });
-        let nextId = 'VND-001';
+    // Cari vendor terakhir untuk menentukan ID otomatis selanjutnya
+    const lastVendor = await DataBahanKain.findOne().sort({ _id: -1 });
+    let nextId = 'VND-001';
 
-        if (lastVendor && lastVendor.idVendor) {
-            // Ambil angka dari string misal 'VND-015' mengambil 15
-            const lastNum = parseInt(lastVendor.idVendor.replace('VND-', ''), 10);
-            if (!isNaN(lastNum)) {
-                const nextNum = lastNum + 1;
-                nextId = `VND-${String(nextNum).padStart(3, '0')}`;
-            }
-        }
-
-        res.render('data-bahan-kain', { 
-            vendors: listVendor, 
-            nextIdVendor: nextId, // Ubah dari nextId menjadi nextIdVendor agar cocok dengan EJS
-            backUrl: '/dashboard'
-        });
-      } 
-    catch (err) {
-        console.error('Gagal memuat data:', err);
-        res.status(500).send('Terjadi kesalahan pada server.');
+    if (lastVendor && lastVendor.idVendor) {
+      // Ambil angka dari string misal 'VND-015' mengambil 15
+      const lastNum = parseInt(lastVendor.idVendor.replace('VND-', ''), 10);
+      if (!isNaN(lastNum)) {
+        const nextNum = lastNum + 1;
+        nextId = `VND-${String(nextNum).padStart(3, '0')}`;
+      }
     }
+
+    res.render('data-bahan-kain', {
+      vendors: listVendor,
+      nextIdVendor: nextId, // Ubah dari nextId menjadi nextIdVendor agar cocok dengan EJS
+      backUrl: '/dashboard',
+    });
+  } catch (err) {
+    console.error('Gagal memuat data:', err);
+    res.status(500).send('Terjadi kesalahan pada server.');
+  }
 });
 
 app.post('/data-bahan-kain/add', uploadMultiple, async (req, res) => {
@@ -2878,27 +3014,30 @@ app.post('/data-bahan-kain/add', uploadMultiple, async (req, res) => {
 
     // Fallback aman untuk slug vendorId jika hanya diisi simbol (misal: '-')
     let vendorId = namaVendor
-      ? namaVendor.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      ? namaVendor
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '')
       : '';
 
     if (!vendorId) {
       vendorId = 'vendor-' + Date.now();
     }
 
-    const fotoPaths = req.files && req.files.length > 0
-      ? req.files.map(f => '/uploads/' + f.filename)
-      : [];
+    const fotoPaths = req.files && req.files.length > 0 ? req.files.map((f) => '/uploads/' + f.filename) : [];
 
     const vendorBaru = new DataBahanKain({
-      idVendor, vendorId, namaVendor,
-      wilayah:         wilayah         || '-',
-      kategoriSupply:  kategoriSupply  || 'Bahan Kain',
-      kontak:          kontak          || '-',
-      rating:          rating          ? parseFloat(rating) : 5,
-      deskripsi:       deskripsi       || 'Belum ada deskripsi untuk vendor ini.',
-      foto:            fotoPaths,
-      status:          'Aktif',
-      diinputOleh:     getNamaPenginput(req)
+      idVendor,
+      vendorId,
+      namaVendor,
+      wilayah: wilayah || '-',
+      kategoriSupply: kategoriSupply || 'Bahan Kain',
+      kontak: kontak || '-',
+      rating: rating ? parseFloat(rating) : 5,
+      deskripsi: deskripsi || 'Belum ada deskripsi untuk vendor ini.',
+      foto: fotoPaths,
+      status: 'Aktif',
+      diinputOleh: getNamaPenginput(req),
     });
 
     await vendorBaru.save();
@@ -2912,14 +3051,18 @@ app.post('/data-bahan-kain/add', uploadMultiple, async (req, res) => {
 app.post('/data-bahan-kain/edit/:id', async (req, res) => {
   try {
     const { namaVendor, wilayah, kategoriSupply, kontak, rating } = req.body;
-    const vendorId = namaVendor.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const vendorId = namaVendor
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
 
     await DataBahanKain.findByIdAndUpdate(req.params.id, {
-      namaVendor, vendorId,
-      wilayah:        wilayah        || '-',
+      namaVendor,
+      vendorId,
+      wilayah: wilayah || '-',
       kategoriSupply: kategoriSupply || '-',
-      kontak:         kontak         || '-',
-      rating:         rating         ? parseFloat(rating) : 5
+      kontak: kontak || '-',
+      rating: rating ? parseFloat(rating) : 5,
     });
 
     res.json({ success: true, message: 'Data vendor berhasil diperbarui!' });
@@ -2949,8 +3092,9 @@ app.get('/katalog-vendor/:vendorId', async (req, res) => {
       return res.status(404).send('Vendor tidak ditemukan.');
     }
 
-    const isFromAdmin = req.query.from === 'admin' || (req.headers.referer && req.headers.referer.includes('/data-kain-admin'));
-    const backUrl     = isFromAdmin ? '/data-kain-admin' : '/data-bahan-kain';
+    const isFromAdmin =
+      req.query.from === 'admin' || (req.headers.referer && req.headers.referer.includes('/data-kain-admin'));
+    const backUrl = isFromAdmin ? '/data-kain-admin' : '/data-bahan-kain';
 
     res.render('katalog-vendor', { vendor, backUrl });
   } catch (err) {
@@ -2964,11 +3108,11 @@ app.get('/katalog-vendor/:vendorId', async (req, res) => {
 // ============================================================
 app.get('/data-kain-admin', async (req, res) => {
   try {
-    const vendors       = await DataBahanKain.find().sort({ createdAt: -1 });
-    const count         = await DataBahanKain.countDocuments();
-    const kategoriUnik  = await DataBahanKain.distinct('kategoriSupply');
+    const vendors = await DataBahanKain.find().sort({ createdAt: -1 });
+    const count = await DataBahanKain.countDocuments();
+    const kategoriUnik = await DataBahanKain.distinct('kategoriSupply');
     const totalKategori = kategoriUnik.length;
-    const nextIdVendor  = 'VND-' + String(count + 1).padStart(3, '0');
+    const nextIdVendor = 'VND-' + String(count + 1).padStart(3, '0');
 
     res.render('data-kain-admin', { vendors, nextIdVendor, totalKategori });
   } catch (err) {
@@ -2998,29 +3142,30 @@ app.post('/data-kain-admin/add', uploadMultiple, async (req, res) => {
 
     // Fallback aman untuk slug vendorId jika hanya diisi simbol (misal: '-')
     let vendorId = namaVendor
-      ? namaVendor.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      ? namaVendor
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '')
       : '';
 
     if (!vendorId) {
       vendorId = 'vendor-' + Date.now();
     }
 
-    const fotoPaths = req.files && req.files.length > 0
-      ? req.files.map(f => '/uploads/' + f.filename)
-      : [];
+    const fotoPaths = req.files && req.files.length > 0 ? req.files.map((f) => '/uploads/' + f.filename) : [];
 
     const vendorBaru = new DataBahanKain({
-      idVendor, 
-      vendorId, 
+      idVendor,
+      vendorId,
       namaVendor,
-      wilayah:        wilayah        || '-',
+      wilayah: wilayah || '-',
       kategoriSupply: kategoriSupply || 'Bahan Kain',
-      kontak:         kontak         || '-',
-      rating:         rating         ? parseFloat(rating) : 5,
-      deskripsi:      deskripsi      || 'Belum ada deskripsi untuk vendor ini.',
-      foto:           fotoPaths,
-      status:         status         || 'Aktif',
-      diinputOleh:    getNamaPenginput(req)
+      kontak: kontak || '-',
+      rating: rating ? parseFloat(rating) : 5,
+      deskripsi: deskripsi || 'Belum ada deskripsi untuk vendor ini.',
+      foto: fotoPaths,
+      status: status || 'Aktif',
+      diinputOleh: getNamaPenginput(req),
     });
 
     await vendorBaru.save();
@@ -3036,21 +3181,24 @@ app.post('/data-kain-admin/edit/:id', uploadMultiple, async (req, res) => {
     await syncReqFilesToGridFS(req);
     const { namaVendor, wilayah, kategoriSupply, kontak, rating, deskripsi, status } = req.body;
     const vendorIdUpdate = namaVendor
-      ? namaVendor.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      ? namaVendor
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '')
       : undefined;
 
     let updateData = {
       namaVendor,
-      vendorId:       vendorIdUpdate,
-      wilayah:        wilayah        || '-',
+      vendorId: vendorIdUpdate,
+      wilayah: wilayah || '-',
       kategoriSupply: kategoriSupply || 'Bahan Kain',
-      kontak:         kontak         || '-',
-      rating:         rating         ? parseFloat(rating) : 5,
-      deskripsi:      deskripsi      || '-',
-      status:         status         || 'Aktif'
+      kontak: kontak || '-',
+      rating: rating ? parseFloat(rating) : 5,
+      deskripsi: deskripsi || '-',
+      status: status || 'Aktif',
     };
     if (req.files && req.files.length > 0) {
-      updateData.foto = req.files.map(f => '/uploads/' + f.filename);
+      updateData.foto = req.files.map((f) => '/uploads/' + f.filename);
     }
 
     await DataBahanKain.findByIdAndUpdate(req.params.id, updateData);
@@ -3080,7 +3228,7 @@ function normalizeFotoUrls(foto) {
 
   return list
     .filter(Boolean)
-    .map(item => {
+    .map((item) => {
       const value = String(item).trim();
       if (!value) return null;
       if (/^https?:\/\//i.test(value) || value.startsWith('/')) return value;
@@ -3093,18 +3241,16 @@ app.get('/guest/vendor', async (req, res) => {
   try {
     const vendors = await Vendor.find().sort({ idVendor: 1 }).lean();
     const totalVendor = vendors.length;
-    const totalVendorAktif = vendors.filter(v => v.status === 'Aktif').length;
-    const totalVendorTidakAktif = vendors.filter(v => v.status && v.status !== 'Aktif').length;
-    const totalKategori = new Set(
-      vendors.map(v => (v.kategori || '').trim()).filter(Boolean)
-    ).size;
+    const totalVendorAktif = vendors.filter((v) => v.status === 'Aktif').length;
+    const totalVendorTidakAktif = vendors.filter((v) => v.status && v.status !== 'Aktif').length;
+    const totalKategori = new Set(vendors.map((v) => (v.kategori || '').trim()).filter(Boolean)).size;
 
     res.render('guest-vendor', {
       vendors,
       totalVendor,
       totalVendorAktif,
       totalVendorTidakAktif,
-      totalKategori
+      totalKategori,
     });
   } catch (err) {
     console.error('Gagal memuat data vendor guest:', err);
@@ -3125,7 +3271,7 @@ app.get('/guest/vendor/:id', async (req, res) => {
 
     res.render('guest-vendor-detail', {
       vendor,
-      fotoUrls: normalizeFotoUrls(vendor.foto)
+      fotoUrls: normalizeFotoUrls(vendor.foto),
     });
   } catch (err) {
     console.error('Gagal memuat detail vendor guest:', err);
@@ -3137,14 +3283,14 @@ app.get('/guest/harga-dasar', async (req, res) => {
   try {
     const items = await HargaDasar.find().sort({ tanggal: -1, _id: -1 }).lean();
     const totalItem = items.length;
-    const totalReady = items.filter(i => i.status === 'Ready').length;
-    const totalPending = items.filter(i => i.status === 'Pending').length;
+    const totalReady = items.filter((i) => i.status === 'Ready').length;
+    const totalPending = items.filter((i) => i.status === 'Pending').length;
 
     res.render('guest-harga-dasar', {
       items,
       totalItem,
       totalReady,
-      totalPending
+      totalPending,
     });
   } catch (err) {
     console.error('Gagal memuat harga dasar guest:', err);
@@ -3156,14 +3302,14 @@ app.get('/guest/data-kain', async (req, res) => {
   try {
     const items = await DataBahanKain.find().sort({ _id: -1 }).lean();
     const totalDataKain = items.length;
-    const totalAktif = items.filter(i => i.status === 'Aktif').length;
-    const totalReview = items.filter(i => i.status === 'Review').length;
+    const totalAktif = items.filter((i) => i.status === 'Aktif').length;
+    const totalReview = items.filter((i) => i.status === 'Review').length;
 
     res.render('guest-data-kain', {
       items,
       totalDataKain,
       totalAktif,
-      totalReview
+      totalReview,
     });
   } catch (err) {
     console.error('Gagal memuat data kain guest:', err);
@@ -3174,19 +3320,19 @@ app.get('/guest/data-kain', async (req, res) => {
 app.get('/guest/laporan', async (req, res) => {
   try {
     const rawListLaporan = await Laporan.find().sort({ _id: -1 }).lean();
-    const listLaporan = rawListLaporan.map(item => ({
+    const listLaporan = rawListLaporan.map((item) => ({
       ...item,
-      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : ''
+      cleanName: item.filePath ? item.filePath.replace(/^.*[\\\/]/, '') : '',
     }));
     const totalLaporan = listLaporan.length;
-    const totalBerkas = listLaporan.filter(item => item.filePath).length;
+    const totalBerkas = listLaporan.filter((item) => item.filePath).length;
     const totalTanpaBerkas = totalLaporan - totalBerkas;
 
     res.render('guest-laporan', {
       listLaporan,
       totalLaporan,
       totalBerkas,
-      totalTanpaBerkas
+      totalTanpaBerkas,
     });
   } catch (err) {
     console.error('Gagal memuat laporan guest:', err);
@@ -3200,21 +3346,20 @@ app.get('/dashboard-guest', async (req, res) => {
       Vendor.countDocuments(),
       HargaDasar.countDocuments(),
       DataBahanKain.countDocuments(),
-      Laporan.countDocuments()
+      Laporan.countDocuments(),
     ]);
 
     res.render('dashboard-guest', {
       totalVendor,
       totalHargaDasar,
       totalDataKain,
-      totalLaporan
+      totalLaporan,
     });
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memuat halaman guest: ' + err.message);
   }
 });
-
 
 // ============================================================
 //  START SERVER

@@ -10,7 +10,14 @@
     <div class="card-header">
       <span class="card-title">Total Laporan</span>
       <div class="icon-wrapper icon-blue">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
           <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -32,7 +39,14 @@
     <div class="card-header">
       <span class="card-title">Berkas Tersedia</span>
       <div class="icon-wrapper icon-green">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
           <polyline points="22 4 12 14.01 9 11.01"></polyline>
         </svg>
@@ -52,7 +66,14 @@
     <div class="card-header">
       <span class="card-title">Tanpa Berkas</span>
       <div class="icon-wrapper icon-red">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="8" x2="12" y2="12"></line>
           <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -73,8 +94,14 @@
 <section class="main-box">
   <div class="box-header">
     <div class="box-title">Arsip Laporan</div>
-    <input type="search" class="search-input" placeholder="Cari laporan..." aria-label="Cari laporan"
-           data-table-search="#laporanTable" data-empty="laporanEmpty">
+    <input
+      type="search"
+      class="search-input"
+      placeholder="Cari laporan..."
+      aria-label="Cari laporan"
+      data-table-search="#laporanTable"
+      data-empty="laporanEmpty"
+    />
   </div>
 
   <div class="table-wrap">
@@ -93,36 +120,43 @@
       </thead>
       <tbody>
         <% if (!listLaporan || listLaporan.length === 0) { %>
-          <tr>
-            <td colspan="8">
-              <div class="empty-state">Belum ada laporan yang ditambahkan.</div>
-            </td>
-          </tr>
+        <tr>
+          <td colspan="8">
+            <div class="empty-state">Belum ada laporan yang ditambahkan.</div>
+          </td>
+        </tr>
         <% } else { %>
-          <% listLaporan.forEach(function (lap, index) { %>
-            <tr data-row>
-              <td><%= index + 1 %></td>
-              <td class="strong"><%= lap.namaDokumen || lap.judul || '-' %></td>
-              <td><span class="tag"><%= lap.jenis || lap.kategori || 'Umum' %></span></td>
-              <td><%= lap.tujuan || lap.kepada || '-' %></td>
-              <td><%= lap.keterangan || '-' %></td>
-              <td><%= lap.tanggal ? new Date(lap.tanggal).toLocaleDateString('id-ID') : '-' %></td>
-              <td><%= lap.diinputOleh || '-' %></td>
-              <td class="col-action">
-                <% if (lap.filePath) { %>
-                  <a class="btn-view" href="<%= lap.filePath %>" target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Lihat
-                  </a>
-                <% } else { %>
-                  <span style="color:#a89898;font-size:11px;">Tidak ada</span>
-                <% } %>
-              </td>
-            </tr>
-          <% }); %>
+        <% listLaporan.forEach(function (lap, index) { %>
+        <tr data-row>
+          <td><%= index + 1 %></td>
+          <td class="strong"><%= lap.namaDokumen || lap.judul || '-' %></td>
+          <td><span class="tag"><%= lap.jenis || lap.kategori || 'Umum' %></span></td>
+          <td><%= lap.tujuan || lap.kepada || '-' %></td>
+          <td><%= lap.keterangan || '-' %></td>
+          <td><%= lap.tanggal ? new Date(lap.tanggal).toLocaleDateString('id-ID') : '-' %></td>
+          <td><%= lap.diinputOleh || '-' %></td>
+          <td class="col-action">
+            <% if (lap.filePath) { %>
+            <a class="btn-view" href="<%= lap.filePath %>" target="_blank" rel="noopener">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              Lihat
+            </a>
+            <% } else { %>
+            <span style="color: #a89898; font-size: 11px">Tidak ada</span>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
         <% } %>
       </tbody>
     </table>
