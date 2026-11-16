@@ -941,39 +941,38 @@
               </div>
 
               <!-- Bar Ringkasan Total Anggaran Otomatis -->
-              <div class="total-bar-container">
-                <span class="total-bar-title">Total Anggaran Pengajuan (Otomatis):</span>
-                <span class="total-bar-value" id="tampilanTotalAnggaran">Rp 0</span>
-                <input type="hidden" id="inputTotalNominal" name="totalNominal" value="0">
+                  <div class="total-bar-container">
+                    <span class="total-bar-title">Total Anggaran Pengajuan (Otomatis):</span>
+                    <span class="total-bar-value" id="tampilanTotalAnggaran">Rp 0</span>
+                    <input type="hidden" id="inputTotalNominal" name="totalNominal" value="0">
+                  </div>
+                </div>
+
+                <div class="form-group full">
+                  <label for="inputDeskripsi">Catatan Pemohon (Opsional)</label>
+                  <textarea id="inputDeskripsi" name="deskripsi" rows="2" placeholder="Catatan mendesak, alasan pembelian, atau instruksi lainnya..."></textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Unggah Berkas / Dokumen Pendukung (PDF)</label>
+                  <input type="file" name="fileLaporan" accept="application/pdf">
+                </div>
               </div>
+              <p class="form-hint" style="margin-top: 12px;">Field bertanda <span style="color:#dc2626;">*</span> wajib diisi.</p>
             </div>
-
-            <div class="form-group full">
-              <label for="inputDeskripsi">Catatan Pemohon (Opsional)</label>
-              <textarea id="inputDeskripsi" name="deskripsi" rows="2" placeholder="Catatan mendesak, alasan pembelian, atau instruksi lainnya..."></textarea>
+            <div class="modal-footer">
+              <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+              <button type="submit" class="btn-submit">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                Kirim Pengajuan
+              </button>
             </div>
-            <div class="form-group full">
-              <label>Unggah Berkas / Dokumen Pendukung (PDF)</label>
-              <input type="file" name="fileLaporan" accept="application/pdf">
-            </div>
-          </div>
-          <p class="form-hint" style="margin-top: 12px;">Field bertanda <span style="color:#dc2626;">*</span> wajib diisi.</p>
+          </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
-          <button type="submit" class="btn-submit">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>
-            Kirim Pengajuan
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
+      </div>
+      <script>
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('sidebarOverlay');
@@ -995,7 +994,7 @@
       if (modal) modal.classList.remove('open');
     }
 
-    // Fungsi untuk Baris Barang Dinamis
+    // Fungsi untuk Baris Barang Dinamis (Urutan kolom disesuaikan dengan baris pertama)
     function addItemRow() {
       const container = document.getElementById('itemContainer');
       const rows = container.getElementsByClassName('item-row');
@@ -1150,6 +1149,6 @@
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape') closeModal();
     });
-  </script>
+    </script>
 </body>
 </html>
