@@ -1003,7 +1003,7 @@
       const newRow = document.createElement('div');
       newRow.className = 'item-row';
       newRow.innerHTML = `
-        <textarea data-field="diskripsi" name="items[${rowCount}][diskripsi]" placeholder="Nama barang / spesifikasi material..." rows="1" required></textarea>
+        <textarea data-field="diskripsi" name="items[0][diskripsi]" placeholder="Nama barang / spesifikasi material..." rows="1" required style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>  
         <input type="number" min="1" step="any" data-field="jumlah" name="items[${rowCount}][jumlah]" placeholder="Jml" value="1" required oninput="hitungSubtotalItem(this)">
         <input type="text" data-field="satuan" name="items[${rowCount}][satuan]" placeholder="Cth: Batang" required>
         <input type="number" min="0" step="any" data-field="hargaSatuan" name="items[${rowCount}][hargaSatuan]" placeholder="0" required oninput="hitungSubtotalItem(this)">
