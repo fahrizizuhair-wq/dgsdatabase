@@ -1622,18 +1622,34 @@
                   </div>
                 </td>
                 <td class="cell-nominal" data-label="Total Nominal"
-                  >Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td
-                >
+                  >Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
                 <td data-label="Urgensi"
                   ><span class="badge <%= kelasUrgensi %>"
                     ><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span
-                  ></td
-                >
-                <td data-label="Status"
-                  ><span class="badge <%= kelasStatus %>"
-                    ><span class="badge-dot"></span><%= materi.statusApproval || 'Menunggu' %></span
-                  ></td
-                >
+                  ></td>
+                <td data-label="Status">
+                  <span class="badge <%= kelasStatus %>" id="status-badge-<%= materi._id %>">
+                    <% 
+                      const statusMateri = String(materi.statusApproval || 'Menunggu').trim().toLowerCase();
+                    %>
+                    
+                    <% if (['disetujui', 'approved', 'selesai'].includes(statusMateri)) { %>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
+                        <path d="M20 6 9 17l-5-5"/>
+                      </svg>
+                    <% } else if (['ditolak', 'rejected'].includes(statusMateri)) { %>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
+                        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                      </svg>
+                    <% } else { %>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                      </svg>
+                    <% } %>
+
+                    <span><%= materi.statusApproval || 'Menunggu' %></span>
+                  </span>
+                </td>
               </tr>
               <% }); %>
               <tr id="barisTidakCocok" style="display: none">
