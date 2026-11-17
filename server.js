@@ -19,6 +19,7 @@ const bcrypt = require('bcrypt');
 const puppeteer = require('puppeteer');
 const ExcelJS = require('exceljs');
 const { wrapText } = require('./utils/textWrap');
+const realtime = require('./utils/realtime');
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
@@ -346,6 +347,11 @@ app.use(
     cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 }, // 24 jam
   }),
 );
+
+// ============================================================
+//  REAL-TIME (SSE) — UPDATE DATA ANTAR PENGGUNA
+// ============================================================
+realtime.install(app);
 
 // ============================================================
 //  MIDDLEWARE AUTH
