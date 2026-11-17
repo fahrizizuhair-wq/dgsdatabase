@@ -28,7 +28,8 @@ const PORT = process.env.PORT || 3000;
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static('public'));
+// Static dipasang setelah global access control (lihat app.use(express.static(...))
+// di bawah) supaya berkas non-gambar di /uploads tidak bisa lolos tanpa login.
 
 // ============================================================
 //  GRIDFS CLOUD STORAGE (FILE TETAP AMAN SAAT SERVER RESTART / SLEEP)
@@ -186,6 +187,109 @@ const { buildLpjWorkbook } = require('./utils/lpj-excel');
 const mongoUri =
   process.env.MONGO_URI ||
   'mongodb+srv://fahrizizuhair_db_user:QTzFx9ErXbkYCf5O@cluster0.xp4d3tt.mongodb.net/kiosk_sblk_db?retryWrites=true&w=majority';
+
+// Session — HARUS sebelum seluruh route supaya penjaga akses global bisa
+// membaca req.session, termasuk route unduhan yang terdaftar lebih awal.
+app.use(
+  session({
+    secret: 'rahasia-negara-perusahaan-dgs',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: mongoUri,
+    }),
+    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 }, // 24 jam
+  }),
+);
+
+// ============================================================
+//  GLOBAL ACCESS CONTROL — SEMUA MENU ADMIN/USER WAJIB LOGIN
+// ============================================================
+const PUBLIC_EXACT_PATHS = new Set([
+  '/',
+  '/login',
+  '/login-admin',
+  '/login-user',
+  '/register-admin',
+  '/register-user',
+  '/forgot-password',
+  '/reset-password',
+  '/logout',
+  '/favicon.ico',
+  '/realtime/events',
+  '/dashboard-guest',
+]);
+
+const ADMIN_PREFIX_PATHS = [
+  '/dashboard-admin',
+  '/admin',
+  '/harga-dasar',
+  '/stok-masuk',
+  '/stok-keluar',
+  '/stok-opname',
+  '/laporan',
+  '/surat-jalan-admin',
+  '/materi-approval-admin',
+  '/lpj-admin',
+  '/data-kain-admin',
+];
+
+const PUBLIC_IMAGE_EXT = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.svg', '.ico']);
+
+function matchesPath(requestPath, prefix) {
+  return requestPath === prefix || requestPath.startsWith(prefix + '/');
+}
+
+function isPublicPath(requestPath) {
+  if (PUBLIC_EXACT_PATHS.has(requestPath)) return true;
+  if (matchesPath(requestPath, '/guest')) return true;
+  if (matchesPath(requestPath, '/katalog-vendor')) return true;
+  if (matchesPath(requestPath, '/css') || matchesPath(requestPath, '/js') || matchesPath(requestPath, '/images')) {
+    return true;
+  }
+  if (matchesPath(requestPath, '/uploads')) {
+    return PUBLIC_IMAGE_EXT.has(path.extname(requestPath).toLowerCase());
+  }
+  return false;
+}
+
+function requiredRole(requestPath) {
+  return ADMIN_PREFIX_PATHS.some((prefix) => matchesPath(requestPath, prefix)) ? 'admin' : 'authenticated';
+}
+
+function wantsJson(req) {
+  const accept = String(req.get && req.get('Accept') ? req.get('Accept') : '');
+  const requestedBy = String(req.get && req.get('X-Requested-With') ? req.get('X-Requested-With') : '');
+  const fetchMode = String(req.get && req.get('Sec-Fetch-Mode') ? req.get('Sec-Fetch-Mode') : '');
+  return accept.includes('application/json') || requestedBy === 'XMLHttpRequest' || fetchMode === 'cors';
+}
+
+app.use((req, res, next) => {
+  const requestPath = String(req.path || req.originalUrl.split('?')[0] || '/').toLowerCase();
+
+  if (isPublicPath(requestPath)) return next();
+
+  // Cegah halaman terotentikasi tersimpan di cache browser/back-button.
+  res.set({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+    Pragma: 'no-cache',
+    Expires: '0',
+  });
+
+  const sessionData = req.session || {};
+  const isAdmin = Boolean(sessionData.isAdmin);
+  const isAuthenticated = Boolean(sessionData.isUser || sessionData.isAdmin);
+  const role = requiredRole(requestPath);
+  const allowed = role === 'admin' ? isAdmin : isAuthenticated;
+
+  if (allowed) return next();
+
+  if (wantsJson(req)) {
+    return res.status(401).json({ success: false, message: 'Anda belum login atau tidak memiliki akses.' });
+  }
+  return res.redirect('/?error=Unauthorized');
+});
+
 mongoose
   .connect(mongoUri)
   .then(async () => {
@@ -334,19 +438,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 const uploadMultiple = upload.array('foto'); // DIPERBAIKI: Koma menggantung dihapus
-
-// Session
-app.use(
-  session({
-    secret: 'rahasia-negara-perusahaan-dgs',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: mongoUri,
-    }),
-    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 }, // 24 jam
-  }),
-);
 
 // ============================================================
 //  REAL-TIME (SSE) — UPDATE DATA ANTAR PENGGUNA

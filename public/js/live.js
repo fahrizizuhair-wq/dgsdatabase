@@ -124,6 +124,22 @@
     return /(^|\/)(delete|hapus)(\/|$)/i.test(String(pathname || ''));
   }
 
+  function ambilPath(value) {
+    try {
+      return new URL(value, location.href).pathname.toLowerCase();
+    } catch (err) {
+      return String(value || '').toLowerCase();
+    }
+  }
+
+  // Login/registrasi bukan aksi ubah data. Jangan menahan auto-reload setelah
+  // request ini, supaya update pertama sesudah login tetap langsung masuk.
+  function bukanAksiData(pathname) {
+    return /^\/(login|login-admin|login-user|register-admin|register-user|forgot-password|reset-password|logout)(\/|$)/.test(
+      String(pathname || '').toLowerCase(),
+    );
+  }
+
   // ------------------------------------------------------------------
   // Kirim ID tab pada setiap request tulis, supaya tab penyubmit tidak
   // ikut me-reload dirinya sendiri.
@@ -164,7 +180,8 @@
       var form = event.target;
       if (!form || !form.tagName || form.tagName.toLowerCase() !== 'form') return;
       tambahFieldSumber(form);
-      tandaiAksiLokal(5000);
+      var actionPath = ambilPath(form.getAttribute('action') || location.pathname);
+      if (!bukanAksiData(actionPath)) tandaiAksiLokal(5000);
     },
     true,
   );
@@ -213,7 +230,8 @@
           }
 
           if (['POST', 'PUT', 'PATCH', 'DELETE'].indexOf(method) !== -1) {
-            tandaiAksiLokal(5000);
+            var requestPath = ambilPath(isRequest ? input.url : url);
+            if (!bukanAksiData(requestPath)) tandaiAksiLokal(5000);
           }
         }
       } catch (err) {
@@ -244,7 +262,8 @@
         if (this.__dgsLiveUrl && urlSamaOrigin(this.__dgsLiveUrl)) {
           this.setRequestHeader('X-Live-Client-Id', clientId);
           if (['POST', 'PUT', 'PATCH', 'DELETE'].indexOf(this.__dgsLiveMethod) !== -1) {
-            tandaiAksiLokal(5000);
+            var xhrPath = ambilPath(this.__dgsLiveUrl);
+            if (!bukanAksiData(xhrPath)) tandaiAksiLokal(5000);
           }
         }
       } catch (err) {
@@ -293,6 +312,17 @@
   function sedangMengetik() {
     var el = document.activeElement;
     if (!el) return false;
+
+    // Modal yang baru ditutup bisa meninggalkan fokus pada input di dalamnya.
+    // Input yang tidak terlihat tidak boleh menghalangi auto-reload.
+    try {
+      var style = window.getComputedStyle(el);
+      if (style.display === 'none' || style.visibility === 'hidden') return false;
+      if (typeof el.getClientRects === 'function' && el.getClientRects().length === 0) return false;
+    } catch (err) {
+      // Lanjutkan pemeriksaan tag di bawah.
+    }
+
     if (el.isContentEditable) return true;
 
     var tag = String(el.tagName || '').toUpperCase();
