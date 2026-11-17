@@ -787,9 +787,8 @@
         color: #0f172a;
         outline: none;
         background: #ffffff;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
+        border-color: 0.2s;
+        box-shadow: 0.2s;
       }
       .form-group textarea {
         resize: vertical;
@@ -1622,12 +1621,11 @@
                     <div style="font-size: 14px; font-weight: 500; color: #1e293b"> <%= namaBarangTampil %> </div>
                   </div>
                 </td>
-                <td class="cell-nominal" data-label="Total Nominal"
-                  >Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
+                <td class="cell-nominal" data-label="Total Nominal">Rp<%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
                 <td data-label="Urgensi"
                   ><span class="badge <%= kelasUrgensi %>"
-                    ><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span
-                  ></td>
+                    ><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span>
+                </td>
                 <td data-label="Status">
                   <span class="badge <%= kelasStatus %>" id="status-badge-<%= materi._id %>">
                     <% 
