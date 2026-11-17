@@ -990,7 +990,7 @@
       </section>
     </main>
 
-    <!-- MODAL TAMBAH SURAT JALAN -->
+
     <div class="modal" id="suratJalanModal">
       <div class="modal-content">
         <h3 style="margin-bottom: 15px; color: #7a1b1b; font-weight: 700">Buat Surat Jalan Baru</h3>
@@ -1005,7 +1005,7 @@
           <div class="form-grid">
             <div class="form-group">
               <label>No. Surat Jalan</label>
-              <input type="text" name="noSuratJalan" placeholder="Contoh: DGS/SJ/V/2026/001" required />
+              <input type="text" name="nomorSuratJalan" id="noSuratJalan" class="form-control" oninput="this.value = this.value.toUpperCase()" placeholder="Contoh: DGS/SJ/V/2026/001" required>
             </div>
             <div class="form-group">
               <label>Tanggal Pengiriman</label>
