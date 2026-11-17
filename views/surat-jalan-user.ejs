@@ -1059,8 +1059,6 @@
               </select>
             </div>
           </div>
-
-          <!-- DAFTAR BARANG UTAMA -->
           <div
             style="
               margin-top: 20px;
@@ -1114,13 +1112,10 @@
                 rows="2"
               ></textarea>
               <button type="button" class="btn-remove-item" onclick="removeItemRow(this)"
-                ><i class="fa-solid fa-trash"></i
-              ></button>
+                ><i class="fa-solid fa-trash"></i></button>
             </div>
           </div>
-
-          <!-- KETERANGAN KODE BARANG -->
-          <<div
+            <div
             style="
               margin-top: 20px;
               margin-bottom: 10px;
@@ -1130,9 +1125,7 @@
             "
           >
             <label style="font-size: 13px; font-weight: 600; color: #334155">Keterangan Kode Barang</label>
-            <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 12px" onclick="addKodeRow()"
-              >+ Tambah Kode Barang</button
-            >
+            <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 12px" onclick="addKodeRow()">+ Tambah Kode Barang</button>
           </div>
 
           <div
@@ -1228,7 +1221,6 @@
         parentLi.classList.toggle('active');
       }
 
-      // Fungsi untuk Daftar Barang Utama
       function addItemRow() {
         const container = document.getElementById('itemContainer');
         const rowCount = container.getElementsByClassName('item-row').length;
