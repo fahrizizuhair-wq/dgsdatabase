@@ -1664,13 +1664,27 @@ app.get('/materi-approval-admin', async (req, res) => {
     const listMateri = await MateriApproval.find().sort({ tanggalPengajuan: -1 });
     const totalMateri = listMateri.length;
 
+    // Helper normalisasi status (case-insensitive & robust)
+    const isMenunggu = (s) => {
+      const teks = String(s || '').trim().toLowerCase();
+      if (!teks) return true;
+      if (['disetujui', 'approved', 'selesai'].includes(teks)) return false;
+      if (['ditolak', 'rejected'].includes(teks)) return false;
+      return true;
+    };
+    const isDisetujui = (s) => {
+      const teks = String(s || '').trim().toLowerCase();
+      return ['disetujui', 'approved', 'selesai'].includes(teks);
+    };
+    const isKritis = (u) => {
+      const teks = String(u || '').trim().toLowerCase();
+      return ['kritis', 'critical'].includes(teks);
+    };
+
     // Hitung statistik
-    const statusPerluTindakan = ['Draft', 'Menunggu', 'Menunggu Persetujuan', 'Sedang Ditinjau'];
-    const jumlahMenunggu = listMateri.filter(
-      (m) => !m.statusApproval || statusPerluTindakan.includes(m.statusApproval),
-    ).length;
-    const jumlahDisetujui = listMateri.filter((m) => m.statusApproval === 'Disetujui').length;
-    const jumlahKritis = listMateri.filter((m) => ['Kritis', 'Critical'].includes(m.urgensi)).length;
+    const jumlahMenunggu = listMateri.filter((m) => isMenunggu(m.statusApproval)).length;
+    const jumlahDisetujui = listMateri.filter((m) => isDisetujui(m.statusApproval)).length;
+    const jumlahKritis = listMateri.filter((m) => isKritis(m.urgensi) && isMenunggu(m.statusApproval)).length;
     const totalNominal = listMateri.reduce((acc, curr) => acc + (Number(curr.totalNominal) || 0), 0);
 
     res.render('materi-approval-admin', {
@@ -2322,17 +2336,28 @@ app.get('/materi-approval-user', isUserAuthenticated, async (req, res) => {
   try {
     const dataMateri = await MateriApproval.find().sort({ tanggalPengajuan: -1, createdAt: -1 }).lean();
 
-    const statusAktif = ['Draft', 'Menunggu', 'Menunggu Persetujuan', 'Sedang Ditinjau'];
-    const statusSelesai = ['Disetujui', 'Ditolak'];
+    // Helper normalisasi status (case-insensitive & robust)
+    const isMenunggu = (s) => {
+      const teks = String(s || '').trim().toLowerCase();
+      if (!teks) return true;
+      if (['disetujui', 'approved', 'selesai'].includes(teks)) return false;
+      if (['ditolak', 'rejected'].includes(teks)) return false;
+      return true;
+    };
+    const isDisetujui = (s) => {
+      const teks = String(s || '').trim().toLowerCase();
+      return ['disetujui', 'approved', 'selesai'].includes(teks);
+    };
+    const isKritis = (u) => {
+      const teks = String(u || '').trim().toLowerCase();
+      return ['kritis', 'critical'].includes(teks);
+    };
 
     const totalMateri = dataMateri.length;
     const totalNominal = dataMateri.reduce((acc, item) => acc + (Number(item.totalNominal) || 0), 0);
-    const jumlahMenunggu = dataMateri.filter((m) => !m.statusApproval || statusAktif.includes(m.statusApproval)).length;
-
-    const jumlahDisetujui = dataMateri.filter((item) => item.statusApproval === 'Disetujui').length;
-    const jumlahKritis = dataMateri.filter(
-      (item) => ['Kritis', 'Critical'].includes(item.urgensi) && !statusSelesai.includes(item.statusApproval),
-    ).length;
+    const jumlahMenunggu = dataMateri.filter((m) => isMenunggu(m.statusApproval)).length;
+    const jumlahDisetujui = dataMateri.filter((item) => isDisetujui(item.statusApproval)).length;
+    const jumlahKritis = dataMateri.filter((item) => isKritis(item.urgensi) && isMenunggu(item.statusApproval)).length;
 
     res.render('materi-approval-user', {
       listMateri: dataMateri,

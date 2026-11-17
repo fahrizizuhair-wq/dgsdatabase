@@ -761,7 +761,7 @@
           </div>
         </div>
         <div class="card-body">
-          <span class="card-value"><%= typeof jumlahMenunggu !== 'undefined' ? jumlahMenunggu : 0 %></span>
+          <span class="card-value" id="cardMenungguCount"><%= typeof jumlahMenunggu !== 'undefined' ? jumlahMenunggu : 0 %></span>
           <span class="card-unit">Berkas</span>
         </div>
         <div class="card-footer">
@@ -1298,6 +1298,20 @@
 
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') tutupModalReview();
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const rows = document.querySelectorAll('.approval-table tbody tr.data-row');
+      if (rows.length > 0) {
+        let countMenunggu = 0;
+        rows.forEach(function (r) {
+          if (normalisasiStatus(r.getAttribute('data-status')) === 'Menunggu') countMenunggu++;
+        });
+        const elCount = document.getElementById('cardMenungguCount');
+        if (elCount) elCount.textContent = countMenunggu;
+        const badgeCount = document.querySelector('.status-nav-group .badge-count.warning');
+        if (badgeCount) badgeCount.textContent = countMenunggu;
+      }
     });
   </script>
 </body>
