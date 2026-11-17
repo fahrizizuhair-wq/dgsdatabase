@@ -1101,11 +1101,17 @@
         </div>
         <div class="form-group">
           <label>Jenis Laporan</label>
-          <select name="jenis">
+          <!-- Tambahkan onchange untuk mendeteksi perubahan pilihan -->
+          <select name="jenis" id="pilihanJenis" onchange="cekLainLain(this)">
             <option value="Surat Tanda Terima">Surat Tanda Terima</option>
             <option value="Surat Jalan">Surat Jalan</option>
             <option value="Laporan Harian">Laporan Harian</option>
+            <option value="Lain-lain">Lain-lain</option>
           </select>
+        </div>
+        <div class="form-group" id="inputLainLainGroup" style="display: none; margin-top: 10px;">
+          <label>Sebutkan Jenis Laporan Lainnya</label>
+          <input type="text" name="jenis_lainnya" id="inputLainLain" class="form-control" placeholder="Ketik jenis laporan...">
         </div>
         <div class="form-group">
           <label>Tujuan/Kepada</label>
@@ -1165,6 +1171,21 @@
   </div>
 
   <script>
+    function cekLainLain(selectElement) {
+      const groupLain = document.getElementById('inputLainLainGroup');
+      const inputLain = document.getElementById('inputLainLain');
+
+      if (selectElement.value === 'Lain-lain') {
+        // Tampilkan input teks jika user memilih "Lain-lain"
+        groupLain.style.display = 'block';
+        inputLain.required = true; // Wajib diisi jika opsi Lain-lain dipilih
+      } else {
+        // Sembunyikan kembali jika memilih opsi yang lain
+        groupLain.style.display = 'none';
+        inputLain.required = false;
+        inputLain.value = ''; // Kosongkan isinya jika batal
+      }
+    }
     function openModal() {
       document.getElementById('laporanModal').style.display = 'flex';
     }
