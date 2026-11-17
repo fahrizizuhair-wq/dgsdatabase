@@ -523,6 +523,24 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
 
+    .btn-hapus-custom {
+      background-color: #5a1212; /* Warna maroon gelap */
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-hapus-custom:hover {
+      background-color: #400c0c;
+    }
+
     /* MODAL TAMBAH / EDIT SURAT JALAN */
     .modal {
       display: none;
@@ -1023,7 +1041,7 @@
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>
                 <form action="/surat-jalan-admin/delete/<%= item._id %>" method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus surat jalan ini? Data yang dihapus tidak dapat dikembalikan.');">
-                  <button type="submit" class="btn btn-danger btn-sm">
+                  <button type="submit" class="btn-hapus-custom">
                     <i class="fa-solid fa-trash"></i> Hapus
                   </button>
                 </form>
