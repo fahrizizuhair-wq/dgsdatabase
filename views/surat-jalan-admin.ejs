@@ -1022,6 +1022,7 @@
                 <button type="button" class="btn-sub-action btn-edit" title="Edit" onclick="openEditModal('<%= item._id %>')">
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>
+                <button>
                 <form action="/surat-jalan-admin/delete/<%= item._id %>" method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus surat jalan ini? Data yang dihapus tidak dapat dikembalikan.');"></form>
                 <i class="fa-solid fa-trash"></i> Hapus
                 </button>
