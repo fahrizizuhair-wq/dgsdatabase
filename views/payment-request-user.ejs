@@ -3,7 +3,7 @@
   <head>
     <%- include('partials/head', { pageTitle: 'Payment Request — PT. DIAN GIRI SAPUTRA', useTailwind: true }) %>
   </head>
-  <body class="bg-[#f8fafc] text-slate-800 antialiased selection:bg-maroon-800 selection:text-white">
+  <body class="text-slate-800 antialiased selection:bg-maroon-800 selection:text-white">
     <%- include('partials/payment-request-page', {
       role: 'user',
       user: (typeof user !== 'undefined' ? user : null),
