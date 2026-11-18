@@ -393,10 +393,6 @@
     </div>
 
     <div class="banner-actions">
-      <button type="button" id="btn-nav-list" onclick="navigateTo('list')" class="btn-banner-nav cursor-pointer" title="Lihat Daftar PR">
-        <i data-lucide="file-text" class="w-4 h-4"></i>
-        <span>Daftar PR</span>
-      </button>
       <button type="button" onclick="openCreateForm()" class="btn-banner-primary cursor-pointer" title="Buat Pengajuan Baru">
         <i data-lucide="plus" class="w-4 h-4"></i>
         <span class="hidden sm:inline">Buat Pengajuan Baru</span>
@@ -569,7 +565,7 @@
   </section>
 
   <!-- ALUR 3: DOKUMEN -->
-  <section id="view-detail" data-live-view="detail" class="view-section hidden space-y-5">
+  <section id="view-  " data-live-view="detail" class="view-section hidden space-y-5">
     <div class="pr-detail-topbar flex flex-wrap items-center justify-between gap-3 no-print">
       <button type="button" onclick="navigateTo('list')" class="btn-banner-nav cursor-pointer">
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
@@ -600,24 +596,6 @@
     </div>
 
     <div id="official-pr-sheet" class="bg-white rounded-2xl border border-slate-300 shadow-sm p-6 sm:p-10 text-slate-900 space-y-5">
-      <div class="border-b-4 border-double border-maroon-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-3.5">
-          <svg class="w-12 h-12 shrink-0" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="2" y="2" width="60" height="60" rx="10" stroke="#7a1b1b" stroke-width="4" fill="#fff"/>
-            <path d="M16 18H35C43.2843 18 50 24.7157 50 33C50 41.2843 43.2843 48 35 48H16V18Z" stroke="#7a1b1b" stroke-width="4"/>
-            <path d="M23 25H34C38.4183 25 42 28.5817 42 33C42 37.4183 38.4183 41 34 41H23V25Z" fill="#7a1b1b"/>
-          </svg>
-          <div>
-            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-maroon-800 italic leading-none">PT. DIAN GIRI SAPUTRA</h1>
-            <p class="text-[11px] sm:text-xs font-bold tracking-[0.2em] text-slate-600 uppercase mt-1.5">Contractor - General Service</p>
-          </div>
-        </div>
-        <div class="text-left sm:text-right">
-          <span id="doc-badge-status" class="inline-block no-print"></span>
-          <p id="doc-ref-no" class="text-[11px] font-mono font-bold text-slate-500 mt-1">NO: -</p>
-        </div>
-      </div>
-
       <div class="text-center">
         <h2 class="text-lg sm:text-xl font-extrabold uppercase tracking-wide text-slate-900">Payment Request</h2>
       </div>
