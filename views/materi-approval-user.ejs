@@ -1544,7 +1544,7 @@
             <thead>
               <tr>
                 <th>Tanggal Pengajuan</th>
-                <th>Pemohon / Unit Kerja</th>
+                <th>Nama Pekerjaan</th>
                 <th>Vendor / Supplier</th>
                 <th>Nama Barang</th>
                 <th class="col-nominal">Total Nominal</th>
@@ -1687,7 +1687,7 @@
       </section>
     </main>
 
-    <!-- MODAL: BUAT DRAFT PENGAJUAN -->
+    //MODAL: BUAT DRAFT PENGAJUAN//
     <div class="modal" id="modalDraft" onclick="if (event.target === this) closeModal();">
       <div class="modal-content">
         <div class="modal-header">
@@ -1701,12 +1701,12 @@
           <div class="modal-body">
             <div class="form-grid">
               <div class="form-group">
-                <label for="inputUnitKerja">Unit Kerja <span class="required">*</span></label>
+                <label for="inputUnitKerja">Nama Pekerjaan <span class="required">*</span></label>
                 <input
                   type="text"
                   id="inputUnitKerja"
                   name="unitKerja"
-                  placeholder="Contoh: Divisi Logistik & Armada"
+                  placeholder= "Contoh: Pengadaan Sampel ..."
                   required
                 />
               </div>

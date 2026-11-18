@@ -1679,15 +1679,14 @@
           <span class="count-info">
             Menampilkan
             <strong id="jumlahTampil"
-              ><%= typeof listMateri !== 'undefined' && listMateri ? listMateri.length : 0 %></strong
-            >
+              ><%= typeof listMateri !== 'undefined' && listMateri ? listMateri.length : 0 %></strong>
             dari <strong><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %></strong> pengajuan
           </span>
         </div>
       </section>
     </main>
 
-    <!-- MODAL: BUAT DRAFT PENGAJUAN -->
+    //MODAL TAMBAH DRAFT//
     <div class="modal" id="modalDraft" onclick="if (event.target === this) closeModal();">
       <div class="modal-content">
         <div class="modal-header">
@@ -1701,7 +1700,7 @@
           <div class="modal-body">
             <div class="form-grid">
               <div class="form-group">
-                <label for="inputUnitKerja">Unit Kerja <span class="required">*</span></label>
+                <label for="inputUnitKerja">Pekerjaan<span class="required">*</span></label>
                 <input
                   type="text"
                   id="inputUnitKerja"
