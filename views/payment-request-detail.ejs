@@ -2,14 +2,505 @@
 <html lang="id">
   <head>
     <%- include('partials/head', { pageTitle: 'Dokumen Payment Request — PT. DIAN GIRI SAPUTRA', useTailwind: true }) %>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/payment-request.css" />
   </head>
   <body class="text-slate-800 antialiased selection:bg-maroon-800 selection:text-white">
-    <%- include('partials/payment-request-page', {
-      role: (typeof role !== 'undefined' && role === 'admin') ? 'admin' : 'user',
-      user: (typeof user !== 'undefined' ? user : null),
-      listMateri: (typeof listMateri !== 'undefined' ? listMateri : []),
-      startView: 'detail',
-      initialPRId: (typeof initialPRId !== 'undefined' ? initialPRId : ''),
-    }) %>
+    <%
+      var prDetail = (typeof pengajuan !== 'undefined' && pengajuan) ? pengajuan : {};
+      var peranDetail = (typeof role !== 'undefined' && role === 'admin') ? 'admin' : 'user';
+      var bolehAturStatusDetail = peranDetail === 'admin';
+      var namaPemohonDetail = (typeof user !== 'undefined' && user && (user.namaLengkap || user.username))
+        ? String(user.namaLengkap || user.username)
+        : (peranDetail === 'admin' ? 'Admin' : 'User');
+      var adminUserDetail = (typeof adminUser !== 'undefined' && adminUser)
+        ? String(adminUser)
+        : namaPemohonDetail;
+      var idDokumenDetail = prDetail && prDetail._id
+        ? String(prDetail._id)
+        : String((prDetail && (prDetail.id || prDetail.nomorPengajuan)) || '');
+      var daftarUrlDetail = peranDetail === 'admin' ? '/payment-request-admin' : '/payment-request-user';
+      var editUrlDetail = daftarUrlDetail + '?edit=' + encodeURIComponent(idDokumenDetail);
+
+      function jsonUntukScriptDetail(nilai) {
+        return JSON.stringify(nilai || {})
+          .replace(/</g, '\\u003c')
+          .replace(/>/g, '\\u003e')
+          .replace(/&/g, '\\u0026')
+          .replace(/\u2028/g, '\\u2028')
+          .replace(/\u2029/g, '\\u2029');
+      }
+    %>
+
+    <% if (peranDetail === 'admin') { %>
+      <%- include('partials/sidebar-admin', { activePage: 'payment-request', adminUser: adminUserDetail }) %>
+    <% } else { %>
+      <%- include('partials/sidebar-user', { activePage: 'payment-request', user: (typeof user !== 'undefined' ? user : null) }) %>
+    <% } %>
+
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none no-print"></div>
+
+    <main class="pr-main">
+      <!-- HEADBAR: hamburger membuka sidebar, bukan link dashboard -->
+      <header class="system-banner no-print">
+        <div class="banner-title-wrap">
+          <button type="button" class="banner-toggle-btn" onclick="toggleSidebar()" aria-label="Buka menu navigasi" title="Buka Menu">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <div class="banner-text">
+            <span>Dokumen Payment Request &bull; <%= peranDetail === 'admin' ? 'Admin' : 'User' %></span>
+            <h1>Surat Resmi Payment Request (PR)</h1>
+          </div>
+        </div>
+        <div class="banner-actions">
+          <a href="<%= daftarUrlDetail %>" class="btn-banner-nav no-print">
+            <i data-lucide="list" class="w-4 h-4"></i>
+            <span>Daftar PR</span>
+          </a>
+        </div>
+      </header>
+
+      <div class="pr-detail-topbar flex flex-wrap items-center justify-between gap-3 no-print">
+        <a href="<%= daftarUrlDetail %>" class="btn-banner-nav">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Kembali ke Daftar PR</span>
+        </a>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <% if (bolehAturStatusDetail) { %>
+            <div class="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+              <span class="text-[11px] font-semibold text-slate-500">Status:</span>
+              <select id="detail-status-select" onchange="changeCurrentPRStatus()" class="text-xs font-bold bg-transparent text-slate-900 focus:outline-none cursor-pointer">
+                <option value="Pending">Pending</option>
+                <option value="Disetujui">Disetujui</option>
+                <option value="Ditolak">Ditolak</option>
+                <option value="Sudah Transfer">Sudah Transfer (Lunas)</option>
+              </select>
+            </div>
+          <% } %>
+          <a href="<%= editUrlDetail %>" class="btn-banner-nav">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            <span>Edit Data</span>
+          </a>
+          <button type="button" onclick="window.print()" class="btn-banner-primary cursor-pointer">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>Cetak / Simpan PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="official-pr-sheet" class="bg-white rounded-2xl border border-slate-300 shadow-sm p-6 sm:p-10 text-slate-900 space-y-5">
+        <div class="border-b-4 border-double border-maroon-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3.5">
+            <svg class="w-12 h-12 shrink-0" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="2" y="2" width="60" height="60" rx="10" stroke="#7a1b1b" stroke-width="4" fill="#fff"/>
+              <path d="M16 18H35C43.2843 18 50 24.7157 50 33C50 41.2843 43.2843 48 35 48H16V18Z" stroke="#7a1b1b" stroke-width="4"/>
+              <path d="M23 25H34C38.4183 25 42 28.5817 42 33C42 37.4183 38.4183 41 34 41H23V25Z" fill="#7a1b1b"/>
+            </svg>
+            <div>
+              <h1 class="text-xl sm:text-2xl font-black tracking-tight text-maroon-800 italic leading-none">PT. DIAN GIRI SAPUTRA</h1>
+              <p class="text-[11px] sm:text-xs font-bold tracking-[0.2em] text-slate-600 uppercase mt-1.5">Contractor - General Service</p>
+            </div>
+          </div>
+          <div class="text-left sm:text-right">
+            <span id="doc-badge-status" class="inline-block no-print"></span>
+            <p id="doc-ref-no" class="text-[11px] font-mono font-bold text-slate-500 mt-1">NO: -</p>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <h2 class="text-lg sm:text-xl font-extrabold uppercase tracking-wide text-slate-900">Payment Request</h2>
+        </div>
+
+        <table class="w-full text-xs sm:text-sm border-collapse">
+          <tbody>
+            <tr><td class="py-1 w-32 sm:w-36 font-semibold text-slate-600">Pekerjaan</td><td class="py-1 w-4 font-bold">:</td><td id="doc-pekerjaan" class="py-1 font-bold text-slate-900">-</td></tr>
+            <tr><td class="py-1 font-semibold text-slate-600">Est. Transfer</td><td class="py-1 font-bold">:</td><td id="doc-transfer" class="py-1 font-medium text-slate-900">-</td></tr>
+            <tr><td class="py-1 font-semibold text-slate-600">Lokasi</td><td class="py-1 font-bold">:</td><td id="doc-lokasi" class="py-1 font-medium text-slate-900">-</td></tr>
+            <tr><td class="py-1 font-semibold text-slate-600">Detail</td><td class="py-1 font-bold">:</td><td id="doc-detail" class="py-1 font-medium text-slate-900">-</td></tr>
+          </tbody>
+        </table>
+
+        <div id="doc-cost-summaries" class="border border-slate-300 rounded-xl overflow-hidden divide-y divide-slate-300 text-xs"></div>
+
+        <div class="p-3.5 rounded-xl bg-slate-100 border border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div>
+            <span class="font-bold uppercase text-slate-700">Total Keseluruhan Pengajuan:</span>
+            <p id="doc-grand-terbilang" class="italic font-semibold text-maroon-800 mt-0.5">Terbilang: -</p>
+          </div>
+          <span id="doc-grand-total" class="text-lg sm:text-xl font-black text-slate-900">Rp 0</span>
+        </div>
+
+        <div class="text-xs flex items-start gap-2">
+          <span class="font-bold text-slate-800 w-32 sm:w-36 shrink-0">Lampiran</span>
+          <span class="font-bold">:</span>
+          <ul id="doc-attachments" class="space-y-0.5 text-slate-800"></ul>
+        </div>
+
+        <div class="overflow-x-auto pt-1">
+          <table class="w-full border-collapse border-2 border-slate-900 text-xs min-w-[720px]">
+            <thead>
+              <tr class="bg-slate-100 border-b-2 border-slate-900 text-slate-900 font-bold text-center">
+                <th class="border border-slate-800 py-2.5 px-2 w-10">No</th>
+                <th class="border border-slate-800 py-2.5 px-3">Deskripsi</th>
+                <th class="border border-slate-800 py-2.5 px-2 w-14">Qty</th>
+                <th class="border border-slate-800 py-2.5 px-3 w-28">Harga Satuan</th>
+                <th class="border border-slate-800 py-2.5 px-3 w-28">Total Harga</th>
+                <th class="border border-slate-800 py-2.5 px-3 w-44">Rekening Tujuan</th>
+              </tr>
+            </thead>
+            <tbody id="doc-items-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 pt-8 text-center text-xs avoid-break">
+          <div>
+            <p class="font-semibold text-slate-700 mb-16">Diajukan Oleh,</p>
+            <div class="border-t border-slate-800 mx-3 pt-1">
+              <p class="font-bold text-slate-900">Admin / Procurement</p>
+              <p class="text-[10px] text-slate-500">Pemohon Dana</p>
+            </div>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-700 mb-16">Diperiksa Oleh,</p>
+            <div class="border-t border-slate-800 mx-3 pt-1">
+              <p class="font-bold text-slate-900">Manager Project</p>
+              <p class="text-[10px] text-slate-500">Verifikasi Lapangan</p>
+            </div>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-700 mb-16">Disetujui Oleh,</p>
+            <div class="border-t border-slate-800 mx-3 pt-1">
+              <p class="font-bold text-slate-900">Finance &amp; Direktur</p>
+              <p class="text-[10px] text-slate-500">Otorisasi Transfer</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      var PR_DETAIL = <%- jsonUntukScriptDetail(prDetail) %>;
+      var PR_BISA_ATUR_STATUS = <%- JSON.stringify(bolehAturStatusDetail) %>;
+      var PR_NAMA_PEMOHON = <%- JSON.stringify(namaPemohonDetail) %>;
+
+      var colorStylesDetail = [
+        { docBg: 'bg-[#d9ead3]' },
+        { docBg: 'bg-[#f4cccc]' },
+        { docBg: 'bg-[#ffe599]' },
+        { docBg: 'bg-[#ead1dc]' },
+        { docBg: 'bg-[#cfe2f3]' },
+      ];
+
+      var prSaatIni = null;
+
+      function toggleSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        if (sidebar) sidebar.classList.toggle('active');
+        if (overlay) overlay.classList.toggle('active');
+      }
+
+      function toggleDropdown(element) {
+        var parent = element.closest('.nav-item.dropdown');
+        if (parent) parent.classList.toggle('active');
+      }
+
+      function initIcons() {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          try { window.lucide.createIcons(); } catch (err) {}
+        }
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function formatRupiah(num) {
+        return new Intl.NumberFormat('id-ID', {
+          style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0,
+        }).format(Number(num) || 0);
+      }
+
+      function terbilang(nilai) {
+        var angka = Math.floor(Math.abs(Number(nilai) || 0));
+        if (angka === 0) return 'Nol Rupiah';
+        var satuan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+        function convert(n) {
+          if (n < 12) return satuan[n];
+          if (n < 20) return convert(n - 10) + ' Belas';
+          if (n < 100) return convert(Math.floor(n / 10)) + ' Puluh' + (n % 10 ? ' ' + convert(n % 10) : '');
+          if (n < 200) return 'Seratus' + (n % 100 ? ' ' + convert(n % 100) : '');
+          if (n < 1000) return convert(Math.floor(n / 100)) + ' Ratus' + (n % 100 ? ' ' + convert(n % 100) : '');
+          if (n < 2000) return 'Seribu' + (n % 1000 ? ' ' + convert(n % 1000) : '');
+          if (n < 1000000) return convert(Math.floor(n / 1000)) + ' Ribu' + (n % 1000 ? ' ' + convert(n % 1000) : '');
+          if (n < 1000000000) return convert(Math.floor(n / 1000000)) + ' Juta' + (n % 1000000 ? ' ' + convert(n % 1000000) : '');
+          if (n < 1000000000000) return convert(Math.floor(n / 1000000000)) + ' Miliar' + (n % 1000000000 ? ' ' + convert(n % 1000000000) : '');
+          return '';
+        }
+        return convert(angka).replace(/\s+/g, ' ').trim() + ' Rupiah';
+      }
+
+      function formatTanggal(value) {
+        if (!value) return '-';
+        var d = new Date(value);
+        if (isNaN(d.getTime())) return String(value);
+        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+
+      function statusKey(status) {
+        var teks = String(status || '').trim().toLowerCase();
+        if (teks.indexOf('transfer') !== -1) return 'Sudah Transfer';
+        if (['ditolak', 'rejected', 'batal', 'dibatalkan'].indexOf(teks) !== -1) return 'Ditolak';
+        if (['disetujui', 'approved', 'selesai'].indexOf(teks) !== -1) return 'Disetujui';
+        return 'Pending';
+      }
+
+      function statusLabel(status) {
+        var kunci = statusKey(status);
+        return kunci === 'Sudah Transfer' ? 'Sudah Transfer (Lunas)' : kunci;
+      }
+
+      function getStatusBadge(status) {
+        var kunci = statusKey(status);
+        if (kunci === 'Sudah Transfer') {
+          return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">✓ Sudah Transfer</span>';
+        }
+        if (kunci === 'Ditolak') {
+          return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Ditolak</span>';
+        }
+        if (kunci === 'Disetujui') {
+          return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Disetujui</span>';
+        }
+        return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">Pending</span>';
+      }
+
+      function jadiArray(value) {
+        if (Array.isArray(value)) return value.filter(Boolean);
+        if (value && typeof value === 'object') {
+          return Object.keys(value).sort().map(function (k) { return value[k]; }).filter(Boolean);
+        }
+        return [];
+      }
+
+      function normalizePR(doc) {
+        var penerimaRaw = jadiArray(doc && doc.penerimaTransfer);
+        var recipients = penerimaRaw.map(function (p) {
+          var itemsRaw = jadiArray(p.items);
+          var rincianRaw = jadiArray(p.rincianBiaya);
+          if (itemsRaw.length === 0 && rincianRaw.length > 0) {
+            itemsRaw = rincianRaw.map(function (r) {
+              return { desc: r.deskripsi || '', qty: r.qty || 1, price: r.hargaSatuan || r.jumlah || 0 };
+            });
+          }
+          var items = itemsRaw.map(function (it) {
+            var qty = Number(it.qty != null ? it.qty : 1) || 1;
+            var price = Number(it.price != null ? it.price : (it.hargaSatuan || 0)) || 0;
+            return { desc: String(it.desc || it.deskripsi || ''), qty: qty, price: price };
+          });
+          if (items.length === 0) {
+            items = [{ desc: String(p.keterangan || ''), qty: 1, price: Number(p.subtotal) || 0 }];
+          }
+          return {
+            summaryTitle: String(p.summaryTitle || p.namaPenerima || '-'),
+            vendorName: String(p.vendorName || p.namaPenerima || '-'),
+            pic: String(p.pic || p.keterangan || '-'),
+            bank: String(p.bank || ''),
+            accountNo: String(p.accountNo || p.noRekening || ''),
+            accountHolder: String(p.accountHolder || p.atasNama || ''),
+            items: items,
+          };
+        });
+
+        var attachments = jadiArray(doc && doc.attachments).map(String);
+        if (attachments.length === 0 && doc && doc.daftarDokumen) {
+          attachments = String(doc.daftarDokumen).split(/\r?\n/).map(function (s) {
+            return s.replace(/^[-•*]\s*/, '').trim();
+          }).filter(Boolean);
+        }
+
+        var nomorTampil = doc && (doc.nomorPengajuan || doc._id);
+        if (!nomorTampil && doc && doc.id) nomorTampil = doc.id;
+        var idInternal = doc && doc._id ? String(doc._id) : String(nomorTampil || '-');
+
+        return {
+          id: idInternal,
+          nomor: String(nomorTampil || '-'),
+          _id: doc && doc._id ? String(doc._id) : '',
+          pekerjaan: String((doc && (doc.pekerjaan || doc.namaMaterial)) || '-'),
+          estTransfer: String((doc && doc.estimasiTransfer) || formatTanggal(doc && doc.tanggalTransfer)),
+          lokasi: String((doc && doc.lokasi) || '-'),
+          detail: String((doc && (doc.detailPekerjaan || doc.deskripsi)) || '-'),
+          status: statusKey(doc && doc.statusApproval),
+          attachments: attachments,
+          recipients: recipients,
+        };
+      }
+
+      function calcRecipientTotal(rec) {
+        return (rec.items || []).reduce(function (sum, item) {
+          return sum + ((Number(item.qty) || 0) * (Number(item.price) || 0));
+        }, 0);
+      }
+
+      function calcPRTotal(pr) {
+        return (pr.recipients || []).reduce(function (sum, rec) { return sum + calcRecipientTotal(rec); }, 0);
+      }
+
+      function showToast(msg, type) {
+        var tipe = type || 'success';
+        var container = document.getElementById('toast-container');
+        if (!container) return;
+        var el = document.createElement('div');
+        var borderColor = tipe === 'error' ? 'border-rose-500' : tipe === 'info' ? 'border-amber-400' : 'border-emerald-500';
+        el.className = 'bg-slate-900 text-white border-l-4 ' + borderColor + ' rounded-xl p-3.5 shadow-xl text-xs font-medium pointer-events-auto transition-all duration-300';
+        el.innerHTML = msg;
+        container.appendChild(el);
+        window.setTimeout(function () {
+          el.style.opacity = '0';
+          window.setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 250);
+        }, 3200);
+      }
+
+      function renderPRDetail() {
+        var pr = prSaatIni;
+        if (!pr) return;
+
+        var statusSelect = document.getElementById('detail-status-select');
+        if (statusSelect) statusSelect.value = pr.status;
+
+        var badge = document.getElementById('doc-badge-status');
+        if (badge) badge.innerHTML = getStatusBadge(pr.status);
+        var ref = document.getElementById('doc-ref-no');
+        if (ref) ref.textContent = 'NO: ' + pr.nomor;
+        document.getElementById('doc-pekerjaan').textContent = pr.pekerjaan;
+        document.getElementById('doc-transfer').textContent = pr.estTransfer;
+        document.getElementById('doc-lokasi').textContent = pr.lokasi;
+        document.getElementById('doc-detail').textContent = pr.detail;
+
+        var summaryBox = document.getElementById('doc-cost-summaries');
+        summaryBox.innerHTML = (pr.recipients || []).map(function (rec, idx) {
+          var total = calcRecipientTotal(rec);
+          var theme = colorStylesDetail[idx % colorStylesDetail.length];
+          return '' +
+            '<div class="' + theme.docBg + ' p-3.5 space-y-1 avoid-break">' +
+              '<div class="flex items-center justify-between gap-2">' +
+                '<p class="font-extrabold text-slate-900">' + (idx + 1) + '. ' + escapeHtml(rec.summaryTitle) + '</p>' +
+                '<button type="button" class="btn-salin-rek no-print px-2.5 py-1 rounded-lg bg-white/90 hover:bg-white text-slate-800 border border-slate-300 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer" ' +
+                  'data-account-no="' + escapeHtml(rec.accountNo) + '" data-bank="' + escapeHtml(rec.bank) + '" data-holder="' + escapeHtml(rec.accountHolder) + '">' +
+                  '<i data-lucide="copy" class="w-3 h-3 text-maroon-800"></i><span>Salin Rek</span>' +
+                '</button>' +
+              '</div>' +
+              '<div class="grid grid-cols-12 gap-1 items-baseline"><div class="col-span-4 sm:col-span-3 font-semibold text-slate-700">Cost Summary</div>' +
+                '<div class="col-span-8 sm:col-span-9 flex flex-wrap items-baseline gap-3"><span class="font-extrabold text-slate-900">: ' + formatRupiah(total) + '</span><span class="italic font-medium text-slate-800">' + terbilang(total) + '</span></div></div>' +
+              '<div class="grid grid-cols-12 gap-1 items-start"><div class="col-span-4 sm:col-span-3 font-semibold text-slate-700">Bank/No. Rek</div>' +
+                '<div class="col-span-8 sm:col-span-9 text-slate-900">: ' + escapeHtml(rec.bank) + ' <span class="font-mono font-bold">' + escapeHtml(rec.accountNo) + '</span><br/><span class="pl-2 text-slate-800">a.n ' + escapeHtml(rec.accountHolder) + '</span></div></div>' +
+            '</div>';
+        }).join('') || '<div class="p-4 text-xs text-slate-500">Belum ada penerima transfer.</div>';
+
+        var grandTotal = calcPRTotal(pr);
+        document.getElementById('doc-grand-total').textContent = formatRupiah(grandTotal);
+        document.getElementById('doc-grand-terbilang').textContent = 'Terbilang: ' + terbilang(grandTotal);
+        document.getElementById('doc-attachments').innerHTML = (pr.attachments || []).map(function (a) {
+          return '<li>- ' + escapeHtml(a) + '</li>';
+        }).join('') || '<li>-</li>';
+
+        var tbody = document.getElementById('doc-items-tbody');
+        var html = '';
+        (pr.recipients || []).forEach(function (rec, idx) {
+          var subTotal = calcRecipientTotal(rec);
+          var theme = colorStylesDetail[idx % colorStylesDetail.length];
+          var rowSpanCount = rec.items.length + 2;
+          html += '' +
+            '<tr class="border-t-2 border-slate-900">' +
+              '<td rowspan="' + rowSpanCount + '" class="border border-slate-800 py-2 px-2 text-center font-extrabold align-middle">' + (idx + 1) + '</td>' +
+              '<td colspan="4" class="border border-slate-800 py-2 px-3 bg-slate-50"><span class="font-extrabold text-slate-900 block">' + escapeHtml(rec.vendorName) + '</span><span class="text-[11px] text-slate-600">PIC: ' + escapeHtml(rec.pic) + '</span></td>' +
+              '<td rowspan="' + rowSpanCount + '" class="border border-slate-800 py-2 px-3 text-center align-middle leading-relaxed"><span class="font-semibold block">' + escapeHtml(rec.bank) + ' <strong class="font-mono">' + escapeHtml(rec.accountNo) + '</strong></span><span class="text-[11px] text-slate-700">a.n ' + escapeHtml(rec.accountHolder) + '</span></td>' +
+            '</tr>';
+          rec.items.forEach(function (item) {
+            html += '' +
+              '<tr>' +
+                '<td class="border border-slate-800 py-1.5 px-3 text-slate-900">' + escapeHtml(item.desc) + '</td>' +
+                '<td class="border border-slate-800 py-1.5 px-2 text-center font-medium">' + escapeHtml(item.qty) + '</td>' +
+                '<td class="border border-slate-800 py-1.5 px-3 text-right whitespace-nowrap">' + formatRupiah(item.price) + '</td>' +
+                '<td class="border border-slate-800 py-1.5 px-3 text-right font-medium whitespace-nowrap">' + formatRupiah(Number(item.qty) * Number(item.price)) + '</td>' +
+              '</tr>';
+          });
+          html += '' +
+            '<tr class="' + theme.docBg + ' font-extrabold">' +
+              '<td colspan="3" class="border border-slate-800 py-2 px-3 text-center">Total Pembayaran</td>' +
+              '<td class="border border-slate-800 py-2 px-3 text-right whitespace-nowrap">' + formatRupiah(subTotal) + '</td>' +
+            '</tr>';
+        });
+        tbody.innerHTML = html || '<tr><td colspan="6" class="border border-slate-800 py-4 text-center text-slate-500">Belum ada rincian biaya.</td></tr>';
+        initIcons();
+      }
+
+      async function changeCurrentPRStatus() {
+        if (!PR_BISA_ATUR_STATUS || !prSaatIni) return;
+        var select = document.getElementById('detail-status-select');
+        if (!select) return;
+        var statusBaru = select.value;
+        var statusLama = prSaatIni.status;
+        select.disabled = true;
+        try {
+          var response = await fetch('/payment-request-admin/update-status/' + encodeURIComponent(prSaatIni._id || prSaatIni.id), {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            },
+            body: new URLSearchParams({ statusApproval: statusBaru }),
+          });
+          var hasil;
+          try { hasil = await response.json(); } catch (err) { hasil = null; }
+          if (!response.ok || !hasil || hasil.success === false) {
+            throw new Error((hasil && hasil.message) || 'Gagal memperbarui status.');
+          }
+          prSaatIni.status = statusKey((hasil.data && hasil.data.statusApproval) || statusBaru);
+          renderPRDetail();
+          showToast('Status dokumen diperbarui menjadi <strong>' + escapeHtml(statusLabel(prSaatIni.status)) + '</strong>.', 'success');
+        } catch (err) {
+          prSaatIni.status = statusLama;
+          select.value = statusLama;
+          showToast('Gagal memperbarui status: ' + escapeHtml(err.message || 'terjadi kesalahan'), 'error');
+        } finally {
+          select.disabled = false;
+        }
+      }
+
+      function copyText(text, label) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast('Disalin: <strong>' + escapeHtml(text) + '</strong> (' + escapeHtml(label) + ')', 'success');
+        } catch (err) {
+          showToast('Gagal menyalin teks.', 'error');
+        }
+        document.body.removeChild(ta);
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        prSaatIni = normalizePR(PR_DETAIL);
+        renderPRDetail();
+
+        document.addEventListener('click', function (event) {
+          var btn = event.target.closest('.btn-salin-rek');
+          if (!btn) return;
+          var no = btn.getAttribute('data-account-no') || '';
+          var bank = btn.getAttribute('data-bank') || '';
+          var holder = btn.getAttribute('data-holder') || '';
+          copyText(no, bank + ' a.n ' + holder);
+        });
+
+        initIcons();
+      });
+    </script>
   </body>
 </html>

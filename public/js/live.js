@@ -461,9 +461,13 @@
       input.dispatchEvent(new Event('keyup', { bubbles: true }));
     }
 
-    // Payment Request: pulihkan alur yang sedang dibuka (daftar/form/detail).
+    // Payment Request: pulihkan hanya alur yang masih ada di halaman ini
+    // (daftar/form). Dokumen detail kini merupakan halaman tersendiri.
     if (state.activeView && typeof window.navigateTo === 'function') {
-      try { window.navigateTo(state.activeView); } catch (err) {}
+      var viewElement = document.getElementById('view-' + state.activeView);
+      if (viewElement) {
+        try { window.navigateTo(state.activeView); } catch (err) {}
+      }
     }
 
     try {

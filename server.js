@@ -473,14 +473,16 @@ app.get('/payment-request/detail/:id', async (req, res) => {
     if (!pengajuan) {
       return res.status(404).send('Payment request tidak ditemukan.');
     }
-    const daftarPaymentRequest = await PaymentRequest.find()
-      .sort({ tanggalPengajuan: -1, createdAt: -1 })
-      .lean();
     res.render('payment-request-detail', {
-      listMateri: daftarPaymentRequest,
-      initialPRId: String(pengajuan._id),
+      pengajuan,
       role: req.session.isAdmin ? 'admin' : 'user',
-      user: req.session.user || { namaLengkap: req.session.adminUser || 'User' },
+      user: req.session.user || {
+        username: req.session.adminUser || 'User',
+        namaLengkap: req.session.adminUser || 'User',
+      },
+      adminUser: req.session.adminUser || '',
+      pageTitle: 'Dokumen Payment Request — PT. DIAN GIRI SAPUTRA',
+      useTailwind: true,
     });
   } catch (err) {
     console.error('Error route /payment-request/detail/:id:', err);

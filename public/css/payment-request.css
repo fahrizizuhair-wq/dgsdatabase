@@ -1,0 +1,758 @@
+/* ============================================================
+   Payment Request — gaya bersama (DGS)
+   Dipakai oleh halaman admin, user, dan detail dokumen.
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+  color: #333 !important;
+  min-height: 100vh !important;
+  position: relative !important;
+  background-color: #f4f6f9 !important;
+  display: flex;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(122, 27, 27, 0.85) 0%,
+      rgba(122, 27, 27, 0.1) 40%,
+      rgba(244, 246, 249, 0.88) 100%
+    ),
+    url('/images/background.jpg') no-repeat center top fixed;
+  background-size: cover;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(180deg, #4d0e0e 0%, #7a1b1b 50%, #3e0b0b 100%);
+  color: white;
+  padding: 28px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 1000;
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
+}
+
+.sidebar.active {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo-img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.brand-text h2 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+.brand-text span {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+.close-sidebar-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close-sidebar-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-user-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c9933b 0%, #7a1b1b 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-user-info h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+}
+
+.sidebar-user-info span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #86efac;
+  font-weight: 500;
+}
+
+.sidebar-user-info span::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+}
+
+.nav-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 10px 0 10px 8px;
+}
+
+.nav-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-item a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  color: rgba(255, 255, 255, 0.82);
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 13.5px;
+  transition: all 0.2s ease;
+}
+
+.nav-item a svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+  transition: transform 0.2s;
+}
+
+.nav-item a:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: translateX(3px);
+}
+
+.nav-item a:hover svg {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.nav-item.active a {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-left: 3px solid #f87171;
+}
+
+.nav-item.active a svg {
+  opacity: 1;
+}
+
+.nav-item.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dropdown-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dropdown-toggle .arrow {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.dropdown-menu {
+  list-style: none;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: rgba(50, 10, 10, 0.45);
+  border-radius: 10px;
+  margin-top: 4px;
+  padding-left: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dropdown-menu li a {
+  padding: 9px 14px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dropdown-menu li a:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.nav-item.dropdown.active .dropdown-menu {
+  max-height: 260px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.nav-item.dropdown.active .arrow {
+  transform: rotate(180deg);
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 25px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.btn-bottom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.btn-bottom:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* ============================================================
+   KONTEN UTAMA
+   ============================================================ */
+.pr-main {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  .pr-main {
+    padding: 32px 28px 56px;
+  }
+}
+
+.view-section {
+  animation: prFadeSlide 0.2s ease-out forwards;
+}
+
+@keyframes prFadeSlide {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   HEAD BAR / SYSTEM BANNER
+   ============================================================ */
+.system-banner {
+  background: #f4f6f9;
+  color: #7a1b1b;
+  border-radius: 14px;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14);
+  flex-wrap: wrap;
+  gap: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.banner-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* Tombol hamburger: membuka sidebar, BUKAN link dashboard. */
+.banner-toggle-btn {
+  background: #ffffff;
+  color: #7a1b1b;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.banner-toggle-btn:hover {
+  background: #7a1b1b;
+  color: #ffffff;
+  border-color: #7a1b1b;
+}
+
+.banner-text span {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #475569;
+  font-weight: 700;
+  display: block;
+  line-height: 1.2;
+}
+
+.banner-text h1 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-top: 3px;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+}
+
+.banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-banner-nav {
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+}
+
+.btn-banner-nav:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.btn-banner-primary {
+  background-color: #7a1b1b;
+  color: #ffffff;
+  border: 1px solid #7a1b1b;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  box-shadow: 0 3px 10px rgba(122, 27, 27, 0.28);
+  transition: all 0.2s ease;
+}
+
+.btn-banner-primary:hover {
+  background-color: #5c1313;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(122, 27, 27, 0.35);
+}
+
+/* ============================================================
+   KARTU STATISTIK
+   ============================================================ */
+.pr-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.pr-stat-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 22px;
+  border-top: 5px solid transparent;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pr-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.pr-stat-card.card-blue { border-top-color: #3b82f6; }
+.pr-stat-card.card-gold { border-top-color: #f59e0b; }
+.pr-stat-card.card-green { border-top-color: #10b981; }
+
+.pr-stat-card .card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pr-stat-card .card-title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.pr-stat-card .icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.icon-wrapper.icon-blue { background-color: #e8f0fe; color: #3b82f6; }
+.icon-wrapper.icon-gold { background-color: #fef3c7; color: #d97706; }
+.icon-wrapper.icon-green { background-color: #dcfce7; color: #15803d; }
+
+.pr-stat-card .card-body {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 14px 0 10px;
+}
+
+.pr-stat-card .card-value {
+  font-size: 1.85rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #1e293b;
+}
+
+.pr-stat-card .card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 11.5px;
+}
+
+/* ============================================================
+   PANEL DATA & FILTER
+   ============================================================ */
+.pr-data-panel {
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.pr-filter-toolbar {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 16px 0 20px;
+}
+
+/* ============================================================
+   KARTU DOKUMEN PR
+   ============================================================ */
+.pr-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  padding: 18px 22px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pr-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(122, 27, 27, 0.12);
+  border-color: #7a1b1b;
+  background: #fffdfd;
+}
+
+.pr-card-btn-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7a1b1b;
+  background: #fdf2f2;
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.pr-card:hover .pr-card-btn-view {
+  background: #7a1b1b;
+  color: #ffffff;
+}
+
+/* ============================================================
+   FORM & DOKUMEN CETAK
+   ============================================================ */
+.pr-form-card {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
+  padding: 24px;
+}
+
+.pr-detail-topbar {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+#official-pr-sheet {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   RESPONSIF
+   ============================================================ */
+@media (min-width: 640px) {
+  .pr-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .pr-main {
+    padding: 16px 14px 40px;
+  }
+
+  .pr-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .system-banner {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .banner-text h1 {
+    font-size: 17px;
+  }
+
+  .banner-actions {
+    width: 100%;
+  }
+
+  .banner-actions .btn-banner-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pr-data-panel,
+  .pr-form-card {
+    padding: 16px;
+  }
+
+  .pr-filter-toolbar {
+    padding: 12px;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    display: block !important;
+  }
+
+  body::before,
+  .no-print,
+  .sidebar,
+  .sidebar-overlay {
+    display: none !important;
+  }
+
+  .pr-main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #official-pr-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .avoid-break {
+    break-inside: avoid;
+  }
+}
