@@ -467,6 +467,23 @@ app.get('/payment-request/download/:id', async (req, res) => {
   }
 });
 
+app.get('/payment-request/detail/:id', async (req, res) => {
+  try {
+    const pengajuan = await PaymentRequest.findById(req.params.id).lean();
+    if (!pengajuan) {
+      return res.status(404).send('Payment request tidak ditemukan.');
+    }
+    res.render('payment-request-detail', {
+      pengajuan,
+      role: req.session.isAdmin ? 'admin' : 'user',
+      user: req.session.user || { namaLengkap: 'User' },
+    });
+  } catch (err) {
+    console.error('Error route /payment-request/detail/:id:', err);
+    if (!res.headersSent) res.status(500).send('Gagal memuat dokumen payment request.');
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Multer – konfigurasi penyimpanan file
@@ -2703,11 +2720,42 @@ app.get('/payment-request-user', isUserAuthenticated, async (req, res) => {
   }
 });
 
+app.get('/payment-request-user/form', isUserAuthenticated, (req, res) => {
+  res.render('payment-request-form', {
+    role: 'user',
+    user: req.session.user || {
+      username: req.session.adminUser || 'User',
+      namaLengkap: req.session.adminUser || 'User',
+    },
+  });
+});
+
 app.post('/payment-request-user/add', isUserAuthenticated, upload.single('fileLaporan'), async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
 
-    const { unitKerja, pemohon, kategori, vendor, urgensi, namaMaterial, deskripsi, totalNominal, items } = req.body;
+    const {
+      unitKerja,
+      pemohon,
+      kategori,
+      vendor,
+      urgensi,
+      namaMaterial,
+      deskripsi,
+      totalNominal,
+      items,
+      pekerjaan,
+      tanggalTransfer,
+      detailPekerjaan,
+      daftarDokumen,
+      penerimaTransfer,
+    } = req.body;
+
+    const jadiArray = (value) => {
+      if (Array.isArray(value)) return value.filter(Boolean);
+      if (value && typeof value === 'object') return Object.values(value).filter(Boolean);
+      return [];
+    };
 
     let itemList = [];
     if (Array.isArray(items)) {
@@ -2726,29 +2774,77 @@ app.post('/payment-request-user/add', isUserAuthenticated, upload.single('fileLa
       return { no: idx + 1, diskripsi, jumlah, satuan, hargaSatuan, subtotal };
     });
 
+    const parsedPenerima = jadiArray(penerimaTransfer)
+      .map((p) => {
+        const rincian = jadiArray(p.rincianBiaya)
+          .map((r) => ({
+            deskripsi: String(r.diskripsi || r.deskripsi || '').trim(),
+            jumlah: Math.max(0, Number(String(r.jumlah || 0).replace(/[^\d.-]/g, '')) || 0),
+          }))
+          .filter((r) => r.deskripsi || r.jumlah > 0);
+        const subtotalDariRincian = rincian.reduce((acc, r) => acc + r.jumlah, 0);
+        const subtotal = subtotalDariRincian > 0
+          ? subtotalDariRincian
+          : Math.max(0, Number(String(p.subtotal || 0).replace(/[^\d.-]/g, '')) || 0);
+        return {
+          namaPenerima: String(p.namaPenerima || '').trim(),
+          bank: String(p.bank || '').trim(),
+          noRekening: String(p.noRekening || '').trim(),
+          atasNama: String(p.atasNama || '').trim(),
+          keterangan: String(p.keterangan || '').trim(),
+          rincianBiaya: rincian,
+          subtotal,
+        };
+      })
+      .filter((p) => p.namaPenerima || p.bank || p.noRekening || p.rincianBiaya.length > 0);
+
+    const totalDariPenerima = parsedPenerima.reduce((acc, p) => acc + (Number(p.subtotal) || 0), 0);
     const calculatedTotal = parsedItems.reduce((acc, curr) => acc + (Number(curr.subtotal) || 0), 0);
-    const finalTotalNominal = calculatedTotal > 0 ? calculatedTotal : Math.max(0, Number(totalNominal) || 0);
+    const finalTotalNominal =
+      totalDariPenerima > 0
+        ? totalDariPenerima
+        : calculatedTotal > 0
+          ? calculatedTotal
+          : Math.max(0, Number(totalNominal) || 0);
+
     const derivedNamaMaterial =
       parsedItems.length > 0 ? parsedItems.map((it) => it.diskripsi).join(', ') : String(namaMaterial || '').trim();
+    const pekerjaanTeks =
+      String(pekerjaan || namaMaterial || derivedNamaMaterial || unitKerja || '').trim() || derivedNamaMaterial;
+    const vendorTeks =
+      parsedPenerima.map((p) => p.namaPenerima).filter(Boolean).join(', ') || String(vendor || '').trim();
+    const kategoriTeks = String(kategori || '').trim() || 'Payment Request';
 
-    if (!unitKerja || !kategori || !vendor || (!derivedNamaMaterial && parsedItems.length === 0)) {
+    if (
+      !pekerjaanTeks ||
+      (parsedPenerima.length === 0 &&
+        (!unitKerja || !kategoriTeks || !vendorTeks || (!derivedNamaMaterial && parsedItems.length === 0)))
+    ) {
       return res.redirect('/payment-request-user?error=1');
     }
 
     const namaPenginput = getNamaPenginput(req);
     const urgensiValid = ['Rendah', 'Normal', 'Sedang', 'Tinggi', 'High', 'Kritis', 'Critical'];
     const tanggalPengajuan = new Date();
+    const tanggalTransferObj = tanggalTransfer ? new Date(tanggalTransfer) : null;
+    const tanggalTransferFinal =
+      tanggalTransferObj && !isNaN(tanggalTransferObj.getTime()) ? tanggalTransferObj : tanggalPengajuan;
 
     const draft = new PaymentRequest({
-      nomorPengajuan: nomorPengajuanBaru(kategori, tanggalPengajuan),
+      nomorPengajuan: nomorPengajuanBaru(kategoriTeks, tanggalPengajuan),
       tanggalPengajuan,
-      unitKerja: String(unitKerja).trim(),
+      pekerjaan: pekerjaanTeks,
+      tanggalTransfer: tanggalTransferFinal,
+      detailPekerjaan: String(detailPekerjaan || deskripsi || '').trim(),
+      daftarDokumen: String(daftarDokumen || '').trim(),
+      penerimaTransfer: parsedPenerima,
+      unitKerja: String(unitKerja || pekerjaanTeks).trim(),
       pemohon: String(pemohon || namaPenginput).trim(),
-      kategori: String(kategori).trim(),
-      vendor: String(vendor).trim(),
+      kategori: kategoriTeks,
+      vendor: vendorTeks,
       urgensi: urgensiValid.includes(urgensi) ? urgensi : 'Normal',
-      namaMaterial: derivedNamaMaterial,
-      deskripsi: String(deskripsi || '').trim(),
+      namaMaterial: pekerjaanTeks,
+      deskripsi: String(detailPekerjaan || deskripsi || '').trim(),
       totalNominal: finalTotalNominal,
       statusApproval: 'Menunggu',
       diinputOleh: namaPenginput,

@@ -534,10 +534,10 @@
       .approval-table tbody tr:last-child td {
         border-bottom: none;
       }
-      .approval-table tbody tr.data-row {
+      .pr-card {
         transition: background 0.15s;
       }
-      .approval-table tbody tr.data-row:hover {
+      .pr-card:hover {
         background: #fcfbfb;
       }
 
@@ -978,7 +978,7 @@
         .approval-table thead {
           display: none;
         }
-        .approval-table tbody tr.data-row {
+        .pr-card {
           border: 1px solid #e2e8f0;
           border-radius: 12px;
           margin-bottom: 14px;
@@ -986,10 +986,10 @@
           background: #ffffff;
           box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
         }
-        .approval-table tbody tr.data-row:hover {
+        .pr-card:hover {
           background: #ffffff;
         }
-        .approval-table tbody tr.data-row td {
+        .pr-card td {
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
@@ -998,7 +998,7 @@
           border-bottom: none;
           text-align: right;
         }
-        .approval-table tbody tr.data-row td::before {
+        .pr-card td::before {
           content: attr(data-label);
           flex: 0 0 40%;
           text-align: left;
@@ -1009,13 +1009,13 @@
           text-transform: uppercase;
           padding-top: 2px;
         }
-        .approval-table tbody tr.data-row td > * {
+        .pr-card td > * {
           min-width: 0;
         }
-        .approval-table tbody tr.data-row td .cell-multi {
+        .pr-card td .cell-multi {
           align-items: flex-end;
         }
-        .approval-table tbody tr.data-row td .cell-date {
+        .pr-card td .cell-date {
           white-space: normal;
         }
         .approval-table tbody tr:not(.data-row) {
@@ -1169,7 +1169,7 @@
       .approval-data-panel {
         padding: 14px !important;
       }
-      .approval-table tbody tr.data-row {
+      .pr-card {
         display: grid !important;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         grid-template-areas:
@@ -1186,7 +1186,7 @@
         border-radius: 12px !important;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
       }
-      .approval-table tbody tr.data-row td {
+      .pr-card td {
         display: block !important;
         min-width: 0 !important;
         padding: 0 !important;
@@ -1194,26 +1194,26 @@
         text-align: left !important;
         font-size: 13px;
       }
-      .approval-table tbody tr.data-row td::before {
+      .pr-card td::before {
         content: none !important;
       }
-      .approval-table tbody tr.data-row td:nth-child(1) {
+      .pr-card td:nth-child(1) {
         grid-area: date;
         font-size: 11px;
         font-weight: 600;
         color: #94a3b8;
         white-space: nowrap;
       }
-      .approval-table tbody tr.data-row td:nth-child(2) {
+      .pr-card td:nth-child(2) {
         grid-area: unit;
         font-size: 12px;
         color: #64748b;
       }
-      .approval-table tbody tr.data-row td:nth-child(2) .cell-unit {
+      .pr-card td:nth-child(2) .cell-unit {
         font-weight: 600;
         color: #475569;
       }
-      .approval-table tbody tr.data-row td:nth-child(3) {
+      .pr-card td:nth-child(3) {
         grid-area: vendor;
         min-width: 0;
         overflow: hidden;
@@ -1223,19 +1223,19 @@
         font-size: 12px;
         color: #94a3b8;
       }
-      .approval-table tbody tr.data-row td:nth-child(4) {
+      .pr-card td:nth-child(4) {
         grid-area: title;
       }
-      .approval-table tbody tr.data-row td .cell-multi {
+      .pr-card td .cell-multi {
         align-items: flex-start !important;
       }
-      .approval-table tbody tr.data-row td:nth-child(4) > .cell-multi > div:nth-child(2) {
+      .pr-card td:nth-child(4) > .cell-multi > div:nth-child(2) {
         font-size: 15px !important;
         font-weight: 700 !important;
         color: #0f172a !important;
         line-height: 1.35;
       }
-      .approval-table tbody tr.data-row td:nth-child(5) {
+      .pr-card td:nth-child(5) {
         grid-area: nominal;
         text-align: left !important;
         font-size: 15px !important;
@@ -1243,16 +1243,16 @@
         color: #7a1b1b !important;
         white-space: nowrap;
       }
-      .approval-table tbody tr.data-row td:nth-child(6) {
+      .pr-card td:nth-child(6) {
         grid-area: urgensi;
         justify-self: end;
       }
-      .approval-table tbody tr.data-row td:nth-child(7) {
+      .pr-card td:nth-child(7) {
         grid-area: status;
         justify-self: end;
         align-self: start;
       }
-      .approval-table tbody tr.data-row td .badge {
+      .pr-card td .badge {
         font-size: 10.5px;
         padding: 4px 9px;
         white-space: normal !important;
@@ -1266,241 +1266,168 @@
 </head>
   <body>
     <%- include('partials/sidebar-user', { activePage: 'payment-request' }) %>
-
     <main class="main-content">
-      <!-- SYSTEM BANNER -->
+      <style>
+        .banner-actions-pr { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .btn-pr-secondary,
+        .btn-pr-primary {
+          display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+          padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: 700;
+          text-decoration: none; cursor: pointer; border: 1px solid transparent; white-space: nowrap;
+        }
+        .btn-pr-secondary { background: #fff5f5; color: #7a1b1b; border-color: #fecaca; }
+        .btn-pr-secondary:hover { background: #fee2e2; }
+        .btn-pr-primary { background: #7a1b1b; color: #fff; }
+        .btn-pr-primary:hover { background: #5c1313; }
+        .pr-stats .card-title { letter-spacing: 0.02em; }
+      </style>
+
       <div class="system-banner">
         <div class="banner-title-wrap">
-          <button
-            class="banner-toggle-btn"
-            type="button"
-            onclick="toggleSidebar()"
-            title="Buka Menu"
-            aria-label="Buka Menu"
-          >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
+          <button class="banner-toggle-btn" type="button" onclick="toggleSidebar()" title="Buka Menu" aria-label="Buka Menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
           </button>
           <div class="banner-text">
-            <span>System Approval Terpusat</span>
+            <span>PT. DIAN GIRI SAPUTRA</span>
             <h1>Payment Request</h1>
           </div>
         </div>
-        <button class="btn-primary" type="button" onclick="openModal()">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          Buat Draft Pengajuan
-        </button>
+        <div class="banner-actions-pr">
+          <button class="btn-pr-secondary" type="button">Daftar PR</button>
+          <a class="btn-pr-primary" href="/payment-request-user/form">+ Buat Pengajuan Baru</a>
+        </div>
       </div>
-
       <% if (typeof dibuat !== 'undefined' && dibuat) { %>
       <div class="page-alert success">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
-        <span>Draft pengajuan berhasil disimpan dan sudah masuk ke tabel data pengajuan.</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        <span>Pengajuan berhasil disimpan dan masuk ke daftar Payment Request.</span>
       </div>
       <% } %>
-
       <% if (typeof gagal !== 'undefined' && gagal) { %>
       <div class="page-alert error">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <span>Draft gagal disimpan. Lengkapi unit kerja, kategori dokumen, vendor target, dan nama material.</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span>Pengajuan gagal disimpan. Lengkapi pekerjaan dan minimal satu penerima transfer.</span>
       </div>
       <% } %>
 
-      <!-- BOX INFORMASI PERSETUJUAN -->
-      <section class="approval-intro">
-        <div class="approval-heading">
-          <div class="approval-icon">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M9 11l3 3L22 4"></path>
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-            </svg>
-          </div>
-          <div class="approval-title-wrap">
-            <h2>Persetujuan & Verifikasi Pengadaan</h2>
-            <p
-              >Pantau status persetujuan pengajuan pembelian material (PR/PO) dan Laporan Pertanggungjawaban (LPJ).
-              Halaman user hanya untuk melihat status, tanpa tindakan evaluasi atau otorisasi.</p
-            >
-          </div>
-        </div>
-      </section>
-
-      <!-- KARTU STATISTIK -->
-      <section class="card-grid card-grid-approval">
+      <section class="card-grid card-grid-approval pr-stats">
         <div class="stat-card card-gold">
           <div class="card-header">
-            <span class="card-title">Menunggu Persetujuan</span>
+            <span class="card-title">TOTAL PENGAJUAN PR</span>
             <div class="icon-wrapper icon-gold">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
             </div>
           </div>
           <div class="card-body">
-            <span class="card-value" id="cardMenungguCount"><%= typeof jumlahMenunggu !== 'undefined' ? jumlahMenunggu : 0 %></span>
-            <span class="card-unit">Berkas</span>
+            <span class="card-value"><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %></span>
+            <span class="card-unit">Dokumen</span>
           </div>
-          <div class="card-footer">
-            <span class="text-orange">Perlu Tindakan</span>
-            <span>Evaluasi Cepat</span>
-          </div>
+          <div class="card-footer"><span class="text-orange">Seluruh pengajuan</span><span>Tercatat</span></div>
         </div>
 
         <div class="stat-card card-blue">
           <div class="card-header">
-            <span class="card-title">Total Nominal Pengajuan</span>
+            <span class="card-title">TOTAL NOMINAL</span>
             <div class="icon-wrapper icon-blue">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="2" y="6" width="20" height="14" rx="2"></rect>
-                <path d="M2 10h20"></path>
-                <circle cx="17" cy="15" r="1"></circle>
-              </svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path><circle cx="17" cy="15" r="1"></circle></svg>
             </div>
           </div>
           <div class="card-body">
-            <span class="card-value" style="font-size: 1.55rem"
-              >Rp <%= (typeof totalNominal !== 'undefined' ? totalNominal : 0).toLocaleString('id-ID') %></span
-            >
+            <span class="card-value" style="font-size: 1.55rem">Rp <%= (typeof totalNominal !== 'undefined' ? totalNominal : 0).toLocaleString('id-ID') %></span>
           </div>
-          <div class="card-footer">
-            <span class="text-blue">
-              Akumulasi Dari <%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %> Dokumen</span
-            >
-            <span>Terdistribusi safe</span>
-          </div>
-        </div>
-
-        <div class="stat-card card-green">
-          <div class="card-header">
-            <span class="card-title">Disetujui</span>
-            <div class="icon-wrapper icon-green">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
-            </div>
-          </div>
-          <div class="card-body">
-            <span class="card-value"><%= typeof jumlahDisetujui !== 'undefined' ? jumlahDisetujui : 0 %></span>
-            <span class="card-unit">Berkas</span>
-          </div>
-          <div class="card-footer">
-            <span class="text-green">Disetujui</span>
-            <span>Selesai</span>
-          </div>
+          <div class="card-footer"><span class="text-blue">MENUNGGU / DISETUJUI</span><span><%= typeof jumlahMenunggu !== 'undefined' ? jumlahMenunggu : 0 %> / <%= typeof jumlahDisetujui !== 'undefined' ? jumlahDisetujui : 0 %></span></div>
         </div>
 
         <div class="stat-card card-red">
           <div class="card-header">
-            <span class="card-title">Urgensi Kritis (SLA)</span>
+            <span class="card-title">PERLU PROSES FINANCE</span>
             <div class="icon-wrapper icon-red">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-                ></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </div>
           </div>
           <div class="card-body">
-            <span class="card-value"><%= typeof jumlahKritis !== 'undefined' ? jumlahKritis : 0 %></span>
-            <span class="card-unit">Item</span>
+            <span class="card-value"><%= typeof jumlahMenunggu !== 'undefined' ? jumlahMenunggu : 0 %></span>
+            <span class="card-unit">Pengajuan</span>
           </div>
-          <div class="card-footer">
-            <span class="text-red">Payment Request Prioritas</span>
-            <span>Target Respons</span>
+          <div class="card-footer"><span class="text-red">Menunggu tindak lanjut</span><span>Finance</span></div>
+        </div>
+
+        <div class="stat-card card-green">
+          <div class="card-header">
+            <span class="card-title">DISETUJUI</span>
+            <div class="icon-wrapper icon-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"></path></svg>
+            </div>
           </div>
+          <div class="card-body">
+            <span class="card-value"><%= typeof jumlahDisetujui !== 'undefined' ? jumlahDisetujui : 0 %></span>
+            <span class="card-unit">Dokumen</span>
+          </div>
+          <div class="card-footer"><span class="text-green">Siap dibayarkan</span><span>Selesai</span></div>
         </div>
       </section>
-
       <!-- PANEL DATA -->
+      <style>
+        .pr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; width: 100%; }
+        .pr-card {
+          background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.06); display: flex; flex-direction: column;
+          justify-content: space-between; transition: transform .2s, box-shadow .2s;
+        }
+        .pr-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .pr-card-top { padding: 19px 20px 15px; }
+        .pr-meta-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+        .pr-id-wrap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .pr-id { font-size: 12px; font-weight: 800; color: #7a1b1b; letter-spacing: .04em; }
+        .pr-badge { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+        .pr-badge.disetujui { background: #dcfce7; color: #15803d; }
+        .pr-badge.menunggu { background: #fef9c3; color: #a16207; }
+        .pr-badge.ditolak { background: #fee2e2; color: #b91c1c; }
+        .pr-est { font-size: 11px; color: #64748b; text-align: right; white-space: nowrap; }
+        .pr-card h3 { font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 12px; line-height: 1.4; }
+        .pr-transfer-status {
+          display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .03em;
+          padding: 4px 9px; border-radius: 6px; margin-bottom: 12px;
+        }
+        .transfer-done { background: #dcfce7; color: #15803d; }
+        .transfer-wait { background: #fef9c3; color: #a16207; }
+        .transfer-cancel { background: #fee2e2; color: #b91c1c; }
+        .pr-recipients { font-size: 11.5px; color: #64748b; line-height: 1.5; }
+        .pr-recipients strong { color: #334155; }
+        .pr-card-footer {
+          border-top: 1px solid #f1f5f9; padding: 13px 20px; background: #fafafa;
+          display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+        }
+        .pr-nominal { display: flex; flex-direction: column; gap: 2px; }
+        .pr-nominal span { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; font-weight: 700; }
+        .pr-nominal strong { font-size: 16px; color: #7a1b1b; }
+        .pr-card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .pr-open {
+          display: inline-flex; align-items: center; gap: 5px; padding: 9px 13px; border-radius: 8px;
+          background: #7a1b1b; color: #fff; font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap;
+        }
+        .pr-open:hover { background: #5c1313; }
+        .pr-card .btn-review { padding: 9px 11px; font-size: 11.5px; }
+        .pr-empty { grid-column: 1 / -1; }
+        @media (max-width: 768px) {
+          .pr-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+          .pr-meta-row { flex-direction: column; }
+          .pr-est { text-align: left; }
+          .pr-card-footer { align-items: flex-start; flex-direction: column; }
+          .pr-card-actions { width: 100%; }
+          .pr-open { flex: 1 1 auto; justify-content: center; }
+        }
+      </style>
+
       <section class="approval-data-panel">
         <div class="data-panel-head">
           <div>
-            <h2>Data Pengajuan</h2>
-            <p>Daftar pengajuan yang tercatat beserta status persetujuannya.</p>
+            <h2>Riwayat Pengajuan Payment Request</h2>
+            <p>Klik dokumen untuk melihat surat resmi, menyalin nomor rekening, atau cetak PDF.</p>
           </div>
           <span class="total-chip"><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %> Pengajuan</span>
         </div>
@@ -1508,183 +1435,118 @@
         <div class="filter-nav-container">
           <div class="status-nav-group">
             <button type="button" class="nav-btn active btn-semua" onclick="filterStatus('', this)">
-              Semua Pengajuan <span class="badge-count"><%= totalMateri %></span>
+              Semua Status <span class="badge-count"><%= totalMateri %></span>
             </button>
             <button type="button" class="nav-btn btn-warning" onclick="filterStatus('Menunggu', this)">
-              Perlu Persetujuan <span class="badge-count warning"><%= jumlahMenunggu %></span>
+              Menunggu <span class="badge-count warning"><%= jumlahMenunggu %></span>
             </button>
             <button type="button" class="nav-btn btn-success" onclick="filterStatus('Disetujui', this)">
               Disetujui <span class="badge-count success"><%= jumlahDisetujui %></span>
             </button>
           </div>
-
-          <!-- Filter Dropdown & Search (Kanan) -->
           <div class="filter-right-group">
-            <!-- Dropdown Urgensi -->
             <select id="filterUrgensi" onchange="filterTabel()" class="form-select filter-select">
               <option value="">Semua Urgensi</option>
               <option value="Normal">Normal</option>
               <option value="High">High</option>
               <option value="Critical">Critical</option>
             </select>
-
-            <!-- Search Box Ringkas -->
             <div class="search-field-compact">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-              <input type="text" id="searchMateri" oninput="filterTabel()" placeholder="Cari ID / Pembayaran..." />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="searchMateri" oninput="filterTabel()" placeholder="Cari nama pekerjaan, lokasi, atau nama vendor..." />
             </div>
           </div>
         </div>
 
-        <div class="table-responsive">
-          <table class="approval-table">
-            <thead>
-              <tr>
-                <th>Tanggal Pengajuan</th>
-                <th>Pemohon / Unit Kerja</th>
-                <th>Vendor / Supplier</th>
-                <th>Nama Barang</th>
-                <th class="col-nominal">Total Nominal</th>
-                <th>Urgensi</th>
-                <th>Status Approval</th>
-              </tr>
-            </thead>
-            <tbody>
-              <%
-              const daftarMateri = (typeof listMateri !== 'undefined' && listMateri) ? listMateri : [];
-            %>
-              <% if (daftarMateri.length === 0) { %>
-              <tr>
-                <td colspan="7" class="empty-state">
-                  <div class="empty-icon">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="9" y1="15" x2="15" y2="15"></line>
-                    </svg>
-                  </div>
-                  <h3>Belum ada data pengajuan</h3>
-                  <p>Buat draft pengajuan baru untuk mulai mencatat materi approval.</p>
-                  <button type="button" class="btn-empty-action" onclick="openModal()">+ Buat Draft Pengajuan</button>
-                </td>
-              </tr>
-              <% } else { %>
-              <% daftarMateri.forEach(function (materi) { const tanggal = materi.tanggalPengajuan ? new
-              Date(materi.tanggalPengajuan) : null; const tanggalTampil = (tanggal && !isNaN(tanggal.getTime())) ?
-              tanggal.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'; const
-              kelasUrgensi = { 'Critical': 'urgensi-kritis', 'High': 'urgensi-tinggi', 'Normal': 'urgensi-normal'
-              }[materi.urgensi] || 'urgensi-normal'; const kelasStatus = { 'Draft': 'status-menunggu', 'Menunggu':
-              'status-menunggu', 'Menunggu Persetujuan': 'status-menunggu', 'Sedang Ditinjau': 'status-menunggu',
-              'Disetujui': 'status-disetujui', 'Ditolak': 'status-ditolak' }[materi.statusApproval] ||
-              'status-menunggu'; // Mengambil nama barang (mendukung input single namaMaterial atau multi-item items)
-              let namaBarangTampil = materi.namaMaterial || '-'; if (materi.items && Array.isArray(materi.items) &&
-              materi.items.length > 0) { namaBarangTampil = materi.items[0].diskripsi || materi.namaMaterial || '-'; }
-              const teksCari = [ materi.unitKerja, materi.vendor, materi.pemohon, namaBarangTampil, materi.deskripsi
-              ].filter(Boolean).join(' ').toLowerCase(); %>
-              <tr
-                class="data-row"
-                data-urgensi="<%= materi.urgensi || 'Normal' %>"
-                data-status="<%= materi.statusApproval || 'Menunggu' %>"
-                data-search="<%= teksCari %>"
-              >
-                <td data-label="Tanggal"><span class="cell-date"><%= tanggalTampil %></span></td>
-                <td data-label="Unit Kerja"><span class="cell-unit"><%= materi.unitKerja || '-' %></span></td>
-                <td data-label="Vendor"><span class="cell-vendor"><%= materi.vendor || '-' %></span></td>
-                <td data-label="Nama Barang">
-                  <div class="cell-multi">
-                    <div
-                      style="
-                        font-size: 11px;
-                        font-weight: 600;
-                        color: #475569;
-                        background: #f1f5f9;
-                        padding: 2px 8px;
-                        border-radius: 4px;
-                        display: inline-block;
-                        margin-bottom: 4px;
-                        align-self: flex-start;
-                      
-                      "
-                    >
-                      <%= materi.kategori || 'Umum' %>
-                    </div>
-                    <div style="font-size: 14px; font-weight: 500; color: #1e293b"> <%= namaBarangTampil %> </div>
-                  </div>
-                </td>
-                <td class="cell-nominal" data-label="Total Nominal">Rp<%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></td>
-                <td data-label="Urgensi"
-                  ><span class="badge <%= kelasUrgensi %>"
-                    ><span class="badge-dot"></span><%= materi.urgensi || 'Normal' %></span>
-                </td>
-                <td data-label="Status">
-                  <span class="badge <%= kelasStatus %>" id="status-badge-<%= materi._id %>">
-                    <% 
-                      const statusMateri = String(materi.statusApproval || 'Menunggu').trim().toLowerCase();
-                    %>
-                    
-                    <% if (['disetujui', 'approved', 'selesai'].includes(statusMateri)) { %>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
-                        <path d="M20 6 9 17l-5-5"/>
-                      </svg>
-                    <% } else if (['ditolak', 'rejected'].includes(statusMateri)) { %>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
-                        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                      </svg>
-                    <% } else { %>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
-                        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-                      </svg>
-                    <% } %>
-
-                    <span><%= materi.statusApproval || 'Menunggu' %></span>
-                  </span>
-                </td>
-              </tr>
-              <% }); %>
-              <tr id="barisTidakCocok" style="display: none">
-                <td colspan="7" class="empty-state">
-                  <div class="empty-icon">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                  </div>
-                  <h3>Tidak ada hasil</h3>
-                  <p>Tidak ada pengajuan yang cocok dengan pencarian atau filter urgensi.</p>
-                </td>
-              </tr>
-              <% } %>
-            </tbody>
-          </table>
+        <%
+          const daftarMateri = (typeof listMateri !== 'undefined' && listMateri) ? listMateri : [];
+          const apakahAdmin = false;
+        %>
+        <div class="pr-grid">
+          <% if (daftarMateri.length === 0) { %>
+          <div class="empty-state pr-empty">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            </div>
+            <h3>Belum ada pengajuan Payment Request</h3>
+            <p>Buat pengajuan baru untuk mulai mencatat daftar transfer.</p>
+            <a href="/payment-request-user/form" class="btn-empty-action">+ Buat Pengajuan Baru</a>
+          </div>
+          <% } else { %>
+          <% daftarMateri.forEach(function (materi) {
+            const tanggal = materi.tanggalTransfer || materi.tanggalPengajuan ? new Date(materi.tanggalTransfer || materi.tanggalPengajuan) : null;
+            const tanggalTampil = (tanggal && !isNaN(tanggal.getTime()))
+              ? tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+            const statusTeks = String(materi.statusApproval || 'Menunggu').trim().toLowerCase();
+            const disetujui = ['disetujui', 'approved', 'selesai'].includes(statusTeks);
+            const ditolak = ['ditolak', 'rejected'].includes(statusTeks);
+            const kelasStatus = disetujui ? 'disetujui' : ditolak ? 'ditolak' : 'menunggu';
+            const statusTransfer = disetujui ? 'SUDAH TRANSFER (LUNAS)' : ditolak ? 'DIBATALKAN' : 'MENUNGGU TRANSFER';
+            const kelasTransfer = disetujui ? 'transfer-done' : ditolak ? 'transfer-cancel' : 'transfer-wait';
+            const judulPekerjaan = materi.pekerjaan || materi.namaMaterial || '-';
+            const penerimaArr = Array.isArray(materi.penerimaTransfer) ? materi.penerimaTransfer : [];
+            const penerimaNama = penerimaArr.map(function (p) { return p && p.namaPenerima ? p.namaPenerima : ''; }).filter(Boolean);
+            if (penerimaNama.length === 0 && materi.vendor) penerimaNama.push(materi.vendor);
+            const penerimaTeks = penerimaNama.join(', ');
+            const detailTeks = [materi.detailPekerjaan, materi.deskripsi, materi.unitKerja].filter(Boolean).join(' ');
+            const teksCari = [materi.nomorPengajuan, judulPekerjaan, penerimaTeks, materi.vendor, materi.unitKerja, detailTeks]
+              .filter(Boolean).join(' ').toLowerCase();
+          %>
+          <article class="pr-card"
+            data-urgensi="<%= materi.urgensi || 'Normal' %>"
+            data-status="<%= materi.statusApproval || 'Menunggu' %>"
+            data-search="<%= teksCari %>">
+            <div class="pr-card-top">
+              <div class="pr-meta-row">
+                <div class="pr-id-wrap">
+                  <span class="pr-id"><%= materi.nomorPengajuan || '-' %></span>
+                  <span class="pr-badge <%= kelasStatus %>"><%= materi.statusApproval || 'Menunggu' %></span>
+                </div>
+                <span class="pr-est">Est. Transfer: <%= tanggalTampil %></span>
+              </div>
+              <h3><%= judulPekerjaan %></h3>
+              <span class="pr-transfer-status <%= kelasTransfer %>"><%= statusTransfer %></span>
+              <div class="pr-recipients">
+                <strong><%= penerimaNama.length %> Penerima:</strong>
+                <%= penerimaTeks || '-' %>
+              </div>
+            </div>
+            <div class="pr-card-footer">
+              <div class="pr-nominal">
+                <span>Total Pengajuan</span>
+                <strong>Rp <%= (Number(materi.totalNominal) || 0).toLocaleString('id-ID') %></strong>
+              </div>
+              <div class="pr-card-actions">
+                <a class="pr-open" href="/payment-request/detail/<%= materi._id %>">Buka Dokumen →</a>
+                <% if (apakahAdmin) { %>
+                <button type="button" class="btn-review" data-materi="<%= encodeURIComponent(JSON.stringify(materi)) %>" onclick="handleKlikReview(this)">
+                  Review &amp; Otorisasi
+                </button>
+                <% } %>
+              </div>
+            </div>
+          </article>
+          <% }); %>
+          <div id="barisTidakCocok" class="empty-state pr-empty" style="display: none">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <h3>Tidak ada hasil</h3>
+            <p>Tidak ada pengajuan yang cocok dengan pencarian atau filter.</p>
+          </div>
+          <% } %>
         </div>
 
         <div class="approval-footer">
           <span class="count-info">
-            Menampilkan
-            <strong id="jumlahTampil"
-              ><%= typeof listMateri !== 'undefined' && listMateri ? listMateri.length : 0 %></strong>
+            Menampilkan <strong id="jumlahTampil"><%= daftarMateri.length %></strong>
             dari <strong><%= typeof totalMateri !== 'undefined' ? totalMateri : 0 %></strong> pengajuan
           </span>
         </div>
       </section>
+
     </main>
+
 
     //MODAL TAMBAH DRAFT//
     <div class="modal" id="modalDraft" onclick="if (event.target === this) closeModal();">
@@ -2070,7 +1932,7 @@
 
         const kataKunci = input.value.trim().toLowerCase();
         const urgensi = select.value;
-        const rows = document.querySelectorAll('.approval-table tbody tr.data-row');
+        const rows = document.querySelectorAll('.pr-card');
         let tampil = 0;
 
         rows.forEach(function (row) {
@@ -2106,7 +1968,7 @@
       });
 
       document.addEventListener('DOMContentLoaded', function () {
-        const rows = document.querySelectorAll('.approval-table tbody tr.data-row');
+        const rows = document.querySelectorAll('.pr-card');
         if (rows.length > 0) {
           let countMenunggu = 0;
           rows.forEach(function (r) {

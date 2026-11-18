@@ -1,0 +1,309 @@
+<%
+  const pr = pengajuan;
+  const statusTeks = String(pr.statusApproval || 'Menunggu').trim().toLowerCase();
+  const disetujui = ['disetujui', 'approved', 'selesai'].includes(statusTeks);
+  const ditolak = ['ditolak', 'rejected'].includes(statusTeks);
+  const statusLabel = pr.statusApproval || 'Menunggu';
+  const statusKelas = disetujui ? 'disetujui' : ditolak ? 'ditolak' : 'menunggu';
+  const statusTransfer = disetujui ? 'SUDAH TRANSFER (LUNAS)' : ditolak ? 'DIBATALKAN' : 'MENUNGGU TRANSFER';
+  const transferKelas = disetujui ? 'transfer-done' : ditolak ? 'transfer-cancel' : 'transfer-wait';
+
+  const penerimaList = Array.isArray(pr.penerimaTransfer) ? pr.penerimaTransfer : [];
+  const judulPekerjaan = pr.pekerjaan || pr.namaMaterial || '-';
+
+  function tanggalIndo(value) {
+    if (!value) return '-';
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return '-';
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function rupiah(value) {
+    return 'Rp ' + (Number(value) || 0).toLocaleString('id-ID');
+  }
+  function teksAman(value) {
+    return value == null ? '-' : String(value);
+  }
+%>
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <%- include('partials/head') %>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dokumen Payment Request - <%= pr.nomorPengajuan || 'PR' %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; min-height: 100%; overflow-x: hidden; }
+      body {
+        font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+        color: #1f2937; background: #f4f6f9; display: flex; min-height: 100vh;
+      }
+      .main-content { flex: 1; min-width: 0; padding: 26px; width: 100%; }
+      .pr-detail-banner {
+        background: #fffdfd; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 22px;
+        display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+        margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,.06);
+      }
+      .banner-eyebrow { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #7a1b1b; font-weight: 800; }
+      .pr-detail-banner h1 { margin: 3px 0 0; font-size: 20px; color: #111827; }
+      .banner-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+      .btn-detail {
+        display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+        padding: 9px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700;
+        text-decoration: none; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; color: #334155;
+      }
+      .btn-detail:hover { background: #f1f5f9; }
+      .btn-detail.utama { background: #7a1b1b; border-color: #7a1b1b; color: #fff; }
+      .btn-detail.utama:hover { background: #5c1313; }
+      .detail-wrap {
+        background: rgba(255,255,255,.97); border-radius: 14px; padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,.06); border: 1px solid #e2e8f0;
+      }
+      .detail-header {
+        display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; flex-wrap: wrap;
+        padding-bottom: 20px; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9;
+      }
+      .detail-header h2 { margin: 6px 0 10px; font-size: 21px; line-height: 1.4; color: #0f172a; }
+      .detail-id { font-size: 13px; font-weight: 800; color: #7a1b1b; letter-spacing: .04em; }
+      .badge-status {
+        display: inline-block; font-size: 11px; font-weight: 800; padding: 4px 11px; border-radius: 20px; margin-left: 8px;
+      }
+      .disetujui { background: #dcfce7; color: #15803d; }
+      .menunggu { background: #fef9c3; color: #a16207; }
+      .ditolak { background: #fee2e2; color: #b91c1c; }
+      .transfer-status {
+        display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .04em;
+        padding: 6px 11px; border-radius: 7px; margin-top: 6px;
+      }
+      .transfer-done { background: #dcfce7; color: #15803d; }
+      .transfer-wait { background: #fef9c3; color: #a16207; }
+      .transfer-cancel { background: #fee2e2; color: #b91c1c; }
+      .header-total { text-align: right; }
+      .header-total span { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; font-weight: 800; }
+      .header-total strong { display: block; font-size: 24px; color: #7a1b1b; margin-top: 4px; }
+      .section { margin-bottom: 26px; }
+      .section h3 {
+        display: flex; align-items: center; gap: 9px; font-size: 14px; color: #7a1b1b;
+        margin: 0 0 14px; padding-bottom: 9px; border-bottom: 1px dashed #e2e8f0;
+      }
+      .section-number {
+        width: 24px; height: 24px; border-radius: 50%; background: #7a1b1b; color: #fff;
+        display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;
+      }
+      .info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .info-box {
+        border: 1px solid #e2e8f0; border-radius: 10px; padding: 13px 14px; background: #fafafa;
+      }
+      .info-box.full { grid-column: 1 / -1; }
+      .info-label { font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: #94a3b8; font-weight: 800; }
+      .info-value { font-size: 13.5px; color: #1f2937; margin-top: 5px; font-weight: 600; white-space: pre-line; }
+      .penerima-card {
+        border: 1px solid #e2e8f0; border-left: 4px solid #7a1b1b; border-radius: 10px;
+        padding: 15px; margin-bottom: 14px; background: #fffdfd;
+      }
+      .penerima-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+      .penerima-head strong { font-size: 13px; color: #7a1b1b; }
+      .rekening-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .rekening-code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; font-weight: 700;
+        background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 7px; padding: 6px 10px;
+      }
+      .btn-copy { border: 1px solid #fecaca; background: #fff; color: #b91c1c; border-radius: 7px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+      .btn-copy:hover { background: #fee2e2; }
+      .bank-meta { font-size: 12px; color: #64748b; margin-top: 7px; }
+      table.rincian { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px; }
+      table.rincian th, table.rincian td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; }
+      table.rincian th { background: #f8fafc; color: #475569; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; }
+      table.rincian td:last-child, table.rincian th:last-child { text-align: right; white-space: nowrap; }
+      .subtotal-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; font-size: 13px; }
+      .subtotal-row strong { color: #7a1b1b; }
+      .dokumen-list { margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8; white-space: pre-line; }
+      .lampiran-link { display: inline-flex; margin-top: 10px; }
+      .footer-tanda { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 28px; padding-top: 16px; border-top: 1px dashed #e2e8f0; font-size: 12px; color: #64748b; }
+      .toast {
+        position: fixed; right: 22px; bottom: 22px; background: #166534; color: #fff;
+        padding: 10px 15px; border-radius: 8px; font-size: 12.5px; font-weight: 700;
+        opacity: 0; pointer-events: none; transform: translateY(8px); transition: .2s; z-index: 9999;
+      }
+      .toast.muncul { opacity: 1; transform: translateY(0); }
+      @media (max-width: 768px) {
+        .main-content { padding: 16px; }
+        .detail-wrap { padding: 17px; }
+        .info-grid { grid-template-columns: minmax(0, 1fr); }
+        .header-total { text-align: left; }
+        .detail-header h2 { font-size: 18px; }
+        .banner-actions { width: 100%; }
+        .banner-actions .btn-detail { flex: 1 1 auto; }
+      }
+      @media print {
+        body > *:not(.main-content) { display: none !important; }
+        .main-content { padding: 0; }
+        .pr-detail-banner, .btn-copy, .toast { display: none !important; }
+        .detail-wrap { border: 0; box-shadow: none; padding: 0; }
+        .penerima-card, .section { break-inside: avoid; }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include(role === 'admin' ? 'partials/sidebar-admin' : 'partials/sidebar-user', { activePage: 'payment-request' }) %>
+
+    <main class="main-content">
+      <div class="pr-detail-banner">
+        <div>
+          <div class="banner-eyebrow">PT. DIAN GIRI SAPUTRA</div>
+          <h1>Dokumen Payment Request</h1>
+        </div>
+        <div class="banner-actions">
+          <a class="btn-detail" href="<%= role === 'admin' ? '/payment-request-admin' : '/payment-request-user' %>">← Kembali ke Daftar</a>
+          <% if (pr.fileUrl) { %>
+          <a class="btn-detail" href="/payment-request/download/<%= pr._id %>">Unduh Lampiran</a>
+          <% } %>
+          <button class="btn-detail utama" type="button" onclick="window.print()">Cetak / Simpan PDF</button>
+        </div>
+      </div>
+
+      <div class="detail-wrap">
+        <div class="detail-header">
+          <div>
+            <div class="detail-id">
+              <%= pr.nomorPengajuan || '-' %>
+              <span class="badge-status <%= statusKelas %>"><%= statusLabel %></span>
+            </div>
+            <h2><%= judulPekerjaan %></h2>
+            <span class="transfer-status <%= transferKelas %>"><%= statusTransfer %></span>
+          </div>
+          <div class="header-total">
+            <span>Total Pengajuan</span>
+            <strong><%= rupiah(pr.totalNominal) %></strong>
+            <span style="margin-top: 6px">Est. Transfer: <%= tanggalIndo(pr.tanggalTransfer || pr.tanggalPengajuan) %></span>
+          </div>
+        </div>
+
+        <section class="section">
+          <h3><span class="section-number">1</span> Informasi Pekerjaan &amp; Jadwal Transfer</h3>
+          <div class="info-grid">
+            <div class="info-box">
+              <div class="info-label">Pekerjaan</div>
+              <div class="info-value"><%= teksAman(judulPekerjaan) %></div>
+            </div>
+            <div class="info-box">
+              <div class="info-label">Tanggal Transfer</div>
+              <div class="info-value"><%= tanggalIndo(pr.tanggalTransfer) %></div>
+            </div>
+            <div class="info-box full">
+              <div class="info-label">Detail Pekerjaan</div>
+              <div class="info-value"><%= teksAman(pr.detailPekerjaan || pr.deskripsi) %></div>
+            </div>
+            <div class="info-box">
+              <div class="info-label">Unit Kerja / Lokasi</div>
+              <div class="info-value"><%= teksAman(pr.unitKerja) %></div>
+            </div>
+            <div class="info-box">
+              <div class="info-label">Pemohon &amp; Kategori</div>
+              <div class="info-value"><%= teksAman(pr.pemohon) %> · <%= teksAman(pr.kategori) %></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h3><span class="section-number">2</span> Penerima Transfer &amp; Rincian Biaya</h3>
+          <% if (penerimaList.length === 0) { %>
+          <div class="info-box">
+            <div class="info-label">Penerima Transfer</div>
+            <div class="info-value"><%= teksAman(pr.vendor) %></div>
+          </div>
+          <% } else { %>
+          <% penerimaList.forEach(function (penerima, index) {
+            const rincian = Array.isArray(penerima.rincianBiaya) ? penerima.rincianBiaya : [];
+          %>
+          <div class="penerima-card">
+            <div class="penerima-head">
+              <strong>PENERIMA TRANSFER <%= index + 1 %>: <%= teksAman(penerima.namaPenerima) %></strong>
+              <% if (penerima.noRekening) { %>
+              <div class="rekening-box">
+                <span class="rekening-code"><%= penerima.noRekening %></span>
+                <button class="btn-copy" type="button" onclick="salinRekening(this, '<%= penerima.noRekening %>')">Salin No. Rekening</button>
+              </div>
+              <% } %>
+            </div>
+            <div class="bank-meta">
+              Bank: <strong><%= teksAman(penerima.bank) %></strong>
+              · Atas Nama: <strong><%= teksAman(penerima.atasNama) %></strong>
+              <% if (penerima.keterangan) { %> · Keterangan: <%= penerima.keterangan %><% } %>
+            </div>
+
+            <% if (rincian.length > 0) { %>
+            <table class="rincian">
+              <thead>
+                <tr><th>Deskripsi</th><th>Rupiah</th></tr>
+              </thead>
+              <tbody>
+                <% rincian.forEach(function (item) { %>
+                <tr><td><%= teksAman(item.deskripsi) %></td><td><%= rupiah(item.jumlah) %></td></tr>
+                <% }); %>
+              </tbody>
+            </table>
+            <% } %>
+            <div class="subtotal-row"><span>Subtotal</span><strong><%= rupiah(penerima.subtotal) %></strong></div>
+          </div>
+          <% }); %>
+          <% } %>
+        </section>
+
+        <section class="section">
+          <h3><span class="section-number">3</span> Lampiran &amp; Konfirmasi</h3>
+          <div class="info-box">
+            <div class="info-label">Daftar Dokumen</div>
+            <% if (pr.daftarDokumen) { %>
+            <div class="info-value"><%= pr.daftarDokumen %></div>
+            <% } else { %>
+            <div class="info-value">-</div>
+            <% } %>
+            <% if (pr.fileName) { %>
+            <div class="bank-meta">Berkas: <%= pr.fileName %></div>
+            <% } %>
+            <% if (pr.fileUrl) { %>
+            <a class="btn-detail lampiran-link" href="/payment-request/download/<%= pr._id %>">Buka Berkas Pendukung</a>
+            <% } %>
+          </div>
+          <div class="footer-tanda">
+            <span>Jakarta, <%= tanggalIndo(pr.tanggalPengajuan) %></span>
+            <span>Diajukan oleh: <%= teksAman(pr.pemohon || pr.diinputOleh) %></span>
+            <span>Dokumen: <%= teksAman(pr.nomorPengajuan) %></span>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <div class="toast" id="toastRekening">Nomor rekening disalin</div>
+    <script>
+      function salinRekening(button, nomor) {
+        const teks = String(nomor || '').trim();
+        if (!teks) return;
+        const tampilToast = function () {
+          const toast = document.getElementById('toastRekening');
+          if (!toast) return;
+          toast.classList.add('muncul');
+          setTimeout(function () { toast.classList.remove('muncul'); }, 1800);
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(teks).then(tampilToast).catch(function () { fallbackCopy(teks, tampilToast); });
+        } else {
+          fallbackCopy(teks, tampilToast);
+        }
+      }
+
+      function fallbackCopy(teks, selesai) {
+        const input = document.createElement('textarea');
+        input.value = teks;
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.appendChild(input);
+        input.select();
+        try { document.execCommand('copy'); selesai(); } catch (e) {}
+        document.body.removeChild(input);
+      }
+    </script>
+  </body>
+</html>

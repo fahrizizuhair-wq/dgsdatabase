@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <%- include('partials/head') %>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Request - Buat Pengajuan</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; min-height: 100%; overflow-x: hidden; }
+      body {
+        font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+        color: #1f2937;
+        display: flex;
+        background: #f4f6f9;
+      }
+      .main-content { flex: 1; min-width: 0; padding: 28px; width: 100%; }
+      .pr-banner {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        padding: 18px 22px; margin-bottom: 22px; border-radius: 14px; color: #fff;
+        background: linear-gradient(135deg, #7a1b1b 0%, #a52a2a 100%);
+        box-shadow: 0 10px 25px rgba(122, 27, 27, 0.18);
+      }
+      .pr-banner h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+      .pr-banner p { margin: 4px 0 0; font-size: 0.78rem; opacity: 0.85; letter-spacing: 0.08em; }
+      .btn-kembali {
+        display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px;
+        border: 1px solid rgba(255,255,255,0.45); border-radius: 8px; background: rgba(255,255,255,0.1);
+        color: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-decoration: none;
+      }
+      .btn-kembali:hover { background: rgba(255,255,255,0.2); }
+      .pr-form { max-width: 860px; margin: 0 auto; }
+      .pr-section {
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 14px;
+        padding: 22px 24px; margin-bottom: 18px; box-shadow: 0 6px 18px rgba(15,23,42,0.05);
+      }
+      .pr-section h2 {
+        display: flex; align-items: center; gap: 10px; margin: 0 0 18px;
+        font-size: 1rem; font-weight: 700; color: #7a1b1b;
+      }
+      .section-number {
+        width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 50%; background: #7a1b1b; color: #fff; font-size: 0.78rem;
+      }
+      .hint { margin: -8px 0 16px; font-size: 0.78rem; color: #64748b; }
+      .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+      .field-grid .full { grid-column: 1 / -1; }
+      label.field { display: flex; flex-direction: column; gap: 7px; font-size: 0.78rem; font-weight: 600; color: #475569; }
+      label.field .req { color: #dc2626; }
+      input, textarea, select {
+        width: 100%; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+        font: inherit; font-size: 0.86rem; color: #1f2937; background: #fff; outline: none;
+      }
+      input:focus, textarea:focus, select:focus { border-color: #7a1b1b; box-shadow: 0 0 0 3px rgba(122,27,27,0.08); }
+      textarea { resize: vertical; min-height: 82px; }
+      .vendor-block {
+        border: 1px solid #e2e8f0; border-left: 4px solid #7a1b1b; border-radius: 10px;
+        padding: 16px; margin-bottom: 16px; background: #fffdfd;
+      }
+      .vendor-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+      .vendor-head h3 { margin: 0; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.06em; color: #7a1b1b; }
+      .btn-small {
+        padding: 7px 11px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff;
+        color: #475569; font-size: 0.76rem; font-weight: 600; cursor: pointer;
+      }
+      .btn-small:hover { background: #f1f5f9; }
+      .btn-danger { color: #b91c1c; border-color: #fecaca; }
+      .rincian-head {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        margin: 14px 0 8px; font-size: 0.78rem; font-weight: 700; color: #475569;
+      }
+      .rincian-list { display: flex; flex-direction: column; gap: 8px; }
+      .rincian-row { display: grid; grid-template-columns: minmax(0, 1fr) 170px 34px; gap: 8px; align-items: center; }
+      .btn-hapus-rincian {
+        width: 34px; height: 34px; border: 1px solid #fecaca; border-radius: 7px;
+        background: #fff; color: #b91c1c; font-size: 1rem; cursor: pointer;
+      }
+      .vendor-subtotal-text { margin-top: 10px; text-align: right; font-size: 0.82rem; color: #475569; }
+      .vendor-subtotal-text strong { color: #7a1b1b; }
+      .section-actions { display: flex; justify-content: flex-start; }
+      .btn-tambah-vendor {
+        padding: 10px 16px; border: 1px dashed #7a1b1b; border-radius: 8px; background: #fff;
+        color: #7a1b1b; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+      }
+      .btn-tambah-vendor:hover { background: #fff5f5; }
+      .grand-total {
+        display: flex; justify-content: space-between; align-items: center; margin-top: 18px;
+        padding: 14px 16px; border-radius: 10px; background: #fef2f2; color: #7a1b1b; font-weight: 700;
+      }
+      .grand-total strong { font-size: 1.15rem; }
+      .confirm-row {
+        display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px;
+        margin: 18px 0; padding-top: 14px; border-top: 1px dashed #e2e8f0;
+        font-size: 0.8rem; color: #64748b;
+      }
+      .btn-submit {
+        width: 100%; padding: 13px; border: 0; border-radius: 9px; background: #7a1b1b;
+        color: #fff; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+      }
+      .btn-submit:hover { background: #631515; }
+      @media (max-width: 768px) {
+        .main-content { padding: 16px; }
+        .pr-banner { flex-direction: column; align-items: flex-start; }
+        .pr-section { padding: 18px 16px; }
+        .field-grid { grid-template-columns: minmax(0, 1fr); }
+        .rincian-row { grid-template-columns: minmax(0, 1fr) 110px 34px; }
+        .grand-total { flex-direction: column; align-items: flex-start; gap: 4px; }
+      }
+      @media print {
+        body > *:not(.main-content) { display: none !important; }
+        .main-content { padding: 0; }
+        .pr-banner, .btn-submit, .btn-small, .btn-tambah-vendor { display: none !important; }
+        .pr-section { box-shadow: none; break-inside: avoid; }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/sidebar-user', { activePage: 'payment-request' }) %>
+
+    <main class="main-content">
+      <div class="pr-banner">
+        <div>
+          <h1>Aplikasi Payment Request (PR)</h1>
+          <p>PT. DIAN GIRI SAPUTRA</p>
+        </div>
+        <a class="btn-kembali" href="/payment-request-user">← Kembali ke Daftar PR</a>
+      </div>
+
+      <% const hariIni = new Date().toISOString().slice(0, 10); %>
+      <form class="pr-form" action="/payment-request-user/add" method="POST" enctype="multipart/form-data" id="formPR">
+        <input type="hidden" name="kategori" value="Payment Request" />
+        <input type="hidden" name="pemohon" value="<%= user && user.namaLengkap ? user.namaLengkap : 'User' %>" />
+
+        <section class="pr-section">
+          <h2><span class="section-number">1</span> Informasi Pekerjaan &amp; Jadwal Transfer</h2>
+          <div class="field-grid">
+            <label class="field">
+              <span>Pekerjaan <span class="req">*</span></span>
+              <input type="text" name="pekerjaan" required placeholder="Contoh: Pengadaan Seragam Team Sales Force" />
+            </label>
+            <label class="field">
+              <span>Tanggal <span class="req">*</span></span>
+              <input type="date" name="tanggalTransfer" required value="<%= hariIni %>" />
+            </label>
+            <label class="field full">
+              <span>Detail <span class="req">*</span></span>
+              <textarea name="detailPekerjaan" required placeholder="Contoh: Biaya sampel dan operasional lapangan"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="pr-section">
+          <h2><span class="section-number">2</span> Penerima Transfer &amp; Rincian Biaya</h2>
+          <p class="hint">Total rupiah dihitung otomatis dari seluruh rincian biaya setiap penerima.</p>
+          <div id="daftarVendor"></div>
+          <div class="section-actions">
+            <button type="button" class="btn-tambah-vendor" id="btnTambahVendor">+ Tambah Vendor</button>
+          </div>
+          <div class="grand-total">
+            <span>Total Pengajuan</span>
+            <strong id="grandTotal">Rp 0</strong>
+          </div>
+        </section>
+
+        <section class="pr-section">
+          <h2><span class="section-number">3</span> Lampiran &amp; Konfirmasi</h2>
+          <div class="field-grid">
+            <label class="field full">
+              <span>Daftar Dokumen</span>
+              <textarea name="daftarDokumen" placeholder="Contoh: 1 (satu) lembar invoice dari Emil Production"></textarea>
+            </label>
+            <label class="field full">
+              <span>File Pendukung</span>
+              <input type="file" name="fileLaporan" accept=".pdf,.jpg,.jpeg,.png,.xlsx,.doc,.docx" />
+            </label>
+          </div>
+          <div class="confirm-row">
+            <span>Jakarta, <%= hariIni %></span>
+            <span>Diajukan oleh: <%= user && user.namaLengkap ? user.namaLengkap : 'User' %></span>
+          </div>
+          <button type="submit" class="btn-submit">Simpan Pengajuan</button>
+        </section>
+      </form>
+    </main>
+
+    <template id="tplVendor">
+      <div class="vendor-block" data-index="__i__">
+        <div class="vendor-head">
+          <h3>PENERIMA TRANSFER <span class="vendor-number">__n__</span></h3>
+          <button type="button" class="btn-small btn-danger" onclick="hapusVendor(this)">Hapus</button>
+        </div>
+        <div class="field-grid">
+          <label class="field">
+            <span>Nama Penerima Transfer <span class="req">*</span></span>
+            <input type="text" data-name="penerimaTransfer[__i__][namaPenerima]" required placeholder="Misal: Sample Retail" />
+          </label>
+          <label class="field">
+            <span>No. Rekening <span class="req">*</span></span>
+            <input type="text" data-name="penerimaTransfer[__i__][noRekening]" required placeholder="Contoh: 4971232395" />
+          </label>
+          <label class="field">
+            <span>Bank <span class="req">*</span></span>
+            <input type="text" data-name="penerimaTransfer[__i__][bank]" required placeholder="Contoh: BCA" />
+          </label>
+          <label class="field">
+            <span>Atas Nama <span class="req">*</span></span>
+            <input type="text" data-name="penerimaTransfer[__i__][atasNama]" required placeholder="Contoh: Emil" />
+          </label>
+          <label class="field full">
+            <span>Keterangan</span>
+            <input type="text" data-name="penerimaTransfer[__i__][keterangan]" placeholder="Contoh: Transfer biaya produksi" />
+          </label>
+        </div>
+
+        <div class="rincian-head">
+          <span>Rincian Biaya</span>
+          <button type="button" class="btn-small" onclick="tambahRincian(this)">+ Tambah Rp</button>
+        </div>
+        <div class="rincian-list">
+          <div class="rincian-row">
+            <input type="text" data-name="penerimaTransfer[__i__][rincianBiaya][__j__][deskripsi]" placeholder="Deskripsi biaya" required />
+            <input type="number" min="0" step="any" class="rincian-jumlah" data-name="penerimaTransfer[__i__][rincianBiaya][__j__][jumlah]" placeholder="Rp" value="0" required oninput="hitungSemua()" />
+            <button type="button" class="btn-hapus-rincian" onclick="hapusRincian(this)" aria-label="Hapus rincian">×</button>
+          </div>
+        </div>
+        <input type="hidden" class="vendor-subtotal" data-name="penerimaTransfer[__i__][subtotal]" value="0" />
+        <div class="vendor-subtotal-text">Subtotal: <strong class="subtotal-label">Rp 0</strong></div>
+      </div>
+    </template>
+
+    <script>
+      function rupiah(nilai) {
+        return 'Rp ' + (Number(nilai) || 0).toLocaleString('id-ID');
+      }
+
+      function reindexVendor() {
+        document.querySelectorAll('.vendor-block').forEach(function (block, i) {
+          block.dataset.index = String(i);
+          const numberEl = block.querySelector('.vendor-number');
+          if (numberEl) numberEl.textContent = String(i + 1);
+
+          block.querySelectorAll('[data-name]').forEach(function (el) {
+            el.name = el.dataset.name.replace(/__i__/g, i).replace(/__j__/g, 0);
+          });
+          block.querySelectorAll('.rincian-row').forEach(function (row, j) {
+            row.querySelectorAll('[data-name]').forEach(function (el) {
+              el.name = el.dataset.name.replace(/__i__/g, i).replace(/__j__/g, j);
+            });
+          });
+        });
+        hitungSemua();
+      }
+
+      function tambahVendor() {
+        const tpl = document.getElementById('tplVendor');
+        const daftar = document.getElementById('daftarVendor');
+        if (!tpl || !daftar) return;
+        daftar.appendChild(tpl.content.firstElementChild.cloneNode(true));
+        reindexVendor();
+      }
+
+      function hapusVendor(button) {
+        const blok = button.closest('.vendor-block');
+        const daftar = document.getElementById('daftarVendor');
+        if (!blok || !daftar || daftar.querySelectorAll('.vendor-block').length <= 1) return;
+        blok.remove();
+        reindexVendor();
+      }
+
+      function tambahRincian(button) {
+        const blok = button.closest('.vendor-block');
+        const list = blok ? blok.querySelector('.rincian-list') : null;
+        if (!list) return;
+        const baris = list.querySelector('.rincian-row').cloneNode(true);
+        baris.querySelectorAll('input').forEach(function (input) {
+          input.value = input.classList.contains('rincian-jumlah') ? '0' : '';
+        });
+        list.appendChild(baris);
+        reindexVendor();
+      }
+
+      function hapusRincian(button) {
+        const blok = button.closest('.vendor-block');
+        const list = blok ? blok.querySelector('.rincian-list') : null;
+        if (!list || list.querySelectorAll('.rincian-row').length <= 1) return;
+        button.closest('.rincian-row').remove();
+        reindexVendor();
+      }
+
+      function hitungSemua() {
+        let total = 0;
+        document.querySelectorAll('.vendor-block').forEach(function (blok) {
+          let subtotal = 0;
+          blok.querySelectorAll('.rincian-jumlah').forEach(function (input) {
+            subtotal += Number(input.value) || 0;
+          });
+          const hidden = blok.querySelector('.vendor-subtotal');
+          const label = blok.querySelector('.subtotal-label');
+          if (hidden) hidden.value = String(subtotal);
+          if (label) label.textContent = rupiah(subtotal);
+          total += subtotal;
+        });
+        const grand = document.getElementById('grandTotal');
+        if (grand) grand.textContent = rupiah(total);
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        tambahVendor();
+        document.getElementById('btnTambahVendor').addEventListener('click', tambahVendor);
+      });
+    </script>
+  </body>
+</html>
