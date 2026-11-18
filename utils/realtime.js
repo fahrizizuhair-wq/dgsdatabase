@@ -57,6 +57,9 @@ function entityForPath(rawPath) {
   if (pathStarts(path, ['/materi-approval-admin', '/materi-approval-user'])) {
     return 'materi-approval';
   }
+  if (pathStarts(path, ['/payment-request-admin', '/payment-request-user'])) {
+    return 'payment-request';
+  }
 
   return null;
 }

@@ -179,6 +179,7 @@ const User = require('./models/User');
 const SuratJalan = require('./models/SuratJalan');
 const Lpj = require('./models/Lpj');
 const MateriApproval = require('./models/MateriApproval');
+const PaymentRequest = require('./models/PaymentRequest');
 const { buildLpjWorkbook } = require('./utils/lpj-excel');
 
 // ============================================================
@@ -230,6 +231,7 @@ const ADMIN_PREFIX_PATHS = [
   '/laporan',
   '/surat-jalan-admin',
   '/materi-approval-admin',
+  '/payment-request-admin',
   '/lpj-admin',
   '/data-kain-admin',
 ];
@@ -416,6 +418,51 @@ app.get('/materi-approval/download/:id', async (req, res) => {
     downloadStream.pipe(res);
   } catch (err) {
     console.error('Error route /materi-approval/download/:id:', err);
+    if (!res.headersSent) res.status(500).send('Terjadi kesalahan saat mengunduh berkas.');
+  }
+});
+
+// Unduh berkas pendukung payment request dengan nama dokumen asli
+app.get('/payment-request/download/:id', async (req, res) => {
+  try {
+    const pengajuan = await PaymentRequest.findById(req.params.id).lean();
+    if (!pengajuan) {
+      return res.status(404).send('Data payment request tidak ditemukan.');
+    }
+    if (!pengajuan.fileUrl) {
+      return res.status(404).send('Pengajuan ini tidak memiliki berkas pendukung.');
+    }
+
+    const namaTersimpan = path.basename(String(pengajuan.fileUrl).split('?')[0]);
+    const namaUnduhan = namaBerkasAsli(pengajuan.fileName) || namaTersimpan;
+    const localPath = path.join(__dirname, 'public/uploads', namaTersimpan);
+
+    if (fs.existsSync(localPath)) {
+      res.setHeader('Content-Type', getMimeType(namaTersimpan));
+      res.setHeader('Content-Disposition', headerUnduhan(namaUnduhan));
+      return res.sendFile(localPath);
+    }
+
+    if (!gridfsBucket) {
+      return res.status(404).send('Layanan database file sedang bersiap...');
+    }
+
+    const files = await gridfsBucket.find({ filename: namaTersimpan }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).send('Berkas tidak ditemukan di database.');
+    }
+
+    res.setHeader('Content-Type', files[0].contentType || getMimeType(namaTersimpan));
+    res.setHeader('Content-Disposition', headerUnduhan(namaUnduhan));
+
+    const downloadStream = gridfsBucket.openDownloadStreamByName(namaTersimpan);
+    downloadStream.on('error', (err) => {
+      console.error('Error saat mengunduh berkas payment request dari GridFS:', err);
+      if (!res.headersSent) res.status(404).send('Gagal mengunduh berkas.');
+    });
+    downloadStream.pipe(res);
+  } catch (err) {
+    console.error('Error route /payment-request/download/:id:', err);
     if (!res.headersSent) res.status(500).send('Terjadi kesalahan saat mengunduh berkas.');
   }
 });
@@ -1823,6 +1870,68 @@ app.post('/materi-approval-admin/update-status/:id', async (req, res) => {
 });
 
 // ============================================================
+//  PAYMENT REQUEST – ADMIN
+// ============================================================
+app.get('/payment-request-admin', async (req, res) => {
+  try {
+    const listPaymentRequest = await PaymentRequest.find().sort({ tanggalPengajuan: -1 });
+    const totalPaymentRequest = listPaymentRequest.length;
+
+    const isMenunggu = (s) => {
+      const teks = String(s || '').trim().toLowerCase();
+      if (!teks) return true;
+      if (['disetujui', 'approved', 'selesai', 'ditolak', 'rejected'].includes(teks)) return false;
+      return true;
+    };
+    const isDisetujui = (s) => {
+      const teks = String(s || '').trim().toLowerCase();
+      return ['disetujui', 'approved', 'selesai'].includes(teks);
+    };
+    const isKritis = (u) => ['kritis', 'critical'].includes(String(u || '').trim().toLowerCase());
+
+    const jumlahMenunggu = listPaymentRequest.filter((m) => isMenunggu(m.statusApproval)).length;
+    const jumlahDisetujui = listPaymentRequest.filter((m) => isDisetujui(m.statusApproval)).length;
+    const jumlahKritis = listPaymentRequest.filter((m) => isKritis(m.urgensi) && isMenunggu(m.statusApproval)).length;
+    const totalNominal = listPaymentRequest.reduce((acc, curr) => acc + (Number(curr.totalNominal) || 0), 0);
+
+    // Nama variabel dipertahankan agar view turunan materi approval bisa dipakai apa adanya.
+    res.render('payment-request-admin', {
+      listMateri: listPaymentRequest,
+      totalMateri: totalPaymentRequest,
+      jumlahMenunggu,
+      jumlahDisetujui,
+      jumlahKritis,
+      totalNominal,
+      user: req.session.user || null,
+    });
+  } catch (err) {
+    console.error('Gagal memuat payment request admin:', err);
+    res.status(500).send('Terjadi kesalahan pada server');
+  }
+});
+
+app.post('/payment-request-admin/update-status/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { statusApproval } = req.body;
+
+    if (!['Disetujui', 'Ditolak', 'Menunggu Persetujuan'].includes(statusApproval)) {
+      return res.status(400).json({ success: false, message: 'Status tidak valid.' });
+    }
+
+    const updated = await PaymentRequest.findByIdAndUpdate(id, { statusApproval }, { new: true });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Data payment request tidak ditemukan.' });
+    }
+
+    res.json({ success: true, message: 'Status berhasil diperbarui.', data: updated });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Gagal memperbarui status di server.' });
+  }
+});
+
+// ============================================================
 //  RUTE: USER – Data Vendor
 // ============================================================
 app.get('/user', async (req, res) => {
@@ -2548,6 +2657,114 @@ app.post('/materi-approval-user/add', isUserAuthenticated, upload.single('fileLa
   } catch (err) {
     console.error('Gagal menyimpan draft pengajuan:', err);
     res.status(500).send('Gagal menyimpan draft pengajuan: ' + err.message);
+  }
+});
+
+// ==========================================
+// PAYMENT REQUEST VERSI USER
+// ==========================================
+app.get('/payment-request-user', isUserAuthenticated, async (req, res) => {
+  try {
+    const dataPaymentRequest = await PaymentRequest.find().sort({ tanggalPengajuan: -1, createdAt: -1 }).lean();
+
+    const isMenunggu = (s) => {
+      const teks = String(s || '').trim().toLowerCase();
+      if (!teks) return true;
+      if (['disetujui', 'approved', 'selesai', 'ditolak', 'rejected'].includes(teks)) return false;
+      return true;
+    };
+    const isDisetujui = (s) => ['disetujui', 'approved', 'selesai'].includes(String(s || '').trim().toLowerCase());
+    const isKritis = (u) => ['kritis', 'critical'].includes(String(u || '').trim().toLowerCase());
+
+    const totalPaymentRequest = dataPaymentRequest.length;
+    const totalNominal = dataPaymentRequest.reduce((acc, item) => acc + (Number(item.totalNominal) || 0), 0);
+    const jumlahMenunggu = dataPaymentRequest.filter((m) => isMenunggu(m.statusApproval)).length;
+    const jumlahDisetujui = dataPaymentRequest.filter((m) => isDisetujui(m.statusApproval)).length;
+    const jumlahKritis = dataPaymentRequest.filter((m) => isKritis(m.urgensi) && isMenunggu(m.statusApproval)).length;
+
+    res.render('payment-request-user', {
+      listMateri: dataPaymentRequest,
+      totalMateri: totalPaymentRequest,
+      totalNominal,
+      jumlahMenunggu,
+      jumlahDisetujui,
+      jumlahKritis,
+      dibuat: req.query.dibuat === '1',
+      gagal: req.query.error === '1',
+      role: 'user',
+      user: req.session.user || {
+        username: req.session.adminUser || 'User',
+        namaLengkap: req.session.adminUser || 'User',
+      },
+    });
+  } catch (err) {
+    console.error('Gagal memuat payment request user:', err);
+    res.status(500).send('Gagal memuat payment request: ' + err.message);
+  }
+});
+
+app.post('/payment-request-user/add', isUserAuthenticated, upload.single('fileLaporan'), async (req, res) => {
+  try {
+    await syncReqFilesToGridFS(req);
+
+    const { unitKerja, pemohon, kategori, vendor, urgensi, namaMaterial, deskripsi, totalNominal, items } = req.body;
+
+    let itemList = [];
+    if (Array.isArray(items)) {
+      itemList = items.filter((it) => it && (it.diskripsi || it.nama || it.namaBarang));
+    } else if (items && typeof items === 'object') {
+      itemList = Object.values(items).filter((it) => it && (it.diskripsi || it.nama || it.namaBarang));
+    }
+
+    const parsedItems = itemList.map((it, idx) => {
+      const diskripsi = String(it.diskripsi || it.nama || it.namaBarang || '').trim();
+      const jumlah = Number(String(it.jumlah || it.qty || '1').replace(/[^\d.-]/g, '')) || 1;
+      const satuan = String(it.satuan || 'Pcs').trim();
+      const hargaSatuan = Number(String(it.hargaSatuan || it.harga || '0').replace(/[^\d.-]/g, '')) || 0;
+      const subtotal =
+        Number(String(it.subtotal || jumlah * hargaSatuan).replace(/[^\d.-]/g, '')) || jumlah * hargaSatuan;
+      return { no: idx + 1, diskripsi, jumlah, satuan, hargaSatuan, subtotal };
+    });
+
+    const calculatedTotal = parsedItems.reduce((acc, curr) => acc + (Number(curr.subtotal) || 0), 0);
+    const finalTotalNominal = calculatedTotal > 0 ? calculatedTotal : Math.max(0, Number(totalNominal) || 0);
+    const derivedNamaMaterial =
+      parsedItems.length > 0 ? parsedItems.map((it) => it.diskripsi).join(', ') : String(namaMaterial || '').trim();
+
+    if (!unitKerja || !kategori || !vendor || (!derivedNamaMaterial && parsedItems.length === 0)) {
+      return res.redirect('/payment-request-user?error=1');
+    }
+
+    const namaPenginput = getNamaPenginput(req);
+    const urgensiValid = ['Rendah', 'Normal', 'Sedang', 'Tinggi', 'High', 'Kritis', 'Critical'];
+    const tanggalPengajuan = new Date();
+
+    const draft = new PaymentRequest({
+      nomorPengajuan: nomorPengajuanBaru(kategori, tanggalPengajuan),
+      tanggalPengajuan,
+      unitKerja: String(unitKerja).trim(),
+      pemohon: String(pemohon || namaPenginput).trim(),
+      kategori: String(kategori).trim(),
+      vendor: String(vendor).trim(),
+      urgensi: urgensiValid.includes(urgensi) ? urgensi : 'Normal',
+      namaMaterial: derivedNamaMaterial,
+      deskripsi: String(deskripsi || '').trim(),
+      totalNominal: finalTotalNominal,
+      statusApproval: 'Menunggu',
+      diinputOleh: namaPenginput,
+      items: parsedItems,
+    });
+
+    if (req.file) {
+      draft.fileUrl = '/uploads/' + req.file.filename;
+      draft.fileName = namaBerkasAsli(req.file.originalname);
+    }
+
+    await draft.save();
+    res.redirect('/payment-request-user?dibuat=1');
+  } catch (err) {
+    console.error('Gagal menyimpan payment request:', err);
+    res.status(500).send('Gagal menyimpan payment request: ' + err.message);
   }
 });
 
