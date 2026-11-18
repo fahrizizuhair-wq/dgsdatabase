@@ -337,8 +337,21 @@
     return false;
   }
 
+  // Halaman Payment Request memakai wizard satu halaman. Jangan muat ulang
+  // halaman saat form sedang terbuka supaya input yang belum dikirim tidak hilang.
+  function formPaymentRequestAktif() {
+    var formView = document.getElementById('view-form');
+    if (!formView || formView.classList.contains('hidden')) return false;
+    try {
+      var style = window.getComputedStyle(formView);
+      return style.display !== 'none' && style.visibility !== 'hidden';
+    } catch (err) {
+      return true;
+    }
+  }
+
   function tidakBolehReload() {
-    return document.hidden || modalTerbuka() || sedangMengetik();
+    return document.hidden || modalTerbuka() || sedangMengetik() || formPaymentRequestAktif();
   }
 
   // ------------------------------------------------------------------
@@ -350,7 +363,11 @@
       search: [],
       activePaneId: '',
       activeButtonIndex: -1,
+      activeView: '',
     };
+
+    var visibleView = document.querySelector('[data-live-view]:not(.hidden)');
+    if (visibleView) state.activeView = visibleView.getAttribute('data-live-view') || '';
 
     var searches = document.querySelectorAll(
       'input[type="search"], input[id*="search" i], input[name*="search" i], input[placeholder*="cari" i]',
@@ -442,6 +459,11 @@
       input.value = search[j].value;
       input.dispatchEvent(new Event('input', { bubbles: true }));
       input.dispatchEvent(new Event('keyup', { bubbles: true }));
+    }
+
+    // Payment Request: pulihkan alur yang sedang dibuka (daftar/form/detail).
+    if (state.activeView && typeof window.navigateTo === 'function') {
+      try { window.navigateTo(state.activeView); } catch (err) {}
     }
 
     try {

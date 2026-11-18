@@ -18,16 +18,43 @@ const paymentRequestSchema = new mongoose.Schema(
     },
     statusApproval: {
       type: String,
-      enum: ['Draft', 'Menunggu', 'Menunggu Persetujuan', 'Sedang Ditinjau', 'Disetujui', 'Ditolak'],
+      enum: [
+        'Draft',
+        'Menunggu',
+        'Pending',
+        'Menunggu Persetujuan',
+        'Sedang Ditinjau',
+        'Disetujui',
+        'Ditolak',
+        'Sudah Transfer',
+      ],
       default: 'Menunggu',
     },
-    // Field baru untuk tampilan Payment Request versi screenshot.
+    // Field baru untuk tampilan Payment Request versi acuan PT. DGS.
     pekerjaan: { type: String, default: '', trim: true },
     tanggalTransfer: { type: Date, default: null },
+    estimasiTransfer: { type: String, default: '', trim: true },
+    lokasi: { type: String, default: '', trim: true },
     detailPekerjaan: { type: String, default: '', trim: true },
     daftarDokumen: { type: String, default: '' },
+    attachments: [{ type: String, trim: true }],
     penerimaTransfer: [
       {
+        // Field acuan (baru).
+        summaryTitle: { type: String, default: '', trim: true },
+        vendorName: { type: String, default: '', trim: true },
+        pic: { type: String, default: '', trim: true },
+        accountNo: { type: String, default: '', trim: true },
+        accountHolder: { type: String, default: '', trim: true },
+        items: [
+          {
+            desc: { type: String, default: '', trim: true },
+            qty: { type: Number, default: 1 },
+            price: { type: Number, default: 0 },
+            subtotal: { type: Number, default: 0 },
+          },
+        ],
+        // Field lama tetap didukung.
         namaPenerima: { type: String, default: '', trim: true },
         bank: { type: String, default: '', trim: true },
         noRekening: { type: String, default: '', trim: true },
@@ -37,6 +64,8 @@ const paymentRequestSchema = new mongoose.Schema(
           {
             deskripsi: { type: String, default: '', trim: true },
             jumlah: { type: Number, default: 0 },
+            qty: { type: Number, default: 1 },
+            hargaSatuan: { type: Number, default: 0 },
           },
         ],
         subtotal: { type: Number, default: 0 },

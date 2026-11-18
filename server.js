@@ -473,10 +473,14 @@ app.get('/payment-request/detail/:id', async (req, res) => {
     if (!pengajuan) {
       return res.status(404).send('Payment request tidak ditemukan.');
     }
+    const daftarPaymentRequest = await PaymentRequest.find()
+      .sort({ tanggalPengajuan: -1, createdAt: -1 })
+      .lean();
     res.render('payment-request-detail', {
-      pengajuan,
+      listMateri: daftarPaymentRequest,
+      initialPRId: String(pengajuan._id),
       role: req.session.isAdmin ? 'admin' : 'user',
-      user: req.session.user || { namaLengkap: 'User' },
+      user: req.session.user || { namaLengkap: req.session.adminUser || 'User' },
     });
   } catch (err) {
     console.error('Error route /payment-request/detail/:id:', err);
@@ -1897,7 +1901,7 @@ app.get('/payment-request-admin', async (req, res) => {
     const isMenunggu = (s) => {
       const teks = String(s || '').trim().toLowerCase();
       if (!teks) return true;
-      if (['disetujui', 'approved', 'selesai', 'ditolak', 'rejected'].includes(teks)) return false;
+      if (['disetujui', 'approved', 'selesai', 'ditolak', 'rejected', 'sudah transfer', 'lunas'].includes(teks)) return false;
       return true;
     };
     const isDisetujui = (s) => {
@@ -1919,7 +1923,10 @@ app.get('/payment-request-admin', async (req, res) => {
       jumlahDisetujui,
       jumlahKritis,
       totalNominal,
-      user: req.session.user || null,
+      role: 'admin',
+      pageTitle: 'Payment Request — Admin PT. DIAN GIRI SAPUTRA',
+      useTailwind: true,
+      user: req.session.user || { namaLengkap: req.session.adminUser || 'Admin' },
     });
   } catch (err) {
     console.error('Gagal memuat payment request admin:', err);
@@ -1930,13 +1937,19 @@ app.get('/payment-request-admin', async (req, res) => {
 app.post('/payment-request-admin/update-status/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { statusApproval } = req.body;
+    const statusDiterima = String(req.body && req.body.statusApproval ? req.body.statusApproval : '').trim();
 
-    if (!['Disetujui', 'Ditolak', 'Menunggu Persetujuan'].includes(statusApproval)) {
+    const statusValid = ['Pending', 'Menunggu', 'Menunggu Persetujuan', 'Disetujui', 'Ditolak', 'Sudah Transfer'];
+    if (!statusValid.includes(statusDiterima)) {
       return res.status(400).json({ success: false, message: 'Status tidak valid.' });
     }
 
-    const updated = await PaymentRequest.findByIdAndUpdate(id, { statusApproval }, { new: true });
+    // Status "Pending"/"Menunggu Persetujuan" disimpan sebagai "Menunggu"
+    // agar data lama tetap konsisten, tampilan tetap menampilkannya sebagai Pending.
+    const statusApproval =
+      statusDiterima === 'Pending' || statusDiterima === 'Menunggu Persetujuan' ? 'Menunggu' : statusDiterima;
+
+    const updated = await PaymentRequest.findByIdAndUpdate(id, { statusApproval }, { returnDocument: 'after' }).lean();
     if (!updated) {
       return res.status(404).json({ success: false, message: 'Data payment request tidak ditemukan.' });
     }
@@ -2687,7 +2700,7 @@ app.get('/payment-request-user', isUserAuthenticated, async (req, res) => {
     const isMenunggu = (s) => {
       const teks = String(s || '').trim().toLowerCase();
       if (!teks) return true;
-      if (['disetujui', 'approved', 'selesai', 'ditolak', 'rejected'].includes(teks)) return false;
+      if (['disetujui', 'approved', 'selesai', 'ditolak', 'rejected', 'sudah transfer', 'lunas'].includes(teks)) return false;
       return true;
     };
     const isDisetujui = (s) => ['disetujui', 'approved', 'selesai'].includes(String(s || '').trim().toLowerCase());
@@ -2709,6 +2722,9 @@ app.get('/payment-request-user', isUserAuthenticated, async (req, res) => {
       dibuat: req.query.dibuat === '1',
       gagal: req.query.error === '1',
       role: 'user',
+      startView: 'list',
+      pageTitle: 'Payment Request — PT. DIAN GIRI SAPUTRA',
+      useTailwind: true,
       user: req.session.user || {
         username: req.session.adminUser || 'User',
         namaLengkap: req.session.adminUser || 'User',
@@ -2730,137 +2746,288 @@ app.get('/payment-request-user/form', isUserAuthenticated, (req, res) => {
   });
 });
 
+// Helper parser Payment Request: menerima format acuan baru dan format lama.
+function jadiArrayPR(value) {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (value && typeof value === 'object') {
+    return Object.keys(value)
+      .sort((a, b) => Number(a) - Number(b))
+      .map((k) => value[k])
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function angkaPR(value, fallback) {
+  const teks = String(value == null ? '' : value).replace(/[^\d.-]/g, '');
+  const angka = Number(teks);
+  return Number.isFinite(angka) ? angka : Number(fallback) || 0;
+}
+
+function tanggalIndoPR(value) {
+  const d = value instanceof Date ? value : new Date(value);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function parseItemPR(raw) {
+  const qty = Math.max(1, angkaPR(raw.qty != null ? raw.qty : raw.jumlah, 1));
+  const price = Math.max(0, angkaPR(raw.price != null ? raw.price : (raw.hargaSatuan || raw.harga || 0), 0));
+  return {
+    desc: String(raw.desc || raw.deskripsi || raw.diskripsi || raw.nama || raw.namaBarang || '').trim(),
+    qty,
+    price,
+    subtotal: qty * price,
+  };
+}
+
+function parsePenerimaPR(body) {
+  const hasil = jadiArrayPR(body && body.penerimaTransfer).map((p) => {
+    let itemsRaw = jadiArrayPR(p.items);
+    const rincianRaw = jadiArrayPR(p.rincianBiaya);
+
+    if (itemsRaw.length === 0 && rincianRaw.length > 0) {
+      itemsRaw = rincianRaw;
+    }
+
+    let items = itemsRaw
+      .map(parseItemPR)
+      .filter((it) => it.desc || it.price > 0);
+
+    if (items.length === 0 && rincianRaw.length > 0) {
+      items = rincianRaw
+        .map((r) => ({
+          desc: String(r.deskripsi || r.diskripsi || '').trim(),
+          qty: Math.max(1, angkaPR(r.qty, 1)),
+          price: Math.max(0, angkaPR(r.hargaSatuan || r.jumlah, 0)),
+          subtotal: 0,
+        }))
+        .filter((it) => it.desc || it.price > 0)
+        .map((it) => ({ ...it, subtotal: it.qty * it.price }));
+    }
+
+    if (items.length === 0 && angkaPR(p.subtotal, 0) > 0) {
+      items = [{ desc: String(p.keterangan || '').trim(), qty: 1, price: angkaPR(p.subtotal, 0), subtotal: angkaPR(p.subtotal, 0) }];
+    }
+
+    const subtotal = items.reduce((acc, it) => acc + it.subtotal, 0);
+    const namaPenerima = String(p.namaPenerima || p.vendorName || '').trim();
+    const noRekening = String(p.noRekening || p.accountNo || '').trim();
+    const atasNama = String(p.atasNama || p.accountHolder || '').trim();
+    const keterangan = String(p.keterangan || p.pic || '').trim();
+
+    return {
+      summaryTitle: String(p.summaryTitle || namaPenerima || '').trim(),
+      vendorName: String(p.vendorName || namaPenerima || '').trim(),
+      pic: String(p.pic || keterangan || '').trim(),
+      bank: String(p.bank || '').trim(),
+      accountNo: String(p.accountNo || noRekening || '').trim(),
+      accountHolder: String(p.accountHolder || atasNama || '').trim(),
+      items,
+      namaPenerima,
+      noRekening,
+      atasNama,
+      keterangan,
+      rincianBiaya: items.map((it) => ({
+        deskripsi: it.desc,
+        jumlah: it.subtotal,
+        qty: it.qty,
+        hargaSatuan: it.price,
+      })),
+      subtotal,
+    };
+  });
+
+  // Kompatibilitas dengan form lama yang hanya mengirim items[].
+  if (hasil.length === 0) {
+    const itemLama = jadiArrayPR(body && body.items).map(parseItemPR).filter((it) => it.desc || it.price > 0);
+    if (itemLama.length > 0) {
+      const vendorLama = String((body && body.vendor) || '').trim();
+      hasil.push({
+        summaryTitle: vendorLama || 'Pembayaran',
+        vendorName: vendorLama,
+        pic: '',
+        bank: '',
+        accountNo: '',
+        accountHolder: '',
+        items: itemLama,
+        namaPenerima: vendorLama,
+        noRekening: '',
+        atasNama: '',
+        keterangan: '',
+        rincianBiaya: itemLama.map((it) => ({
+          deskripsi: it.desc,
+          jumlah: it.subtotal,
+          qty: it.qty,
+          hargaSatuan: it.price,
+        })),
+        subtotal: itemLama.reduce((acc, it) => acc + it.subtotal, 0),
+      });
+    }
+  }
+
+  return hasil.filter((p) => p.vendorName || p.bank || p.accountNo || p.items.length > 0);
+}
+
+function dataPaymentRequestDariBody(req, existing) {
+  const body = req.body || {};
+  const penerima = parsePenerimaPR(body);
+  const itemLama = jadiArrayPR(body.items).map(parseItemPR).filter((it) => it.desc || it.price > 0);
+  const itemsLegacy = itemLama.length
+    ? itemLama.map((it, idx) => ({
+        no: idx + 1,
+        diskripsi: it.desc,
+        jumlah: it.qty,
+        satuan: 'Pcs',
+        hargaSatuan: it.price,
+        subtotal: it.subtotal,
+      }))
+    : penerima.reduce((acc, p) => {
+        p.items.forEach((it) => {
+          acc.push({
+            no: acc.length + 1,
+            diskripsi: it.desc,
+            jumlah: it.qty,
+            satuan: 'Pcs',
+            hargaSatuan: it.price,
+            subtotal: it.subtotal,
+          });
+        });
+        return acc;
+      }, []);
+
+  const tanggalPengajuan = existing ? new Date(existing.tanggalPengajuan || Date.now()) : new Date();
+  const estimasiTransfer = String(body.estimasiTransfer || '').trim();
+  const tanggalTransferMentah = String(body.tanggalTransfer || '').trim();
+  let tanggalTransfer = existing ? existing.tanggalTransfer || null : tanggalPengajuan;
+  if (tanggalTransferMentah) {
+    const parsed = new Date(tanggalTransferMentah);
+    if (!isNaN(parsed.getTime())) tanggalTransfer = parsed;
+  } else if (estimasiTransfer) {
+    const parsed = new Date(estimasiTransfer);
+    if (!isNaN(parsed.getTime())) tanggalTransfer = parsed;
+  }
+
+  const teksDokumen = String(body.daftarDokumen || '').trim();
+  const attachments = teksDokumen
+    ? teksDokumen.split(/\r?\n/).map((s) => s.replace(/^[-•*]\s*/, '').trim()).filter(Boolean)
+    : [];
+
+  const pekerjaanDariItem = itemLama.length ? itemLama.map((it) => it.desc).join(', ') : '';
+  const pekerjaan =
+    String(body.pekerjaan || body.namaMaterial || '').trim() ||
+    pekerjaanDariItem ||
+    String(body.unitKerja || '').trim();
+  const detailPekerjaan = String(body.detailPekerjaan || body.deskripsi || '').trim();
+  const kategori = String(body.kategori || '').trim() || 'Payment Request';
+  const urgensiValid = ['Rendah', 'Normal', 'Sedang', 'Tinggi', 'High', 'Kritis', 'Critical'];
+  const urgensi = urgensiValid.includes(String(body.urgensi || '').trim()) ? String(body.urgensi).trim() : 'Normal';
+  const vendor = penerima.map((p) => p.vendorName).filter(Boolean).join(', ') || String(body.vendor || '').trim();
+  const totalNominal = penerima.reduce((acc, p) => acc + (Number(p.subtotal) || 0), 0);
+
+  return {
+    data: {
+      nomorPengajuan: existing ? existing.nomorPengajuan : nomorPengajuanBaru(kategori, tanggalPengajuan),
+      tanggalPengajuan,
+      pekerjaan,
+      tanggalTransfer,
+      estimasiTransfer: estimasiTransfer || tanggalIndoPR(tanggalTransfer),
+      lokasi: String(body.lokasi || '').trim(),
+      detailPekerjaan,
+      daftarDokumen: teksDokumen,
+      attachments,
+      penerimaTransfer: penerima,
+      unitKerja: String(body.unitKerja || pekerjaan).trim(),
+      pemohon: String(body.pemohon || getNamaPenginput(req)).trim(),
+      kategori,
+      vendor,
+      urgensi,
+      namaMaterial: pekerjaan,
+      deskripsi: detailPekerjaan,
+      totalNominal,
+      statusApproval: existing ? existing.statusApproval || 'Menunggu' : 'Menunggu',
+      diinputOleh: getNamaPenginput(req),
+      items: itemsLegacy,
+    },
+    valid: Boolean(pekerjaan && penerima.length > 0),
+  };
+}
+
 app.post('/payment-request-user/add', isUserAuthenticated, upload.single('fileLaporan'), async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
 
-    const {
-      unitKerja,
-      pemohon,
-      kategori,
-      vendor,
-      urgensi,
-      namaMaterial,
-      deskripsi,
-      totalNominal,
-      items,
-      pekerjaan,
-      tanggalTransfer,
-      detailPekerjaan,
-      daftarDokumen,
-      penerimaTransfer,
-    } = req.body;
-
-    const jadiArray = (value) => {
-      if (Array.isArray(value)) return value.filter(Boolean);
-      if (value && typeof value === 'object') return Object.values(value).filter(Boolean);
-      return [];
-    };
-
-    let itemList = [];
-    if (Array.isArray(items)) {
-      itemList = items.filter((it) => it && (it.diskripsi || it.nama || it.namaBarang));
-    } else if (items && typeof items === 'object') {
-      itemList = Object.values(items).filter((it) => it && (it.diskripsi || it.nama || it.namaBarang));
-    }
-
-    const parsedItems = itemList.map((it, idx) => {
-      const diskripsi = String(it.diskripsi || it.nama || it.namaBarang || '').trim();
-      const jumlah = Number(String(it.jumlah || it.qty || '1').replace(/[^\d.-]/g, '')) || 1;
-      const satuan = String(it.satuan || 'Pcs').trim();
-      const hargaSatuan = Number(String(it.hargaSatuan || it.harga || '0').replace(/[^\d.-]/g, '')) || 0;
-      const subtotal =
-        Number(String(it.subtotal || jumlah * hargaSatuan).replace(/[^\d.-]/g, '')) || jumlah * hargaSatuan;
-      return { no: idx + 1, diskripsi, jumlah, satuan, hargaSatuan, subtotal };
-    });
-
-    const parsedPenerima = jadiArray(penerimaTransfer)
-      .map((p) => {
-        const rincian = jadiArray(p.rincianBiaya)
-          .map((r) => ({
-            deskripsi: String(r.diskripsi || r.deskripsi || '').trim(),
-            jumlah: Math.max(0, Number(String(r.jumlah || 0).replace(/[^\d.-]/g, '')) || 0),
-          }))
-          .filter((r) => r.deskripsi || r.jumlah > 0);
-        const subtotalDariRincian = rincian.reduce((acc, r) => acc + r.jumlah, 0);
-        const subtotal = subtotalDariRincian > 0
-          ? subtotalDariRincian
-          : Math.max(0, Number(String(p.subtotal || 0).replace(/[^\d.-]/g, '')) || 0);
-        return {
-          namaPenerima: String(p.namaPenerima || '').trim(),
-          bank: String(p.bank || '').trim(),
-          noRekening: String(p.noRekening || '').trim(),
-          atasNama: String(p.atasNama || '').trim(),
-          keterangan: String(p.keterangan || '').trim(),
-          rincianBiaya: rincian,
-          subtotal,
-        };
-      })
-      .filter((p) => p.namaPenerima || p.bank || p.noRekening || p.rincianBiaya.length > 0);
-
-    const totalDariPenerima = parsedPenerima.reduce((acc, p) => acc + (Number(p.subtotal) || 0), 0);
-    const calculatedTotal = parsedItems.reduce((acc, curr) => acc + (Number(curr.subtotal) || 0), 0);
-    const finalTotalNominal =
-      totalDariPenerima > 0
-        ? totalDariPenerima
-        : calculatedTotal > 0
-          ? calculatedTotal
-          : Math.max(0, Number(totalNominal) || 0);
-
-    const derivedNamaMaterial =
-      parsedItems.length > 0 ? parsedItems.map((it) => it.diskripsi).join(', ') : String(namaMaterial || '').trim();
-    const pekerjaanTeks =
-      String(pekerjaan || namaMaterial || derivedNamaMaterial || unitKerja || '').trim() || derivedNamaMaterial;
-    const vendorTeks =
-      parsedPenerima.map((p) => p.namaPenerima).filter(Boolean).join(', ') || String(vendor || '').trim();
-    const kategoriTeks = String(kategori || '').trim() || 'Payment Request';
-
-    if (
-      !pekerjaanTeks ||
-      (parsedPenerima.length === 0 &&
-        (!unitKerja || !kategoriTeks || !vendorTeks || (!derivedNamaMaterial && parsedItems.length === 0)))
-    ) {
+    const hasil = dataPaymentRequestDariBody(req, null);
+    if (!hasil.valid) {
+      if (wantsJson(req)) {
+        return res.status(400).json({ success: false, message: 'Pekerjaan dan minimal satu penerima transfer wajib diisi.' });
+      }
       return res.redirect('/payment-request-user?error=1');
     }
 
-    const namaPenginput = getNamaPenginput(req);
-    const urgensiValid = ['Rendah', 'Normal', 'Sedang', 'Tinggi', 'High', 'Kritis', 'Critical'];
-    const tanggalPengajuan = new Date();
-    const tanggalTransferObj = tanggalTransfer ? new Date(tanggalTransfer) : null;
-    const tanggalTransferFinal =
-      tanggalTransferObj && !isNaN(tanggalTransferObj.getTime()) ? tanggalTransferObj : tanggalPengajuan;
-
-    const draft = new PaymentRequest({
-      nomorPengajuan: nomorPengajuanBaru(kategoriTeks, tanggalPengajuan),
-      tanggalPengajuan,
-      pekerjaan: pekerjaanTeks,
-      tanggalTransfer: tanggalTransferFinal,
-      detailPekerjaan: String(detailPekerjaan || deskripsi || '').trim(),
-      daftarDokumen: String(daftarDokumen || '').trim(),
-      penerimaTransfer: parsedPenerima,
-      unitKerja: String(unitKerja || pekerjaanTeks).trim(),
-      pemohon: String(pemohon || namaPenginput).trim(),
-      kategori: kategoriTeks,
-      vendor: vendorTeks,
-      urgensi: urgensiValid.includes(urgensi) ? urgensi : 'Normal',
-      namaMaterial: pekerjaanTeks,
-      deskripsi: String(detailPekerjaan || deskripsi || '').trim(),
-      totalNominal: finalTotalNominal,
-      statusApproval: 'Menunggu',
-      diinputOleh: namaPenginput,
-      items: parsedItems,
-    });
-
+    const draft = new PaymentRequest(hasil.data);
     if (req.file) {
       draft.fileUrl = '/uploads/' + req.file.filename;
       draft.fileName = namaBerkasAsli(req.file.originalname);
     }
-
     await draft.save();
+
+    if (wantsJson(req)) {
+      return res.status(201).json({
+        success: true,
+        message: 'Payment request berhasil dibuat.',
+        data: draft.toObject(),
+      });
+    }
     res.redirect('/payment-request-user?dibuat=1');
   } catch (err) {
     console.error('Gagal menyimpan payment request:', err);
+    if (wantsJson(req)) {
+      return res.status(500).json({ success: false, message: 'Gagal menyimpan payment request: ' + err.message });
+    }
     res.status(500).send('Gagal menyimpan payment request: ' + err.message);
+  }
+});
+
+// Edit data Payment Request dari halaman yang sama (AJAX). Status tetap dikunci
+// untuk user: nilai statusApproval dari form tidak pernah dipakai di sini.
+app.post('/payment-request-user/update/:id', isUserAuthenticated, upload.single('fileLaporan'), async (req, res) => {
+  try {
+    await syncReqFilesToGridFS(req);
+
+    const existing = await PaymentRequest.findById(req.params.id).lean();
+    if (!existing) {
+      if (wantsJson(req)) {
+        return res.status(404).json({ success: false, message: 'Data payment request tidak ditemukan.' });
+      }
+      return res.redirect('/payment-request-user?error=1');
+    }
+
+    const hasil = dataPaymentRequestDariBody(req, existing);
+    if (!hasil.valid) {
+      if (wantsJson(req)) {
+        return res.status(400).json({ success: false, message: 'Pekerjaan dan minimal satu penerima transfer wajib diisi.' });
+      }
+      return res.redirect('/payment-request-user?error=1');
+    }
+
+    const updateData = { ...hasil.data, statusApproval: existing.statusApproval || 'Menunggu' };
+    if (req.file) {
+      updateData.fileUrl = '/uploads/' + req.file.filename;
+      updateData.fileName = namaBerkasAsli(req.file.originalname);
+    }
+
+    const updated = await PaymentRequest.findByIdAndUpdate(req.params.id, updateData, { returnDocument: 'after' }).lean();
+    if (wantsJson(req)) {
+      return res.json({ success: true, message: 'Payment request berhasil diperbarui.', data: updated });
+    }
+    res.redirect('/payment-request-user?dibuat=1');
+  } catch (err) {
+    console.error('Gagal memperbarui payment request:', err);
+    if (wantsJson(req)) {
+      return res.status(500).json({ success: false, message: 'Gagal memperbarui payment request: ' + err.message });
+    }
+    res.status(500).send('Gagal memperbarui payment request: ' + err.message);
   }
 });
 
