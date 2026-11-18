@@ -543,7 +543,7 @@
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5">Daftar Lampiran Dokumen (1 baris = 1 lampiran)</label>
-          <textarea id="inp-attachments" rows="3" placeholder="- 1 (satu) lembar invoice dari Emil Production&#10;- 2 (dua) lembar bukti transaksi operasional" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:border-maroon-800"></textarea>
+          <textarea id="inp-attachments" rows="3" placeholder="Masukan daftar lampiran" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:border-maroon-800"></textarea>
         </div>
 
         <div class="p-5 rounded-2xl bg-gradient-to-r from-maroon-800 to-maroon-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
@@ -998,9 +998,9 @@
         '<button type="button" onclick="removeRecipientBlock(this)" class="text-xs font-semibold text-rose-700 hover:underline cursor-pointer">Hapus Penerima</button>' +
       '</div>' +
       '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">' +
-        '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">Judul Pos Biaya *</label><input type="text" required value="' + escapeHtml(d.summaryTitle || '') + '" placeholder="Misal: Sampel Kemeja Retail" class="rec-summary-title w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs focus:outline-none focus:border-maroon-800" /></div>' +
-        '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">Nama Vendor / Penerima *</label><input type="text" required value="' + escapeHtml(d.vendorName || '') + '" placeholder="Misal: Emil Production" class="rec-vendor-name w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs focus:outline-none focus:border-maroon-800" /></div>' +
-        '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">PIC &amp; No. HP *</label><input type="text" required value="' + escapeHtml(d.pic || '') + '" placeholder="Misal: Emil - 0812 1105 0038" class="rec-pic w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs focus:outline-none focus:border-maroon-800" /></div>' +
+        '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">Nama Barang *</label><input type="text" required value="' + escapeHtml(d.summaryTitle || '') + '" placeholder="Masukan nama barang..." class="rec-summary-title w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs focus:outline-none focus:border-maroon-800" /></div>' +
+        '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">Nama Vendor *</label><input type="text" required value="' + escapeHtml(d.vendorName || '') + '" placeholder="Masukan nama vendor..." class="rec-vendor-name w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs focus:outline-none focus:border-maroon-800" /></div>' +
+        '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">PIC &amp; No. HP *</label><input type="text" required value="' + escapeHtml(d.pic || '') + '" placeholder="Contoh: Nama - 0812 1105 0038" class="rec-pic w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs focus:outline-none focus:border-maroon-800" /></div>' +
       '</div>' +
       '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">' +
         '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">Nama Bank *</label><select class="rec-bank w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-medium focus:outline-none focus:border-maroon-800">' +
@@ -1008,8 +1008,8 @@
             return '<option value="' + b + '"' + ((d.bank || 'Bank BCA') === b ? ' selected' : '') + '>' + b + '</option>';
           }).join('') +
         '</select></div>' +
-        '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">Nomor Rekening *</label><input type="text" required value="' + escapeHtml(d.accountNo || '') + '" placeholder="Contoh: 4971232395" class="rec-acc-no w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono font-bold focus:outline-none focus:border-maroon-800" /></div>' +
-        '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">Atas Nama Rekening (a.n) *</label><input type="text" required value="' + escapeHtml(d.accountHolder || '') + '" placeholder="Contoh: Emil Dei Rahim" class="rec-acc-holder w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs focus:outline-none focus:border-maroon-800" /></div>' +
+        '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">Nomor Rekening *</label><input type="text" required value="' + escapeHtml(d.accountNo || '') + '" placeholder="Masukan nomer rekening" class="rec-acc-no w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono font-bold focus:outline-none focus:border-maroon-800" /></div>' +
+        '<div><label class="block text-[11px] font-semibold text-slate-700 mb-1">Atas Nama Rekening (a.n) *</label><input type="text" required value="' + escapeHtml(d.accountHolder || '') + '" placeholder="Masukan nama rekening" class="rec-acc-holder w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs focus:outline-none focus:border-maroon-800" /></div>' +
       '</div>' +
       '<div class="bg-white/90 rounded-xl p-3 border border-slate-300 space-y-2">' +
         '<div class="flex items-center justify-between">' +
