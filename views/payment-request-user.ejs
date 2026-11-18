@@ -534,7 +534,31 @@
       .approval-table tbody tr:last-child td {
         border-bottom: none;
       }
-      .pr-card {
+      .approval-table tbody tr.data-row {
+        transition: background 0.15s;
+      }
+      .approval-table tbody tr.data-row:hover {
+        background: #fcfbfb;
+      }
+
+      .cell-date {
+        display: block;
+        font-weight: 600;
+        color: #0f172a;
+        white-space: nowrap;
+      }
+      .cell-unit {
+        font-weight: 600;
+        color: #1e293b;
+      }
+      .cell-vendor {
+        color: #334155;
+      }
+      .cell-multi {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        m      .pr-card {
         transition: background 0.15s;
       }
       .pr-card:hover {
@@ -1296,6 +1320,10 @@
             <h1>Payment Request</h1>
           </div>
         </div>
+        <div class="banner-actions-pr">
+          <button class="btn-pr-secondary" type="button">Daftar PR</button>
+          <a class="btn-pr-primary" href="/payment-request-user/form">+ Buat Pengajuan Baru</a>
+        </div>
       </div>
       <% if (typeof dibuat !== 'undefined' && dibuat) { %>
       <div class="page-alert success">
@@ -1964,17 +1992,3 @@
 
       document.addEventListener('DOMContentLoaded', function () {
         const rows = document.querySelectorAll('.pr-card');
-        if (rows.length > 0) {
-          let countMenunggu = 0;
-          rows.forEach(function (r) {
-            if (normalisasiStatus(r.getAttribute('data-status')) === 'Menunggu') countMenunggu++;
-          });
-          const elCount = document.getElementById('cardMenungguCount');
-          if (elCount) elCount.textContent = countMenunggu;
-          const badgeCount = document.querySelector('.status-nav-group .badge-count.warning');
-          if (badgeCount) badgeCount.textContent = countMenunggu;
-        }
-      });
-    </script>
-  </body>
-</html>
