@@ -870,120 +870,185 @@
         background: #5c1313;
       }
 
-      /* DAFTAR BARANG STYLES */
-      .items-table-wrapper {
-        overflow-x: auto;
-        margin-top: 8px;
-        margin-bottom: 12px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 12px;
-        background: #fafafa;
-      }
-      .items-table-min {
-        min-width: 680px;
-      }
-      .item-head {
-        display: grid;
-        grid-template-columns: 36px minmax(180px, 2fr) 75px 85px 125px 135px 36px;
-        gap: 8px;
-        margin-bottom: 8px;
-        font-size: 11px;
-        font-weight: 700;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        align-items: center;
-      }
-      .item-row {
-        display: grid;
-        grid-template-columns: 36px minmax(180px, 2fr) 75px 85px 125px 135px 36px;
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-      .item-row input,
-      .item-row textarea {
-        width: 100%;
-        padding: 8px 10px;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        font-family: inherit;
-        font-size: 12.5px;
-        outline: none;
-        background: #ffffff;
-        transition: border-color 0.2s;
-      }
-      .item-row input:focus,
-      .item-row textarea:focus {
-        border-color: #7a1b1b;
-        box-shadow: 0 0 0 2px rgba(122, 27, 27, 0.1);
-      }
-      .item-row input[readonly] {
-        background: #f1f5f9;
-        text-align: center;
-        color: #475569;
-        font-weight: 600;
-      }
-      .item-row .input-subtotal {
+      /* PAYMENT REQUEST MODAL FORM STYLES */
+      .pr-modal-section {
         background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 16px;
+      }
+      .pr-modal-section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
         font-weight: 700;
         color: #7a1b1b;
-        text-align: right;
+        margin: 0 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e2e8f0;
       }
-      .btn-remove-item {
+      .pr-section-badge {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #7a1b1b;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 800;
+      }
+      .vendor-block {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #7a1b1b;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      }
+      .vendor-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed #e2e8f0;
+      }
+      .vendor-head h4 {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        color: #7a1b1b;
+      }
+      .btn-del-vendor {
         background: #fee2e2;
         color: #dc2626;
-        border: none;
-        width: 36px;
-        height: 36px;
+        border: 1px solid #fecaca;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .btn-del-vendor:hover {
+        background: #fecaca;
+      }
+      .rincian-biaya-wrap {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px dashed #e2e8f0;
+      }
+      .rincian-biaya-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .rincian-biaya-head span {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .btn-add-rincian {
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 4px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .btn-add-rincian:hover {
+        background: #e2e8f0;
+      }
+      .rincian-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .rincian-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 160px 32px;
+        gap: 8px;
+        align-items: center;
+      }
+      .btn-del-rincian {
+        width: 32px;
+        height: 32px;
+        border: 1px solid #fecaca;
+        background: #fff;
+        color: #dc2626;
         border-radius: 6px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background 0.2s;
-        flex-shrink: 0;
+        font-size: 14px;
+        line-height: 1;
       }
-      .btn-remove-item:hover {
-        background: #fecaca;
+      .btn-del-rincian:hover {
+        background: #fee2e2;
       }
-      .btn-add-item {
-        background-color: #7a1b1b;
-        color: #ffffff;
-        border: none;
-        padding: 6px 14px;
-        border-radius: 6px;
+      .vendor-subtotal-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        padding-top: 6px;
         font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
+        color: #64748b;
+      }
+      .vendor-subtotal-bar strong {
+        color: #7a1b1b;
+        font-size: 13.5px;
+      }
+      .btn-add-vendor {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        transition: background 0.2s;
+        background: #ffffff;
+        color: #7a1b1b;
+        border: 1.5px dashed #7a1b1b;
+        border-radius: 8px;
+        padding: 9px 16px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
       }
-      .btn-add-item:hover {
-        background-color: #5c1313;
+      .btn-add-vendor:hover {
+        background: #fff5f5;
       }
-      .total-bar-container {
+      .grand-total-box {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 10px;
         padding: 12px 16px;
-        margin-top: 8px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        margin-top: 14px;
       }
-      .total-bar-title {
+      .grand-total-box span {
         font-size: 13px;
-        font-weight: 600;
-        color: #475569;
-      }
-      .total-bar-value {
-        font-size: 16px;
         font-weight: 700;
+        color: #7a1b1b;
+      }
+      .grand-total-box strong {
+        font-size: 18px;
         color: #7a1b1b;
       }
 
@@ -1321,8 +1386,8 @@
           </div>
         </div>
         <div class="banner-actions-pr">
-          <button class="btn-pr-secondary" type="button">Daftar PR</button>
-          <a class="btn-pr-primary" href="/payment-request-user/form">+ Buat Pengajuan Baru</a>
+          <button class="btn-pr-secondary" type="button" onclick="window.scrollTo({top: 400, behavior: 'smooth'})">Daftar PR</button>
+          <button class="btn-pr-primary" type="button" onclick="openModal()">+ Buat Pengajuan Baru</button>
         </div>
       </div>
       <% if (typeof dibuat !== 'undefined' && dibuat) { %>
@@ -1494,7 +1559,7 @@
             </div>
             <h3>Belum ada pengajuan Payment Request</h3>
             <p>Buat pengajuan baru untuk mulai mencatat daftar transfer.</p>
-            <a href="/payment-request-user/form" class="btn-empty-action">+ Buat Pengajuan Baru</a>
+            <button type="button" class="btn-empty-action" onclick="openModal()">+ Buat Pengajuan Baru</button>
           </div>
           <% } else { %>
           <% daftarMateri.forEach(function (materi) {
@@ -1572,241 +1637,179 @@
     </main>
 
 
+    <!-- MODAL: BUAT PENGAJUAN PAYMENT REQUEST BARU -->
     <div class="modal" id="modalDraft" onclick="if (event.target === this) closeModal();">
-      <div class="modal-content">
+      <div class="modal-content" style="max-width: 860px;">
         <div class="modal-header">
           <div>
-            <h3>Buat Draft Pengajuan Baru</h3>
-            <p>Lengkapi data pengajuan. Data akan tersimpan dengan status Menunggu Persetujuan.</p>
+            <h3>Buat Pengajuan Payment Request</h3>
+            <p>Lengkapi jadwal transfer dan rincian penerima dana. Data otomatis tersimpan dengan status Menunggu Persetujuan.</p>
           </div>
           <button type="button" class="modal-close" onclick="closeModal()" aria-label="Tutup">×</button>
         </div>
-        <form action="/payment-request-user/add" method="POST" enctype="multipart/form-data">
-          <div class="modal-body">
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="inputUnitKerja">Pekerjaan<span class="required">*</span></label>
-                <input
-                  type="text"
-                  id="inputUnitKerja"
-                  name="unitKerja"
-                  placeholder="Contoh: Divisi Logistik & Armada"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="inputPemohon">Yang Mengajukan</label>
-                <input
-                  type="text"
-                  id="inputPemohon"
-                  name="pemohon"
-                  value="<%= (typeof user !== 'undefined' && user && (user.namaLengkap || user.username)) ? (user.namaLengkap || user.username) : '' %>"
-                  placeholder="Nama pemohon"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="inputKategori">Kategori Dokumen <span class="required">*</span></label>
-                <select id="inputKategori" name="kategori" required>
-                  <option value="Purchase Requisition (PR)">Purchase Requisition (PR)</option>
-                  <option value="Purchase Order (PO)">Purchase Order (PO)</option>
-                  <option value="Laporan Pertanggungjawaban (LPJ)">Laporan Pertanggungjawaban (LPJ)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="inputVendor">Nama Vendor <span class="required">*</span></label>
-                <input
-                  type="text"
-                  id="inputVendor"
-                  name="vendor"
-                  placeholder="Contoh: CV Semen Nusantara Enterprise"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="inputUrgensi">Tingkat Urgensi</label>
-                <select id="inputUrgensi" name="urgensi">
-                  <option value="Normal" selected>Normal</option>
-                  <option value="High">High</option>
-                  <option value="Critical">Critical</option>
-                </select>
-              </div>
+        <form action="/payment-request-user/add" method="POST" enctype="multipart/form-data" id="formPRModal">
+          <input type="hidden" name="kategori" value="Payment Request" />
+          <input type="hidden" name="pemohon" value="<%= (typeof user !== 'undefined' && user && (user.namaLengkap || user.username)) ? (user.namaLengkap || user.username) : 'User' %>" />
 
-              <!-- DAFTAR BARANG UTAMA -->
-              <div class="form-group full" style="margin-top: 6px">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px">
-                  <label style="font-size: 13px; font-weight: 700; color: #1e293b"
-                    >Daftar Barang <span class="required">*</span></label
-                  >
-                  <button type="button" class="btn-add-item" onclick="addItemRow()">
-                    <i class="fa-solid fa-plus"></i> + Tambah Barang
-                  </button>
+          <div class="modal-body" style="padding: 20px 24px;">
+            <!-- BAGIAN 1: INFORMASI PEKERJAAN & JADWAL TRANSFER -->
+            <div class="pr-modal-section">
+              <div class="pr-modal-section-title">
+                <span class="pr-section-badge">1</span>
+                <span>Informasi Pekerjaan &amp; Jadwal Transfer</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="inputPekerjaan">Pekerjaan / Pengadaan <span class="required">*</span></label>
+                  <input
+                    type="text"
+                    id="inputPekerjaan"
+                    name="pekerjaan"
+                    placeholder="Contoh: Pengadaan Seragam Team Sales Force"
+                    required
+                  />
                 </div>
-                <small style="display: block; margin-bottom: 8px; color: #64748b; font-size: 11.5px">
-                  Input rincian material / barang, volume (jumlah), satuan, dan harga satuan acuan pengajuan.
-                </small>
-
-                <div class="items-table-wrapper">
-                  <div class="items-table-min">
-                    <div
-                      class="item-head"
-                      style="
-                        display: grid;
-                        grid-template-columns: 2fr 100px 120px 1.5fr 1.5fr 45px;
-                        gap: 10px;
-                        align-items: center;
-                        font-weight: 600;
-                        font-size: 13px;
-                        color: #475569;
-                        margin-bottom: 8px;
-                      "
-                    >
-                      <span>Diskripsi / Pembayaran & Spesifikasi</span>
-                      <span style="text-align: center">Jumlah</span>
-                      <span>Satuan</span>
-                      <span style="text-align: right">Harga Satuan (Rp)</span>
-                      <span style="text-align: right">Subtotal (Rp)</span>
-                      <span></span>
-                    </div>
-                    <div id="itemContainer">
-                      <div
-                        class="item-row"
-                        style="
-                          display: grid;
-                          grid-template-columns: 2fr 100px 120px 1.5fr 1.5fr 45px;
-                          gap: 10px;
-                          align-items: center;
-                          margin-bottom: 8px;
-                        "
-                      >
-                        <textarea
-                          data-field="diskripsi"
-                          name="items[0][diskripsi]"
-                          placeholder="Nama barang / spesifikasi material..."
-                          rows="1"
-                          required
-                          style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical"
-                        ></textarea>
-                        <input
-                          type="number"
-                          min="1"
-                          step="any"
-                          data-field="jumlah"
-                          name="items[0][jumlah]"
-                          placeholder="Jml"
-                          value="1"
-                          required
-                          oninput="hitungSubtotalItem(this)"
-                          style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center"
-                        />
-                        <input
-                          type="text"
-                          data-field="satuan"
-                          name="items[0][satuan]"
-                          placeholder="Cth: Batang"
-                          required
-                          style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px"
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          step="any"
-                          data-field="hargaSatuan"
-                          name="items[0][hargaSatuan]"
-                          placeholder="0"
-                          required
-                          oninput="hitungSubtotalItem(this)"
-                          style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right"
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          step="any"
-                          data-field="subtotal"
-                          name="items[0][subtotal]"
-                          placeholder="0"
-                          readonly
-                          class="input-subtotal"
-                          style="
-                            padding: 8px 12px;
-                            border: 1px solid #cbd5e1;
-                            border-radius: 6px;
-                            background: #f1f5f9;
-                            text-align: right;
-                          "
-                        />
-                        <button type="button" class="btn-remove-item" onclick="removeItemRow(this)" title="Hapus baris">
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path
-                              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                            ></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                <div class="form-group">
+                  <label for="inputTanggalTransfer">Tanggal Transfer <span class="required">*</span></label>
+                  <input
+                    type="date"
+                    id="inputTanggalTransfer"
+                    name="tanggalTransfer"
+                    value="<%= new Date().toISOString().slice(0, 10) %>"
+                    required
+                  />
                 </div>
-
-                <!-- Bar Ringkasan Total Anggaran Otomatis -->
-                <div class="total-bar-container">
-                  <span class="total-bar-title">Total Anggaran Pengajuan (Otomatis):</span>
-                  <span class="total-bar-value" id="tampilanTotalAnggaran">Rp 0</span>
-                  <input type="hidden" id="inputTotalNominal" name="totalNominal" value="0" />
+                <div class="form-group full">
+                  <label for="inputDetailPekerjaan">Detail / Keperluan Biaya <span class="required">*</span></label>
+                  <textarea
+                    id="inputDetailPekerjaan"
+                    name="detailPekerjaan"
+                    rows="2"
+                    placeholder="Contoh: Biaya sampel dan operasional produksi seragam lapangan..."
+                    required
+                  ></textarea>
                 </div>
-              </div>
-
-              <div class="form-group full">
-                <label for="inputDeskripsi">Catatan Pemohon (Opsional)</label>
-                <textarea
-                  id="inputDeskripsi"
-                  name="deskripsi"
-                  rows="2"
-                  placeholder="Catatan mendesak, alasan pembelian, atau instruksi lainnya..."
-                ></textarea>
-              </div>
-              <div class="form-group full">
-                <label>Unggah Berkas / Dokumen Pendukung (PDF)</label>
-                <input type="file" name="fileLaporan" accept="application/pdf" />
               </div>
             </div>
-            <p class="form-hint" style="margin-top: 12px"
-              >Field bertanda <span style="color: #dc2626">*</span> wajib diisi.</p
-            >
+
+            <!-- BAGIAN 2: PENERIMA TRANSFER & RINCIAN BIAYA -->
+            <div class="pr-modal-section">
+              <div class="pr-modal-section-title" style="justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="pr-section-badge">2</span>
+                  <span>Penerima Transfer &amp; Rincian Biaya</span>
+                </div>
+                <button type="button" class="btn-add-vendor" onclick="tambahVendorModal()">
+                  + Tambah Penerima
+                </button>
+              </div>
+              <p class="form-hint" style="margin-top: -6px; margin-bottom: 12px;">
+                Rincian nominal transfer dihitung otomatis dari subtotal setiap penerima/vendor.
+              </p>
+
+              <!-- KONTENER DAFTAR PENERIMA TRANSFER -->
+              <div id="daftarVendorModal"></div>
+
+              <!-- TOTAL AKUMULASI BIAYA -->
+              <div class="grand-total-box">
+                <span>Total Pengajuan:</span>
+                <strong id="grandTotalModal">Rp 0</strong>
+                <input type="hidden" id="inputTotalNominal" name="totalNominal" value="0" />
+              </div>
+            </div>
+
+            <!-- BAGIAN 3: LAMPIRAN & DOKUMEN PENDUKUNG -->
+            <div class="pr-modal-section" style="margin-bottom: 0;">
+              <div class="pr-modal-section-title">
+                <span class="pr-section-badge">3</span>
+                <span>Lampiran &amp; Dokumen Pendukung</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group full">
+                  <label for="inputDaftarDokumen">Daftar Dokumen (Opsional)</label>
+                  <textarea
+                    id="inputDaftarDokumen"
+                    name="daftarDokumen"
+                    rows="2"
+                    placeholder="Contoh: 1 (satu) lembar invoice/kwitansi asli dari vendor..."
+                  ></textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Unggah Berkas Pendukung (PDF / Excel / Gambar)</label>
+                  <input type="file" name="fileLaporan" accept=".pdf,.png,.jpg,.jpeg,.xlsx,.doc,.docx" />
+                </div>
+              </div>
+            </div>
+
+            <p class="form-hint" style="margin-top: 14px;">
+              Field bertanda <span style="color: #dc2626">*</span> wajib diisi.
+            </p>
           </div>
+
           <div class="modal-footer">
             <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
             <button type="submit" class="btn-submit">
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
               </svg>
-              Kirim Pengajuan
+              Simpan Pengajuan
             </button>
           </div>
         </form>
       </div>
     </div>
+
+    <!-- TEMPLATE VENDOR / PENERIMA TRANSFER MODAL -->
+    <template id="tplVendorModal">
+      <div class="vendor-block" data-index="__i__">
+        <div class="vendor-head">
+          <h4>PENERIMA TRANSFER <span class="vendor-number">__n__</span></h4>
+          <button type="button" class="btn-del-vendor" onclick="hapusVendorModal(this)" title="Hapus penerima ini">Hapus</button>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nama Penerima Transfer <span class="required">*</span></label>
+            <input type="text" data-name="penerimaTransfer[__i__][namaPenerima]" placeholder="Misal: CV Maju Bersama / Nama Toko" required />
+          </div>
+          <div class="form-group">
+            <label>No. Rekening <span class="required">*</span></label>
+            <input type="text" data-name="penerimaTransfer[__i__][noRekening]" placeholder="Contoh: 4971232395" required />
+          </div>
+          <div class="form-group">
+            <label>Bank <span class="required">*</span></label>
+            <input type="text" data-name="penerimaTransfer[__i__][bank]" placeholder="Contoh: BCA / Mandiri / BRI" required />
+          </div>
+          <div class="form-group">
+            <label>Atas Nama Rekening <span class="required">*</span></label>
+            <input type="text" data-name="penerimaTransfer[__i__][atasNama]" placeholder="Contoh: PT Sumber Rejeki" required />
+          </div>
+          <div class="form-group full">
+            <label>Keterangan Transfer (Opsional)</label>
+            <input type="text" data-name="penerimaTransfer[__i__][keterangan]" placeholder="Contoh: Transfer termin 1 pengadaan barang..." />
+          </div>
+        </div>
+
+        <div class="rincian-biaya-wrap">
+          <div class="rincian-biaya-head">
+            <span>Rincian Biaya</span>
+            <button type="button" class="btn-add-rincian" onclick="tambahRincianModal(this)">+ Tambah Item Biaya</button>
+          </div>
+          <div class="rincian-list">
+            <div class="rincian-row">
+              <input type="text" data-name="penerimaTransfer[__i__][rincianBiaya][__j__][deskripsi]" placeholder="Deskripsi rincian biaya..." required />
+              <input type="number" min="0" step="any" class="rincian-jumlah" data-name="penerimaTransfer[__i__][rincianBiaya][__j__][jumlah]" placeholder="Rp" value="0" required oninput="hitungSemuaModal()" />
+              <button type="button" class="btn-del-rincian" onclick="hapusRincianModal(this)" title="Hapus item biaya">×</button>
+            </div>
+          </div>
+          <input type="hidden" class="vendor-subtotal" data-name="penerimaTransfer[__i__][subtotal]" value="0" />
+          <div class="vendor-subtotal-bar">
+            <span>Subtotal:</span>
+            <strong class="subtotal-label">Rp 0</strong>
+          </div>
+        </div>
+      </div>
+    </template>
     <script>
       function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
@@ -1819,9 +1822,17 @@
         el.closest('.nav-item.dropdown').classList.toggle('active');
       }
 
+      function rupiah(nilai) {
+        return 'Rp ' + (Number(nilai) || 0).toLocaleString('id-ID');
+      }
+
       function openModal() {
         const modal = document.getElementById('modalDraft');
         if (modal) modal.classList.add('open');
+        const daftar = document.getElementById('daftarVendorModal');
+        if (daftar && daftar.children.length === 0) {
+          tambahVendorModal();
+        }
       }
 
       function closeModal() {
@@ -1829,100 +1840,87 @@
         if (modal) modal.classList.remove('open');
       }
 
-      // Fungsi untuk Baris Barang Dinamis (Urutan kolom disesuaikan dengan baris pertama)
-      function addItemRow() {
-        const container = document.getElementById('itemContainer');
-        const rows = container.getElementsByClassName('item-row');
-        const rowCount = rows.length;
-
-        const newRow = document.createElement('div');
-        newRow.className = 'item-row';
-        newRow.style.cssText =
-          'display: grid; grid-template-columns: 2fr 100px 120px 1.5fr 1.5fr 45px; gap: 10px; align-items: center; margin-bottom: 8px;';
-        newRow.innerHTML = `
-        <textarea data-field="diskripsi" name="items[0][diskripsi]" placeholder="Nama barang / spesifikasi material..." rows="1" required style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>  
-        <input type="number" min="1" step="any" data-field="jumlah" name="items[${rowCount}][jumlah]" placeholder="Jml" value="1" required oninput="hitungSubtotalItem(this)">
-        <input type="text" data-field="satuan" name="items[${rowCount}][satuan]" placeholder="Cth: Batang" required>
-        <input type="number" min="0" step="any" data-field="hargaSatuan" name="items[${rowCount}][hargaSatuan]" placeholder="0" required oninput="hitungSubtotalItem(this)">
-        <input type="number" min="0" step="any" data-field="subtotal" name="items[${rowCount}][subtotal]" placeholder="0" readonly class="input-subtotal">
-        <button type="button" class="btn-remove-item" onclick="removeItemRow(this)" title="Hapus baris">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            <line x1="10" y1="11" x2="10" y2="17"></line>
-            <line x1="14" y1="11" x2="14" y2="17"></line>
-          </svg>
-        </button>
-      `;
-        container.appendChild(newRow);
-        hitungTotalSemuaBarang();
-      }
-
-      function removeItemRow(btn) {
-        const container = document.getElementById('itemContainer');
-        if (container.getElementsByClassName('item-row').length > 1) {
-          btn.closest('.item-row').remove();
-          reindexRows();
-          hitungTotalSemuaBarang();
-        } else {
-          alert('Minimal harus ada 1 baris item barang.');
-        }
-      }
-
-      function reindexRows() {
-        const container = document.getElementById('itemContainer');
-        const rows = container.getElementsByClassName('item-row');
-        for (let i = 0; i < rows.length; i++) {
-          const row = rows[i];
-          const noInput = row.querySelector('[data-field="no"]');
-          if (noInput) {
-            noInput.value = i + 1;
-            noInput.name = `items[${i}][no]`;
-          }
-          ['diskripsi', 'jumlah', 'satuan', 'hargaSatuan', 'subtotal'].forEach((field) => {
-            const el = row.querySelector(`[data-field="${field}"]`);
-            if (el) {
-              el.name = `items[${i}][${field}]`;
-            }
-          });
-        }
-      }
-
-      function hitungSubtotalItem(el) {
-        const row = el.closest('.item-row');
-        if (!row) return;
-        const inputJumlah = row.querySelector('[data-field="jumlah"]');
-        const inputHarga = row.querySelector('[data-field="hargaSatuan"]');
-        const inputSubtotal = row.querySelector('[data-field="subtotal"]');
-
-        const qty = parseFloat(inputJumlah ? inputJumlah.value : 0) || 0;
-        const harga = parseFloat(inputHarga ? inputHarga.value : 0) || 0;
-        const subtotal = Math.round(qty * harga);
-
-        if (inputSubtotal) {
-          inputSubtotal.value = subtotal;
-        }
-        hitungTotalSemuaBarang();
-      }
-
-      function hitungTotalSemuaBarang() {
-        const container = document.getElementById('itemContainer');
+      function reindexVendorModal() {
+        const container = document.getElementById('daftarVendorModal');
         if (!container) return;
-        const subtotalInputs = container.querySelectorAll('[data-field="subtotal"]');
-        let grandTotal = 0;
-        subtotalInputs.forEach((input) => {
-          grandTotal += parseFloat(input.value) || 0;
+        const blocks = container.querySelectorAll('.vendor-block');
+        blocks.forEach(function (block, i) {
+          block.dataset.index = String(i);
+          const numEl = block.querySelector('.vendor-number');
+          if (numEl) numEl.textContent = String(i + 1);
+
+          block.querySelectorAll('[data-name]').forEach(function (el) {
+            el.name = el.dataset.name.replace(/__i__/g, i).replace(/__j__/g, 0);
+          });
+          block.querySelectorAll('.rincian-row').forEach(function (row, j) {
+            row.querySelectorAll('[data-name]').forEach(function (el) {
+              el.name = el.dataset.name.replace(/__i__/g, i).replace(/__j__/g, j);
+            });
+          });
+
+          const btnHapus = block.querySelector('.btn-del-vendor');
+          if (btnHapus) {
+            btnHapus.style.display = blocks.length > 1 ? 'inline-block' : 'none';
+          }
         });
+        hitungSemuaModal();
+      }
 
-        const totalDisplay = document.getElementById('tampilanTotalAnggaran');
-        const totalHidden = document.getElementById('inputTotalNominal');
+      function tambahVendorModal() {
+        const tpl = document.getElementById('tplVendorModal');
+        const daftar = document.getElementById('daftarVendorModal');
+        if (!tpl || !daftar) return;
+        daftar.appendChild(tpl.content.firstElementChild.cloneNode(true));
+        reindexVendorModal();
+      }
 
-        if (totalDisplay) {
-          totalDisplay.textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
-        }
-        if (totalHidden) {
-          totalHidden.value = grandTotal;
-        }
+      function hapusVendorModal(btn) {
+        const blok = btn.closest('.vendor-block');
+        const daftar = document.getElementById('daftarVendorModal');
+        if (!blok || !daftar || daftar.querySelectorAll('.vendor-block').length <= 1) return;
+        blok.remove();
+        reindexVendorModal();
+      }
+
+      function tambahRincianModal(btn) {
+        const blok = btn.closest('.vendor-block');
+        const list = blok ? blok.querySelector('.rincian-list') : null;
+        if (!list) return;
+        const barisPertama = list.querySelector('.rincian-row');
+        if (!barisPertama) return;
+        const clone = barisPertama.cloneNode(true);
+        clone.querySelectorAll('input').forEach(function (input) {
+          input.value = input.classList.contains('rincian-jumlah') ? '0' : '';
+        });
+        list.appendChild(clone);
+        reindexVendorModal();
+      }
+
+      function hapusRincianModal(btn) {
+        const blok = btn.closest('.vendor-block');
+        const list = blok ? blok.querySelector('.rincian-list') : null;
+        if (!list || list.querySelectorAll('.rincian-row').length <= 1) return;
+        btn.closest('.rincian-row').remove();
+        reindexVendorModal();
+      }
+
+      function hitungSemuaModal() {
+        let total = 0;
+        document.querySelectorAll('#daftarVendorModal .vendor-block').forEach(function (blok) {
+          let subtotal = 0;
+          blok.querySelectorAll('.rincian-jumlah').forEach(function (input) {
+            subtotal += Number(input.value) || 0;
+          });
+          const hidden = blok.querySelector('.vendor-subtotal');
+          const label = blok.querySelector('.subtotal-label');
+          if (hidden) hidden.value = String(subtotal);
+          if (label) label.textContent = rupiah(subtotal);
+          total += subtotal;
+        });
+        const grandDisplay = document.getElementById('grandTotalModal');
+        const grandInput = document.getElementById('inputTotalNominal');
+        if (grandDisplay) grandDisplay.textContent = rupiah(total);
+        if (grandInput) grandInput.value = String(total);
       }
 
       let statusFilterAktif = '';
@@ -1992,3 +1990,16 @@
 
       document.addEventListener('DOMContentLoaded', function () {
         const rows = document.querySelectorAll('.pr-card');
+        if (rows.length > 0) {
+          let countMenunggu = 0;
+          rows.forEach(function (r) {
+            if (normalisasiStatus(r.getAttribute('data-status')) === 'Menunggu') countMenunggu++;
+          });
+          const badgeCount = document.querySelector('.status-nav-group .badge-count.warning');
+          if (badgeCount) badgeCount.textContent = countMenunggu;
+        }
+        tambahVendorModal();
+      });
+    </script>
+  </body>
+</html>
