@@ -29,6 +29,7 @@ const lpjSchema = new mongoose.Schema(
       {
         tanggal: { type: Date, default: Date.now },
         kategoriPengeluaran: { type: String, default: '' },
+        jenisPembayaran: { type: String, enum: ['DP', 'Lunas'], default: 'Lunas' },
         namaItem: { type: String, default: '' },
         keterangan: { type: String, default: '' },
         qty: { type: Number, default: 0 },

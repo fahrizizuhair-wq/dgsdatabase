@@ -3348,7 +3348,7 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
     await syncReqFilesToGridFS(req);
 
     const { id } = req.params;
-    const { kategoriPengeluaran, namaItem, keterangan, qty, hargaSatuan, nominal, tanggal } = req.body;
+    const { kategoriPengeluaran, jenisPembayaran, namaItem, keterangan, qty, hargaSatuan, nominal, tanggal } = req.body;
 
     const lpj = await Lpj.findById(id);
     if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
@@ -3356,6 +3356,7 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
     const qtyAngka = Number(qty) || 0;
     const hargaAngka = Number(hargaSatuan) || 0;
     const nominalAngka = Number(nominal) || qtyAngka * hargaAngka;
+    const jenisDipilih = String(jenisPembayaran || '').trim().toUpperCase() === 'DP' ? 'DP' : 'Lunas';
 
     let tanggalCatatan = new Date();
     if (tanggal) {
@@ -3372,6 +3373,7 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
     lpj.rincianPengeluaran.push({
       tanggal: tanggalCatatan,
       kategoriPengeluaran: kategoriPengeluaran || '',
+      jenisPembayaran: jenisDipilih,
       namaItem: namaItem || '',
       keterangan: keterangan || '',
       qty: qtyAngka,
@@ -3397,7 +3399,7 @@ app.post('/lpj/detail/:id/edit-catatan/:itemId', upload.single('nota'), async (r
     await syncReqFilesToGridFS(req);
 
     const { id, itemId } = req.params;
-    const { kategoriPengeluaran, namaItem, keterangan, qty, hargaSatuan, nominal, tanggal } = req.body;
+    const { kategoriPengeluaran, jenisPembayaran, namaItem, keterangan, qty, hargaSatuan, nominal, tanggal } = req.body;
 
     const lpj = await Lpj.findById(id);
     if (!lpj) return res.status(404).send('LPJ tidak ditemukan');
@@ -3405,6 +3407,7 @@ app.post('/lpj/detail/:id/edit-catatan/:itemId', upload.single('nota'), async (r
     const qtyAngka = Number(qty) || 0;
     const hargaAngka = Number(hargaSatuan) || 0;
     const nominalAngka = Number(nominal) || qtyAngka * hargaAngka;
+    const jenisDipilih = String(jenisPembayaran || '').trim().toUpperCase() === 'DP' ? 'DP' : 'Lunas';
 
     let tanggalCatatan = new Date();
     if (tanggal) {
@@ -3425,6 +3428,7 @@ app.post('/lpj/detail/:id/edit-catatan/:itemId', upload.single('nota'), async (r
       if (item) {
         item.tanggal = tanggalCatatan;
         item.kategoriPengeluaran = kategoriPengeluaran || item.kategoriPengeluaran;
+        item.jenisPembayaran = jenisDipilih;
         item.namaItem = namaItem || item.namaItem;
         item.keterangan = keterangan !== undefined ? keterangan : item.keterangan;
         item.qty = qtyAngka;

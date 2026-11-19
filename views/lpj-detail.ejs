@@ -1174,14 +1174,14 @@
                   <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
                     <td><%= index + 1 %></td>
                     <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
-                    <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '' : '' %></td>
+                    <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <% if (item.jenisPembayaran) { %><span style="display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 999px; font-size: 10px; font-weight: 700; <%= item.jenisPembayaran === 'DP' ? 'background: #fff7ed; color: #c2410c;' : 'background: #f0fdf4; color: #15803d;' %>"><%= item.jenisPembayaran %></span><% } %></td>
                     <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
                     <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
                     <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
                     <td><%= item.keterangan || '-' %></td>
                     <td style="white-space: nowrap; text-align: center;" onclick="event.stopPropagation()">
                       <div style="display: inline-flex; gap: 5px; align-items: center;">
-                        <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)" data-id="<%= item._id %>" data-tanggal="<%= tglIso %>" data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>" data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>" data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>" data-qty="<%= item.qty || 1 %>" data-harga="<%= item.hargaSatuan || 0 %>" data-nominal="<%= item.nominal || 0 %>" data-notapath="<%= item.notaPath || '' %>" title="Edit Transaksi">
+                        <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)" data-id="<%= item._id %>" data-tanggal="<%= tglIso %>" data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>" data-jenis="<%= item.jenisPembayaran || 'Lunas' %>" data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>" data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>" data-qty="<%= item.qty || 1 %>" data-harga="<%= item.hargaSatuan || 0 %>" data-nominal="<%= item.nominal || 0 %>" data-notapath="<%= item.notaPath || '' %>" title="Edit Transaksi">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -1262,14 +1262,14 @@
                   <tr onclick="bukaNotaItem('<%= item.notaPath || '' %>')" title="Klik untuk lihat nota">
                     <td><%= index + 1 %></td>
                     <td style="white-space: nowrap;"><%= formatTanggal(item.tanggal) %></td>
-                    <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <%= item.notaPath ? '' : '' %></td>
+                    <td><strong style="color: #0f172a;"><%= item.namaItem || '-' %></strong> <% if (item.jenisPembayaran) { %><span style="display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 999px; font-size: 10px; font-weight: 700; <%= item.jenisPembayaran === 'DP' ? 'background: #fff7ed; color: #c2410c;' : 'background: #f0fdf4; color: #15803d;' %>"><%= item.jenisPembayaran %></span><% } %></td>
                     <td class="num"><%= (Number(item.qty) || 0).toLocaleString('id-ID') %></td>
                     <td class="num">Rp <%= (Number(item.hargaSatuan) || 0).toLocaleString('id-ID') %></td>
                     <td class="num" style="font-weight: 700; color: #b91c1c;">Rp <%= (Number(item.nominal) || 0).toLocaleString('id-ID') %></td>
                     <td><%= item.keterangan || '-' %></td>
                     <td style="white-space: nowrap; text-align: center;" onclick="event.stopPropagation()">
                       <div style="display: inline-flex; gap: 5px; align-items: center;">
-                        <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)" data-id="<%= item._id %>" data-tanggal="<%= tglIso %>" data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>" data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>" data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>" data-qty="<%= item.qty || 1 %>" data-harga="<%= item.hargaSatuan || 0 %>" data-nominal="<%= item.nominal || 0 %>" data-notapath="<%= item.notaPath || '' %>" title="Edit Transaksi">
+                        <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)" data-id="<%= item._id %>" data-tanggal="<%= tglIso %>" data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>" data-jenis="<%= item.jenisPembayaran || 'Lunas' %>" data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>" data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>" data-qty="<%= item.qty || 1 %>" data-harga="<%= item.hargaSatuan || 0 %>" data-nominal="<%= item.nominal || 0 %>" data-notapath="<%= item.notaPath || '' %>" title="Edit Transaksi">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -1404,6 +1404,15 @@
         </div>
 
         <div class="form-group">
+          <label>Jenis Pembayaran</label>
+          <select name="jenisPembayaran" required>
+            <option value="DP">DP</option>
+            <option value="Lunas" selected>Lunas</option>
+          </select>
+          <small style="display: block; margin-top: 5px; font-size: 11px; color: #64748b;">Gunakan uraian yang sama saat Input pelunasan agar barisnya saling berpasangan di export.</small>
+        </div>
+
+        <div class="form-group">
           <label>Uraian Barang</label>
           <input type="text" name="namaItem" placeholder="Contoh: Pembelian 10 pcs Kipas Mini" required>
         </div>
@@ -1472,6 +1481,14 @@
           <select name="kategoriPengeluaran" id="editKategoriCatatan" required>
             <option value="BIAYA PRODUKSI">Biaya Produksi</option>
             <option value="Biaya Oprasional">Biaya Oprasional</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Jenis Pembayaran</label>
+          <select name="jenisPembayaran" id="editJenisPembayaran" required>
+            <option value="DP">DP</option>
+            <option value="Lunas">Lunas</option>
           </select>
         </div>
 
@@ -1646,6 +1663,7 @@
       const id = btn.getAttribute('data-id');
       const tanggal = btn.getAttribute('data-tanggal');
       const kategori = btn.getAttribute('data-kategori');
+      const jenis = btn.getAttribute('data-jenis') || 'Lunas';
       const nama = btn.getAttribute('data-nama');
       const keterangan = btn.getAttribute('data-keterangan');
       const qty = btn.getAttribute('data-qty') || 1;
@@ -1667,6 +1685,7 @@
         }
       }
 
+      document.getElementById('editJenisPembayaran').value = jenis === 'DP' ? 'DP' : 'Lunas';
       document.getElementById('editNamaItem').value = nama || '';
       document.getElementById('editKeterangan').value = keterangan || '';
       document.getElementById('editQty').value = qty;
