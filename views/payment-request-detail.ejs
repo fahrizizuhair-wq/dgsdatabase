@@ -394,56 +394,41 @@
         }, 3200);
       }
 
-        function renderPRDetail() {
-          var pr = prSaatIni;
-          if (!pr) return;
+      function renderPRDetail() {
+        var pr = prSaatIni;
+        if (!pr) return;
 
-          var statusSelect = document.getElementById('detail-status-select');
-          if (statusSelect) statusSelect.value = pr.status;
+        var statusSelect = document.getElementById('detail-status-select');
+        if (statusSelect) statusSelect.value = pr.status;
 
-          var badge = document.getElementById('doc-badge-status');
-          if (badge) {
-            // Bersihkan class warna & border bawaan pada #doc-badge-status agar tidak menumpuk di belakang badge hasil getStatusBadge()
-            badge.classList.remove(
-              'px-2.5', 'py-1', 'rounded-full', 'border',
-              'bg-amber-50', 'text-amber-800', 'border-amber-200',
-              'bg-yellow-50', 'text-yellow-800', 'border-yellow-200',
-              'bg-emerald-50', 'text-emerald-800', 'border-emerald-200',
-              'bg-blue-50', 'text-blue-800', 'border-blue-200',
-              'bg-rose-50', 'text-rose-800', 'border-rose-200',
-              'bg-slate-50', 'text-slate-700', 'border-slate-200'
-            );
-            badge.classList.add('inline-flex', 'items-center');
-            badge.innerHTML = getStatusBadge(pr.status);
-          }
+        var badge = document.getElementById('doc-badge-status');
+        if (badge) badge.innerHTML = getStatusBadge(pr.status);
+        var ref = document.getElementById('doc-ref-no');
+        if (ref) ref.textContent = 'NO: ' + pr.nomor;
+        document.getElementById('doc-pekerjaan').textContent = pr.pekerjaan;
+        document.getElementById('doc-transfer').textContent = pr.estTransfer;
+        document.getElementById('doc-lokasi').textContent = pr.lokasi;
+        document.getElementById('doc-detail').textContent = pr.detail;
 
-          var ref = document.getElementById('doc-ref-no');
-          if (ref) ref.textContent = 'NO: ' + pr.nomor;
-          document.getElementById('doc-pekerjaan').textContent = pr.pekerjaan;
-          document.getElementById('doc-transfer').textContent = pr.estTransfer;
-          document.getElementById('doc-lokasi').textContent = pr.lokasi;
-          document.getElementById('doc-detail').textContent = pr.detail;
-
-          var summaryBox = document.getElementById('doc-cost-summaries');
-          summaryBox.innerHTML = (pr.recipients || []).map(function (rec, idx) {
-            var total = calcRecipientTotal(rec);
-            var theme = colorStylesDetail[idx % colorStylesDetail.length];
-            return '' +
-              '<div class="' + theme.docBg + ' p-3.5 space-y-1 avoid-break">' +
-                '<div class="flex items-center justify-between gap-2">' +
-                  '<p class="font-extrabold text-slate-900">' + (idx + 1) + '. ' + escapeHtml(rec.summaryTitle) + '</p>' +
-                  '<button type="button" class="btn-salin-rek no-print px-2.5 py-1 rounded-lg bg-white/90 hover:bg-white text-slate-800 border border-slate-300 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer" ' +
-                    'data-account-no="' + escapeHtml(rec.accountNo) + '" data-bank="' + escapeHtml(rec.bank) + '" data-holder="' + escapeHtml(rec.accountHolder) + '">' +
-                    '<i data-lucide="copy" class="w-3 h-3 text-maroon-800"></i><span>Salin Rek</span>' +
-                  '</button>' +
-                '</div>' +
-                '<div class="grid grid-cols-12 gap-1 items-baseline"><div class="col-span-4 sm:col-span-3 font-semibold text-slate-700">Cost Summary</div>' +
-                  '<div class="col-span-8 sm:col-span-9 flex flex-wrap items-baseline gap-3"><span class="font-extrabold text-slate-900">: ' + formatRupiah(total) + '</span><span class="italic font-medium text-slate-800">' + terbilang(total) + '</span></div></div>' +
-                '<div class="grid grid-cols-12 gap-1 items-start"><div class="col-span-4 sm:col-span-3 font-semibold text-slate-700">Bank/No. Rek</div>' +
-                  '<div class="col-span-8 sm:col-span-9 text-slate-900">: ' + escapeHtml(rec.bank) + ' <span class="font-mono font-bold">' + escapeHtml(rec.accountNo) + '</span><br/><span class="pl-2 text-slate-800">a.n ' + escapeHtml(rec.accountHolder) + '</span></div></div>' +
-              '</div>';
-          }).join('') || '<div class="p-4 text-xs text-slate-500">Belum ada penerima transfer.</div>';
-        }
+        var summaryBox = document.getElementById('doc-cost-summaries');
+        summaryBox.innerHTML = (pr.recipients || []).map(function (rec, idx) {
+          var total = calcRecipientTotal(rec);
+          var theme = colorStylesDetail[idx % colorStylesDetail.length];
+          return '' +
+            '<div class="' + theme.docBg + ' p-3.5 space-y-1 avoid-break">' +
+              '<div class="flex items-center justify-between gap-2">' +
+                '<p class="font-extrabold text-slate-900">' + (idx + 1) + '. ' + escapeHtml(rec.summaryTitle) + '</p>' +
+                '<button type="button" class="btn-salin-rek no-print px-2.5 py-1 rounded-lg bg-white/90 hover:bg-white text-slate-800 border border-slate-300 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer" ' +
+                  'data-account-no="' + escapeHtml(rec.accountNo) + '" data-bank="' + escapeHtml(rec.bank) + '" data-holder="' + escapeHtml(rec.accountHolder) + '">' +
+                  '<i data-lucide="copy" class="w-3 h-3 text-maroon-800"></i><span>Salin Rek</span>' +
+                '</button>' +
+              '</div>' +
+              '<div class="grid grid-cols-12 gap-1 items-baseline"><div class="col-span-4 sm:col-span-3 font-semibold text-slate-700">Cost Summary</div>' +
+                '<div class="col-span-8 sm:col-span-9 flex flex-wrap items-baseline gap-3"><span class="font-extrabold text-slate-900">: ' + formatRupiah(total) + '</span><span class="italic font-medium text-slate-800">' + terbilang(total) + '</span></div></div>' +
+              '<div class="grid grid-cols-12 gap-1 items-start"><div class="col-span-4 sm:col-span-3 font-semibold text-slate-700">Bank/No. Rek</div>' +
+                '<div class="col-span-8 sm:col-span-9 text-slate-900">: ' + escapeHtml(rec.bank) + ' <span class="font-mono font-bold">' + escapeHtml(rec.accountNo) + '</span><br/><span class="pl-2 text-slate-800">a.n ' + escapeHtml(rec.accountHolder) + '</span></div></div>' +
+            '</div>';
+        }).join('') || '<div class="p-4 text-xs text-slate-500">Belum ada penerima transfer.</div>';
 
         var grandTotal = calcPRTotal(pr);
         document.getElementById('doc-grand-total').textContent = formatRupiah(grandTotal);
@@ -482,7 +467,7 @@
         });
         tbody.innerHTML = html || '<tr><td colspan="6" class="border border-slate-800 py-4 text-center text-slate-500">Belum ada rincian biaya.</td></tr>';
         initIcons();
-      
+      }
 
       async function changeCurrentPRStatus() {
         if (!PR_BISA_ATUR_STATUS || !prSaatIni) return;
