@@ -92,6 +92,52 @@ function normalisasiKategori(kategori) {
   return /operasional|oprasional/i.test(String(kategori || '')) ? 'operasional' : 'produksi';
 }
 
+function normalisasiTeks(value) {
+  return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+// DP dan pelunasan dianggap satu pengeluaran bila keterangannya sama
+// (dalam kategori yang sama). Bila keterangan kosong, uraian dipakai sebagai fallback.
+function kunciPengeluaran(row) {
+  const keterangan = normalisasiTeks(row.keterangan);
+  const fallback = normalisasiTeks(row.namaDasar) || 'tanpa-keterangan';
+  return `${normalisasiKategori(row.kategori)}|${keterangan || fallback}`;
+}
+
+function bersihkanNamaRekap(value) {
+  return String(value || '')
+    .replace(/^\s*(?:dp\s*\d+\s*%\s*|dp\s+|pelunasan\s+)/i, '')
+    .trim() || 'Tanpa uraian';
+}
+
+// Menaruh pasangan DP/Lunas bersebelahan tanpa mengubah urutan grup pengeluaran.
+function rapikanPasangan(rows) {
+  const indeksPertama = new Map();
+  const buckets = new Map();
+
+  rows.forEach((row, index) => {
+    if (!indeksPertama.has(row.kunciPasangan)) indeksPertama.set(row.kunciPasangan, index);
+    if (!buckets.has(row.kunciPasangan)) buckets.set(row.kunciPasangan, []);
+    buckets.get(row.kunciPasangan).push(row);
+  });
+
+  const hasil = [];
+  Array.from(indeksPertama.entries())
+    .sort((a, b) => a[1] - b[1])
+    .forEach(([kunci]) => {
+      const grup = buckets.get(kunci) || [];
+      grup
+        .slice()
+        .sort((a, b) => {
+          if (a.jenis === b.jenis) return 0;
+          return a.jenis === 'DP' ? -1 : 1;
+        })
+        .forEach((row) => hasil.push(row));
+    });
+
+  return hasil;
+}
+
 function siapkanData(lpj) {
   const pencairan = (Array.isArray(lpj.riwayatPencairan) ? lpj.riwayatPencairan : [])
     .map((row) => ({
@@ -110,14 +156,15 @@ function siapkanData(lpj) {
       const jenis = String(jenisMentah || '').toUpperCase() === 'DP' ? 'DP' : 'Lunas';
       const namaDasar = String(row.namaItem || '').trim() || 'Tanpa uraian';
       const kategori = String(row.kategoriPengeluaran || '').trim();
+      const keterangan = String(row.keterangan || '').trim();
       return {
         tanggal: toDate(row.tanggal),
         kategori,
         namaItem: jenisMentah ? `${namaDasar} (${jenis})` : namaDasar,
         namaDasar,
-        kunciPasangan: `${namaDasar.toLowerCase()}|${kategori.toLowerCase()}`,
+        kunciPasangan: kunciPengeluaran({ kategori, keterangan, namaDasar }),
         jenis,
-        keterangan: String(row.keterangan || '').trim(),
+        keterangan,
         qty,
         hargaSatuan: harga,
         nominal,
@@ -125,13 +172,15 @@ function siapkanData(lpj) {
     })
     .sort((a, b) => (a.tanggal ? a.tanggal.getTime() : 0) - (b.tanggal ? b.tanggal.getTime() : 0));
 
-  // DP yang belum punya pasangan Lunas tetap disiapkan sebagai baris kosong
-  // di export, supaya bentuk tabelnya konsisten (lihat uraian yang sama).
+  const rincianUrut = rapikanPasangan(rincianMentah);
+
+  // DP yang belum punya pasangan Lunas (keterangan sama) tetap disiapkan
+  // sebagai baris kosong di export, supaya bentuk tabelnya konsisten.
   const kunciSudahLunas = new Set(
-    rincianMentah.filter((row) => row.jenis === 'Lunas').map((row) => row.kunciPasangan),
+    rincianUrut.filter((row) => row.jenis === 'Lunas').map((row) => row.kunciPasangan),
   );
   const rincian = [];
-  rincianMentah.forEach((row) => {
+  rincianUrut.forEach((row) => {
     rincian.push(row);
     if (row.jenis === 'DP' && !kunciSudahLunas.has(row.kunciPasangan)) {
       rincian.push({
@@ -155,17 +204,21 @@ function siapkanData(lpj) {
   const totalPencairan = pencairan.reduce((total, row) => total + row.nominal, 0) || Number(lpj.anggaranKasbon) || 0;
   const totalPengeluaran = rincianAktual.reduce((total, row) => total + row.nominal, 0);
 
-  // Rekap barang untuk bagian bawah template
+  // Rekap barang untuk bagian bawah template.
+  // Satu pasangan DP/Lunas hanya dihitung sekali qty-nya, nominalnya tetap dijumlah.
   const rekapMap = new Map();
   rincianAktual.forEach((row) => {
-    const namaRekap = row.namaDasar || row.namaItem;
-    const kunci = namaRekap.toLowerCase();
+    const kunci = row.kunciPasangan || `${normalisasiKategori(row.kategori)}|${normalisasiTeks(row.namaDasar)}`;
     if (!rekapMap.has(kunci)) {
-      rekapMap.set(kunci, { namaItem: namaRekap, qty: 0, nominal: 0 });
+      rekapMap.set(kunci, {
+        namaItem: bersihkanNamaRekap(row.namaDasar),
+        qty: row.qty,
+        nominal: 0,
+      });
     }
     const rekap = rekapMap.get(kunci);
-    rekap.qty += row.qty;
     rekap.nominal += row.nominal;
+    if (row.jenis === 'Lunas') rekap.namaItem = bersihkanNamaRekap(row.namaDasar);
   });
   const rekapBarang = Array.from(rekapMap.values());
 
@@ -350,6 +403,7 @@ async function buildLpjWorkbook(lpj) {
     row += 1;
 
     const barisAwalItem = row;
+    const barisItem = [];
     if (item.rows.length === 0) {
       const teksKosong = 'Belum ada pengeluaran';
       writeCell(ws, row, 1, '', { align: ALIGN_CENTER });
@@ -369,6 +423,7 @@ async function buildLpjWorkbook(lpj) {
         row += 1;
         return;
       }
+      barisItem.push({ baris, nomorBaris: row });
       writeCell(ws, row, 1, index + 1, { align: ALIGN_CENTER });
       writeCell(ws, row, 2, baris.tanggal, { align: ALIGN_CENTER, numFmt: DATE_FMT });
       writeCell(ws, row, 3, baris.namaItem, {});
@@ -381,6 +436,33 @@ async function buildLpjWorkbook(lpj) {
         { col: 7, text: baris.keterangan },
       ]);
       row += 1;
+    });
+
+    // Satu pengeluaran (DP + pelunasan dengan keterangan sama) memakai
+    // qty & harga satuan yang sama, sehingga sel qty/harganya digabung vertikal.
+    const grupPasangan = new Map();
+    barisItem.forEach((entri) => {
+      if (!entri.baris.kunciPasangan) return;
+      if (!grupPasangan.has(entri.baris.kunciPasangan)) grupPasangan.set(entri.baris.kunciPasangan, []);
+      grupPasangan.get(entri.baris.kunciPasangan).push(entri);
+    });
+    grupPasangan.forEach((anggota) => {
+      if (anggota.length < 2) return;
+      const awal = Math.min(...anggota.map((entri) => entri.nomorBaris));
+      const akhir = Math.max(...anggota.map((entri) => entri.nomorBaris));
+      const utama = anggota.find((entri) => entri.nomorBaris === awal);
+      const hargaSama = new Set(anggota.map((entri) => Number(entri.baris.hargaSatuan) || 0)).size === 1;
+      [
+        { col: 4, value: utama.baris.qty, align: ALIGN_CENTER, numFmt: QTY_FMT, gabung: true },
+        { col: 5, value: utama.baris.hargaSatuan, align: ALIGN_RIGHT, numFmt: RUPIAH, gabung: hargaSama },
+      ].forEach(({ col, value, align, numFmt, gabung }) => {
+        if (!gabung) return;
+        ws.mergeCells(awal, col, akhir, col);
+        for (let r = awal; r <= akhir; r += 1) {
+          styleCell(ws.getCell(r, col), { align, numFmt });
+        }
+        ws.getCell(awal, col).value = value;
+      });
     });
 
     const barisAkhirItem = row - 1;
