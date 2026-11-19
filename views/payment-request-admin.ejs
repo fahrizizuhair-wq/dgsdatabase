@@ -136,8 +136,14 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="sm:col-span-2">
-                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Pekerjaan / Proyek *</label>
-                <input type="text" id="inp-pekerjaan" required placeholder="Masukan nama pekerjaan..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-maroon-800" />
+                <label for="inp-pekerjaan" class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Pekerjaan / Proyek *</label>
+                <select id="inp-pekerjaan" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-maroon-800">
+                  <option value="">-- Pilih project dari LPJ --</option>
+                  <% (listLpjPR || []).forEach(function (lpj) { %>
+                    <option value="<%= lpj.id %>" data-nama="<%= lpj.nama %>" data-anggaran="<%= lpj.anggaranKasbon %>" data-sisa="<%= lpj.sisaSaldo %>"><%= lpj.nama %></option>
+                  <% }); %>
+                </select>
+                <p id="lpj-kosong" class="text-[11px] text-amber-700 mt-1 <%= (listLpjPR || []).length ? 'hidden' : '' %>">Belum ada project LPJ yang tersedia.</p>
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1.5">Estimasi Tanggal Transfer *</label>
@@ -150,6 +156,13 @@
               <div class="sm:col-span-2">
                 <label class="block text-xs font-semibold text-slate-700 mb-1.5">Detail Keperluan *</label>
                 <input type="text" id="inp-detail" required placeholder="Contoh: Biaya Sampel dan Operasional" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-maroon-800" />
+              </div>
+              <div id="info-lpj-pr" class="sm:col-span-2 hidden">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 rounded-lg bg-maroon-50/70 border border-maroon-100 text-[11px] text-slate-600">
+                  <span class="font-bold text-maroon-800" id="info-lpj-nama">-</span>
+                  <span>Anggaran Kasbon: <b id="info-lpj-anggaran" class="text-slate-900">Rp 0</b></span>
+                  <span>Sisa Saldo LPJ: <b id="info-lpj-sisa" class="text-emerald-700">Rp 0</b></span>
+                </div>
               </div>
             </div>
           </div>
@@ -202,6 +215,7 @@
 
     <script>
       var PR_DATA_ADMIN = <%- jsonUntukScriptAdmin(dataPRAdmin) %>;
+      var PR_LIST_LPJ = <%- JSON.stringify(listLpjPR || []) %>;
       var PR_NAMA_PEMOHON = <%- JSON.stringify(namaPemohonAdmin) %>;
 
       var colorStylesAdmin = [
@@ -397,6 +411,7 @@
           nomor: String(nomorTampil || '-'),
           _id: doc && doc._id ? String(doc._id) : '',
           pekerjaan: String((doc && (doc.pekerjaan || doc.namaMaterial)) || '-'),
+          lpjId: doc && doc.lpjId ? String(doc.lpjId) : '',
           estTransfer: String((doc && doc.estimasiTransfer) || formatTanggal(doc && doc.tanggalTransfer)),
           lokasi: String((doc && doc.lokasi) || '-'),
           detail: String((doc && (doc.detailPekerjaan || doc.deskripsi)) || '-'),
@@ -511,6 +526,42 @@
         initIcons();
       }
 
+      function updateInfoLpj() {
+        var select = document.getElementById('inp-pekerjaan');
+        var box = document.getElementById('info-lpj-pr');
+        if (!select || !box) return;
+        var opt = select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
+        if (!opt || !opt.value) {
+          box.classList.add('hidden');
+          return;
+        }
+        box.classList.remove('hidden');
+        var nama = document.getElementById('info-lpj-nama');
+        var anggaran = document.getElementById('info-lpj-anggaran');
+        var sisa = document.getElementById('info-lpj-sisa');
+        if (nama) nama.textContent = opt.getAttribute('data-nama') || opt.textContent;
+        if (anggaran) anggaran.textContent = formatRupiah(opt.getAttribute('data-anggaran'));
+        if (sisa) sisa.textContent = formatRupiah(opt.getAttribute('data-sisa'));
+      }
+
+      function pilihLpjDiForm(id, namaFallback) {
+        var select = document.getElementById('inp-pekerjaan');
+        if (!select) return;
+        var nilai = String(id || '');
+        var nama = String(namaFallback || 'Project LPJ (data lama)');
+        if (nilai && !Array.prototype.some.call(select.options, function (o) { return o.value === nilai; })) {
+          var opsi = document.createElement('option');
+          opsi.value = nilai;
+          opsi.textContent = nama;
+          opsi.setAttribute('data-nama', nama);
+          opsi.setAttribute('data-anggaran', '0');
+          opsi.setAttribute('data-sisa', '0');
+          select.appendChild(opsi);
+        }
+        select.value = nilai;
+        updateInfoLpj();
+      }
+
       // Detail bukan section lagi: pindah ke halaman dokumen mandiri.
       function openPRDetail(id) {
         var pr = prList.find(function (item) { return item.id === id || item._id === id; });
@@ -528,6 +579,7 @@
         var container = document.getElementById('form-recipients-container');
         if (container) container.innerHTML = '';
         addRecipientBlock();
+        pilihLpjDiForm('', '');
         navigateTo('form');
       }
 
@@ -541,7 +593,7 @@
         if (editId) editId.value = pr._id || pr.id;
         var badge = document.getElementById('form-mode-badge');
         if (badge) badge.textContent = 'Edit ' + pr.nomor;
-        document.getElementById('inp-pekerjaan').value = pr.pekerjaan === '-' ? '' : pr.pekerjaan;
+        pilihLpjDiForm(pr.lpjId || (pr.pekerjaan === '-' ? '' : pr.pekerjaan), pr.pekerjaan);
         document.getElementById('inp-transfer').value = pr.estTransfer === '-' ? '' : tanggalISO(pr.estTransfer);
         document.getElementById('inp-lokasi').value = pr.lokasi === '-' ? '' : pr.lokasi;
         document.getElementById('inp-detail').value = pr.detail === '-' ? '' : pr.detail;
@@ -661,7 +713,10 @@
 
       function kumpulkanPayload() {
         var fd = new FormData();
-        var pekerjaan = document.getElementById('inp-pekerjaan').value.trim();
+        var selectLpj = document.getElementById('inp-pekerjaan');
+        var opsiLpj = selectLpj && selectLpj.selectedIndex >= 0 ? selectLpj.options[selectLpj.selectedIndex] : null;
+        var lpjId = opsiLpj && opsiLpj.value ? opsiLpj.value : '';
+        var pekerjaan = lpjId ? (opsiLpj.getAttribute('data-nama') || opsiLpj.textContent.trim()) : '';
         var estTransfer = document.getElementById('inp-transfer').value.trim();
         var lokasi = document.getElementById('inp-lokasi').value.trim();
         var detail = document.getElementById('inp-detail').value.trim();
@@ -670,6 +725,7 @@
           ? rawAtt.split(/\r?\n/).map(function (line) { return line.replace(/^[-•*]\s*/, '').trim(); }).filter(Boolean)
           : ['1 (satu) lembar dokumen bukti tagihan'];
 
+        fd.append('lpjId', lpjId);
         fd.append('pekerjaan', pekerjaan);
         fd.append('estimasiTransfer', estTransfer);
         fd.append('tanggalTransfer', tanggalISO(estTransfer));
@@ -783,6 +839,10 @@
 
         var form = document.getElementById('pr-editor-form');
         if (form) form.addEventListener('submit', handleSavePR);
+
+        var selectLpjAwal = document.getElementById('inp-pekerjaan');
+        if (selectLpjAwal) selectLpjAwal.addEventListener('change', updateInfoLpj);
+        updateInfoLpj();
 
         var params = new URLSearchParams(window.location.search);
         var editId = params.get('edit');

@@ -36,6 +36,16 @@ const paymentRequestSchema = new mongoose.Schema(
     estimasiTransfer: { type: String, default: '', trim: true },
     lokasi: { type: String, default: '', trim: true },
     detailPekerjaan: { type: String, default: '', trim: true },
+
+    // Kaitan dengan LPJ: sumber anggaran kasbon dan saldo yang dipakai PR ini.
+    lpjId: { type: mongoose.Schema.Types.ObjectId, ref: 'Lpj', default: null },
+    namaLpj: { type: String, default: '', trim: true },
+    anggaranKasbon: { type: Number, default: 0 },
+    sisaSaldoAwal: { type: Number, default: 0 },
+    totalPengeluaranPR: { type: Number, default: 0 },
+    lpjPengeluaranId: { type: mongoose.Schema.Types.ObjectId, default: null },
+    saldoDikurangi: { type: Boolean, default: false },
+
     daftarDokumen: { type: String, default: '' },
     attachments: [{ type: String, trim: true }],
     penerimaTransfer: [
