@@ -34,6 +34,7 @@ const lpjSchema = new mongoose.Schema(
         keterangan: { type: String, default: '' },
         qty: { type: Number, default: 0 },
         hargaSatuan: { type: Number, default: 0 },
+        hitungOtomatis: { type: Boolean, default: true },
         nominal: { type: Number, default: 0 },
         notaPath: { type: String, default: '' },
         notaNama: { type: String, default: '' },

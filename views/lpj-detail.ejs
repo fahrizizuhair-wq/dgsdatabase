@@ -1181,7 +1181,7 @@
                     <td><%= item.keterangan || '-' %></td>
                     <td style="white-space: nowrap; text-align: center;" onclick="event.stopPropagation()">
                       <div style="display: inline-flex; gap: 5px; align-items: center;">
-                        <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)" data-id="<%= item._id %>" data-tanggal="<%= tglIso %>" data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>" data-jenis="<%= item.jenisPembayaran || 'Lunas' %>" data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>" data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>" data-qty="<%= item.qty || 1 %>" data-harga="<%= item.hargaSatuan || 0 %>" data-nominal="<%= item.nominal || 0 %>" data-notapath="<%= item.notaPath || '' %>" title="Edit Transaksi">
+                        <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)" data-id="<%= item._id %>" data-tanggal="<%= tglIso %>" data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>" data-jenis="<%= item.jenisPembayaran || 'Lunas' %>" data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>" data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>" data-qty="<%= item.qty || 1 %>" data-harga="<%= item.hargaSatuan || 0 %>" data-nominal="<%= item.nominal || 0 %>" data-hitung="<%= item.hitungOtomatis === false ? '0' : '1' %>" data-notapath="<%= item.notaPath || '' %>" title="Edit Transaksi">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -1269,7 +1269,7 @@
                     <td><%= item.keterangan || '-' %></td>
                     <td style="white-space: nowrap; text-align: center;" onclick="event.stopPropagation()">
                       <div style="display: inline-flex; gap: 5px; align-items: center;">
-                        <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)" data-id="<%= item._id %>" data-tanggal="<%= tglIso %>" data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>" data-jenis="<%= item.jenisPembayaran || 'Lunas' %>" data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>" data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>" data-qty="<%= item.qty || 1 %>" data-harga="<%= item.hargaSatuan || 0 %>" data-nominal="<%= item.nominal || 0 %>" data-notapath="<%= item.notaPath || '' %>" title="Edit Transaksi">
+                        <button type="button" class="btn-table-edit" onclick="openEditCatatanModal(this)" data-id="<%= item._id %>" data-tanggal="<%= tglIso %>" data-kategori="<%= (item.kategoriPengeluaran || '').replace(/"/g, '&quot;') %>" data-jenis="<%= item.jenisPembayaran || 'Lunas' %>" data-nama="<%= (item.namaItem || '').replace(/"/g, '&quot;') %>" data-keterangan="<%= (item.keterangan || '').replace(/"/g, '&quot;') %>" data-qty="<%= item.qty || 1 %>" data-harga="<%= item.hargaSatuan || 0 %>" data-nominal="<%= item.nominal || 0 %>" data-hitung="<%= item.hitungOtomatis === false ? '0' : '1' %>" data-notapath="<%= item.notaPath || '' %>" title="Edit Transaksi">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -1433,11 +1433,26 @@
           </div>
         </div>
 
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px;">
+            <input type="checkbox" id="cbHitungOtomatis" checked onchange="hitungTotalOtomatis()" style="width: 15px; height: 15px; accent-color: #7a1b1b;">
+            Hitung otomatis (Qty × Harga Satuan)
+          </label>
+          <small style="display: block; margin-top: 5px; font-size: 11px; color: #64748b;">Jika tidak dicentang (misal untuk DP), isi pengeluaran secara manual.</small>
+        </div>
+
+        <div id="boxNominalManual" class="form-group" style="display: none;">
+          <label>Pengeluaran / Nominal (Rp)</label>
+          <input type="number" id="inputNominalManual" min="0" placeholder="Contoh: 1240000" oninput="hitungTotalOtomatis()">
+          <small style="display: block; margin-top: 5px; font-size: 11px; color: #64748b;">Nominal ini yang dipakai, bukan hasil Qty × Harga Satuan.</small>
+        </div>
+
         <div style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 12.5px; font-weight: 700; color: #7a1b1b;">Total Otomatis:</span>
+          <span id="textLabelTotal" style="font-size: 12.5px; font-weight: 700; color: #7a1b1b;">Total Otomatis:</span>
           <span id="textTotalOtomatis" style="font-size: 16px; font-weight: 700; color: #7a1b1b;">Rp 0</span>
         </div>
 
+        <input type="hidden" id="inputHitungOtomatis" name="hitungOtomatis" value="1">
         <input type="hidden" id="inputNominalTotal" name="nominal" value="0">
 
         <div class="form-group">
@@ -1513,11 +1528,26 @@
           </div>
         </div>
 
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px;">
+            <input type="checkbox" id="cbEditHitungOtomatis" checked onchange="hitungEditTotalOtomatis()" style="width: 15px; height: 15px; accent-color: #166534;">
+            Hitung otomatis (Qty × Harga Satuan)
+          </label>
+          <small style="display: block; margin-top: 5px; font-size: 11px; color: #64748b;">Jika tidak dicentang (misal untuk DP), isi pengeluaran secara manual.</small>
+        </div>
+
+        <div id="boxEditNominalManual" class="form-group" style="display: none;">
+          <label>Pengeluaran / Nominal (Rp)</label>
+          <input type="number" id="inputEditNominalManual" min="0" placeholder="Contoh: 1240000" oninput="hitungEditTotalOtomatis()">
+          <small style="display: block; margin-top: 5px; font-size: 11px; color: #64748b;">Nominal ini yang dipakai, bukan hasil Qty × Harga Satuan.</small>
+        </div>
+
         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 12.5px; font-weight: 700; color: #166534;">Total Otomatis:</span>
+          <span id="editTextLabelTotal" style="font-size: 12.5px; font-weight: 700; color: #166534;">Total Otomatis:</span>
           <span id="editTextTotalOtomatis" style="font-size: 16px; font-weight: 700; color: #15803d;">Rp 0</span>
         </div>
 
+        <input type="hidden" id="editInputHitungOtomatis" name="hitungOtomatis" value="1">
         <input type="hidden" id="editInputNominalTotal" name="nominal" value="0">
 
         <div class="form-group">
@@ -1651,6 +1681,9 @@
         const today = new Date().toISOString().split('T')[0];
         tglInput.value = today;
       }
+      document.getElementById('cbHitungOtomatis').checked = true;
+      document.getElementById('inputNominalManual').value = '';
+      hitungTotalOtomatis();
       document.getElementById('catatanModal').style.display = 'flex';
     }
 
@@ -1669,6 +1702,7 @@
       const qty = btn.getAttribute('data-qty') || 1;
       const harga = btn.getAttribute('data-harga') || 0;
       const nominal = btn.getAttribute('data-nominal') || 0;
+      const hitungOtomatis = btn.getAttribute('data-hitung') !== '0';
       const notaPath = btn.getAttribute('data-notapath') || '';
 
       const form = document.getElementById('formEditCatatan');
@@ -1690,7 +1724,8 @@
       document.getElementById('editKeterangan').value = keterangan || '';
       document.getElementById('editQty').value = qty;
       document.getElementById('editHargaSatuan').value = harga;
-      document.getElementById('editInputNominalTotal').value = nominal;
+      document.getElementById('cbEditHitungOtomatis').checked = hitungOtomatis;
+      document.getElementById('inputEditNominalManual').value = nominal;
 
       hitungEditTotalOtomatis();
 
@@ -1721,9 +1756,12 @@
     }
 
     function hitungEditTotalOtomatis() {
+      const hitungOtomatis = document.getElementById('cbEditHitungOtomatis').checked;
       const qty = parseFloat(document.getElementById('editQty').value) || 0;
       const hargaSatuan = parseFloat(document.getElementById('editHargaSatuan').value) || 0;
-      const total = qty * hargaSatuan;
+      const manualInput = document.getElementById('inputEditNominalManual');
+      const manual = parseFloat(manualInput.value) || 0;
+      const total = hitungOtomatis ? qty * hargaSatuan : manual;
 
       const formatRp = total.toLocaleString('id-ID', {
         style: 'currency',
@@ -1731,7 +1769,11 @@
         maximumFractionDigits: 0
       });
 
+      document.getElementById('boxEditNominalManual').style.display = hitungOtomatis ? 'none' : 'block';
+      manualInput.required = !hitungOtomatis;
+      document.getElementById('editTextLabelTotal').textContent = hitungOtomatis ? 'Total Otomatis:' : 'Total Manual:';
       document.getElementById('editTextTotalOtomatis').textContent = formatRp.replace('IDR', 'Rp');
+      document.getElementById('editInputHitungOtomatis').value = hitungOtomatis ? '1' : '0';
       document.getElementById('editInputNominalTotal').value = total;
     }
 
@@ -1773,11 +1815,14 @@
       }
     }
 
-    // Fungsi kalkulasi otomatis (Qty x Harga Satuan)
+    // Fungsi kalkulasi total: otomatis (Qty x Harga Satuan) atau nominal manual
     function hitungTotalOtomatis() {
+      const hitungOtomatis = document.getElementById('cbHitungOtomatis').checked;
       const qty = parseFloat(document.getElementById('inputQty').value) || 0;
       const hargaSatuan = parseFloat(document.getElementById('inputHargaSatuan').value) || 0;
-      const total = qty * hargaSatuan;
+      const manualInput = document.getElementById('inputNominalManual');
+      const manual = parseFloat(manualInput.value) || 0;
+      const total = hitungOtomatis ? qty * hargaSatuan : manual;
 
       const formatRp = total.toLocaleString('id-ID', {
         style: 'currency',
@@ -1785,7 +1830,11 @@
         maximumFractionDigits: 0
       });
 
+      document.getElementById('boxNominalManual').style.display = hitungOtomatis ? 'none' : 'block';
+      manualInput.required = !hitungOtomatis;
+      document.getElementById('textLabelTotal').textContent = hitungOtomatis ? 'Total Otomatis:' : 'Total Manual:';
       document.getElementById('textTotalOtomatis').textContent = formatRp.replace('IDR', 'Rp');
+      document.getElementById('inputHitungOtomatis').value = hitungOtomatis ? '1' : '0';
       document.getElementById('inputNominalTotal').value = total;
     }
 

@@ -3355,7 +3355,8 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
 
     const qtyAngka = Number(qty) || 0;
     const hargaAngka = Number(hargaSatuan) || 0;
-    const nominalAngka = Number(nominal) || qtyAngka * hargaAngka;
+    const hitungOtomatis = String(req.body.hitungOtomatis == null ? '1' : req.body.hitungOtomatis) !== '0';
+    const nominalAngka = hitungOtomatis ? qtyAngka * hargaAngka : (Number(nominal) || 0);
     const jenisDipilih = String(jenisPembayaran || '').trim().toUpperCase() === 'DP' ? 'DP' : 'Lunas';
 
     let tanggalCatatan = new Date();
@@ -3378,6 +3379,7 @@ app.post('/lpj/detail/:id/tambah-catatan', upload.single('nota'), async (req, re
       keterangan: keterangan || '',
       qty: qtyAngka,
       hargaSatuan: hargaAngka,
+      hitungOtomatis,
       nominal: nominalAngka,
       notaPath: req.file ? '/uploads/' + req.file.filename : '',
       notaNama: req.file ? req.file.originalname : '',
@@ -3406,7 +3408,8 @@ app.post('/lpj/detail/:id/edit-catatan/:itemId', upload.single('nota'), async (r
 
     const qtyAngka = Number(qty) || 0;
     const hargaAngka = Number(hargaSatuan) || 0;
-    const nominalAngka = Number(nominal) || qtyAngka * hargaAngka;
+    const hitungOtomatis = String(req.body.hitungOtomatis == null ? '1' : req.body.hitungOtomatis) !== '0';
+    const nominalAngka = hitungOtomatis ? qtyAngka * hargaAngka : (Number(nominal) || 0);
     const jenisDipilih = String(jenisPembayaran || '').trim().toUpperCase() === 'DP' ? 'DP' : 'Lunas';
 
     let tanggalCatatan = new Date();
@@ -3433,6 +3436,7 @@ app.post('/lpj/detail/:id/edit-catatan/:itemId', upload.single('nota'), async (r
         item.keterangan = keterangan !== undefined ? keterangan : item.keterangan;
         item.qty = qtyAngka;
         item.hargaSatuan = hargaAngka;
+        item.hitungOtomatis = hitungOtomatis;
         item.nominal = nominalAngka;
 
         if (req.file) {
