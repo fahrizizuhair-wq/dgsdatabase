@@ -142,11 +142,15 @@
             <b id="doc-lpj-anggaran" class="text-slate-900">Rp 0</b>
           </div>
           <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5">
-            <span>Sisa Saldo LPJ sebelum PR</span>
+            <span>Sisa Saldo LPJ saat ini</span>
             <b id="doc-lpj-sisa-awal" class="text-slate-900">Rp 0</b>
           </div>
+          <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5">
+            <span>Sisa Saldo LPJ saat pengajuan</span>
+            <b id="doc-lpj-sisa-pengajuan" class="text-slate-900">Rp 0</b>
+          </div>
           <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5 pt-1 border-t border-dashed border-slate-200">
-            <span class="font-bold text-maroon-800">Sisa Saldo Anggaran setelah PR</span>
+            <span class="font-bold text-maroon-800">Estimasi Sisa Saldo jika PR Disetujui</span>
             <b id="doc-lpj-sisa-akhir" class="text-sm font-black text-emerald-700">Rp 0</b>
           </div>
           <p id="doc-lpj-keterangan" class="text-[10px] italic text-slate-500">-</p>
@@ -359,23 +363,27 @@
         }
         box.classList.remove('hidden');
         var totalPR = Number(info.totalPengeluaranPR) || calcPRTotal(pr) || 0;
-        var sisaAwal = Number(info.sisaSaldoAwal) || 0;
-        var sisaAkhir = info.sisaSaldoSetelahPR != null
+        var sisaSaatIni = info.sisaSaldoSaatIni != null
+          ? Number(info.sisaSaldoSaatIni)
+          : (Number(info.sisaSaldoAwal) || 0);
+        var sisaPengajuan = info.sisaSaldoSaatPengajuan != null
+          ? Number(info.sisaSaldoSaatPengajuan)
+          : sisaSaatIni;
+        var sisaJikaDisetujui = info.sisaSaldoSetelahPR != null
           ? Number(info.sisaSaldoSetelahPR)
-          : sisaAwal - totalPR;
+          : sisaSaatIni - totalPR;
         var setTeks = function (id, nilai) {
           var el = document.getElementById(id);
           if (el) el.textContent = nilai;
         };
         setTeks('doc-lpj-nama', info.namaLpj || pr.pekerjaan || '-');
         setTeks('doc-lpj-anggaran', formatRupiah(info.anggaranKasbon));
-        setTeks('doc-lpj-sisa-awal', formatRupiah(sisaAwal));
-        setTeks('doc-lpj-sisa-akhir', formatRupiah(sisaAkhir));
+        setTeks('doc-lpj-sisa-awal', formatRupiah(sisaSaatIni));
+        setTeks('doc-lpj-sisa-pengajuan', formatRupiah(sisaPengajuan));
+        setTeks('doc-lpj-sisa-akhir', formatRupiah(sisaJikaDisetujui));
         setTeks(
           'doc-lpj-keterangan',
-          info.saldoDikurangi
-            ? 'Saldo LPJ telah dikurangi setelah status Disetujui / Sudah Transfer.'
-            : 'Sisa saldo akan dikurangi di LPJ setelah admin mengubah status menjadi Disetujui / Sudah Transfer.',
+          'Saldo LPJ tidak dikurangi otomatis. Angka "jika disetujui" hanya simulasi, bukan saldo yang telah dipotong.',
         );
       }
 

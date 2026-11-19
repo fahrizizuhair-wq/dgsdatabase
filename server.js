@@ -323,6 +323,22 @@ mongoose
     } catch (seedErr) {
       console.error('Error inisialisasi akun bawaan:', seedErr);
     }
+
+    // Kebijakan baru: saldo LPJ tidak dikurangi oleh Payment Request.
+    // Kembalikan entri lama yang masih menyimpan penanda pengurangan.
+    try {
+      const prLama = await PaymentRequest.find({
+        $or: [{ saldoDikurangi: true }, { lpjPengeluaranId: { $ne: null } }],
+      }).select('_id');
+      for (const item of prLama) {
+        await batalkanPenguranganSaldoLpjDariPR(item._id);
+      }
+      if (prLama.length) {
+        console.log(`[PR] Pengurangan saldo LPJ lama dibatalkan pada ${prLama.length} pengajuan.`);
+      }
+    } catch (prErr) {
+      console.error('Gagal membatalkan pengurangan saldo LPJ lama:', prErr);
+    }
   })
   .catch((err) => console.error('Koneksi MongoDB gagal:', err));
 
@@ -475,16 +491,27 @@ app.get('/payment-request/detail/:id', async (req, res) => {
     }
 
     const totalPR = Number(pengajuan.totalNominal) || 0;
-    const anggaranKasbon = Number(pengajuan.anggaranKasbon) || 0;
-    const sisaSaldoAwal = Number(pengajuan.sisaSaldoAwal) || 0;
+    const lpjAktif = pengajuan.lpjId ? await Lpj.findById(pengajuan.lpjId).lean() : null;
+    const anggaranKasbon = lpjAktif
+      ? Number(lpjAktif.anggaranKasbon) || 0
+      : Number(pengajuan.anggaranKasbon) || 0;
+    const sisaSaldoSaatIni = lpjAktif
+      ? hitungSisaSaldoLpj(lpjAktif)
+      : Number(pengajuan.sisaSaldoAwal) || 0;
+    const sisaSaldoSaatPengajuan = Number(pengajuan.sisaSaldoAwal) || 0;
     const infoAnggaranPR = {
       adaLpj: Boolean(pengajuan.lpjId),
-      namaLpj: String(pengajuan.namaLpj || pengajuan.pekerjaan || ''),
+      namaLpj: lpjAktif
+        ? String(lpjAktif.namaKegiatan || '')
+        : String(pengajuan.namaLpj || pengajuan.pekerjaan || ''),
       anggaranKasbon,
       totalPengeluaranPR: totalPR,
-      sisaSaldoAwal,
-      sisaSaldoSetelahPR: sisaSaldoAwal - totalPR,
-      saldoDikurangi: Boolean(pengajuan.saldoDikurangi) || statusPRMengurangiSaldo(pengajuan.statusApproval),
+      sisaSaldoSaatIni,
+      sisaSaldoSaatPengajuan,
+      // Kompatibel dengan data lama: sisaSaldoAwal kini berarti saldo saat ini.
+      sisaSaldoAwal: sisaSaldoSaatIni,
+      sisaSaldoSetelahPR: sisaSaldoSaatIni - totalPR,
+      saldoDikurangi: false,
     };
 
     res.render('payment-request-detail', {
@@ -1973,8 +2000,8 @@ app.post('/payment-request-admin/update-status/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Data payment request tidak ditemukan.' });
     }
 
-    // Saldo LPJ hanya berubah di sini (kontrol admin), bukan saat user submit/edit.
-    await sinkronSaldoLpjDariPR(id);
+    // Status tidak pernah mengurangi saldo LPJ. Bersihkan entri lama jika ada.
+    await batalkanPenguranganSaldoLpjDariPR(id);
     const finalData = await PaymentRequest.findById(id).lean();
 
     res.json({ success: true, message: 'Status berhasil diperbarui.', data: finalData || updated });
@@ -2806,15 +2833,6 @@ function hitungSisaSaldoLpj(lpj) {
   return (Number(lpj.anggaranKasbon) || 0) - terpakai;
 }
 
-// Status yang membuat saldo LPJ benar-benar berkurang.
-function statusPRMengurangiSaldo(status) {
-  const teks = String(status || '').trim().toLowerCase();
-  return (
-    ['disetujui', 'approved', 'selesai', 'sudah transfer', 'lunas'].includes(teks) ||
-    teks.indexOf('transfer') !== -1
-  );
-}
-
 // Daftar project PR diambil dari nama kegiatan LPJ.
 async function daftarLpjUntukPR() {
   const docs = await Lpj.find().sort({ namaKegiatan: 1 }).lean();
@@ -2828,75 +2846,34 @@ async function daftarLpjUntukPR() {
     }));
 }
 
-// Menambah/menghapus/memperbarui entri pengeluaran LPJ untuk sebuah Payment Request.
-// Idempoten: lpjPengeluaranId dipakai supaya status diubah berulang tidak dobel.
-async function sinkronSaldoLpjDariPR(pengajuanId, opsi = {}) {
+// Payment Request tidak pernah mengurangi saldo LPJ secara otomatis.
+// Fungsi ini hanya membersihkan entri lama yang dulu dibuat saat status
+// Disetujui / Sudah Transfer, supaya saldo LPJ kembali utuh.
+async function batalkanPenguranganSaldoLpjDariPR(pengajuanId) {
   const pr = await PaymentRequest.findById(pengajuanId);
   if (!pr) return null;
 
-  const aktif = opsi.paksaNonaktif ? false : statusPRMengurangiSaldo(pr.statusApproval);
-  const nominalPR = Number(pr.totalNominal) || 0;
-
-  if (!pr.lpjId) {
-    if (pr.lpjPengeluaranId || pr.saldoDikurangi) {
-      pr.lpjPengeluaranId = null;
-      pr.saldoDikurangi = false;
-      pr.totalPengeluaranPR = 0;
-      await pr.save();
+  const penanda = pr.lpjPengeluaranId ? String(pr.lpjPengeluaranId) : '';
+  if (pr.lpjId && penanda) {
+    const lpj = await Lpj.findById(pr.lpjId);
+    if (lpj && Array.isArray(lpj.rincianPengeluaran)) {
+      const indeks = lpj.rincianPengeluaran.findIndex(
+        (row) => String(row && row._id) === penanda,
+      );
+      if (indeks >= 0) {
+        lpj.rincianPengeluaran.splice(indeks, 1);
+        sinkronTotalLpj(lpj);
+        await lpj.save();
+      }
     }
-    return pr.toObject();
   }
 
-  const lpj = await Lpj.findById(pr.lpjId);
-  if (!lpj) {
+  if (pr.lpjPengeluaranId || pr.saldoDikurangi) {
     pr.lpjPengeluaranId = null;
     pr.saldoDikurangi = false;
     await pr.save();
-    return pr.toObject();
   }
 
-  if (!Array.isArray(lpj.rincianPengeluaran)) lpj.rincianPengeluaran = [];
-  const penanda = pr.lpjPengeluaranId ? String(pr.lpjPengeluaranId) : '';
-  const indeks = penanda
-    ? lpj.rincianPengeluaran.findIndex((row) => String(row && row._id) === penanda)
-    : -1;
-
-  if (aktif) {
-    const keterangan = 'Payment Request ' + String(pr.nomorPengajuan || pr._id || '').trim();
-    if (indeks >= 0) {
-      const baris = lpj.rincianPengeluaran[indeks];
-      baris.nominal = nominalPR;
-      baris.hargaSatuan = nominalPR;
-      baris.qty = 1;
-      baris.namaItem = String(pr.pekerjaan || pr.namaLpj || '').trim();
-      baris.keterangan = keterangan;
-      baris.kategoriPengeluaran = 'Payment Request';
-    } else {
-      const baris = lpj.rincianPengeluaran.create({
-        tanggal: new Date(),
-        kategoriPengeluaran: 'Payment Request',
-        namaItem: String(pr.pekerjaan || pr.namaLpj || '').trim(),
-        keterangan,
-        qty: 1,
-        hargaSatuan: nominalPR,
-        nominal: nominalPR,
-        notaPath: '',
-        notaNama: '',
-      });
-      lpj.rincianPengeluaran.push(baris);
-      pr.lpjPengeluaranId = baris._id;
-    }
-    pr.saldoDikurangi = true;
-  } else {
-    if (indeks >= 0) lpj.rincianPengeluaran.splice(indeks, 1);
-    pr.lpjPengeluaranId = null;
-    pr.saldoDikurangi = false;
-  }
-
-  sinkronTotalLpj(lpj);
-  pr.totalPengeluaranPR = nominalPR;
-  await lpj.save();
-  await pr.save();
   return pr.toObject();
 }
 
@@ -3080,8 +3057,8 @@ async function dataPaymentRequestDariBody(req, existing) {
       anggaranKasbon,
       sisaSaldoAwal,
       totalPengeluaranPR: totalNominal,
-      lpjPengeluaranId: lpjSama && existing && existing.lpjPengeluaranId ? existing.lpjPengeluaranId : null,
-      saldoDikurangi: lpjSama ? Boolean(existing && existing.saldoDikurangi) : false,
+      lpjPengeluaranId: null,
+      saldoDikurangi: false,
       tanggalTransfer,
       estimasiTransfer: estimasiTransfer || tanggalIndoPR(tanggalTransfer),
       lokasi: String(body.lokasi || '').trim(),
@@ -3163,12 +3140,9 @@ app.post('/payment-request-user/update/:id', isUserAuthenticated, upload.single(
       return res.redirect('/payment-request-user?error=1');
     }
 
-    // Jika project LPJ diganti pada PR yang sudah aktif, kembalikan dulu saldo LPJ lama.
-    const lpjBaru = hasil.data.lpjId ? String(hasil.data.lpjId) : '';
-    const lpjLama = existing.lpjId ? String(existing.lpjId) : '';
-    if (lpjLama && lpjLama !== lpjBaru && statusPRMengurangiSaldo(existing.statusApproval)) {
-      await sinkronSaldoLpjDariPR(existing._id, { paksaNonaktif: true });
-    }
+    // Bersihkan entri pengurangan saldo lama (jika ada). PR tidak pernah
+    // membuat entri baru, berapapun statusnya.
+    await batalkanPenguranganSaldoLpjDariPR(req.params.id);
 
     const updateData = { ...hasil.data, statusApproval: existing.statusApproval || 'Menunggu' };
     if (req.file) {
@@ -3177,7 +3151,6 @@ app.post('/payment-request-user/update/:id', isUserAuthenticated, upload.single(
     }
 
     const updated = await PaymentRequest.findByIdAndUpdate(req.params.id, updateData, { returnDocument: 'after' }).lean();
-    await sinkronSaldoLpjDariPR(req.params.id);
     const finalData = await PaymentRequest.findById(req.params.id).lean();
     if (wantsJson(req)) {
       return res.json({ success: true, message: 'Payment request berhasil diperbarui.', data: finalData || updated });
