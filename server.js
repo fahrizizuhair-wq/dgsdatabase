@@ -532,6 +532,140 @@ app.get('/payment-request/detail/:id', async (req, res) => {
   }
 });
 
+// ---------- CETAK PAYMENT REQUEST (format mengikuti contoh Excel) ----------
+function daftarArrayPR(value) {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (value && typeof value === 'object') {
+    return Object.keys(value)
+      .sort()
+      .map((k) => value[k])
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function terbilangPR(nilai) {
+  const angka = Math.floor(Math.abs(Number(nilai) || 0));
+  if (!angka) return 'Nol Rupiah';
+  const ucap = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+  function kata(n) {
+    if (n < 12) return ucap[n];
+    if (n < 20) return kata(n - 10) + ' Belas';
+    if (n < 100) return kata(Math.floor(n / 10)) + ' Puluh' + (n % 10 ? ' ' + kata(n % 10) : '');
+    if (n < 200) return 'Seratus' + (n % 100 ? ' ' + kata(n % 100) : '');
+    if (n < 1000) return kata(Math.floor(n / 100)) + ' Ratus' + (n % 100 ? ' ' + kata(n % 100) : '');
+    if (n < 2000) return 'Seribu' + (n % 1000 ? ' ' + kata(n % 1000) : '');
+    if (n < 1000000) return kata(Math.floor(n / 1000)) + ' Ribu' + (n % 1000 ? ' ' + kata(n % 1000) : '');
+    if (n < 1000000000) return kata(Math.floor(n / 1000000)) + ' Juta' + (n % 1000000 ? ' ' + kata(n % 1000000) : '');
+    if (n < 1000000000000) return kata(Math.floor(n / 1000000000)) + ' Miliar' + (n % 1000000000 ? ' ' + kata(n % 1000000000) : '');
+    return '';
+  }
+  return kata(angka).replace(/\s+/g, ' ').trim() + ' Rupiah';
+}
+
+function dataCetakPR(pengajuan, infoAnggaranPR) {
+  const penerima = daftarArrayPR(pengajuan.penerimaTransfer).map((p, index) => {
+    let itemsRaw = daftarArrayPR(p.items);
+    const rincian = daftarArrayPR(p.rincianBiaya);
+    if (!itemsRaw.length && rincian.length) {
+      itemsRaw = rincian.map((r) => ({
+        desc: r.deskripsi || '',
+        qty: r.qty || 1,
+        price: r.hargaSatuan || r.jumlah || 0,
+      }));
+    }
+    if (!itemsRaw.length) {
+      itemsRaw = [{ desc: p.keterangan || '', qty: 1, price: Number(p.subtotal) || 0 }];
+    }
+    const items = itemsRaw.map((it) => {
+      const qty = Number(it.qty != null ? it.qty : 1) || 1;
+      const price = Number(it.price != null ? it.price : it.hargaSatuan || it.jumlah || 0) || 0;
+      return {
+        desc: String(it.desc || it.deskripsi || ''),
+        qty,
+        price,
+        total: qty * price,
+      };
+    });
+    const bank = String(p.bank || '');
+    const noRekening = String(p.accountNo || p.noRekening || '');
+    const atasNama = String(p.accountHolder || p.atasNama || '');
+    const rekening = [bank, noRekening].filter(Boolean).join(' ') + (atasNama ? ' a.n ' + atasNama : '');
+    const totalPenerima = items.reduce((sum, it) => sum + it.total, 0);
+    return {
+      no: index + 1,
+      summaryTitle: String(p.summaryTitle || p.namaPenerima || '-'),
+      vendorName: String(p.vendorName || p.namaPenerima || '-'),
+      pic: String(p.pic || p.keterangan || '-'),
+      rekening,
+      items,
+      total: totalPenerima,
+      terbilang: terbilangPR(totalPenerima),
+    };
+  });
+
+  const grandTotal = penerima.reduce((sum, p) => sum + p.total, 0);
+  const attachments = daftarArrayPR(pengajuan.attachments).map(String);
+  const anggaran =
+    Number(infoAnggaranPR && infoAnggaranPR.anggaranKasbon) ||
+    Number(pengajuan.anggaranKasbon) ||
+    0;
+  const itemsSemua = penerima.reduce(
+    (acc, p) => acc.concat(p.items.map((it) => ({ ...it, vendor: p.vendorName }))),
+    [],
+  );
+
+  return {
+    pekerjaan: String(pengajuan.pekerjaan || pengajuan.namaMaterial || '-'),
+    estTransfer: String(
+      pengajuan.estimasiTransfer ||
+        (pengajuan.tanggalTransfer
+          ? new Date(pengajuan.tanggalTransfer).toLocaleDateString('id-ID')
+          : '-'),
+    ),
+    lokasi: String(pengajuan.lokasi || '-'),
+    detail: String(pengajuan.detailPekerjaan || pengajuan.deskripsi || '-'),
+    penerima,
+    grandTotal,
+    terbilang: terbilangPR(grandTotal),
+    lampiran: attachments.length ? attachments.join(' ') : String(pengajuan.daftarDokumen || '-'),
+    anggaran,
+    sisaAnggaran: anggaran - grandTotal,
+    itemsSemua,
+    info: infoAnggaranPR || {},
+  };
+}
+
+app.get('/payment-request/cetak/:id', async (req, res) => {
+  try {
+    const pengajuan = await PaymentRequest.findById(req.params.id).lean();
+    if (!pengajuan) return res.status(404).send('Payment request tidak ditemukan.');
+
+    const totalPR = Number(pengajuan.totalNominal) || 0;
+    const lpjAktif = pengajuan.lpjId ? await Lpj.findById(pengajuan.lpjId).lean() : null;
+    const infoAnggaranPR = {
+      adaLpj: Boolean(pengajuan.lpjId),
+      namaLpj: lpjAktif
+        ? String(lpjAktif.namaKegiatan || '')
+        : String(pengajuan.namaLpj || pengajuan.pekerjaan || ''),
+      anggaranKasbon: lpjAktif
+        ? Number(lpjAktif.anggaranKasbon) || 0
+        : Number(pengajuan.anggaranKasbon) || 0,
+      totalPengeluaranPR: totalPR,
+    };
+
+    res.render('payment-request-print', {
+      pengajuan,
+      dataCetak: dataCetakPR(pengajuan, infoAnggaranPR),
+      pageTitle: 'Cetak Payment Request',
+      useTailwind: false,
+    });
+  } catch (err) {
+    console.error('Error route /payment-request/cetak/:id:', err);
+    if (!res.headersSent) res.status(500).send('Gagal menyiapkan cetak payment request.');
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Multer – konfigurasi penyimpanan file
@@ -2482,9 +2616,12 @@ app.get('/surat-jalan-user/edit/:id', async (req, res) => {
       return res.status(404).send('Data Surat Jalan tidak ditemukan.');
     }
 
-    res.render('surat-jalan-user-edit', {
+    // Form edit memang hidup di dalam surat-jalan-user.ejs (mode edit),
+    // bukan di view terpisah.
+    res.render('surat-jalan-user', {
       user: req.session.user || { username: 'User' },
       suratJalan: suratJalan,
+      editMode: true,
     });
   } catch (err) {
     console.error('Error memuat form edit surat jalan:', err);

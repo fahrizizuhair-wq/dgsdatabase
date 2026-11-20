@@ -204,10 +204,12 @@ function siapkanData(lpj) {
   const totalPencairan = pencairan.reduce((total, row) => total + row.nominal, 0) || Number(lpj.anggaranKasbon) || 0;
   const totalPengeluaran = rincianAktual.reduce((total, row) => total + row.nominal, 0);
 
-  // Rekap barang untuk bagian bawah template.
+  // Rekap barang untuk bagian bawah template HANYA mengambil biaya produksi.
   // Satu pasangan DP/Lunas hanya dihitung sekali qty-nya, nominalnya tetap dijumlah.
   const rekapMap = new Map();
-  rincianAktual.forEach((row) => {
+  rincianAktual
+    .filter((row) => normalisasiKategori(row.kategori) === 'produksi')
+    .forEach((row) => {
     const kunci = row.kunciPasangan || `${normalisasiKategori(row.kategori)}|${normalisasiTeks(row.namaDasar)}`;
     if (!rekapMap.has(kunci)) {
       rekapMap.set(kunci, {
@@ -221,6 +223,7 @@ function siapkanData(lpj) {
     if (row.jenis === 'Lunas') rekap.namaItem = bersihkanNamaRekap(row.namaDasar);
   });
   const rekapBarang = Array.from(rekapMap.values());
+  const totalRekap = rekapBarang.reduce((total, item) => total + item.nominal, 0);
 
   const notaVault = Array.isArray(lpj.vaultNota) ? lpj.vaultNota.filter((nota) => nota && nota.filePath).length : 0;
   const notaRincian = Array.isArray(lpj.rincianPengeluaran)
@@ -234,6 +237,7 @@ function siapkanData(lpj) {
     totalPencairan,
     totalPengeluaran,
     rekapBarang,
+    totalRekap,
     jumlahNota: notaVault + notaRincian,
   };
 }
@@ -385,12 +389,13 @@ async function buildLpjWorkbook(lpj) {
   ws.getRow(barisHeaderPengeluaran2).height = 17.25;
   row += 2;
 
-  // Grup biaya: BIAYA PRODUKSI lalu BIAYA OPERASIONAL
+  // Grup biaya: BIAYA PRODUKSI lalu BIAYA OPERASIONAL.
+  // Penggabungan qty/satuan hanya boleh pada biaya produksi.
   const grup = [
-    { label: 'BIAYA PRODUKSI', rows: data.grupProduksi },
-    { label: 'BIAYA OPERASIONAL', rows: data.grupOperasional },
+    { label: 'BIAYA PRODUKSI', rows: data.grupProduksi, bolehGabung: true },
+    { label: 'BIAYA OPERASIONAL', rows: data.grupOperasional, bolehGabung: false },
   ].filter((item) => item.rows.length > 0);
-  if (grup.length === 0) grup.push({ label: 'BIAYA PRODUKSI', rows: [] });
+  if (grup.length === 0) grup.push({ label: 'BIAYA PRODUKSI', rows: [], bolehGabung: true });
 
   const totalPerGrup = [];
   grup.forEach((item) => {
@@ -438,8 +443,10 @@ async function buildLpjWorkbook(lpj) {
       row += 1;
     });
 
-    // Satu pengeluaran (DP + pelunasan dengan keterangan sama) memakai
-    // qty & harga satuan yang sama, sehingga sel qty/harganya digabung vertikal.
+    // Satu pengeluaran (DP + pelunasan dengan keterangan sama) boleh digabung
+    // sel qty/satuannya HANYA di biaya produksi, dan hanya bila qty, harga
+    // satuan, serta keterangannya benar-benar sama. Biaya operasional tidak
+    // pernah digabung walaupun keterangannya sama.
     const grupPasangan = new Map();
     barisItem.forEach((entri) => {
       if (!entri.baris.kunciPasangan) return;
@@ -447,14 +454,16 @@ async function buildLpjWorkbook(lpj) {
       grupPasangan.get(entri.baris.kunciPasangan).push(entri);
     });
     grupPasangan.forEach((anggota) => {
-      if (anggota.length < 2) return;
+      if (anggota.length < 2 || !item.bolehGabung) return;
       const awal = Math.min(...anggota.map((entri) => entri.nomorBaris));
       const akhir = Math.max(...anggota.map((entri) => entri.nomorBaris));
       const utama = anggota.find((entri) => entri.nomorBaris === awal);
+      const qtySama = new Set(anggota.map((entri) => Number(entri.baris.qty) || 0)).size === 1;
       const hargaSama = new Set(anggota.map((entri) => Number(entri.baris.hargaSatuan) || 0)).size === 1;
+      const bolehGabung = qtySama && hargaSama;
       [
-        { col: 4, value: utama.baris.qty, align: ALIGN_CENTER, numFmt: QTY_FMT, gabung: true },
-        { col: 5, value: utama.baris.hargaSatuan, align: ALIGN_RIGHT, numFmt: RUPIAH, gabung: hargaSama },
+        { col: 4, value: utama.baris.qty, align: ALIGN_CENTER, numFmt: QTY_FMT, gabung: bolehGabung },
+        { col: 5, value: utama.baris.hargaSatuan, align: ALIGN_RIGHT, numFmt: RUPIAH, gabung: bolehGabung },
       ].forEach(({ col, value, align, numFmt, gabung }) => {
         if (!gabung) return;
         ws.mergeCells(awal, col, akhir, col);
@@ -547,6 +556,42 @@ async function buildLpjWorkbook(lpj) {
   });
   writeCell(ws, row, 7, '', { border: BORDER_NONE });
   ws.getRow(row).height = 19.5;
+  row += 1;
+
+  // ---------- PENCAIRAN DANA PER TAHAP (masuk bagian Summary LPJ) ----------
+  writeMerged(ws, row, 1, row, 7, 'Pencairan Dana per Tahap', {
+    font: FONT_SECTION,
+    border: BORDER_NONE,
+    align: ALIGN_LEFT,
+  });
+  ws.getRow(row).height = 19.5;
+  row += 1;
+
+  writeCell(ws, row, 1, 'No.', { font: FONT_BOLD, align: ALIGN_CENTER });
+  writeCell(ws, row, 2, 'Tahap', { font: FONT_BOLD, align: ALIGN_CENTER });
+  writeCell(ws, row, 3, 'Tanggal', { font: FONT_BOLD, align: ALIGN_CENTER });
+  writeMerged(ws, row, 4, row, 6, 'Uraian', { font: FONT_BOLD, align: ALIGN_CENTER });
+  writeCell(ws, row, 7, 'Pencairan', { font: FONT_BOLD, align: ALIGN_CENTER, numFmt: RUPIAH_HEADER });
+  ws.getRow(row).height = 19.5;
+  row += 1;
+
+  const daftarTahapPencairan = data.pencairan.length
+    ? data.pencairan
+    : [{ tanggal: null, nominal: 0, keterangan: 'Belum ada pencairan dana' }];
+  daftarTahapPencairan.forEach((item, index) => {
+    writeCell(ws, row, 1, index + 1, { align: ALIGN_CENTER });
+    writeCell(ws, row, 2, 'Tahap ' + (index + 1), { align: ALIGN_CENTER });
+    writeCell(ws, row, 3, item.tanggal, { align: ALIGN_CENTER, numFmt: DATE_FMT });
+    const uraian = item.keterangan || 'Pencairan tahap ' + (index + 1);
+    writeMerged(ws, row, 4, row, 6, uraian, {});
+    writeCell(ws, row, 7, item.nominal, { align: ALIGN_RIGHT, numFmt: RUPIAH });
+    setHeight(ws, row, [{ col: 4, text: uraian }]);
+    row += 1;
+  });
+
+  writeMerged(ws, row, 1, row, 6, 'Total Pencairan', { font: FONT_BOLD, align: ALIGN_CENTER });
+  writeCell(ws, row, 7, data.totalPencairan, { font: FONT_BOLD, align: ALIGN_RIGHT, numFmt: RUPIAH });
+  ws.getRow(row).height = 19.5;
   row += 2;
 
   // ---------- SUPPORTING DOCUMENTS ----------
@@ -610,7 +655,7 @@ async function buildLpjWorkbook(lpj) {
       7,
       {
         formula: `SUM(D${barisRekapAwal}:D${row - 1})`,
-        result: data.totalPengeluaran,
+        result: data.totalRekap,
       },
       { font: FONT_BOLD, fill: FILL_CREAM, align: ALIGN_RIGHT, numFmt: RUPIAH },
     );

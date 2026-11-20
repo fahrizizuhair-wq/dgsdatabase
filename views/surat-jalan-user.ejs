@@ -808,10 +808,15 @@
   <script src="/js/live.js?v=5" defer></script>
 </head>
   <body>
+    <%
+      var modeEditSJ = (typeof editMode !== 'undefined' && editMode) === true;
+      var dataSJEdit = (typeof suratJalan !== 'undefined' && suratJalan) ? suratJalan : null;
+    %>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <%- include('partials/sidebar-user', { activePage: 'surat-jalan' }) %>
 
+    <% if (!modeEditSJ) { %>
     <main class="main-content">
       <header class="header-section">
         <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
@@ -1208,7 +1213,9 @@
         </form>
       </div>
     </div>
+    <% } %>
 
+    <% if (modeEditSJ && dataSJEdit) { %>
     <div class="edit-page-wrapper" style="max-width: 920px; margin: 24px auto; background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
     <h3 style="margin: 0; color: #7a1b1b; font-weight: 700">Edit Surat Jalan</h3>
@@ -1511,12 +1518,11 @@
     </div>
   </form>
 </div>
-
-
-  
+<% } %>
 
     <script>
-      document.getElementById('inputTanggal').valueAsDate = new Date();
+      var inputTanggalSJ = document.getElementById('inputTanggal');
+      if (inputTanggalSJ && !inputTanggalSJ.value) inputTanggalSJ.valueAsDate = new Date();
 
       function openModal() {
         document.getElementById('suratJalanModal').style.display = 'flex';
