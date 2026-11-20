@@ -2257,6 +2257,20 @@ app.post('/stok-keluar-user/add', upload.array('foto', 10), async (req, res) => 
   }
 });
 
+app.get('/stok-keluar-user/detail/:id', isUserAuthenticated, async (req, res) => {
+  try {
+    const item = await StokKeluar.findById(req.params.id);
+    if (!item) {
+      return res.status(404).send('Data stok keluar tidak ditemukan.');
+    }
+    const backUrl = req.query.back || req.headers.referer || '/stok-keluar-user';
+    res.render('stok-keluar-detail', { item, backUrl });
+  } catch (err) {
+    console.error('Gagal memuat detail stok keluar:', err);
+    res.status(500).send('Gagal memuat detail stok keluar: ' + err.message);
+  }
+});
+
 // ============================================================
 //  3. RUTE: STOK OPNAME – USER
 // ============================================================
