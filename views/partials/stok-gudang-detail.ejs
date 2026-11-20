@@ -236,128 +236,224 @@
     </div>
 
     <script>
-      function openModal() {
-        document.getElementById('itemModal').style.display = 'flex';
-      }
+        let daftarFotoAktif = [];
+        let indeksFotoAktif = 0;
+        let namaItemFotoAktif = '';
 
-      function closeModal() {
-        document.getElementById('itemModal').style.display = 'none';
-        document.getElementById('previewFoto').innerHTML = '';
-        const input = document.getElementById('inputFotoItem');
-        if (input) input.value = '';
-      }
-
-      function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('sidebarOverlay').classList.toggle('active');
-      }
-
-      function toggleDropdown(element) {
-        const parentLi = element.parentElement;
-        parentLi.classList.toggle('active');
-      }
-
-      function setFotoUtama(src, index, total, namaItem) {
-        const mainImg = document.getElementById('imgModalContent');
-        if (mainImg) {
-          mainImg.src = src;
-          mainImg.alt = (namaItem ? namaItem + ' - ' : '') + 'Foto ' + (index + 1);
+        function openModal() {
+          document.getElementById('itemModal').style.display = 'flex';
         }
 
-        const counter = document.getElementById('imgModalCounter');
-        if (counter) {
-          counter.textContent = (index + 1) + ' / ' + total;
+        function closeModal() {
+          document.getElementById('itemModal').style.display = 'none';
+          document.getElementById('previewFoto').innerHTML = '';
+          const input = document.getElementById('inputFotoItem');
+          if (input) input.value = '';
         }
 
-        const thumbs = document.querySelectorAll('#imgModalGallery img');
-        thumbs.forEach(function (thumb, idx) {
-          thumb.style.borderColor = idx === index ? '#7a1b1b' : '#cbd5e1';
-          thumb.style.opacity = idx === index ? '1' : '0.75';
-        });
-      }
+        function toggleSidebar() {
+          document.getElementById('sidebar').classList.toggle('active');
+          document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
 
-      function bukaFoto(fotos, namaItem) {
-        const list = Array.isArray(fotos)
-          ? fotos.filter(Boolean)
-          : (fotos ? [fotos] : []);
+        function toggleDropdown(element) {
+          const parentLi = element.parentElement;
+          parentLi.classList.toggle('active');
+        }
 
-        if (list.length === 0) return;
+        function renderSlideFoto(index) {
+          if (!Array.isArray(daftarFotoAktif) || daftarFotoAktif.length === 0) return;
 
-        const modal = document.getElementById('imgModal');
-        const mainImg = document.getElementById('imgModalContent');
-        if (!modal || !mainImg) return;
+          const total = daftarFotoAktif.length;
+          indeksFotoAktif = ((index % total) + total) % total;
+          const urlAktif = daftarFotoAktif[indeksFotoAktif];
 
-        // Pastikan ada wadah galeri di dalam #imgModal tanpa harus merombak struktur utama
-        let gallery = document.getElementById('imgModalGallery');
-        let counter = document.getElementById('imgModalCounter');
-
-        if (!gallery) {
-          const wrap = document.createElement('div');
-          wrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:10px; max-width:100%;';
-
-          counter = document.createElement('div');
-          counter.id = 'imgModalCounter';
-          counter.style.cssText = 'font-size:12px; font-weight:700; color:#e2e8f0;';
-
-          gallery = document.createElement('div');
-          gallery.id = 'imgModalGallery';
-          gallery.style.cssText = 'display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:100%;';
-
-          wrap.appendChild(counter);
-          wrap.appendChild(gallery);
-
-          if (mainImg.parentElement) {
-            mainImg.parentElement.appendChild(wrap);
-          } else {
-            modal.appendChild(wrap);
+          const mainImg = document.getElementById('imgModalContent');
+          if (mainImg) {
+            mainImg.src = urlAktif;
+            mainImg.alt = (namaItemFotoAktif ? namaItemFotoAktif + ' - ' : '') + 'Foto ' + (indeksFotoAktif + 1);
           }
-        }
 
-        gallery.innerHTML = list.map(function (url, idx) {
-          return (
-            '<img src="' + url + '" alt="Thumbnail ' + (idx + 1) + '" ' +
-            'onclick="setFotoUtama(\'' + String(url).replace(/'/g, "\\'") + '\', ' + idx + ', ' + list.length + ', \'' + String(namaItem || '').replace(/'/g, "\\'") + '\')" ' +
-            'style="width:68px; height:68px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #cbd5e1; background:#fff;" />'
-          );
-        }).join('');
+          const counter = document.getElementById('imgModalCounter');
+          if (counter) {
+            counter.textContent = (indeksFotoAktif + 1) + ' / ' + total;
+          }
 
-        setFotoUtama(list[0], 0, list.length, namaItem || '');
-        modal.style.display = 'flex';
-      }
-
-      function tutupFoto() {
-        document.getElementById('imgModal').style.display = 'none';
-        document.getElementById('imgModalContent').src = '';
-        const gallery = document.getElementById('imgModalGallery');
-        if (gallery) gallery.innerHTML = '';
-        const counter = document.getElementById('imgModalCounter');
-        if (counter) counter.textContent = '';
-      }
-
-      document.addEventListener('DOMContentLoaded', function () {
-        const inputFoto = document.getElementById('inputFotoItem');
-        const preview = document.getElementById('previewFoto');
-
-        if (inputFoto) {
-          inputFoto.addEventListener('change', function () {
-            preview.innerHTML = '';
-            Array.from(inputFoto.files || []).forEach(function (file) {
-              if (!file.type || file.type.indexOf('image/') !== 0) return;
-              const reader = new FileReader();
-              reader.onload = function (e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = file.name;
-                preview.appendChild(img);
-              };
-              reader.readAsDataURL(file);
-            });
+          const thumbs = document.querySelectorAll('#imgModalGallery img');
+          thumbs.forEach(function (thumb, idx) {
+            const aktif = idx === indeksFotoAktif;
+            thumb.style.borderColor = aktif ? '#7a1b1b' : '#cbd5e1';
+            thumb.style.opacity = aktif ? '1' : '0.72';
+            thumb.style.transform = aktif ? 'scale(1.05)' : 'scale(1)';
           });
+
+          const btnPrev = document.getElementById('imgModalPrev');
+          const btnNext = document.getElementById('imgModalNext');
+          const tampilPanah = total > 1;
+          if (btnPrev) btnPrev.style.display = tampilPanah ? 'flex' : 'none';
+          if (btnNext) btnNext.style.display = tampilPanah ? 'flex' : 'none';
         }
 
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('tambah') === 'item') openModal();
-      });
-    </script>
+        function geserFoto(arah) {
+          if (!Array.isArray(daftarFotoAktif) || daftarFotoAktif.length <= 1) return;
+          renderSlideFoto(indeksFotoAktif + arah);
+        }
+
+        function pastikanKontrolGaleriAda(modal, mainImg) {
+          let navRow = document.getElementById('imgModalNavRow');
+          let gallery = document.getElementById('imgModalGallery');
+          let counter = document.getElementById('imgModalCounter');
+          let btnPrev = document.getElementById('imgModalPrev');
+          let btnNext = document.getElementById('imgModalNext');
+
+          if (!navRow) {
+            const wrap = document.createElement('div');
+            wrap.id = 'imgModalControlsWrap';
+            wrap.style.cssText =
+              'display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:12px; max-width:100%; z-index:20;';
+
+            navRow = document.createElement('div');
+            navRow.id = 'imgModalNavRow';
+            navRow.style.cssText = 'display:flex; align-items:center; justify-content:center; gap:14px;';
+
+            btnPrev = document.createElement('button');
+            btnPrev.type = 'button';
+            btnPrev.id = 'imgModalPrev';
+            btnPrev.innerHTML = '❮';
+            btnPrev.setAttribute('aria-label', 'Foto sebelumnya');
+            btnPrev.style.cssText =
+              'width:38px; height:38px; border-radius:999px; border:none; background:#7a1b1b; color:#fff; ' +
+              'font-size:16px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; ' +
+              'box-shadow:0 4px 10px rgba(0,0,0,0.2);';
+            btnPrev.addEventListener('click', function (e) {
+              e.stopPropagation();
+              geserFoto(-1);
+            });
+
+            counter = document.createElement('div');
+            counter.id = 'imgModalCounter';
+            counter.style.cssText = 'font-size:13px; font-weight:700; color:#e2e8f0; min-width:54px; text-align:center;';
+
+            btnNext = document.createElement('button');
+            btnNext.type = 'button';
+            btnNext.id = 'imgModalNext';
+            btnNext.innerHTML = '❯';
+            btnNext.setAttribute('aria-label', 'Foto berikutnya');
+            btnNext.style.cssText =
+              'width:38px; height:38px; border-radius:999px; border:none; background:#7a1b1b; color:#fff; ' +
+              'font-size:16px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; ' +
+              'box-shadow:0 4px 10px rgba(0,0,0,0.2);';
+            btnNext.addEventListener('click', function (e) {
+              e.stopPropagation();
+              geserFoto(1);
+            });
+
+            navRow.appendChild(btnPrev);
+            navRow.appendChild(counter);
+            navRow.appendChild(btnNext);
+
+            gallery = document.createElement('div');
+            gallery.id = 'imgModalGallery';
+            gallery.style.cssText =
+              'display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:100%;';
+
+            wrap.appendChild(navRow);
+            wrap.appendChild(gallery);
+
+            if (mainImg && mainImg.parentElement) {
+              mainImg.parentElement.appendChild(wrap);
+            } else {
+              modal.appendChild(wrap);
+            }
+          }
+
+          return { gallery, counter };
+        }
+
+        function bukaFoto(fotos, namaItem) {
+          const list = Array.isArray(fotos)
+            ? fotos.filter(Boolean)
+            : (fotos ? [fotos] : []);
+
+          if (list.length === 0) return;
+
+          const modal = document.getElementById('imgModal');
+          const mainImg = document.getElementById('imgModalContent');
+          if (!modal || !mainImg) return;
+
+          daftarFotoAktif = list;
+          namaItemFotoAktif = namaItem || '';
+
+          const { gallery } = pastikanKontrolGaleriAda(modal, mainImg);
+          gallery.innerHTML = '';
+
+          list.forEach(function (url, idx) {
+            const thumb = document.createElement('img');
+            thumb.src = url;
+            thumb.alt = 'Thumbnail ' + (idx + 1);
+            thumb.style.cssText =
+              'width:68px; height:68px; object-fit:cover; border-radius:8px; cursor:pointer; ' +
+              'border:2px solid #cbd5e1; background:#fff; transition:all 0.15s ease;';
+
+            thumb.addEventListener('click', function (e) {
+              e.stopPropagation();
+              renderSlideFoto(idx);
+            });
+
+            gallery.appendChild(thumb);
+          });
+
+          renderSlideFoto(0);
+          modal.style.display = 'flex';
+        }
+
+        function tutupFoto() {
+          document.getElementById('imgModal').style.display = 'none';
+          document.getElementById('imgModalContent').src = '';
+          daftarFotoAktif = [];
+          indeksFotoAktif = 0;
+          const gallery = document.getElementById('imgModalGallery');
+          if (gallery) gallery.innerHTML = '';
+          const counter = document.getElementById('imgModalCounter');
+          if (counter) counter.textContent = '';
+        }
+
+        document.addEventListener('keydown', function (e) {
+          const modal = document.getElementById('imgModal');
+          if (!modal || modal.style.display === 'none' || !modal.style.display) return;
+          if (e.key === 'ArrowLeft') {
+            geserFoto(-1);
+          } else if (e.key === 'ArrowRight') {
+            geserFoto(1);
+          } else if (e.key === 'Escape') {
+            tutupFoto();
+          }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+          const inputFoto = document.getElementById('inputFotoItem');
+          const preview = document.getElementById('previewFoto');
+
+          if (inputFoto) {
+            inputFoto.addEventListener('change', function () {
+              preview.innerHTML = '';
+              Array.from(inputFoto.files || []).forEach(function (file) {
+                if (!file.type || file.type.indexOf('image/') !== 0) return;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                  const img = document.createElement('img');
+                  img.src = e.target.result;
+                  img.alt = file.name;
+                  preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+              });
+            });
+          }
+
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('tambah') === 'item') openModal();
+        });
+      </script>
   </body>
 </html>
