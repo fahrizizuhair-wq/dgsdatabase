@@ -2474,6 +2474,97 @@ app.get('/surat-jalan/cetak/:id', async (req, res) => {
   }
 });
 
+// Route Halaman Edit Surat Jalan (User)
+app.get('/surat-jalan-user/edit/:id', async (req, res) => {
+  try {
+    const suratJalan = await SuratJalan.findById(req.params.id);
+    if (!suratJalan) {
+      return res.status(404).send('Data Surat Jalan tidak ditemukan.');
+    }
+
+    res.render('surat-jalan-user-edit', {
+      user: req.session.user || { username: 'User' },
+      suratJalan: suratJalan,
+    });
+  } catch (err) {
+    console.error('Error memuat form edit surat jalan:', err);
+    res.status(500).send('Terjadi kesalahan pada server');
+  }
+});
+
+// Route Proses Simpan Edit Surat Jalan (User)
+app.post('/surat-jalan-user/edit/:id', async (req, res) => {
+  try {
+    const suratJalan = await SuratJalan.findById(req.params.id);
+    if (!suratJalan) {
+      return res.status(404).send('Data Surat Jalan tidak ditemukan.');
+    }
+
+    const {
+      jenisSurat,
+      noSuratJalan,
+      tanggal,
+      namaPerusahaan,
+      kepadaYth,
+      namaPenerima,
+      namaPenyerah,
+      noTelepon,
+      alamat,
+      perihal,
+      pekerjaan,
+      jenisKirim,
+      items,
+      kodeBarangList,
+    } = req.body;
+
+    // Normalisasi array items (sama seperti pada /surat-jalan-user/add)
+    const rawItems = items ? (Array.isArray(items) ? items : Object.values(items)) : [];
+    const daftarItem = rawItems
+      .filter((item) => item && (item.diskripsi || item.jumlah))
+      .map((item, index) => ({
+        no: index + 1,
+        diskripsi: item.diskripsi || '',
+        jumlah: item.jumlah === undefined || item.jumlah === null ? '' : String(item.jumlah).trim(),
+        satuan: item.satuan || '',
+        keterangan: item.keterangan || '',
+      }));
+
+    // Normalisasi array kodeBarangList (sama seperti pada /surat-jalan-user/add)
+    const rawKodeBarang = kodeBarangList
+      ? (Array.isArray(kodeBarangList) ? kodeBarangList : Object.values(kodeBarangList))
+      : [];
+    const daftarKodeBarang = rawKodeBarang
+      .filter((kb) => kb && (kb.namaBarang || kb.kodeBarang))
+      .map((kb, index) => ({
+        no: index + 1,
+        namaBarang: kb.namaBarang || '',
+        kodeBarang: kb.kodeBarang || '',
+      }));
+
+    suratJalan.jenisSurat = jenisSurat || suratJalan.jenisSurat || 'Surat Jalan';
+    suratJalan.noSuratJalan = noSuratJalan;
+    suratJalan.tanggal = tanggal || suratJalan.tanggal || Date.now();
+    suratJalan.namaPerusahaan = namaPerusahaan;
+    suratJalan.kepadaYth = kepadaYth;
+    suratJalan.namaPenerima = namaPenerima || '';
+    suratJalan.namaPenyerah = namaPenyerah || '';
+    suratJalan.noTelepon = noTelepon;
+    suratJalan.alamat = alamat;
+    suratJalan.perihal = perihal;
+    suratJalan.pekerjaan = pekerjaan;
+    suratJalan.jenisKirim = jenisKirim || suratJalan.jenisKirim || 'Barang';
+    suratJalan.items = daftarItem;
+    suratJalan.kodeBarangList = daftarKodeBarang;
+
+    await suratJalan.save();
+    res.redirect('/surat-jalan-user');
+  } catch (err) {
+    console.error('Error mengupdate surat jalan:', err);
+    res.status(500).send('Gagal mengupdate Surat Jalan: ' + err.message);
+  }
+});
+
+
 // ==========================================
 // RUTE LPJ LAPORAN PERTANGGUNGJAWABAN
 // ==========================================

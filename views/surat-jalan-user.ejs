@@ -966,6 +966,13 @@
                     <i class="fa-solid fa-eye"></i> Detail
                   </a>
                   <a
+                    href="/surat-jalan-user/edit/<%= sj._id %>"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 transition"
+                  >
+                    <i data-lucide="square-pen" class="w-3.5 h-3.5 text-maroon-800"></i>
+                    <span>Edit</span>
+                  </a>
+                  <a
                     href="/surat-jalan/cetak/<%= item._id %>"
                     target="_blank"
                     class="btn-sub-action btn-print"
@@ -1204,6 +1211,312 @@
       </div>
     </div>
 
+    <div class="edit-page-wrapper" style="max-width: 920px; margin: 24px auto; background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+    <h3 style="margin: 0; color: #7a1b1b; font-weight: 700">Edit Surat Jalan</h3>
+    <a href="/surat-jalan-user" style="font-size: 13px; color: #475569; text-decoration: none;">← Kembali ke Daftar</a>
+  </div>
+
+  <%
+    // Format tanggal ke YYYY-MM-DD agar kompatibel dengan input type="date"
+    let tglValue = '';
+    if (suratJalan.tanggal) {
+      const d = new Date(suratJalan.tanggal);
+      if (!isNaN(d.getTime())) {
+        tglValue = d.toISOString().slice(0, 10);
+      }
+    }
+    const itemsList = (suratJalan.items && suratJalan.items.length > 0)
+      ? suratJalan.items
+      : [{ no: 1, diskripsi: '', jumlah: '', satuan: '', keterangan: '' }];
+
+    const kodeList = (suratJalan.kodeBarangList && suratJalan.kodeBarangList.length > 0)
+      ? suratJalan.kodeBarangList
+      : [{ namaBarang: '', kodeBarang: '' }];
+  %>
+
+  <form action="/surat-jalan-user/edit/<%= suratJalan._id %>" method="POST">
+    <div class="form-group full-width">
+      <label>Jenis Surat</label>
+      <select name="jenisSurat">
+        <option value="Surat Jalan" <%= suratJalan.jenisSurat === 'Surat Jalan' ? 'selected' : '' %>>Surat Jalan</option>
+        <option value="Surat Tanda Terima" <%= suratJalan.jenisSurat === 'Surat Tanda Terima' ? 'selected' : '' %>>Surat Tanda Terima</option>
+      </select>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>No. Surat Jalan</label>
+        <input
+          type="text"
+          name="noSuratJalan"
+          id="noSuratJalan"
+          class="form-control"
+          value="<%= suratJalan.noSuratJalan || '' %>"
+          oninput="this.value = this.value.toUpperCase()"
+          placeholder="Contoh: DGS/SJ/V/2026/001"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Tanggal Pengiriman</label>
+        <input
+          type="date"
+          name="tanggal"
+          id="inputTanggal"
+          value="<%= tglValue %>"
+          required
+        />
+      </div>
+
+      <div class="form-group full-width">
+        <label>Nama Perusahaan</label>
+        <select name="namaPerusahaan">
+          <option value="PT.DIAN GIRI SAPUTRA" <%= suratJalan.namaPerusahaan === 'PT.DIAN GIRI SAPUTRA' ? 'selected' : '' %>>PT.DIAN GIRI SAPUTRA</option>
+          <option value="PT.PRASASTI NUSALESTARI" <%= suratJalan.namaPerusahaan === 'PT.PRASASTI NUSALESTARI' ? 'selected' : '' %>>PT.PRASASTI NUSALESTARI</option>
+          <option value="PT.PUSPITA JAYA GIRI" <%= suratJalan.namaPerusahaan === 'PT.PUSPITA JAYA GIRI' ? 'selected' : '' %>>PT.PUSPITA JAYA GIRI</option>
+          <option value="PT.INSAN GIRI MAHARTA" <%= suratJalan.namaPerusahaan === 'PT.INSAN GIRI MAHARTA' ? 'selected' : '' %>>PT.INSAN GIRI MAHARTA</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Kepada Yth</label>
+        <input
+          type="text"
+          name="kepadaYth"
+          value="<%= suratJalan.kepadaYth || '' %>"
+          placeholder="Nama perusahaan penerima..."
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Nama Penerima (opsional)</label>
+        <input
+          type="text"
+          name="namaPenerima"
+          value="<%= suratJalan.namaPenerima || '' %>"
+          placeholder="Kosongkan bila sama dengan Kepada Yth"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>No. Telepon / Kontak</label>
+        <input
+          type="text"
+          name="noTelepon"
+          value="<%= suratJalan.noTelepon || '' %>"
+          placeholder="Nomor telepon..."
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Nama Penyerah (Tanda Tangan)</label>
+        <input
+          type="text"
+          name="namaPenyerah"
+          value="<%= suratJalan.namaPenyerah || '' %>"
+          placeholder="Kosongkan = nama user yang login"
+        />
+      </div>
+
+      <div class="form-group full-width">
+        <label>Alamat Tujuan</label>
+        <textarea
+          name="alamat"
+          rows="3"
+          placeholder="Alamat lengkap lokasi pengiriman..."
+          required
+        ><%= suratJalan.alamat || '' %></textarea>
+        <small style="display: block; margin-top: 4px; color: #94a3b8; font-size: 11.5px">
+          Tekan Enter untuk memisahkan baris alamat (maksimal 3 baris agar rapi di hasil cetak).
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Perihal</label>
+        <input
+          type="text"
+          name="perihal"
+          value="<%= suratJalan.perihal || '' %>"
+          placeholder="Contoh: Pengiriman Material"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Pekerjaan</label>
+        <input
+          type="text"
+          name="pekerjaan"
+          value="<%= suratJalan.pekerjaan || '' %>"
+          placeholder="Nama Pekerjaan"
+        />
+      </div>
+
+      <div class="form-group full-width">
+        <label>Jenis Pengiriman</label>
+        <select name="jenisKirim">
+          <option value="Barang" <%= suratJalan.jenisKirim === 'Barang' ? 'selected' : '' %>>Barang</option>
+          <option value="Dokumen" <%= suratJalan.jenisKirim === 'Dokumen' ? 'selected' : '' %>>Dokumen</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- DAFTAR BARANG -->
+    <div style="margin-top: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+      <label style="font-size: 13px; font-weight: 600; color: #334155">Daftar Barang</label>
+      <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 12px" onclick="addEditItemRow()">
+        + Tambah Barang
+      </button>
+    </div>
+
+    <div class="item-head">
+      <span>No</span>
+      <span>Diskripsi</span>
+      <span>Jumlah</span>
+      <span>Satuan</span>
+      <span>Keterangan</span>
+      <span></span>
+    </div>
+    <small style="display: block; margin: -2px 0 8px; color: #94a3b8; font-size: 11px">
+      Jumlah dan satuan boleh diisi beberapa baris (tekan Enter) untuk barang dengan beberapa kode dalam satu baris.
+    </small>
+
+    <div id="itemContainer">
+      <% itemsList.forEach(function(item, idx) { %>
+        <div class="item-row">
+          <input
+            type="number"
+            data-field="no"
+            name="items[<%= idx %>][no]"
+            value="<%= idx + 1 %>"
+            readonly
+            style="background: #f1f5f9; text-align: center"
+          />
+          <textarea
+            data-field="diskripsi"
+            name="items[<%= idx %>][diskripsi]"
+            placeholder="Nama barang / deskripsi (boleh beberapa baris)..."
+            rows="2"
+            required
+          ><%= item.diskripsi || '' %></textarea>
+          <textarea
+            data-field="jumlah"
+            name="items[<%= idx %>][jumlah]"
+            placeholder="Jml"
+            rows="2"
+            required
+          ><%= item.jumlah || '' %></textarea>
+          <input
+            type="text"
+            data-field="satuan"
+            name="items[<%= idx %>][satuan]"
+            value="<%= item.satuan || '' %>"
+            placeholder="Satuan"
+            required
+          />
+          <textarea
+            data-field="keterangan"
+            name="items[<%= idx %>][keterangan]"
+            placeholder="Keterangan (opsional)..."
+            rows="2"
+          ><%= item.keterangan || '' %></textarea>
+          <button type="button" class="btn-remove-item" onclick="removeEditItemRow(this)">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- KETERANGAN KODE BARANG -->
+    <div style="margin-top: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+      <label style="font-size: 13px; font-weight: 600; color: #334155">Keterangan Kode Barang</label>
+      <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 12px" onclick="addEditKodeRow()">
+        + Tambah Kode Barang
+      </button>
+    </div>
+
+    <div
+      class="kode-head"
+      style="
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px;
+        gap: 8px;
+        margin-bottom: 6px;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+      "
+    >
+      <span>Nama Barang</span>
+      <span>Kode Barang</span>
+      <span></span>
+    </div>
+
+    <div id="kodeBarangContainer">
+      <% kodeList.forEach(function(kb, idx) { %>
+        <div
+          class="kode-row"
+          style="
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px;
+            gap: 8px;
+            align-items: stretch;
+            margin-bottom: 8px;
+          "
+        >
+          <textarea
+            data-field="namaBarang"
+            name="kodeBarangList[<%= idx %>][namaBarang]"
+            placeholder="Nama barang"
+            rows="2"
+            style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px"
+            required
+          ><%= kb.namaBarang || '' %></textarea>
+          <textarea
+            data-field="kodeBarang"
+            name="kodeBarangList[<%= idx %>][kodeBarang]"
+            placeholder="Kode Barang"
+            rows="2"
+            style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px"
+            required
+          ><%= kb.kodeBarang || '' %></textarea>
+          <button
+            type="button"
+            class="btn-remove-item"
+            onclick="removeEditKodeRow(this)"
+            style="
+              background: #fee2e2;
+              color: #dc2626;
+              border: none;
+              width: 36px;
+              height: 100%;
+              min-height: 40px;
+              border-radius: 6px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="modal-actions">
+      <a href="/surat-jalan-user" class="btn-cancel" style="text-decoration: none; display: inline-flex; align-items: center;">Batal</a>
+      <button type="submit" class="btn-action">Simpan Perubahan</button>
+    </div>
+  </form>
+</div>
+
+
+  
+
     <script>
       document.getElementById('inputTanggal').valueAsDate = new Date();
 
@@ -1298,6 +1611,139 @@
           });
         }
       }
+
+      function reindexEditItems() {
+    const rows = document.querySelectorAll('#itemContainer .item-row');
+    rows.forEach((row, i) => {
+      const noInput = row.querySelector('input[data-field="no"]');
+      if (noInput) {
+        noInput.value = i + 1;
+        noInput.name = `items[${i}][no]`;
+      }
+      const diskripsi = row.querySelector('[data-field="diskripsi"]');
+      const jumlah = row.querySelector('[data-field="jumlah"]');
+      const satuan = row.querySelector('[data-field="satuan"]');
+      const keterangan = row.querySelector('[data-field="keterangan"]');
+
+      if (diskripsi) diskripsi.name = `items[${i}][diskripsi]`;
+      if (jumlah) jumlah.name = `items[${i}][jumlah]`;
+      if (satuan) satuan.name = `items[${i}][satuan]`;
+      if (keterangan) keterangan.name = `items[${i}][keterangan]`;
+    });
+  }
+
+  function addEditItemRow() {
+    const container = document.getElementById('itemContainer');
+    const idx = container.querySelectorAll('.item-row').length;
+    const div = document.createElement('div');
+    div.className = 'item-row';
+    div.innerHTML = `
+      <input
+        type="number"
+        data-field="no"
+        name="items[${idx}][no]"
+        value="${idx + 1}"
+        readonly
+        style="background: #f1f5f9; text-align: center"
+      />
+      <textarea
+        data-field="diskripsi"
+        name="items[${idx}][diskripsi]"
+        placeholder="Nama barang / deskripsi (boleh beberapa baris)..."
+        rows="2"
+        required
+      ></textarea>
+      <textarea data-field="jumlah" name="items[${idx}][jumlah]" placeholder="Jml" rows="2" required></textarea>
+      <input type="text" data-field="satuan" name="items[${idx}][satuan]" placeholder="Satuan" required />
+      <textarea
+        data-field="keterangan"
+        name="items[${idx}][keterangan]"
+        placeholder="Keterangan (opsional)..."
+        rows="2"
+      ></textarea>
+      <button type="button" class="btn-remove-item" onclick="removeEditItemRow(this)">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    `;
+    container.appendChild(div);
+    reindexEditItems();
+  }
+
+  function removeEditItemRow(btn) {
+    const container = document.getElementById('itemContainer');
+    const rows = container.querySelectorAll('.item-row');
+    if (rows.length <= 1) return;
+    btn.closest('.item-row').remove();
+    reindexEditItems();
+  }
+
+  function reindexEditKodeRows() {
+    const rows = document.querySelectorAll('#kodeBarangContainer .kode-row');
+    rows.forEach((row, i) => {
+      const namaBarang = row.querySelector('[data-field="namaBarang"]');
+      const kodeBarang = row.querySelector('[data-field="kodeBarang"]');
+      if (namaBarang) namaBarang.name = `kodeBarangList[${i}][namaBarang]`;
+      if (kodeBarang) kodeBarang.name = `kodeBarangList[${i}][kodeBarang]`;
+    });
+  }
+
+  function addEditKodeRow() {
+    const container = document.getElementById('kodeBarangContainer');
+    const idx = container.querySelectorAll('.kode-row').length;
+    const div = document.createElement('div');
+    div.className = 'kode-row';
+    div.style.cssText =
+      'display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px; gap: 8px; align-items: stretch; margin-bottom: 8px;';
+    div.innerHTML = `
+      <textarea
+        data-field="namaBarang"
+        name="kodeBarangList[${idx}][namaBarang]"
+        placeholder="Nama barang"
+        rows="2"
+        style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px"
+        required
+      ></textarea>
+      <textarea
+        data-field="kodeBarang"
+        name="kodeBarangList[${idx}][kodeBarang]"
+        placeholder="Kode Barang"
+        rows="2"
+        style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px"
+        required
+      ></textarea>
+      <button
+        type="button"
+        class="btn-remove-item"
+        onclick="removeEditKodeRow(this)"
+        style="
+          background: #fee2e2;
+          color: #dc2626;
+          border: none;
+          width: 36px;
+          height: 100%;
+          min-height: 40px;
+          border-radius: 6px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    `;
+    container.appendChild(div);
+    reindexEditKodeRows();
+  }
+
+  function removeEditKodeRow(btn) {
+    const container = document.getElementById('kodeBarangContainer');
+    const rows = container.querySelectorAll('.kode-row');
+    if (rows.length <= 1) return;
+    btn.closest('.kode-row').remove();
+    reindexEditKodeRows();
+  }
+  
     </script>
   </body>
 </html>
