@@ -2192,6 +2192,20 @@ app.post('/stok-masuk-user/add', upload.array('foto', 10), async (req, res) => {
   }
 });
 
+app.get('/stok-masuk-user/detail/:id', isUserAuthenticated, async (req, res) => {
+  try {
+    const item = await StokMasuk.findById(req.params.id);
+    if (!item) {
+      return res.status(404).send('Data stok masuk tidak ditemukan.');
+    }
+    const backUrl = req.query.back || req.headers.referer || '/stok-masuk-user';
+    res.render('stok-masuk-detail', { item, backUrl });
+  } catch (err) {
+    console.error('Gagal memuat detail stok masuk:', err);
+    res.status(500).send('Gagal memuat detail stok masuk: ' + err.message);
+  }
+});
+
 // ============================================================
 //  RUTE: STOK KELUAR – USER
 // ============================================================
