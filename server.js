@@ -517,6 +517,7 @@ app.get('/payment-request/detail/:id', async (req, res) => {
     res.render('payment-request-detail', {
       pengajuan,
       infoAnggaranPR,
+      dataCetak: dataCetakPR(pengajuan, infoAnggaranPR),
       role: req.session.isAdmin ? 'admin' : 'user',
       user: req.session.user || {
         username: req.session.adminUser || 'User',
@@ -615,6 +616,24 @@ function dataCetakPR(pengajuan, infoAnggaranPR) {
     [],
   );
 
+  // Jika kemudian hari ada data kasbon/aktual tersendiri, pakai itu.
+  // Untuk sekarang keduanya mengikuti rincian item Payment Request.
+  const barisDariOpsi = (value, fallback) => {
+    const daftar = daftarArrayPR(value);
+    if (!daftar.length) return fallback;
+    return daftar.map((it) => {
+      const qty = Number(it.qty != null ? it.qty : 1) || 1;
+      const price = Number(it.price != null ? it.price : it.hargaSatuan || it.nominal || 0) || 0;
+      return {
+        desc: String(it.desc || it.deskripsi || it.keterangan || ''),
+        qty,
+        price,
+        total: it.total != null ? Number(it.total) || 0 : qty * price,
+        vendor: String(it.vendor || it.vendorName || '-'),
+      };
+    });
+  };
+
   return {
     pekerjaan: String(pengajuan.pekerjaan || pengajuan.namaMaterial || '-'),
     estTransfer: String(
@@ -632,6 +651,8 @@ function dataCetakPR(pengajuan, infoAnggaranPR) {
     anggaran,
     sisaAnggaran: anggaran - grandTotal,
     itemsSemua,
+    kasbonItems: barisDariOpsi(pengajuan.kasbonItems || pengajuan.daftarKasbon, itemsSemua),
+    aktualItems: barisDariOpsi(pengajuan.aktualItems || pengajuan.aktualPengeluaran, itemsSemua),
     info: infoAnggaranPR || {},
   };
 }
@@ -2620,6 +2641,7 @@ app.get('/surat-jalan-user/edit/:id', async (req, res) => {
     // bukan di view terpisah.
     res.render('surat-jalan-user', {
       user: req.session.user || { username: 'User' },
+      suratJalans: [suratJalan],
       suratJalan: suratJalan,
       editMode: true,
     });
