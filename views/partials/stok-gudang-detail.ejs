@@ -142,8 +142,23 @@
                 <% daftarItem.forEach(function (item) { %>
                   <tr>
                     <td>
-                      <% if (item.foto && item.foto.length) { %>
-                        <img class="foto-thumb" src="<%= item.foto[0] %>" alt="Foto <%= item.nama %>" onclick="bukaFoto(this.src)" />
+                      <% const daftarFoto = Array.isArray(item.foto) ? item.foto.filter(Boolean) : (item.foto ? [item.foto] : []); %>
+                      <% if (daftarFoto.length > 0) { %>
+                        <div style="position: relative; display: inline-block;">
+                          <img
+                            class="foto-thumb"
+                            src="<%= daftarFoto[0] %>"
+                            alt="Foto <%= item.nama %>"
+                            data-fotos='<%- JSON.stringify(daftarFoto) %>'
+                            onclick="bukaFoto(JSON.parse(this.dataset.fotos), '<%= item.nama || '' %>')"
+                            style="cursor: pointer;"
+                          />
+                          <% if (daftarFoto.length > 1) { %>
+                            <span style="position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.72); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 999px;">
+                              +<%= daftarFoto.length - 1 %>
+                            </span>
+                          <% } %>
+                        </div>
                       <% } else { %>
                         <div class="foto-placeholder"><i class="fa-regular fa-image"></i></div>
                       <% } %>
