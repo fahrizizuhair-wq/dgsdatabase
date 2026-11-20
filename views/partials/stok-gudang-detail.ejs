@@ -257,15 +257,81 @@
         parentLi.classList.toggle('active');
       }
 
-      function bukaFoto(src) {
-        if (!src) return;
-        document.getElementById('imgModalContent').src = src;
-        document.getElementById('imgModal').style.display = 'flex';
+      function setFotoUtama(src, index, total, namaItem) {
+        const mainImg = document.getElementById('imgModalContent');
+        if (mainImg) {
+          mainImg.src = src;
+          mainImg.alt = (namaItem ? namaItem + ' - ' : '') + 'Foto ' + (index + 1);
+        }
+
+        const counter = document.getElementById('imgModalCounter');
+        if (counter) {
+          counter.textContent = (index + 1) + ' / ' + total;
+        }
+
+        const thumbs = document.querySelectorAll('#imgModalGallery img');
+        thumbs.forEach(function (thumb, idx) {
+          thumb.style.borderColor = idx === index ? '#7a1b1b' : '#cbd5e1';
+          thumb.style.opacity = idx === index ? '1' : '0.75';
+        });
+      }
+
+      function bukaFoto(fotos, namaItem) {
+        const list = Array.isArray(fotos)
+          ? fotos.filter(Boolean)
+          : (fotos ? [fotos] : []);
+
+        if (list.length === 0) return;
+
+        const modal = document.getElementById('imgModal');
+        const mainImg = document.getElementById('imgModalContent');
+        if (!modal || !mainImg) return;
+
+        // Pastikan ada wadah galeri di dalam #imgModal tanpa harus merombak struktur utama
+        let gallery = document.getElementById('imgModalGallery');
+        let counter = document.getElementById('imgModalCounter');
+
+        if (!gallery) {
+          const wrap = document.createElement('div');
+          wrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:10px; max-width:100%;';
+
+          counter = document.createElement('div');
+          counter.id = 'imgModalCounter';
+          counter.style.cssText = 'font-size:12px; font-weight:700; color:#e2e8f0;';
+
+          gallery = document.createElement('div');
+          gallery.id = 'imgModalGallery';
+          gallery.style.cssText = 'display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:100%;';
+
+          wrap.appendChild(counter);
+          wrap.appendChild(gallery);
+
+          if (mainImg.parentElement) {
+            mainImg.parentElement.appendChild(wrap);
+          } else {
+            modal.appendChild(wrap);
+          }
+        }
+
+        gallery.innerHTML = list.map(function (url, idx) {
+          return (
+            '<img src="' + url + '" alt="Thumbnail ' + (idx + 1) + '" ' +
+            'onclick="setFotoUtama(\'' + String(url).replace(/'/g, "\\'") + '\', ' + idx + ', ' + list.length + ', \'' + String(namaItem || '').replace(/'/g, "\\'") + '\')" ' +
+            'style="width:68px; height:68px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #cbd5e1; background:#fff;" />'
+          );
+        }).join('');
+
+        setFotoUtama(list[0], 0, list.length, namaItem || '');
+        modal.style.display = 'flex';
       }
 
       function tutupFoto() {
         document.getElementById('imgModal').style.display = 'none';
         document.getElementById('imgModalContent').src = '';
+        const gallery = document.getElementById('imgModalGallery');
+        if (gallery) gallery.innerHTML = '';
+        const counter = document.getElementById('imgModalCounter');
+        if (counter) counter.textContent = '';
       }
 
       document.addEventListener('DOMContentLoaded', function () {
