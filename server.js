@@ -180,6 +180,8 @@ const SuratJalan = require('./models/SuratJalan');
 const Lpj = require('./models/Lpj');
 const MateriApproval = require('./models/MateriApproval');
 const PaymentRequest = require('./models/PaymentRequest');
+const GudangKategori = require('./models/GudangKategori');
+const GudangItem = require('./models/GudangItem');
 const { buildLpjWorkbook } = require('./utils/lpj-excel');
 
 // ============================================================
@@ -233,6 +235,7 @@ const ADMIN_PREFIX_PATHS = [
   '/materi-approval-admin',
   '/payment-request-admin',
   '/lpj-admin',
+  '/stok-gudang-admin',
   '/data-kain-admin',
 ];
 
@@ -292,6 +295,37 @@ app.use((req, res, next) => {
   return res.redirect('/?error=Unauthorized');
 });
 
+// Kategori bawaan stok gudang. Kategori ketiga sengaja tidak dibuat agar bisa
+// ditambahkan sendiri oleh user/admin sesuai kebutuhan.
+async function pastikanKategoriGudangAwal() {
+  const bawaan = [
+    {
+      nama: 'Stok/Data Sampel',
+      deskripsi: 'Data sampel produk yang tersedia untuk keperluan presentasi dan pengadaan.',
+      urutan: 1,
+    },
+    {
+      nama: 'Stok ATK',
+      deskripsi: 'Alat tulis kantor dan perlengkapan administrasi yang tersedia di gudang.',
+      urutan: 2,
+    },
+  ];
+
+  for (const kategori of bawaan) {
+    await GudangKategori.updateOne(
+      { nama: kategori.nama },
+      {
+        $setOnInsert: {
+          ...kategori,
+          sistem: true,
+          diinputOleh: 'Sistem',
+        },
+      },
+      { upsert: true },
+    );
+  }
+}
+
 mongoose
   .connect(mongoUri)
   .then(async () => {
@@ -322,6 +356,12 @@ mongoose
       }
     } catch (seedErr) {
       console.error('Error inisialisasi akun bawaan:', seedErr);
+    }
+
+    try {
+      await pastikanKategoriGudangAwal();
+    } catch (gudangErr) {
+      console.error('Error inisialisasi kategori stok gudang:', gudangErr);
     }
 
     // Kebijakan baru: saldo LPJ tidak dikurangi oleh Payment Request.
@@ -2890,6 +2930,291 @@ app.post('/lpj-user/add', isUserAuthenticated, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menyimpan LPJ baru: ' + err.message);
+  }
+});
+
+// ==========================================
+// STOK GUDANG — KATEGORI & ITEM (ADMIN / USER)
+// ==========================================
+const uploadFotoGudang = upload.array('foto', 8);
+
+function escapeRegexGudang(nilai) {
+  return String(nilai || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function pelakuGudang(req) {
+  if (req.session && req.session.isAdmin) {
+    return String(req.session.adminUser || 'Admin');
+  }
+  const u = req.session && req.session.user;
+  return String((u && (u.namaLengkap || u.username)) || 'User');
+}
+
+function idGudangValid(id) {
+  return mongoose.Types.ObjectId.isValid(String(id || ''));
+}
+
+async function dataDashboardGudang(query) {
+  const search = String((query && query.search) || '').trim();
+  const filter = search ? { nama: { $regex: escapeRegexGudang(search), $options: 'i' } } : {};
+
+  const daftarKategori = await GudangKategori.find(filter).sort({ urutan: 1, createdAt: 1 }).lean();
+  const ids = daftarKategori.map((k) => k._id);
+  const semuaItem = ids.length
+    ? await GudangItem.find({ kategoriId: { $in: ids } }).lean()
+    : [];
+
+  const ringkasan = new Map();
+  ids.forEach((id) => ringkasan.set(String(id), { jumlahItem: 0, totalStok: 0 }));
+
+  let totalStok = 0;
+  semuaItem.forEach((item) => {
+    const kunci = String(item.kategoriId);
+    const entri = ringkasan.get(kunci);
+    const jumlah = Number(item.jumlah) || 0;
+    if (entri) {
+      entri.jumlahItem += 1;
+      entri.totalStok += jumlah;
+    }
+    totalStok += jumlah;
+  });
+
+  daftarKategori.forEach((kategori) => {
+    const entri = ringkasan.get(String(kategori._id)) || { jumlahItem: 0, totalStok: 0 };
+    kategori.jumlahItem = entri.jumlahItem;
+    kategori.totalStok = entri.totalStok;
+  });
+
+  return {
+    daftarKategori,
+    search,
+    statistik: {
+      totalKategori: daftarKategori.length,
+      totalItem: semuaItem.length,
+      totalStok,
+    },
+  };
+}
+
+async function dataDetailGudang(idKategori, query) {
+  const kategori = await GudangKategori.findById(idKategori).lean();
+  if (!kategori) return null;
+
+  const semuaItem = await GudangItem.find({ kategoriId: kategori._id })
+    .sort({ createdAt: -1 })
+    .lean();
+  const search = String((query && query.search) || '').trim();
+  const regex = search ? new RegExp(escapeRegexGudang(search), 'i') : null;
+  const daftarItem = regex
+    ? semuaItem.filter((item) => regex.test(String(item.nama || '')) || regex.test(String(item.kode || '')))
+    : semuaItem;
+
+  return {
+    kategori,
+    daftarItem,
+    search,
+    statistik: {
+      totalItem: semuaItem.length,
+      totalStok: semuaItem.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0),
+      totalBergambar: semuaItem.filter((item) => Array.isArray(item.foto) && item.foto.length > 0).length,
+    },
+  };
+}
+
+async function tambahKategoriGudang(req, redirectTo) {
+  const nama = String(req.body.nama || '').trim();
+  if (!nama) return redirectTo + '?error=nama';
+
+  const deskripsi = String(req.body.deskripsi || '').trim();
+  const terakhir = await GudangKategori.findOne().sort({ urutan: -1 }).select('urutan').lean();
+  const urutan = (Number(terakhir && terakhir.urutan) || 0) + 1;
+
+  await GudangKategori.create({
+    nama,
+    deskripsi,
+    urutan,
+    sistem: false,
+    diinputOleh: pelakuGudang(req),
+  });
+
+  return redirectTo;
+}
+
+function renderDashboardGudang(res, view, req, extra) {
+  return dataDashboardGudang(req.query).then((data) =>
+    res.render(view, {
+      ...data,
+      ...extra,
+      adminUser: req.session.adminUser,
+      user: req.session.user,
+    }),
+  );
+}
+
+async function renderDetailGudang(res, view, req, idKategori, extra) {
+  const data = await dataDetailGudang(idKategori, req.query);
+  if (!data) return res.status(404).send('Kategori gudang tidak ditemukan.');
+
+  return res.render(view, {
+    ...data,
+    ...extra,
+    ditambah: req.query.ditambah === '1',
+    adminUser: req.session.adminUser,
+    user: req.session.user,
+  });
+}
+
+// Redirect pintar: admin ke versi admin, user ke versi user
+app.get('/stok-gudang', isUserAuthenticated, (req, res) => {
+  if (req.session && req.session.isAdmin) return res.redirect('/stok-gudang-admin');
+  return res.redirect('/stok-gudang-user');
+});
+
+// DASHBOARD ADMIN
+app.get('/stok-gudang-admin', isAdminAuthenticated, async (req, res) => {
+  try {
+    await renderDashboardGudang(res, 'stok-gudang-admin', req, { peran: 'admin' });
+  } catch (err) {
+    console.error('Error route /stok-gudang-admin:', err);
+    res.status(500).send('Gagal memuat stok gudang admin: ' + err.message);
+  }
+});
+
+app.post('/stok-gudang-admin/kategori/add', isAdminAuthenticated, async (req, res) => {
+  try {
+    res.redirect(await tambahKategoriGudang(req, '/stok-gudang-admin'));
+  } catch (err) {
+    console.error('Error tambah kategori gudang admin:', err);
+    res.status(500).send('Gagal menyimpan kategori: ' + err.message);
+  }
+});
+
+app.get('/stok-gudang-admin/kategori/:id', isAdminAuthenticated, async (req, res) => {
+  try {
+    if (!idGudangValid(req.params.id)) return res.status(404).send('Kategori gudang tidak ditemukan.');
+    await renderDetailGudang(res, 'stok-gudang-admin-detail', req, req.params.id, { peran: 'admin' });
+  } catch (err) {
+    console.error('Error detail kategori gudang admin:', err);
+    res.status(500).send('Gagal memuat detail kategori: ' + err.message);
+  }
+});
+
+app.post('/stok-gudang-admin/kategori/:id/item/add', isAdminAuthenticated, uploadFotoGudang, async (req, res) => {
+  try {
+    if (!idGudangValid(req.params.id)) return res.status(404).send('Kategori gudang tidak ditemukan.');
+    const kategori = await GudangKategori.findById(req.params.id);
+    if (!kategori) return res.status(404).send('Kategori gudang tidak ditemukan.');
+
+    const nama = String(req.body.nama || '').trim();
+    if (!nama) return res.redirect('/stok-gudang-admin/kategori/' + req.params.id + '?error=nama');
+
+    await syncReqFilesToGridFS(req);
+    const foto = (req.files || [])
+      .filter((file) => String(file.mimetype || '').startsWith('image/'))
+      .map((file) => '/uploads/' + file.filename);
+
+    await GudangItem.create({
+      kategoriId: kategori._id,
+      nama,
+      kode: String(req.body.kode || '').trim(),
+      jumlah: Math.max(0, Number(req.body.jumlah) || 0),
+      satuan: String(req.body.satuan || 'pcs').trim() || 'pcs',
+      lokasi: String(req.body.lokasi || '').trim(),
+      keterangan: String(req.body.keterangan || '').trim(),
+      foto,
+      diinputOleh: pelakuGudang(req),
+    });
+
+    res.redirect('/stok-gudang-admin/kategori/' + req.params.id + '?ditambah=1');
+  } catch (err) {
+    console.error('Error tambah item gudang admin:', err);
+    res.status(500).send('Gagal menyimpan item: ' + err.message);
+  }
+});
+
+app.post('/stok-gudang-admin/kategori/:id/hapus', isAdminAuthenticated, async (req, res) => {
+  try {
+    if (!idGudangValid(req.params.id)) return res.status(404).send('Kategori gudang tidak ditemukan.');
+    await GudangItem.deleteMany({ kategoriId: req.params.id });
+    await GudangKategori.findByIdAndDelete(req.params.id);
+    res.redirect('/stok-gudang-admin');
+  } catch (err) {
+    console.error('Error hapus kategori gudang admin:', err);
+    res.status(500).send('Gagal menghapus kategori: ' + err.message);
+  }
+});
+
+app.post('/stok-gudang-admin/item/:id/hapus', isAdminAuthenticated, async (req, res) => {
+  try {
+    if (!idGudangValid(req.params.id)) return res.status(404).send('Item gudang tidak ditemukan.');
+    const item = await GudangItem.findByIdAndDelete(req.params.id);
+    res.redirect(item ? '/stok-gudang-admin/kategori/' + item.kategoriId : '/stok-gudang-admin');
+  } catch (err) {
+    console.error('Error hapus item gudang admin:', err);
+    res.status(500).send('Gagal menghapus item: ' + err.message);
+  }
+});
+
+// DASHBOARD USER
+app.get('/stok-gudang-user', isUserAuthenticated, async (req, res) => {
+  try {
+    if (req.session.isAdmin) return res.redirect('/stok-gudang-admin');
+    await renderDashboardGudang(res, 'stok-gudang-user', req, { peran: 'user' });
+  } catch (err) {
+    console.error('Error route /stok-gudang-user:', err);
+    res.status(500).send('Gagal memuat stok gudang: ' + err.message);
+  }
+});
+
+app.post('/stok-gudang-user/kategori/add', isUserAuthenticated, async (req, res) => {
+  try {
+    res.redirect(await tambahKategoriGudang(req, '/stok-gudang-user'));
+  } catch (err) {
+    console.error('Error tambah kategori gudang user:', err);
+    res.status(500).send('Gagal menyimpan kategori: ' + err.message);
+  }
+});
+
+app.get('/stok-gudang-user/kategori/:id', isUserAuthenticated, async (req, res) => {
+  try {
+    if (!idGudangValid(req.params.id)) return res.status(404).send('Kategori gudang tidak ditemukan.');
+    await renderDetailGudang(res, 'stok-gudang-user-detail', req, req.params.id, { peran: 'user' });
+  } catch (err) {
+    console.error('Error detail kategori gudang user:', err);
+    res.status(500).send('Gagal memuat detail kategori: ' + err.message);
+  }
+});
+
+app.post('/stok-gudang-user/kategori/:id/item/add', isUserAuthenticated, uploadFotoGudang, async (req, res) => {
+  try {
+    if (!idGudangValid(req.params.id)) return res.status(404).send('Kategori gudang tidak ditemukan.');
+    const kategori = await GudangKategori.findById(req.params.id);
+    if (!kategori) return res.status(404).send('Kategori gudang tidak ditemukan.');
+
+    const nama = String(req.body.nama || '').trim();
+    if (!nama) return res.redirect('/stok-gudang-user/kategori/' + req.params.id + '?error=nama');
+
+    await syncReqFilesToGridFS(req);
+    const foto = (req.files || [])
+      .filter((file) => String(file.mimetype || '').startsWith('image/'))
+      .map((file) => '/uploads/' + file.filename);
+
+    await GudangItem.create({
+      kategoriId: kategori._id,
+      nama,
+      kode: String(req.body.kode || '').trim(),
+      jumlah: Math.max(0, Number(req.body.jumlah) || 0),
+      satuan: String(req.body.satuan || 'pcs').trim() || 'pcs',
+      lokasi: String(req.body.lokasi || '').trim(),
+      keterangan: String(req.body.keterangan || '').trim(),
+      foto,
+      diinputOleh: pelakuGudang(req),
+    });
+
+    res.redirect('/stok-gudang-user/kategori/' + req.params.id + '?ditambah=1');
+  } catch (err) {
+    console.error('Error tambah item gudang user:', err);
+    res.status(500).send('Gagal menyimpan item: ' + err.message);
   }
 });
 

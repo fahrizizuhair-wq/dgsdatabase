@@ -2,7 +2,7 @@
   var _active = (typeof activePage !== 'undefined' && activePage) ? activePage : '';
   var _adminName = (typeof adminUser !== 'undefined' && adminUser) ? adminUser : 'Administrator';
   var _adminInitial = String(_adminName).trim().substring(0, 2).toUpperCase() || 'AD';
-  var _stokActive = ['stok-masuk', 'stok-keluar', 'stok-opname'].indexOf(_active) !== -1;
+  var _stokActive = ['stok-masuk', 'stok-keluar', 'stok-opname', 'stok-gudang'].indexOf(_active) !== -1;
   var _laporanActive = ['laporan', 'surat-jalan', 'lpj'].indexOf(_active) !== -1;
 %>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -149,6 +149,17 @@
                 <path d="m16 17 2 2 4-4"/><path d="M21 11.127V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.729l7 4a2 2 0 0 0 2 .001l1.32-.753"/>
                 <path d="M3.29 7 12 12l8.71-5"/><path d="m7.5 4.27 8.997 5.148"/></svg>
                 <span>Stok Opname</span>
+              </a>
+            </li>
+            <li>
+              <a href="/stok-gudang-admin">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-warehouse preview-icon">
+                  <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.5a2 2 0 0 1 1.48 0l8 3.5A2 2 0 0 1 22 8.35Z"></path>
+                  <path d="M6 18h12"></path><path d="M6 14h12"></path><path d="M6 10h12"></path>
+                </svg>
+                <span>Stok Gudang</span>
               </a>
             </li>
         </ul>

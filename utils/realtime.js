@@ -45,6 +45,9 @@ function entityForPath(rawPath) {
   if (pathStarts(path, ['/stok-opname', '/stok-opname-user'])) {
     return 'stok-opname';
   }
+  if (pathStarts(path, ['/stok-gudang', '/stok-gudang-admin', '/stok-gudang-user'])) {
+    return 'stok-gudang';
+  }
   if (pathStarts(path, ['/laporan', '/laporan-user', '/guest/laporan'])) {
     return 'laporan';
   }

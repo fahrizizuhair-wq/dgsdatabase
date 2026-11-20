@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <%- include('head', { pageTitle: 'Stok Gudang — PT. DIAN GIRI SAPUTRA' }) %>
+    <link rel="stylesheet" href="/css/stat-cards.css" />
+    <link rel="stylesheet" href="/css/sidebar.css" />
+    <link rel="stylesheet" href="/css/stok-gudang.css" />
+  </head>
+  <body>
+    <% if (peran === 'admin') { %>
+      <%- include('sidebar-admin', { activePage: 'stok-gudang', adminUser: adminUser }) %>
+    <% } else { %>
+      <%- include('sidebar-user', { activePage: 'stok-gudang', user: user }) %>
+    <% } %>
+
+    <main class="main-content">
+      <header class="system-banner">
+        <div class="banner-title-wrap">
+          <button class="banner-toggle-btn" onclick="toggleSidebar()" title="Buka Menu" aria-label="Buka menu navigasi">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="banner-text">
+            <span>System Stok Gudang Terpusat — <%= peran === 'admin' ? 'Admin' : 'User' %></span>
+            <h1>Dashboard Kategori Gudang</h1>
+          </div>
+        </div>
+        <button class="btn-buat-kategori" onclick="openModal()">+ Tambah Kategori</button>
+      </header>
+
+      <section class="card-grid">
+        <div class="stat-card card-blue">
+          <div class="card-header">
+            <span class="card-title">Total Kategori Gudang</span>
+            <div class="icon-wrapper icon-blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+              </svg>
+            </div>
+          </div>
+          <div class="card-body">
+            <span class="card-value"><%= statistik.totalKategori %></span>
+            <span class="card-unit">Kategori</span>
+          </div>
+          <div class="card-footer">
+            <span class="text-blue">Termasuk kategori bawaan</span>
+            <span>Terdaftar</span>
+          </div>
+        </div>
+
+        <div class="stat-card card-red">
+          <div class="card-header">
+            <span class="card-title">Total Item Stok</span>
+            <div class="icon-wrapper icon-red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="card-body">
+            <span class="card-value"><%= statistik.totalItem %></span>
+            <span class="card-unit">Item</span>
+          </div>
+          <div class="card-footer">
+            <span class="text-red">Di seluruh kategori</span>
+            <span>Tercatat</span>
+          </div>
+        </div>
+
+        <div class="stat-card card-green">
+          <div class="card-header">
+            <span class="card-title">Total Stok Tersedia</span>
+            <div class="icon-wrapper icon-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"></path>
+                <path d="m19 9-5 5-4-4-3 3"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="card-body">
+            <span class="card-value"><%= statistik.totalStok.toLocaleString('id-ID') %></span>
+            <span class="card-unit">Unit</span>
+          </div>
+          <div class="card-footer">
+            <span class="text-green">Akumulasi jumlah item</span>
+            <span>Siap pakai</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="panel-putih">
+        <div class="filter-search-toolbar">
+          <form action="<%= baseUrl %>" method="GET" style="display: flex; width: 100%; gap: 15px; flex-wrap: wrap; align-items: center;">
+            <div class="search-box-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" name="search" value="<%= search %>" placeholder="Cari kategori gudang...">
+            </div>
+          </form>
+        </div>
+
+        <div class="grid-kategori">
+          <% if (!daftarKategori || daftarKategori.length === 0) { %>
+            <div class="kosong">
+              <i class="fa-regular fa-folder-open"></i>
+              <strong>Belum ada kategori gudang.</strong>
+              <p>Klik <b>+ Tambah Kategori</b> untuk membuat kategori baru.</p>
+            </div>
+          <% } else { %>
+            <% daftarKategori.forEach(function (kategori) { %>
+              <article class="kategori-card">
+                <div class="kategori-card-top">
+                  <div class="kategori-meta">
+                    <span class="badge-kategori">Kategori <%= kategori.urutan || '-' %></span>
+                    <div class="kategori-ikon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                      </svg>
+                    </div>
+                  </div>
+                  <h3><%= kategori.nama %></h3>
+                  <p class="kategori-deskripsi"><%= kategori.deskripsi || 'Belum ada deskripsi kategori.' %></p>
+                  <div class="kategori-angka">
+                    <div>
+                      <span>Jumlah Item</span>
+                      <strong><%= kategori.jumlahItem || 0 %></strong>
+                    </div>
+                    <div>
+                      <span>Total Stok</span>
+                      <strong><%= (kategori.totalStok || 0).toLocaleString('id-ID') %></strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="kategori-card-footer">
+                  <a href="<%= baseUrl %>/kategori/<%= kategori._id %>" class="btn-lihat">
+                    Lihat Kategori
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </a>
+                  <% if (peran === 'admin') { %>
+                    <form action="<%= baseUrl %>/kategori/<%= kategori._id %>/hapus" method="POST" onsubmit="return confirm('Hapus kategori &quot;<%= kategori.nama %>&quot; beserta seluruh item di dalamnya?');" style="margin: 0;">
+                      <button type="submit" class="btn-hapus-kecil" title="Hapus kategori">✕</button>
+                    </form>
+                  <% } %>
+                </div>
+              </article>
+            <% }); %>
+          <% } %>
+        </div>
+      </div>
+    </main>
+
+    <div class="modal" id="kategoriModal">
+      <div class="modal-content">
+        <h3>Tambah Kategori Gudang</h3>
+        <form action="<%= baseUrl %>/kategori/add" method="POST">
+          <div class="form-group">
+            <label>Nama Kategori</label>
+            <input type="text" name="nama" placeholder="Contoh: Stok Alat Kerja" required maxlength="120" />
+          </div>
+          <div class="form-group">
+            <label>Deskripsi (Opsional)</label>
+            <textarea name="deskripsi" rows="3" placeholder="Catatan singkat tentang kategori ini..."></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-abu" onclick="closeModal()">Batal</button>
+            <button type="submit" class="btn-merah">Simpan Kategori</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      function openModal() {
+        document.getElementById('kategoriModal').style.display = 'flex';
+      }
+
+      function closeModal() {
+        document.getElementById('kategoriModal').style.display = 'none';
+      }
+
+      function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+      }
+
+      function toggleDropdown(element) {
+        const parentLi = element.parentElement;
+        parentLi.classList.toggle('active');
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('tambah') === 'kategori') openModal();
+      });
+    </script>
+  </body>
+</html>
