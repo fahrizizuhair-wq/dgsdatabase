@@ -389,6 +389,54 @@
       function closeModal() {
         document.getElementById('photoModal').style.display = 'none';
       }
+
+      // Filter real-time saat mengetik di searchbox (tanpa perlu tekan Enter)
+      document.addEventListener('DOMContentLoaded', function () {
+        const searchForm = document.querySelector('.filter-search-toolbar form');
+        const searchInput = document.querySelector('.filter-search-toolbar input[name="search"]');
+        const cards = Array.from(document.querySelectorAll('.daftar-detail-item .item-detail-card'));
+
+        function filterItemStok() {
+          if (!searchInput || cards.length === 0) return;
+          const keyword = (searchInput.value || '').trim().toLowerCase();
+
+          let jumlahCocok = 0;
+          cards.forEach(function (card) {
+            const teksCard = (card.textContent || '').toLowerCase();
+            const cocok = !keyword || teksCard.includes(keyword);
+            card.style.display = cocok ? '' : 'none';
+            if (cocok) jumlahCocok++;
+          });
+
+          let infoKosong = document.getElementById('hasilFilterKosong');
+          if (!infoKosong && cards[0] && cards[0].parentElement) {
+            infoKosong = document.createElement('div');
+            infoKosong.id = 'hasilFilterKosong';
+            infoKosong.className = 'kosong detail-kosong';
+            infoKosong.style.display = 'none';
+            infoKosong.innerHTML = 'Tidak ada item yang cocok dengan pencarian tersebut.';
+            cards[0].parentElement.after(infoKosong);
+          }
+
+          if (infoKosong) {
+            infoKosong.style.display = jumlahCocok === 0 ? 'block' : 'none';
+          }
+        }
+
+        if (searchForm) {
+          searchForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            filterItemStok();
+          });
+        }
+
+        if (searchInput) {
+          searchInput.addEventListener('input', filterItemStok);
+          if (searchInput.value.trim()) {
+            filterItemStok();
+          }
+        }
+      });
     </script>
   </body>
 </html>
