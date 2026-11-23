@@ -52,7 +52,15 @@
         font-size: 12.5px;
       }
 
-      /* Form & daftar rincian barang di dalam item */
+      .item-barang-ul {
+        margin: 4px 0 0;
+        padding-left: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      /* Form & daftar rincian barang tambahan di dalam item */
       .isi-barang-box {
         margin-top: 12px;
         padding-top: 12px;
@@ -245,6 +253,9 @@
             <% daftarItem.forEach(function (item) { %>
               <% const daftarFoto = Array.isArray(item.foto) ? item.foto.filter(Boolean) : (item.foto ? [item.foto] : []); %>
               <% const namaTampil = item.namaDaftarBarang || item.nama || '-'; %>
+              <% const listItemBarang = Array.isArray(item.itemBarang)
+                ? item.itemBarang.map(function (b) { return typeof b === 'string' ? b.trim() : (b && b.namaBarang ? String(b.namaBarang).trim() : ''); }).filter(Boolean)
+                : (typeof item.itemBarang === 'string' ? item.itemBarang.split(/\r?\n|,/).map(function (b) { return b.trim(); }).filter(Boolean) : []); %>
 
               <section class="item-detail-card" id="item-<%= item._id %>">
                 <div class="item-detail-head">
@@ -258,34 +269,34 @@
 
                   <% if (peran === 'admin') { %>
                     <form
-                        action="<%= baseUrl %>/item/<%= item._id %>/hapus"
-                        method="POST"
-                        onsubmit='return confirm("Hapus item " + <%- JSON.stringify(namaTampil) %> + "?");'
-                        style="margin:0;"
+                      action="<%= baseUrl %>/item/<%= item._id %>/hapus"
+                      method="POST"
+                      onsubmit='return confirm("Hapus item " + <%- JSON.stringify(namaTampil) %> + "?");'
+                      style="margin:0;"
                     >
-                        <button type="submit" class="btn-hapus-item" title="Hapus item">Hapus Item</button>
+                      <button type="submit" class="btn-hapus-item" title="Hapus item">Hapus Item</button>
                     </form>
-                    <% } %>
-                    </div>
+                  <% } %>
+                </div>
 
-                    <div
-                    class="item-gallery-wrap"
-                    data-fotos='<%- JSON.stringify(daftarFoto).replace(/'/g, "'") %>'
-                    data-nama="<%= namaTampil %>"
-                    >
-                    <% if (daftarFoto.length > 0) { %>
-                        <div class="slider-container">
-                        <% daftarFoto.forEach(function (foto, indexFoto) { %>
-                            <div class="slide <%= indexFoto === 0 ? 'active' : '' %>">
-                            <img
-                                src="<%= foto %>"
-                                alt="Foto <%= namaTampil %>"
-                                data-index="<%= indexFoto %>"
-                                title="Klik untuk memperbesar"
-                                onclick="bukaFotoDariSlider(this)"
-                            />
-                            </div>
-                        <% }); %>
+                <div
+                  class="item-gallery-wrap"
+                  data-fotos='<%- JSON.stringify(daftarFoto).replace(/'/g, "'") %>'
+                  data-nama="<%= namaTampil %>"
+                >
+                  <% if (daftarFoto.length > 0) { %>
+                    <div class="slider-container">
+                      <% daftarFoto.forEach(function (foto, indexFoto) { %>
+                        <div class="slide <%= indexFoto === 0 ? 'active' : '' %>">
+                          <img
+                            src="<%= foto %>"
+                            alt="Foto <%= namaTampil %>"
+                            data-index="<%= indexFoto %>"
+                            title="Klik untuk memperbesar"
+                            onclick="bukaFotoDariSlider(this)"
+                          />
+                        </div>
+                      <% }); %>
 
                       <% if (daftarFoto.length > 1) { %>
                         <button type="button" class="slider-btn prev-btn" onclick="geserSlide(this, -1)" aria-label="Foto sebelumnya">❮</button>
@@ -329,13 +340,59 @@
                     <div class="detail-value"><%= kategori.nama %></div>
                   </div>
                   <div class="detail-group full-width">
-                    <div class="detail-label">List item barang</div>
-                    <div class="detail-value detail-catatan"><%= item.keterangan || 'Tidak ada keterangan.' %></div>
+                    <div class="detail-label">Item Barang</div>
+                    <div class="detail-value">
+                      <% if (listItemBarang.length > 0) { %>
+                        <ul class="item-barang-ul">
+                          <% listItemBarang.forEach(function (brg) { %>
+                            <li><%= brg %></li>
+                          <% }); %>
+                        </ul>
+                      <% } else { %>
+                        -
+                      <% } %>
+                    </div>
+                  </div>
+                  <div class="detail-group full-width">
+                    <div class="detail-label">Keterangan</div>
+                    <div class="detail-value detail-catatan"><%= item.keterangan && item.keterangan.trim() ? item.keterangan : 'Tidak ada keterangan.' %></div>
                   </div>
                   <div class="detail-group full-width">
                     <div class="detail-label">Diinput Oleh</div>
                     <div class="detail-value"><%= item.diinputOleh || '-' %></div>
                   </div>
+                </div>
+
+                <div class="isi-barang-box">
+                  <div class="isi-barang-title">Barang di Dalam Item Ini</div>
+
+                  <form action="<%= baseUrl %>/item/<%= item._id %>/isi-barang" method="POST" class="isi-barang-form">
+                    <input type="text" name="namaBarang" placeholder="Nama barang di dalam..." required />
+                    <input type="number" name="jumlah" value="1" min="1" placeholder="Jml" required />
+                    <input type="text" name="satuan" value="pcs" placeholder="Satuan" />
+                    <button type="submit" class="btn-tambah-isi">+ Catat</button>
+                  </form>
+
+                  <% const daftarIsi = Array.isArray(item.isiBarang) ? item.isiBarang : []; %>
+                  <% if (daftarIsi.length > 0) { %>
+                    <ul class="isi-barang-list">
+                      <% daftarIsi.forEach(function (brg) { %>
+                        <li class="isi-barang-item">
+                          <span>
+                            <strong><%= brg.namaBarang %></strong>
+                            <% if (brg.kodeBarang) { %>
+                              <small style="color:#64748b;">(<%= brg.kodeBarang %>)</small>
+                            <% } %>
+                          </span>
+                          <span style="font-weight:700; color:#334155;">
+                            <%= brg.jumlah || 1 %> <%= brg.satuan || 'pcs' %>
+                          </span>
+                        </li>
+                      <% }); %>
+                    </ul>
+                  <% } else { %>
+                    <div style="font-size: 11.5px; color: #94a3b8;">Belum ada rincian barang di dalam item ini.</div>
+                  <% } %>
                 </div>
               </section>
             <% }); %>
@@ -370,8 +427,14 @@
               <input type="text" name="lokasi" placeholder="Contoh: Rak A-2" maxlength="120" />
             </div>
             <div class="form-group full-width">
-              <label>Item barang</label>
-              <textarea name="Masukan item barang..." rows="2" placeholder="Catatan tambahan tentang barang..."></textarea>
+              <label>Item Barang (pisahkan per baris atau koma)</label>
+              <textarea name="itemBarang" rows="3" placeholder="Contoh:
+Polo Shirt Size M (2 pcs)
+Polo Shirt Size L (3 pcs)"></textarea>
+            </div>
+            <div class="form-group full-width">
+              <label>Keterangan (Opsional)</label>
+              <textarea name="keterangan" rows="2" placeholder="Catatan tambahan tentang barang..."></textarea>
             </div>
             <div class="form-group full-width">
               <label>Foto Barang / Produk (boleh lebih dari satu)</label>
