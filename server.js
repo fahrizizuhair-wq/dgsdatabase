@@ -2981,7 +2981,7 @@ app.post('/lpj-user/add', isUserAuthenticated, async (req, res) => {
 // ==========================================
 // STOK GUDANG — KATEGORI & ITEM (ADMIN / USER)
 // ==========================================
-const uploadFotoGudang = upload.array('foto', 8);
+const uploadFotoGudang = upload.array('foto');
 
 function escapeRegexGudang(nilai) {
   return String(nilai || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
