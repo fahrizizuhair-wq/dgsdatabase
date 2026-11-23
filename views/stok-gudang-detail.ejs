@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <%- include('partials/head', { pageTitle: 'Stok ' + kategori.nama + ' — PT. DIAN GIRI SAPUTRA' }) %>
+    <link rel="stylesheet" href="/css/stat-cards.css" />
+    <link rel="stylesheet" href="/css/sidebar.css" />
+    <link rel="stylesheet" href="/css/stok-gudang.css" />
+  </head>
+  <body data-halaman-detail="stok-gudang">
+    <% if (peran === 'admin') { %>
+      <%- include('partials/sidebar-admin', { activePage: 'stok-gudang', adminUser: adminUser }) %>
+    <% } else { %>
+      <%- include('partials/sidebar-user', { activePage: 'stok-gudang', user: user }) %>
+    <% } %>
+
+    <main class="main-content">
+      <header class="system-banner">
+        <div class="banner-title-wrap">
+          <button class="banner-toggle-btn" onclick="toggleSidebar()" title="Buka Menu" aria-label="Buka menu navigasi">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="banner-text">
+            <span>System Stok Gudang — <%= peran === 'admin' ? 'Admin' : 'User' %></span>
+            <h1>Stok / <%= kategori.nama %></h1>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <a href="<%= baseUrl %>" class="btn-abu">Kembali ke Kategori</a>
+          <button class="btn-tambah-item" onclick="openModal()">+ Tambah Item</button>
+        </div>
+      </header>
+
+      <% if (ditambah) { %>
+        <div class="pemberitahuan">Item berhasil ditambahkan ke kategori <b><%= kategori.nama %></b>.</div>
+      <% } %>
+
+      <section class="card-grid">
+        <div class="stat-card card-blue">
+          <div class="card-header">
+            <span class="card-title">Total Item</span>
+            <div class="icon-wrapper icon-blue">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-package preview-icon"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/>
+              <path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>
+            </div>
+          </div>
+          <div class="card-body">
+            <span class="card-value"><%= statistik.totalItem %></span>
+            <span class="card-unit">Item</span>
+          </div>
+          <div class="card-footer"><span class="text-blue">Di kategori ini</span><span>Tercatat</span></div>
+        </div>
+
+        <div class="stat-card card-green">
+          <div class="card-header">
+            <span class="card-title">Total Qty</span>
+            <div class="icon-wrapper icon-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="card-body">
+            <span class="card-value"><%= statistik.totalStok.toLocaleString('id-ID') %></span>
+            <span class="card-unit">Unit</span>
+          </div>
+          <div class="card-footer"><span class="text-green">Akumulasi jumlah</span><span>Tersedia</span></div>
+        </div>
+
+        <div class="stat-card card-gold">
+          <div class="card-header">
+            <span class="card-title">Item Bergambar</span>
+            <div class="icon-wrapper icon-gold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="card-body">
+            <span class="card-value"><%= statistik.totalBergambar %></span>
+            <span class="card-unit">Item</span>
+          </div>
+          <div class="card-footer"><span style="color:#b07a21;font-weight:600">Memiliki foto</span><span>Dokumentasi</span></div>
+        </div>
+      </section>
+
+      <div class="panel-putih">
+        <div class="header-kategori">
+          <div class="kategori-ikon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-package preview-icon"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/>
+            <polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>
+          </div>
+          <div>
+            <h2><%= kategori.nama %></h2>
+            <p><%= kategori.deskripsi || 'Daftar seluruh item yang tersedia pada kategori ini.' %></p>
+          </div>
+        </div>
+
+        <div class="filter-search-toolbar">
+          <form action="<%= baseUrl %>/kategori/<%= kategori._id %>" method="GET" style="display: flex; width: 100%; gap: 15px; flex-wrap: wrap; align-items: center;">
+            <div class="search-box-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" name="search" value="<%= search %>" placeholder="Cari nama/daftar barang atau kode item...">
+            </div>
+          </form>
+        </div>
+
+        <% if (!daftarItem || daftarItem.length === 0) { %>
+          <div class="kosong detail-kosong">
+            <i class="fa-regular fa-image"></i>
+            Belum ada item pada kategori ini. Klik <b>+ Tambah Item</b> untuk menambah stok.
+          </div>
+        <% } else { %>
+          <div class="daftar-detail-item">
+            <% daftarItem.forEach(function (item) { %>
+              <% const daftarFoto = Array.isArray(item.foto) ? item.foto.filter(Boolean) : (item.foto ? [item.foto] : []); %>
+              <% const namaTampil = item.namaDaftarBarang || item.nama || '-'; %>
+
+              <section class="item-detail-card" id="item-<%= item._id %>">
+                <div class="item-detail-head">
+                  <div class="item-detail-judul">
+                    <span class="badge-kategori"><%= kategori.nama %></span>
+                    <h2>Detail Barang: <%= namaTampil %></h2>
+                    <% if (item.kode) { %>
+                      <p class="item-detail-kode">Kode item: <%= item.kode %></p>
+                    <% } %>
+                  </div>
+
+                  <% if (peran === 'admin') { %>
+                    <form action="<%= baseUrl %>/item/<%= item._id %>/hapus" method="POST"
+                      onsubmit="return confirm('Hapus item &quot;<%= namaTampil %>&quot;?');" style="margin:0;">
+                      <button type="submit" class="btn-hapus-item" title="Hapus item">Hapus Item</button>
+                    </form>
+                  <% } %>
+                </div>
+
+                <div class="item-gallery-wrap"
+                  data-fotos="<%= JSON.stringify(daftarFoto) %>"
+                  data-nama="<%= namaTampil %>">
+                  <% if (daftarFoto.length > 0) { %>
+                    <div class="slider-container">
+                      <% daftarFoto.forEach(function (foto, indexFoto) { %>
+                        <div class="slide <%= indexFoto === 0 ? 'active' : '' %>">
+                          <img
+                            src="<%= foto %>"
+                            alt="Foto <%= namaTampil %>"
+                            data-index="<%= indexFoto %>"
+                            title="Klik untuk memperbesar"
+                            onclick="bukaFotoDariSlider(this)"
+                          />
+                        </div>
+                      <% }); %>
+
+                      <% if (daftarFoto.length > 1) { %>
+                        <button type="button" class="slider-btn prev-btn" onclick="geserSlide(this, -1)" aria-label="Foto sebelumnya">&#10094;</button>
+                        <button type="button" class="slider-btn next-btn" onclick="geserSlide(this, 1)" aria-label="Foto berikutnya">&#10095;</button>
+                      <% } %>
+                    </div>
+                    <div class="slider-counter">
+                      <span class="slide-now">1</span> / <%= daftarFoto.length %> foto
+                      <span class="slider-hint">(Klik foto untuk memperbesar)</span>
+                    </div>
+                  <% } else { %>
+                    <div class="foto-empty">Belum ada foto dokumentasi untuk barang ini.</div>
+                  <% } %>
+                </div>
+
+                <div class="details-grid">
+                  <div class="detail-group">
+                    <div class="detail-label">Nama / Daftar Barang</div>
+                    <div class="detail-value detail-value-utama"><%= namaTampil %></div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-label">Kode Item</div>
+                    <div class="detail-value"><%= item.kode || '-' %></div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-label">Jumlah Stok</div>
+                    <div class="detail-value">
+                      <span class="badge-stok"><%= Number(item.jumlah) || 0 %> <%= item.satuan || 'pcs' %></span>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-label">Satuan</div>
+                    <div class="detail-value"><%= item.satuan || 'pcs' %></div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-label">Lokasi / Rak</div>
+                    <div class="detail-value"><%= item.lokasi || '-' %></div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-label">Kategori Stok</div>
+                    <div class="detail-value"><%= kategori.nama %></div>
+                  </div>
+                  <div class="detail-group full-width">
+                    <div class="detail-label">Keterangan</div>
+                    <div class="detail-value detail-catatan"><%= item.keterangan || 'Tidak ada keterangan.' %></div>
+                  </div>
+                  <div class="detail-group full-width">
+                    <div class="detail-label">Diinput Oleh</div>
+                    <div class="detail-value"><%= item.diinputOleh || '-' %></div>
+                  </div>
+                </div>
+              </section>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+    </main>
+
+    <div class="modal" id="itemModal">
+      <div class="modal-content">
+        <h3>Tambah Item — <%= kategori.nama %></h3>
+        <form action="<%= baseUrl %>/kategori/<%= kategori._id %>/item/add" method="POST" enctype="multipart/form-data">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label>Nama / Daftar Barang</label>
+              <input type="text" name="namaDaftarBarang" placeholder="Contoh: Kaos Polos Hitam / Seragam Sales Force" required maxlength="160" />
+            </div>
+            <div class="form-group">
+              <label>Kode Item (Opsional)</label>
+              <input type="text" name="kode" placeholder="Contoh: SM-001" maxlength="80" />
+            </div>
+            <div class="form-group">
+              <label>Jumlah Stok</label>
+              <input type="number" name="jumlah" value="0" min="0" step="1" required />
+            </div>
+            <div class="form-group">
+              <label>Satuan</label>
+              <input type="text" name="satuan" value="pcs" placeholder="pcs, box, set..." maxlength="40" />
+            </div>
+            <div class="form-group">
+              <label>Lokasi / Rak (Opsional)</label>
+              <input type="text" name="lokasi" placeholder="Contoh: Rak A-2" maxlength="120" />
+            </div>
+            <div class="form-group full-width">
+              <label>Keterangan (Opsional)</label>
+              <textarea name="keterangan" rows="2" placeholder="Catatan tambahan tentang barang..."></textarea>
+            </div>
+            <div class="form-group full-width">
+              <label>Foto Barang / Produk (boleh lebih dari satu)</label>
+              <input type="file" id="inputFotoItem" name="foto" accept="image/*" multiple />
+              <div class="preview-foto" id="previewFoto"></div>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-abu" onclick="closeModal()">Batal</button>
+            <button type="submit" class="btn-merah">Simpan Item</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="img-modal" id="imgModal" onclick="tutupFoto()">
+      <button type="button" class="img-modal-close" onclick="event.stopPropagation(); tutupFoto()" aria-label="Tutup foto">&times;</button>
+      <img id="imgModalContent" src="" alt="Pratinjau foto barang" onclick="event.stopPropagation()" />
+    </div>
+
+    <script>
+      let daftarFotoAktif = [];
+      let indeksFotoAktif = 0;
+      let namaItemFotoAktif = '';
+
+      function openModal() {
+        document.getElementById('itemModal').style.display = 'flex';
+      }
+
+      function closeModal() {
+        document.getElementById('itemModal').style.display = 'none';
+        document.getElementById('previewFoto').innerHTML = '';
+        const input = document.getElementById('inputFotoItem');
+        if (input) input.value = '';
+      }
+
+      function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+      }
+
+      function toggleDropdown(element) {
+        const parentLi = element.parentElement;
+        parentLi.classList.toggle('active');
+      }
+
+      function geserSlide(tombol, arah) {
+        const slider = tombol.closest('.slider-container');
+        if (!slider) return;
+
+        const slides = Array.from(slider.querySelectorAll('.slide'));
+        if (slides.length === 0) return;
+
+        let aktif = slides.findIndex(function (slide) {
+          return slide.classList.contains('active');
+        });
+        if (aktif < 0) aktif = 0;
+
+        const berikut = ((aktif + arah) % slides.length + slides.length) % slides.length;
+        slides.forEach(function (slide, index) {
+          slide.classList.toggle('active', index === berikut);
+        });
+
+        const counter = slider.parentElement.querySelector('.slide-now');
+        if (counter) counter.textContent = String(berikut + 1);
+      }
+
+      function bukaFotoDariSlider(gambar) {
+        const wrap = gambar.closest('.item-gallery-wrap');
+        if (!wrap) return;
+
+        let fotos = [];
+        try {
+          fotos = JSON.parse(wrap.dataset.fotos || '[]');
+        } catch (e) {
+          fotos = [];
+        }
+
+        bukaFoto(fotos, wrap.dataset.nama || '', Number(gambar.dataset.index || 0));
+      }
+
+      function renderSlideFoto(index) {
+        if (!Array.isArray(daftarFotoAktif) || daftarFotoAktif.length === 0) return;
+
+        const total = daftarFotoAktif.length;
+        indeksFotoAktif = ((index % total) + total) % total;
+        const urlAktif = daftarFotoAktif[indeksFotoAktif];
+
+        const mainImg = document.getElementById('imgModalContent');
+        if (mainImg) {
+          mainImg.src = urlAktif;
+          mainImg.alt = (namaItemFotoAktif ? namaItemFotoAktif + ' - ' : '') + 'Foto ' + (indeksFotoAktif + 1);
+        }
+
+        const counter = document.getElementById('imgModalCounter');
+        if (counter) {
+          counter.textContent = (indeksFotoAktif + 1) + ' / ' + total;
+        }
+
+        const thumbs = document.querySelectorAll('#imgModalGallery img');
+        thumbs.forEach(function (thumb, idx) {
+          const aktif = idx === indeksFotoAktif;
+          thumb.style.borderColor = aktif ? '#7a1b1b' : '#cbd5e1';
+          thumb.style.opacity = aktif ? '1' : '0.72';
+          thumb.style.transform = aktif ? 'scale(1.05)' : 'scale(1)';
+        });
+
+        const btnPrev = document.getElementById('imgModalPrev');
+        const btnNext = document.getElementById('imgModalNext');
+        const tampilPanah = total > 1;
+        if (btnPrev) btnPrev.style.display = tampilPanah ? 'flex' : 'none';
+        if (btnNext) btnNext.style.display = tampilPanah ? 'flex' : 'none';
+      }
+
+      function geserFoto(arah) {
+        if (!Array.isArray(daftarFotoAktif) || daftarFotoAktif.length <= 1) return;
+        renderSlideFoto(indeksFotoAktif + arah);
+      }
+
+      function pastikanKontrolGaleriAda(modal, mainImg) {
+        modal.classList.add('foto-galeri-aktif');
+
+        let navRow = document.getElementById('imgModalNavRow');
+        let gallery = document.getElementById('imgModalGallery');
+        let counter = document.getElementById('imgModalCounter');
+        let btnPrev = document.getElementById('imgModalPrev');
+        let btnNext = document.getElementById('imgModalNext');
+
+        if (!navRow) {
+          const wrap = document.createElement('div');
+          wrap.className = 'foto-modal-controls';
+          wrap.id = 'imgModalControlsWrap';
+
+          navRow = document.createElement('div');
+          navRow.id = 'imgModalNavRow';
+          navRow.className = 'foto-modal-nav';
+
+          btnPrev = document.createElement('button');
+          btnPrev.type = 'button';
+          btnPrev.id = 'imgModalPrev';
+          btnPrev.className = 'foto-modal-nav-btn';
+          btnPrev.innerHTML = '❮';
+          btnPrev.setAttribute('aria-label', 'Foto sebelumnya');
+          btnPrev.addEventListener('click', function (e) {
+            e.stopPropagation();
+            geserFoto(-1);
+          });
+
+          counter = document.createElement('div');
+          counter.id = 'imgModalCounter';
+          counter.className = 'foto-modal-counter';
+
+          btnNext = document.createElement('button');
+          btnNext.type = 'button';
+          btnNext.id = 'imgModalNext';
+          btnNext.className = 'foto-modal-nav-btn';
+          btnNext.innerHTML = '❯';
+          btnNext.setAttribute('aria-label', 'Foto berikutnya');
+          btnNext.addEventListener('click', function (e) {
+            e.stopPropagation();
+            geserFoto(1);
+          });
+
+          navRow.appendChild(btnPrev);
+          navRow.appendChild(counter);
+          navRow.appendChild(btnNext);
+
+          gallery = document.createElement('div');
+          gallery.id = 'imgModalGallery';
+          gallery.className = 'foto-modal-gallery';
+
+          wrap.appendChild(navRow);
+          wrap.appendChild(gallery);
+
+          if (mainImg && mainImg.parentElement) {
+            mainImg.parentElement.appendChild(wrap);
+          } else {
+            modal.appendChild(wrap);
+          }
+        }
+
+        return { gallery, counter };
+      }
+
+      function bukaFoto(fotos, namaItem, indexAwal) {
+        const list = Array.isArray(fotos)
+          ? fotos.filter(Boolean)
+          : (fotos ? [fotos] : []);
+
+        if (list.length === 0) return;
+
+        const modal = document.getElementById('imgModal');
+        const mainImg = document.getElementById('imgModalContent');
+        if (!modal || !mainImg) return;
+
+        daftarFotoAktif = list;
+        namaItemFotoAktif = namaItem || '';
+
+        const { gallery } = pastikanKontrolGaleriAda(modal, mainImg);
+        gallery.innerHTML = '';
+
+        list.forEach(function (url, idx) {
+          const thumb = document.createElement('img');
+          thumb.src = url;
+          thumb.alt = 'Thumbnail ' + (idx + 1);
+          thumb.addEventListener('click', function (e) {
+            e.stopPropagation();
+            renderSlideFoto(idx);
+          });
+          gallery.appendChild(thumb);
+        });
+
+        renderSlideFoto(Number(indexAwal) || 0);
+        modal.style.display = 'flex';
+      }
+
+      function tutupFoto() {
+        document.getElementById('imgModal').style.display = 'none';
+        document.getElementById('imgModalContent').src = '';
+        daftarFotoAktif = [];
+        indeksFotoAktif = 0;
+        const gallery = document.getElementById('imgModalGallery');
+        if (gallery) gallery.innerHTML = '';
+        const counter = document.getElementById('imgModalCounter');
+        if (counter) counter.textContent = '';
+      }
+
+      document.addEventListener('keydown', function (e) {
+        const modal = document.getElementById('imgModal');
+        if (!modal || modal.style.display === 'none' || !modal.style.display) return;
+        if (e.key === 'ArrowLeft') {
+          geserFoto(-1);
+        } else if (e.key === 'ArrowRight') {
+          geserFoto(1);
+        } else if (e.key === 'Escape') {
+          tutupFoto();
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const inputFoto = document.getElementById('inputFotoItem');
+        const preview = document.getElementById('previewFoto');
+
+        if (inputFoto) {
+          inputFoto.addEventListener('change', function () {
+            preview.innerHTML = '';
+            Array.from(inputFoto.files || []).forEach(function (file) {
+              if (!file.type || file.type.indexOf('image/') !== 0) return;
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = file.name;
+                preview.appendChild(img);
+              };
+              reader.readAsDataURL(file);
+            });
+          });
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('tambah') === 'item') openModal();
+      });
+    </script>
+  </body>
+</html>

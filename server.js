@@ -2954,6 +2954,10 @@ function idGudangValid(id) {
   return mongoose.Types.ObjectId.isValid(String(id || ''));
 }
 
+function namaItemGudang(body) {
+  return String((body && (body.namaDaftarBarang || body.nama)) || '').trim();
+}
+
 async function dataDashboardGudang(query) {
   const search = String((query && query.search) || '').trim();
   const filter = search ? { nama: { $regex: escapeRegexGudang(search), $options: 'i' } } : {};
@@ -3006,7 +3010,12 @@ async function dataDetailGudang(idKategori, query) {
   const search = String((query && query.search) || '').trim();
   const regex = search ? new RegExp(escapeRegexGudang(search), 'i') : null;
   const daftarItem = regex
-    ? semuaItem.filter((item) => regex.test(String(item.nama || '')) || regex.test(String(item.kode || '')))
+    ? semuaItem.filter(
+        (item) =>
+          regex.test(String(item.nama || '')) ||
+          regex.test(String(item.namaDaftarBarang || '')) ||
+          regex.test(String(item.kode || '')),
+      )
     : semuaItem;
 
   return {
@@ -3055,9 +3064,14 @@ async function renderDetailGudang(res, view, req, idKategori, extra) {
   const data = await dataDetailGudang(idKategori, req.query);
   if (!data) return res.status(404).send('Kategori gudang tidak ditemukan.');
 
+  const peran = extra && extra.peran === 'admin' ? 'admin' : 'user';
+  const baseUrl = (extra && extra.baseUrl) || (peran === 'admin' ? '/stok-gudang-admin' : '/stok-gudang-user');
+
   return res.render(view, {
     ...data,
     ...extra,
+    peran,
+    baseUrl,
     ditambah: req.query.ditambah === '1',
     adminUser: req.session.adminUser,
     user: req.session.user,
@@ -3092,7 +3106,7 @@ app.post('/stok-gudang-admin/kategori/add', isAdminAuthenticated, async (req, re
 app.get('/stok-gudang-admin/kategori/:id', isAdminAuthenticated, async (req, res) => {
   try {
     if (!idGudangValid(req.params.id)) return res.status(404).send('Kategori gudang tidak ditemukan.');
-    await renderDetailGudang(res, 'stok-gudang-admin-detail', req, req.params.id, { peran: 'admin' });
+    await renderDetailGudang(res, 'stok-gudang-detail', req, req.params.id, { peran: 'admin' });
   } catch (err) {
     console.error('Error detail kategori gudang admin:', err);
     res.status(500).send('Gagal memuat detail kategori: ' + err.message);
@@ -3105,7 +3119,7 @@ app.post('/stok-gudang-admin/kategori/:id/item/add', isAdminAuthenticated, uploa
     const kategori = await GudangKategori.findById(req.params.id);
     if (!kategori) return res.status(404).send('Kategori gudang tidak ditemukan.');
 
-    const nama = String(req.body.nama || '').trim();
+    const nama = namaItemGudang(req.body);
     if (!nama) return res.redirect('/stok-gudang-admin/kategori/' + req.params.id + '?error=nama');
 
     await syncReqFilesToGridFS(req);
@@ -3116,6 +3130,7 @@ app.post('/stok-gudang-admin/kategori/:id/item/add', isAdminAuthenticated, uploa
     await GudangItem.create({
       kategoriId: kategori._id,
       nama,
+      namaDaftarBarang: nama,
       kode: String(req.body.kode || '').trim(),
       jumlah: Math.max(0, Number(req.body.jumlah) || 0),
       satuan: String(req.body.satuan || 'pcs').trim() || 'pcs',
@@ -3178,7 +3193,7 @@ app.post('/stok-gudang-user/kategori/add', isUserAuthenticated, async (req, res)
 app.get('/stok-gudang-user/kategori/:id', isUserAuthenticated, async (req, res) => {
   try {
     if (!idGudangValid(req.params.id)) return res.status(404).send('Kategori gudang tidak ditemukan.');
-    await renderDetailGudang(res, 'stok-gudang-user-detail', req, req.params.id, { peran: 'user' });
+    await renderDetailGudang(res, 'stok-gudang-detail', req, req.params.id, { peran: 'user' });
   } catch (err) {
     console.error('Error detail kategori gudang user:', err);
     res.status(500).send('Gagal memuat detail kategori: ' + err.message);
@@ -3191,7 +3206,7 @@ app.post('/stok-gudang-user/kategori/:id/item/add', isUserAuthenticated, uploadF
     const kategori = await GudangKategori.findById(req.params.id);
     if (!kategori) return res.status(404).send('Kategori gudang tidak ditemukan.');
 
-    const nama = String(req.body.nama || '').trim();
+    const nama = namaItemGudang(req.body);
     if (!nama) return res.redirect('/stok-gudang-user/kategori/' + req.params.id + '?error=nama');
 
     await syncReqFilesToGridFS(req);
@@ -3202,6 +3217,7 @@ app.post('/stok-gudang-user/kategori/:id/item/add', isUserAuthenticated, uploadF
     await GudangItem.create({
       kategoriId: kategori._id,
       nama,
+      namaDaftarBarang: nama,
       kode: String(req.body.kode || '').trim(),
       jumlah: Math.max(0, Number(req.body.jumlah) || 0),
       satuan: String(req.body.satuan || 'pcs').trim() || 'pcs',

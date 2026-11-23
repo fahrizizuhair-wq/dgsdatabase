@@ -9,6 +9,7 @@ const gudangItemSchema = new mongoose.Schema(
       index: true,
     },
     nama: { type: String, required: true, trim: true },
+    namaDaftarBarang: { type: String, default: '', trim: true },
     kode: { type: String, default: '', trim: true },
     jumlah: { type: Number, default: 0, min: 0 },
     satuan: { type: String, default: 'pcs', trim: true },
