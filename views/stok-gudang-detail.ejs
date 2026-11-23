@@ -337,38 +337,6 @@
                     <div class="detail-value"><%= item.diinputOleh || '-' %></div>
                   </div>
                 </div>
-
-                <div class="isi-barang-box">
-                  <div class="isi-barang-title">Barang di Dalam Item Ini</div>
-
-                  <form action="<%= baseUrl %>/item/<%= item._id %>/isi-barang" method="POST" class="isi-barang-form">
-                    <input type="text" name="namaBarang" placeholder="Nama barang di dalam..." required />
-                    <input type="number" name="jumlah" value="1" min="1" placeholder="Jml" required />
-                    <input type="text" name="satuan" value="pcs" placeholder="Satuan" />
-                    <button type="submit" class="btn-tambah-isi">+ Catat</button>
-                  </form>
-
-                  <% const daftarIsi = Array.isArray(item.isiBarang) ? item.isiBarang : []; %>
-                  <% if (daftarIsi.length > 0) { %>
-                    <ul class="isi-barang-list">
-                      <% daftarIsi.forEach(function (brg) { %>
-                        <li class="isi-barang-item">
-                          <span>
-                            <strong><%= brg.namaBarang %></strong>
-                            <% if (brg.kodeBarang) { %>
-                              <small style="color:#64748b;">(<%= brg.kodeBarang %>)</small>
-                            <% } %>
-                          </span>
-                          <span style="font-weight:700; color:#334155;">
-                            <%= brg.jumlah || 1 %> <%= brg.satuan || 'pcs' %>
-                          </span>
-                        </li>
-                      <% }); %>
-                    </ul>
-                  <% } else { %>
-                    <div style="font-size: 11.5px; color: #94a3b8;">Belum ada rincian barang di dalam item ini.</div>
-                  <% } %>
-                </div>
               </section>
             <% }); %>
           </div>
