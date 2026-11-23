@@ -296,36 +296,6 @@ app.use((req, res, next) => {
   return res.redirect('/?error=Unauthorized');
 });
 
-// Kategori bawaan stok gudang. Kategori ketiga sengaja tidak dibuat agar bisa
-// ditambahkan sendiri oleh user/admin sesuai kebutuhan.
-async function pastikanKategoriGudangAwal() {
-  const bawaan = [
-    {
-      nama: 'Stok/Data Sampel',
-      deskripsi: 'Data sampel produk yang tersedia untuk keperluan presentasi dan pengadaan.',
-      urutan: 1,
-    },
-    {
-      nama: 'Stok ATK',
-      deskripsi: 'Alat tulis kantor dan perlengkapan administrasi yang tersedia di gudang.',
-      urutan: 2,
-    },
-  ];
-
-  for (const kategori of bawaan) {
-    await GudangKategori.updateOne(
-      { nama: kategori.nama },
-      {
-        $setOnInsert: {
-          ...kategori,
-          sistem: true,
-          diinputOleh: 'Sistem',
-        },
-      },
-      { upsert: true },
-    );
-  }
-}
 
 mongoose
   .connect(mongoUri)
