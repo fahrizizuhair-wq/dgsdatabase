@@ -19,6 +19,7 @@ const bcrypt = require('bcrypt');
 const puppeteer = require('puppeteer');
 const ExcelJS = require('exceljs');
 const { wrapText } = require('./utils/textWrap');
+const { buildPrWorkbook } = require('./utils/pr-excel');
 const realtime = require('./utils/realtime');
 const PORT = process.env.PORT || 3000;
 
@@ -724,6 +725,50 @@ app.get('/payment-request/cetak/:id', async (req, res) => {
   } catch (err) {
     console.error('Error route /payment-request/cetak/:id:', err);
     if (!res.headersSent) res.status(500).send('Gagal menyiapkan cetak payment request.');
+  }
+});
+
+// ==========================================
+//  EXPORT EXCEL PAYMENT REQUEST (format PR Sampel)
+// ==========================================
+app.get('/payment-request/export-excel/:id', async (req, res) => {
+  try {
+    const pengajuan = await PaymentRequest.findById(req.params.id).lean();
+    if (!pengajuan) return res.status(404).send('Payment request tidak ditemukan.');
+
+    const totalPR = Number(pengajuan.totalNominal) || 0;
+    const lpjAktif = pengajuan.lpjId ? await Lpj.findById(pengajuan.lpjId).lean() : null;
+    const infoAnggaranPR = {
+      adaLpj: Boolean(pengajuan.lpjId),
+      namaLpj: lpjAktif
+        ? String(lpjAktif.namaKegiatan || '')
+        : String(pengajuan.namaLpj || pengajuan.pekerjaan || ''),
+      anggaranKasbon: lpjAktif
+        ? Number(lpjAktif.anggaranKasbon) || 0
+        : Number(pengajuan.anggaranKasbon) || 0,
+      totalPengeluaranPR: totalPR,
+      sisaSaldoSaatIni: lpjAktif ? hitungSisaSaldoLpj(lpjAktif) : Number(pengajuan.sisaSaldoAwal) || 0,
+      sisaSaldoSaatPengajuan: Number(pengajuan.sisaSaldoAwal) || 0,
+    };
+
+    const dataCetak = dataCetakPR(pengajuan, infoAnggaranPR);
+    const workbook = await buildPrWorkbook(dataCetak, pengajuan);
+
+    const namaBerkas =
+      String(pengajuan.pekerjaan || 'Payment-Request')
+        .replace(/[^\x20-\x7E]/g, '')
+        .replace(/[\\/:*?"<>|]/g, '')
+        .trim()
+        .replace(/\s+/g, '_')
+        .slice(0, 80) || 'Payment-Request';
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="PR_${namaBerkas}.xlsx"`);
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error('Gagal export Excel Payment Request:', err);
+    if (!res.headersSent) res.status(500).send('Gagal export Excel Payment Request: ' + err.message);
   }
 });
 

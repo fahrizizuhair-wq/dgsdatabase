@@ -12,204 +12,230 @@
     if (!nilai) return '-';
     var t = new Date(nilai);
     if (isNaN(t.getTime())) return String(nilai);
-    return t.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return t.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  function teksPR(nilai, pengganti) {
+    var hasil = String(nilai == null ? '' : nilai).trim();
+    return hasil || (pengganti || '-');
   }
 
   function vendorCetak(p) {
-    var vendor = String((p && p.vendorName) || '-');
-    if (/pic/i.test(vendor)) return vendor;
-    var pic = String((p && p.pic) || '');
-    return vendor + (pic && pic !== '-' ? ' / PIC: ' + pic : '');
+    var vendor = teksPR(p && p.vendorName);
+    var pic = String((p && p.pic) || '').trim();
+    if (pic && !/pic/i.test(vendor) && pic !== '-') {
+      return vendor + ' PIC: ' + pic;
+    }
+    return vendor;
+  }
+
+  function warnaGrupPR(indeks) {
+    var daftar = ['#D9EAD3', '#E6B8AF', '#FFE599', '#EAD1DC'];
+    return daftar[indeks % daftar.length];
   }
 
   var dcCetak = dataCetak || {};
   var penerimaCetak = dcCetak.penerima || [];
   var kasbonCetak = dcCetak.kasbonItems || dcCetak.itemsSemua || [];
   var aktualCetak = dcCetak.aktualItems || dcCetak.itemsSemua || [];
+  var totalKasbonCetak = kasbonCetak.reduce(function (jumlah, it) {
+    return jumlah + (Number(it.total) || 0);
+  }, 0) || Number(dcCetak.grandTotal) || 0;
+  var totalAktualCetak = aktualCetak.reduce(function (jumlah, it) {
+    return jumlah + (Number(it.total) || 0);
+  }, 0) || Number(dcCetak.grandTotal) || 0;
+  var namaPemohonCetak =
+    (pengajuan && (pengajuan.pemohon || pengajuan.diinputOleh)) ||
+    (dcCetak.info && dcCetak.info.namaLpj) || 'Admin';
 %>
 <style>
   @page {
     size: A4 portrait;
-    margin: 12mm 10mm;
+    margin: 10mm 8mm;
   }
+
+  .pr-print-sheet,
+  .pr-print-sheet * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   .pr-print-sheet {
     color: #000;
     background: #fff;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 10pt;
-    line-height: 1.25;
+    font-size: 9pt;
+    line-height: 1.2;
     width: 100%;
   }
-  .pr-print-sheet .title {
-    text-align: center;
-    font-size: 14pt;
-    font-weight: 700;
-    margin: 0 0 14px;
-  }
+
   .pr-print-sheet table {
     border-collapse: collapse;
     width: 100%;
+    table-layout: fixed;
   }
-  .pr-print-sheet .info td,
-  .pr-print-sheet .summary td,
-  .pr-print-sheet .lampiran td {
-    padding: 2px 4px;
-    vertical-align: top;
-  }
-  .pr-print-sheet .label {
-    width: 95px;
+
+  .pr-print-sheet col.col-a { width: 15.2%; }
+  .pr-print-sheet col.col-b { width: 1.4%; }
+  .pr-print-sheet col.col-c { width: 26.9%; }
+  .pr-print-sheet col.col-d { width: 7.3%; }
+  .pr-print-sheet col.col-e { width: 12.2%; }
+  .pr-print-sheet col.col-f { width: 17.9%; }
+  .pr-print-sheet col.col-g { width: 19.1%; }
+
+  .pr-print-sheet .spacer-top { height: 8px; }
+  .pr-print-sheet .logo-band { vertical-align: middle; padding: 2px 0; }
+  .pr-print-sheet .logo-band img { width: 100%; height: auto; display: block; }
+  .pr-print-sheet .blue-band { height: 22px; background: #CFE2F3; }
+  .pr-print-sheet .title-pr {
+    text-align: center;
+    font-size: 14pt;
     font-weight: 700;
-    white-space: nowrap;
+    padding: 3px 0 8px;
   }
-  .pr-print-sheet .sep {
-    width: 14px;
-    font-weight: 700;
-  }
-  .pr-print-sheet .summary {
-    margin-top: 6px;
-  }
-  .pr-print-sheet .summary .nominal {
-    font-weight: 700;
-    white-space: nowrap;
-  }
-  .pr-print-sheet .lampiran {
-    margin-top: 4px;
-  }
-  .pr-print-sheet .items {
-    margin-top: 14px;
-    font-size: 9pt;
-  }
+
+  .pr-print-sheet .info-cell { padding: 2px 3px; vertical-align: top; }
+  .pr-print-sheet .info-label { white-space: nowrap; }
+  .pr-print-sheet .group-cell { padding: 3px; vertical-align: top; }
+  .pr-print-sheet .group-bold { font-weight: 700; }
+  .pr-print-sheet .money { white-space: nowrap; }
+
+  .pr-print-sheet .items { margin-top: 10px; font-size: 8.5pt; }
   .pr-print-sheet .items th,
   .pr-print-sheet .items td {
     border: 1px solid #000;
-    padding: 4px 5px;
-    vertical-align: top;
+    padding: 3px 4px;
+    vertical-align: middle;
   }
-  .pr-print-sheet .items th {
+  .pr-print-sheet .items thead th {
+    border-width: 2px;
     text-align: center;
     font-weight: 700;
-    background: #f2f2f2;
   }
-  .pr-print-sheet .items .group td {
-    background: #e8e8e8;
+  .pr-print-sheet .items .group-row td {
     font-weight: 700;
   }
-  .pr-print-sheet .items .total td {
+  .pr-print-sheet .items .total-row td {
+    border-width: 2px;
     font-weight: 700;
-    background: #f7f7f7;
   }
-  .pr-print-sheet .center {
-    text-align: center;
-  }
-  .pr-print-sheet .right {
-    text-align: right;
-    white-space: nowrap;
-  }
-  .pr-print-sheet .ttd {
-    margin-top: 22px;
-  }
+  .pr-print-sheet .center { text-align: center; }
+  .pr-print-sheet .right { text-align: right; white-space: nowrap; }
+  .pr-print-sheet .wrap { word-wrap: break-word; overflow-wrap: break-word; }
+
+  .pr-print-sheet .ttd { margin-top: 18px; font-size: 9pt; }
   .pr-print-sheet .ttd td {
     width: 33.33%;
-    text-align: center;
     vertical-align: bottom;
-    padding: 0 6px;
+    padding: 0 4px;
   }
-  .pr-print-sheet .ttd .tanggal {
-    height: 34px;
-  }
-  .pr-print-sheet .ttd .line {
+  .pr-print-sheet .ttd .tanggal { height: 34px; }
+  .pr-print-sheet .ttd .nama {
     border-top: 1px solid #000;
     padding-top: 4px;
-  }
-  .pr-print-sheet .ttd .nama {
     font-weight: 700;
-  }
-  .pr-print-sheet .ttd .jabatan {
-    font-size: 8.5pt;
-  }
-  .pr-print-sheet .block {
-    margin-top: 18px;
-  }
-  .pr-print-sheet .block-title {
-    font-weight: 700;
-    font-size: 11pt;
-    margin-bottom: 4px;
-  }
-  .pr-print-sheet .simple td,
-  .pr-print-sheet .simple th {
-    border: 1px solid #000;
-    padding: 3px 5px;
-    vertical-align: top;
-  }
-  .pr-print-sheet .simple th {
-    background: #f2f2f2;
     text-align: center;
   }
-  .pr-print-sheet .simple .total td {
-    font-weight: 700;
-    background: #f7f7f7;
+  .pr-print-sheet .ttd .jabatan { text-align: center; }
+
+  .pr-print-sheet .block { margin-top: 14px; }
+  .pr-print-sheet .block-title { font-weight: 700; font-size: 10pt; margin-bottom: 3px; }
+  .pr-print-sheet .simple { font-size: 8.5pt; }
+  .pr-print-sheet .simple th,
+  .pr-print-sheet .simple td {
+    border: 1px solid #000;
+    padding: 3px 4px;
+    vertical-align: middle;
   }
+  .pr-print-sheet .simple th { text-align: center; font-weight: 700; }
+  .pr-print-sheet .kuning { background: #FFFF00; }
+  .pr-print-sheet .kream { background: #FFF2CC; }
+  .pr-print-sheet .simple .total td { font-weight: 700; }
+  .pr-print-sheet .merah { color: #FF0000; font-weight: 700; }
+
   @media print {
-    .pr-print-sheet {
-      font-size: 9pt;
-    }
-    .pr-print-sheet tr {
-      page-break-inside: avoid;
-    }
+    .pr-print-sheet { font-size: 8.5pt; }
+    .pr-print-sheet tr { page-break-inside: avoid; }
+    .pr-print-sheet .items thead { display: table-header-group; }
   }
 </style>
 
 <div class="pr-print-sheet">
-  <h1 class="title">Payment Request</h1>
+  <table>
+    <colgroup>
+      <col class="col-a" /><col class="col-b" /><col class="col-c" />
+      <col class="col-d" /><col class="col-e" /><col class="col-f" /><col class="col-g" />
+    </colgroup>
+    <tbody>
+      <tr><td colspan="7" class="spacer-top"></td></tr>
+      <tr>
+        <td colspan="7" class="logo-band">
+          <img src="/images/pr-logo.png" alt="Logo DGS" />
+        </td>
+      </tr>
+      <tr><td colspan="7" class="blue-band"></td></tr>
+      <tr><td colspan="7" class="title-pr">Payment Request</td></tr>
 
-  <table class="info">
-    <tr>
-      <td class="label">Pekerjaan</td><td class="sep">:</td><td colspan="2"><%= dcCetak.pekerjaan %></td>
-    </tr>
-    <tr>
-      <td class="label">Est. Transfer</td><td class="sep">:</td><td colspan="2"><%= dcCetak.estTransfer %></td>
-    </tr>
-    <tr>
-      <td class="label">Lokasi</td><td class="sep">:</td><td colspan="2"><%= dcCetak.lokasi %></td>
-    </tr>
-    <tr>
-      <td class="label">Detail</td><td class="sep">:</td><td colspan="2"><%= dcCetak.detail %></td>
-    </tr>
-  </table>
+      <tr>
+        <td class="info-cell info-label">Pekerjaan</td>
+        <td class="info-cell">:</td>
+        <td colspan="5" class="info-cell"><%= teksPR(dcCetak.pekerjaan) %></td>
+      </tr>
+      <tr>
+        <td class="info-cell info-label">Est. Transfer</td>
+        <td class="info-cell">:</td>
+        <td colspan="5" class="info-cell"><%= teksPR(dcCetak.estTransfer) %></td>
+      </tr>
+      <tr>
+        <td class="info-cell info-label">Lokasi</td>
+        <td class="info-cell">:</td>
+        <td colspan="5" class="info-cell"><%= teksPR(dcCetak.lokasi) %></td>
+      </tr>
+      <tr>
+        <td class="info-cell info-label">Detail</td>
+        <td class="info-cell">:</td>
+        <td colspan="5" class="info-cell"><%= teksPR(dcCetak.detail) %></td>
+      </tr>
 
-  <table class="summary">
-    <% penerimaCetak.forEach(function (p) { %>
+      <% penerimaCetak.forEach(function (p, indeks) { %>
+        <tr style="background: <%= warnaGrupPR(indeks) %>">
+          <td colspan="3" class="group-cell group-bold"><%= p.no || indeks + 1 %>. <%= teksPR(p.summaryTitle) %></td>
+          <td colspan="4" class="group-cell"></td>
+        </tr>
+        <tr style="background: <%= warnaGrupPR(indeks) %>">
+          <td class="group-cell">Cost Summary</td>
+          <td class="group-cell">:</td>
+          <td class="group-cell group-bold money"><%= rupiahPR(p.total) %></td>
+          <td colspan="4" class="group-cell"><%= teksPR(p.terbilang) %></td>
+        </tr>
+        <tr style="background: <%= warnaGrupPR(indeks) %>">
+          <td class="group-cell">Bank/No. Rek</td>
+          <td class="group-cell">:</td>
+          <td colspan="5" class="group-cell"><%= teksPR(p.rekening) %></td>
+        </tr>
+      <% }) %>
+
       <tr>
-        <td colspan="4" style="padding-top: 6px; font-weight: 700"><%= p.no %>. <%= p.summaryTitle %></td>
+        <td class="info-cell info-label">Lampiran</td>
+        <td class="info-cell">:</td>
+        <td colspan="5" class="info-cell"><%= teksPR(dcCetak.lampiran) %></td>
       </tr>
-      <tr>
-        <td class="label">Cost Summary</td>
-        <td class="sep">:</td>
-        <td class="nominal"><%= rupiahPR(p.total) %></td>
-        <td><%= p.terbilang %></td>
-      </tr>
-      <tr>
-        <td class="label">Bank/No. Rek</td>
-        <td class="sep">:</td>
-        <td colspan="2"><%= p.rekening %></td>
-      </tr>
-    <% }) %>
-    <tr>
-      <td class="label">Lampiran</td>
-      <td class="sep">:</td>
-      <td colspan="2"><%= dcCetak.lampiran %></td>
-    </tr>
+    </tbody>
   </table>
 
   <table class="items">
+    <colgroup>
+      <col class="col-a" /><col class="col-b" /><col class="col-c" />
+      <col class="col-d" /><col class="col-e" /><col class="col-f" /><col class="col-g" />
+    </colgroup>
     <thead>
       <tr>
-        <th style="width: 30px">No</th>
+        <th>No</th>
         <th colspan="2">Deskripsi</th>
-        <th style="width: 42px">Qty</th>
-        <th style="width: 105px">Harga Satuan</th>
-        <th style="width: 105px">Total Harga</th>
-        <th style="width: 190px">Rekening Tujuan</th>
+        <th>Qty</th>
+        <th>Harga Satuan</th>
+        <th>Total Harga</th>
+        <th>Rekening Tujuan</th>
       </tr>
     </thead>
     <tbody>
@@ -217,75 +243,99 @@
         <tr><td colspan="7" class="center">Belum ada rincian biaya.</td></tr>
       <% } %>
       <% penerimaCetak.forEach(function (p) { %>
-        <tr class="group">
-          <td rowspan="<%= p.items.length + 1 %>" class="center"><%= p.no %></td>
-          <td colspan="5"><%= vendorCetak(p) %></td>
-          <td><%= p.rekening %></td>
+        <% var jumlahItem = (p.items && p.items.length) ? p.items.length : 1; %>
+        <tr class="group-row" style="background: <%= warnaGrupPR((Number(p.no) || 1) - 1) %>">
+          <td rowspan="<%= jumlahItem + 1 %>" class="center"><%= p.no %></td>
+          <td colspan="5" class="wrap"><%= vendorCetak(p) %></td>
+          <td class="center wrap"><%= teksPR(p.rekening) %></td>
         </tr>
-        <% p.items.forEach(function (it) { %>
+        <% if (!p.items || !p.items.length) { %>
           <tr>
-            <td colspan="2"><%= it.desc %></td>
-            <td class="center"><%= it.qty %></td>
-            <td class="right"><%= rupiahPR(it.price) %></td>
-            <td class="right"><%= rupiahPR(it.total) %></td>
+            <td colspan="2" class="wrap">-</td>
+            <td class="center">1</td>
+            <td class="right"><%= rupiahPR(p.total) %></td>
+            <td class="right"><%= rupiahPR(p.total) %></td>
+            <td></td>
           </tr>
-        <% }) %>
-        <tr class="total">
+        <% } else { %>
+          <% p.items.forEach(function (it) { %>
+            <tr>
+              <td colspan="2" class="wrap"><%= teksPR(it.desc) %></td>
+              <td class="center"><%= it.qty %></td>
+              <td class="right"><%= rupiahPR(it.price) %></td>
+              <td class="right"><%= rupiahPR(it.total) %></td>
+              <td></td>
+            </tr>
+          <% }) %>
+        <% } %>
+        <tr class="total-row" style="background: <%= warnaGrupPR((Number(p.no) || 1) - 1) %>">
           <td colspan="5" class="center">Total Pembayaran</td>
           <td class="right"><%= rupiahPR(p.total) %></td>
+          <td class="wrap"><%= teksPR(p.rekening) %></td>
         </tr>
       <% }) %>
     </tbody>
   </table>
 
   <table class="ttd">
-    <tr>
-      <td>
-        <div>Mengajukan,</div>
-        <div class="tanggal"><%= tanggalPR(pengajuan.tanggalPengajuan) %></div>
-        <div class="line">
-          <div class="nama"><%= pengajuan.pemohon || pengajuan.diinputOleh || 'Admin' %></div>
+    <tbody>
+      <tr>
+        <td>
+          <div>Mengajukan,</div>
+          <div class="tanggal"><%= tanggalPR(pengajuan && (pengajuan.tanggalPengajuan || pengajuan.createdAt)) %></div>
+        </td>
+        <td>
+          <div>Approved by,</div>
+          <div class="tanggal">&nbsp;</div>
+        </td>
+        <td>
+          <div>Mengetahui,</div>
+          <div class="tanggal">&nbsp;</div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="nama"><%= teksPR(namaPemohonCetak) %></div>
           <div class="jabatan">Admin</div>
-        </div>
-      </td>
-      <td>
-        <div>Approved by,</div>
-        <div class="tanggal">&nbsp;</div>
-        <div class="line">
+        </td>
+        <td>
           <div class="nama">Dani Kurniawan</div>
           <div class="jabatan">Koordinator Tim Pengadaan</div>
-        </div>
-      </td>
-      <td>
-        <div>Mengetahui,</div>
-        <div class="tanggal">&nbsp;</div>
-        <div class="line">
+        </td>
+        <td>
           <div class="nama">Nila Akbaria</div>
           <div class="jabatan">Direktur</div>
-        </div>
-      </td>
-    </tr>
+        </td>
+      </tr>
+    </tbody>
   </table>
 
   <div class="block">
     <div class="block-title">Rincian Pengeluaran</div>
     <table class="simple">
+      <colgroup>
+        <col class="col-a" /><col class="col-b" /><col class="col-c" />
+        <col class="col-d" /><col class="col-e" />
+      </colgroup>
       <thead>
-        <tr><th>Keterangan</th><th style="width: 140px">Nominal</th></tr>
+        <tr class="kuning">
+          <th colspan="4">Keterangan</th>
+          <th>Nominal</th>
+        </tr>
       </thead>
       <tbody>
         <tr>
-          <td>1. Anggaran Pengadaan<%= dcCetak.info && dcCetak.info.namaLpj ? ' (' + dcCetak.info.namaLpj + ')' : '' %></td>
+          <td colspan="4">1. Anggaran Pengadaan<%= dcCetak.info && dcCetak.info.namaLpj ? ' (' + dcCetak.info.namaLpj + ')' : '' %></td>
           <td class="right"><%= rupiahPR(dcCetak.anggaran) %></td>
         </tr>
         <% penerimaCetak.forEach(function (p, i) { %>
           <tr>
-            <td><%= i + 2 %>. <%= p.summaryTitle %></td>
+            <td colspan="4"><%= i + 2 %>. <%= teksPR(p.summaryTitle) %></td>
             <td class="right"><%= rupiahPR(p.total) %></td>
           </tr>
         <% }) %>
-        <tr class="total">
-          <td>Sisa Anggaran</td>
+        <tr class="kuning total">
+          <td colspan="4">Sisa Anggaran</td>
           <td class="right"><%= rupiahPR(dcCetak.sisaAnggaran) %></td>
         </tr>
       </tbody>
@@ -293,45 +343,64 @@
   </div>
 
   <div class="block">
-    <div class="block-title">Pengajuan Kasbon</div>
     <table class="simple">
+      <colgroup>
+        <col class="col-a" /><col class="col-b" /><col class="col-c" />
+        <col class="col-d" /><col class="col-e" />
+      </colgroup>
       <tbody>
+        <tr class="kream">
+          <td colspan="4" class="group-bold">Pengajuan Kasbon</td>
+          <td></td>
+        </tr>
         <% kasbonCetak.forEach(function (it, i) { %>
           <tr>
-            <td><%= i + 1 %>. <%= it.desc %></td>
-            <td style="width: 110px"><%= it.qty %> pcs</td>
-            <td style="width: 130px" class="right"><%= rupiahPR(it.total) %></td>
+            <td colspan="2"><%= i + 1 %>. <%= teksPR(it.desc) %></td>
+            <td><%= Number(it.qty) || 1 %> pcs</td>
+            <td></td>
+            <td class="right"><%= rupiahPR(it.total) %></td>
           </tr>
         <% }) %>
+        <% if (!kasbonCetak.length) { %>
+          <tr><td colspan="2">-</td><td></td><td></td><td class="right"><%= rupiahPR(0) %></td></tr>
+        <% } %>
         <tr class="total">
-          <td>Total kasbon</td>
-          <td></td>
-          <td class="right"><%= rupiahPR(dcCetak.grandTotal) %></td>
+          <td colspan="4">Total kasbon</td>
+          <td class="right"><%= rupiahPR(totalKasbonCetak) %></td>
         </tr>
       </tbody>
     </table>
   </div>
 
   <div class="block">
-    <div class="block-title">Aktual pengeluaran</div>
     <table class="simple">
+      <colgroup>
+        <col class="col-a" /><col class="col-b" /><col class="col-c" />
+        <col class="col-d" /><col class="col-e" />
+      </colgroup>
       <tbody>
+        <tr class="kream">
+          <td colspan="4" class="group-bold">Aktual pengeluaran</td>
+          <td></td>
+        </tr>
         <% aktualCetak.forEach(function (it, i) { %>
           <tr>
-            <td><%= i + 1 %>. <%= it.desc %></td>
-            <td style="width: 150px">(<%= it.vendor %>)</td>
-            <td style="width: 130px" class="right"><%= rupiahPR(it.total) %></td>
+            <td colspan="2"><%= i + 1 %>. <%= teksPR(it.desc) %></td>
+            <td><%= teksPR(it.vendor) %></td>
+            <td></td>
+            <td class="right"><%= rupiahPR(it.total) %></td>
           </tr>
         <% }) %>
+        <% if (!aktualCetak.length) { %>
+          <tr><td colspan="2">-</td><td></td><td></td><td class="right"><%= rupiahPR(0) %></td></tr>
+        <% } %>
         <tr class="total">
-          <td>Total aktual pengeluaran</td>
-          <td></td>
-          <td class="right"><%= rupiahPR(dcCetak.grandTotal) %></td>
+          <td colspan="4">Total aktual pengeluaran</td>
+          <td class="right"><%= rupiahPR(totalAktualCetak) %></td>
         </tr>
-        <tr class="total">
-          <td>Selisih kasbon dengan aktual</td>
-          <td></td>
-          <td class="right"><%= rupiahPR(0) %></td>
+        <tr>
+          <td colspan="4" class="merah">Selisih kasbon dengan aktual</td>
+          <td class="right merah"><%= rupiahPR(totalKasbonCetak - totalAktualCetak) %></td>
         </tr>
       </tbody>
     </table>
