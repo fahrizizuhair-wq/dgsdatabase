@@ -469,12 +469,12 @@
                   <label>Jenis Transaksi</label>
                   <div class="ck-type-options">
                     <label class="ck-type-option aktif-ekspense" id="ck-label-expense">
-                      <input type="radio" name="type" value="expense" checked onchange="saatJenisBerubah()" />
+                      <input type="radio" name="type" value="expense" checked onchange="saatJenisBerubah(this.form)" />
                       <i data-lucide="trending-down"></i>
                       <span>Pengeluaran</span>
                     </label>
                     <label class="ck-type-option" id="ck-label-income">
-                      <input type="radio" name="type" value="income" onchange="saatJenisBerubah()" />
+                      <input type="radio" name="type" value="income" onchange="saatJenisBerubah(this.form)" />
                       <i data-lucide="trending-up"></i>
                       <span>Pemasukan</span>
                     </label>
@@ -547,7 +547,7 @@
             <div class="ck-toolbar">
               <div class="ck-search-wrap">
                 <i data-lucide="search"></i>
-                <input type="text" id="ck-search" class="ck-input" placeholder="Cari transaksi..." oninput="renderTabelCK()" />
+                <input type="text" id="ck-search" class="ck-input" placeholder="Cari transaksi..." />
               </div>
               <div class="ck-filter-wrap">
                 <button type="button" class="ck-filter-btn aktif" data-filter="all" onclick="gantiFilterCK(this)">Semua</button>
@@ -591,7 +591,7 @@
           </div>
           <button type="button" class="ck-modal-close" onclick="tutupProjectModal()" aria-label="Tutup">&times;</button>
         </div>
-        <form action="/catatan-keuangan/project/add" method="POST" onsubmit="return validasiProjectCK()">
+        <form id="ck-project-form" action="/catatan-keuangan/project/add" method="POST" onsubmit="return validasiProjectCK()">
           <div class="ck-modal-body">
             <div class="ck-field">
               <label for="ck-nama-project">Nama Project *</label>
@@ -630,12 +630,12 @@
               <label>Jenis Transaksi</label>
               <div class="ck-type-options">
                 <label class="ck-type-option aktif-ekspense" id="ck-edit-label-expense">
-                  <input type="radio" id="ck-edit-type-expense" name="type" value="expense" checked onchange="saatJenisBerubah()" />
+                  <input type="radio" id="ck-edit-type-expense" name="type" value="expense" checked onchange="saatJenisBerubah(this.form)" />
                   <i data-lucide="trending-down"></i>
                   <span>Pengeluaran</span>
                 </label>
                 <label class="ck-type-option" id="ck-edit-label-income">
-                  <input type="radio" id="ck-edit-type-income" name="type" value="income" onchange="saatJenisBerubah()" />
+                  <input type="radio" id="ck-edit-type-income" name="type" value="income" onchange="saatJenisBerubah(this.form)" />
                   <i data-lucide="trending-up"></i>
                   <span>Pemasukan</span>
                 </label>
@@ -796,7 +796,10 @@
         var select = document.getElementById(idSelect);
         if (!select) return;
         var dipilih = select.value;
-        var tersedia = CK_KATEGORI.filter(function (k) {
+        var sumber = Array.isArray(CK_KATEGORI) && CK_KATEGORI.length
+          ? CK_KATEGORI
+          : [{ nama: CK_KATEGORI_DEFAULT, jenis: 'both', warna: '#64748b', ikon: 'ellipsis' }];
+        var tersedia = sumber.filter(function (k) {
           return k.jenis === 'both' || k.jenis === jenis;
         });
         select.innerHTML = tersedia.map(function (k) {
@@ -806,11 +809,15 @@
         select.value = masihAda ? dipilih : (tersedia.length ? tersedia[0].nama : '');
       }
 
-      function saatJenisBerubah() {
+      function saatJenisBerubah(formTertentu) {
         var daftarForm = [
           { form: document.getElementById('ck-form'), labelExpense: 'ck-label-expense', labelIncome: 'ck-label-income', select: 'ck-category' },
           { form: document.getElementById('ck-edit-form'), labelExpense: 'ck-edit-label-expense', labelIncome: 'ck-edit-label-income', select: 'ck-edit-category' },
         ];
+
+        if (formTertentu) {
+          daftarForm = daftarForm.filter(function (konf) { return konf.form === formTertentu; });
+        }
 
         daftarForm.forEach(function (konf) {
           if (!konf.form) return;
@@ -848,7 +855,7 @@
           } else {
             keluar += jumlah;
             if (diBulanIni) keluarBulanIni += jumlah;
-            var kat = t.category || 'Lainnya';
+            var kat = t.category || CK_KATEGORI_DEFAULT;
             kategori[kat] = (kategori[kat] || 0) + jumlah;
           }
         });
@@ -867,14 +874,17 @@
 
       function renderRingkasanCK() {
         var elSaldo = document.getElementById('ck-total-saldo');
-        if (!elSaldo) return;
+        var elMasuk = document.getElementById('ck-total-masuk');
+        var elKeluar = document.getElementById('ck-total-keluar');
+        var elBadge = document.getElementById('ck-saldo-badge');
+        if (!elSaldo || !elMasuk || !elKeluar || !elBadge) return;
+
         var r = ringkasCK(CK_DATA);
         elSaldo.textContent = rupiahCK(r.saldo);
-        document.getElementById('ck-total-masuk').textContent = rupiahCK(r.masukBulanIni);
-        document.getElementById('ck-total-keluar').textContent = rupiahCK(r.keluarBulanIni);
-        var badge = document.getElementById('ck-saldo-badge');
-        badge.textContent = r.saldo >= 0 ? 'Surplus' : 'Defisit';
-        badge.className = 'ck-badge ' + (r.saldo >= 0 ? 'ck-badge-green' : 'ck-badge-rose');
+        elMasuk.textContent = rupiahCK(r.masukBulanIni);
+        elKeluar.textContent = rupiahCK(r.keluarBulanIni);
+        elBadge.textContent = r.saldo >= 0 ? 'Surplus' : 'Defisit';
+        elBadge.className = 'ck-badge ' + (r.saldo >= 0 ? 'ck-badge-green' : 'ck-badge-rose');
       }
 
       function dataTersaringCK() {
@@ -888,9 +898,12 @@
       }
 
       function metaKategoriCK(nama) {
-        var ditemukan = CK_KATEGORI.find(function (k) { return k.nama === String(nama || ''); });
+        var sumber = Array.isArray(CK_KATEGORI) && CK_KATEGORI.length
+          ? CK_KATEGORI
+          : [{ nama: CK_KATEGORI_DEFAULT, jenis: 'both', warna: '#64748b', ikon: 'ellipsis' }];
+        var ditemukan = sumber.find(function (k) { return k.nama === String(nama || ''); });
         if (ditemukan) return ditemukan;
-        return CK_KATEGORI.find(function (k) { return k.nama === CK_KATEGORI_DEFAULT; }) || {
+        return sumber.find(function (k) { return k.nama === CK_KATEGORI_DEFAULT; }) || {
           nama: CK_KATEGORI_DEFAULT,
           warna: '#64748b',
           ikon: 'ellipsis',
@@ -898,7 +911,8 @@
       }
 
       function warnaBadgeCK(hex) {
-        return 'background:' + hex + '18;color:' + hex + ';';
+        var aman = /^#[0-9a-fA-F]{6}$/.test(String(hex || '')) ? hex : '#64748b';
+        return 'background:' + aman + '18;color:' + aman + ';';
       }
 
       function renderTabelCK() {
@@ -945,7 +959,10 @@
 
       function renderGrafikCK() {
         var kanvasKategori = document.getElementById('ck-chart-category');
-        if (!kanvasKategori || typeof Chart === 'undefined') {
+        var kanvasBanding = document.getElementById('ck-chart-comparison');
+        if (!kanvasKategori || !kanvasBanding) return;
+
+        if (typeof Chart === 'undefined') {
           var fallbackKategori = document.getElementById('ck-fallback-category');
           var fallbackBanding = document.getElementById('ck-fallback-comparison');
           if (fallbackKategori) fallbackKategori.classList.remove('hidden');
@@ -992,7 +1009,7 @@
         });
 
         if (chartBandingCK) chartBandingCK.destroy();
-        chartBandingCK = new Chart(document.getElementById('ck-chart-comparison').getContext('2d'), {
+        chartBandingCK = new Chart(kanvasBanding.getContext('2d'), {
           type: 'bar',
           data: {
             labels: ['Pemasukan', 'Pengeluaran'],
@@ -1031,10 +1048,16 @@
       function gantiTabCK(tab) {
         tabGrafikCK = tab;
         var kategoriAktif = tab === 'category';
-        document.getElementById('ck-tab-category').classList.toggle('aktif', kategoriAktif);
-        document.getElementById('ck-tab-comparison').classList.toggle('aktif', !kategoriAktif);
-        document.getElementById('ck-wrap-category').classList.toggle('hidden', !kategoriAktif);
-        document.getElementById('ck-wrap-comparison').classList.toggle('hidden', kategoriAktif);
+        var tabKategori = document.getElementById('ck-tab-category');
+        var tabBanding = document.getElementById('ck-tab-comparison');
+        var wrapKategori = document.getElementById('ck-wrap-category');
+        var wrapBanding = document.getElementById('ck-wrap-comparison');
+        if (!tabKategori || !tabBanding || !wrapKategori || !wrapBanding) return;
+
+        tabKategori.classList.toggle('aktif', kategoriAktif);
+        tabBanding.classList.toggle('aktif', !kategoriAktif);
+        wrapKategori.classList.toggle('hidden', !kategoriAktif);
+        wrapBanding.classList.toggle('hidden', kategoriAktif);
         if (!kategoriAktif && chartBandingCK) chartBandingCK.resize();
         if (kategoriAktif && chartKategoriCK) chartKategoriCK.resize();
       }
@@ -1081,10 +1104,15 @@
         var iniIncome = t.type === 'income';
         document.getElementById('ck-edit-type-income').checked = iniIncome;
         document.getElementById('ck-edit-type-expense').checked = !iniIncome;
-        saatJenisBerubah();
+        saatJenisBerubah(document.getElementById('ck-edit-form'));
 
         var selectKategori = document.getElementById('ck-edit-category');
-        if (selectKategori) selectKategori.value = String(t.category || CK_KATEGORI_DEFAULT);
+        if (selectKategori) {
+          selectKategori.value = String(t.category || CK_KATEGORI_DEFAULT);
+          // Data lama bisa punya kategori yang tidak lagi tersedia untuk jenisnya.
+          // Pilih opsi pertama agar select tidak kosong saat disimpan.
+          if (!selectKategori.value && selectKategori.options.length) selectKategori.selectedIndex = 0;
+        }
 
         document.getElementById('ck-edit-modal').classList.add('terbuka');
         document.body.style.overflow = 'hidden';
@@ -1127,7 +1155,7 @@
 
       document.addEventListener('DOMContentLoaded', function () {
         var tanggal = document.getElementById('ck-tanggal');
-        if (tanggal) tanggal.value = new Date().toISOString().slice(0, 10);
+        if (tanggal) tanggal.value = tanggalInputCK(new Date());
 
         var cari = document.getElementById('ck-search');
         if (cari) cari.addEventListener('input', function (e) {
