@@ -2497,6 +2497,23 @@ app.post('/harga-dasar-user/add', async (req, res) => {
   }
 });
 
+// Detail Harga Dasar – dipakai admin & user (baca backUrl dari referer)
+app.get('/harga-dasar-user/detail/:id', async (req, res) => {
+  try {
+    const barang = await HargaDasar.findById(req.params.id);
+    if (!barang) {
+      return res.status(404).send('Data harga dasar tidak ditemukan.');
+    }
+    const backUrl = req.headers.referer || '/harga-dasar-user';
+    res.render('harga-dasar-detail', { barang, backUrl });
+  } catch (err) {
+    console.error('Error detail harga dasar:', err);
+    res.status(500).send('Terjadi kesalahan pada server.');
+  }
+});
+
+
+
 // ============================================================
 //  RUTE: STOK MASUK – USER
 // ============================================================
