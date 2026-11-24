@@ -16,6 +16,8 @@ const transaksiCatatanKeuanganSchema = new mongoose.Schema(
     category: { type: String, default: 'Lainnya' },
     tanggal: { type: Date, default: Date.now },
     diinputOleh: { type: String, default: '' },
+    // Diisi saat transaksi pernah diubah; null/kmosong berarti belum pernah diupdate.
+    diupdateOleh: { type: String, default: '' },
   },
   { timestamps: true, collection: 'transaksi_catatan_keuangan' },
 );

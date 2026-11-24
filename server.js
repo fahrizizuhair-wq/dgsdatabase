@@ -175,6 +175,7 @@ const PengajuanHarga = require('./models/PengajuanHarga');
 const ProjectPengajuanHarga = require('./models/ProjectPengajuanHarga');
 const ProjectCatatanKeuangan = require('./models/ProjectCatatanKeuangan');
 const TransaksiCatatanKeuangan = require('./models/TransaksiCatatanKeuangan');
+const catatanKeuanganConfig = require('./config/catatan-keuangan');
 const Laporan = require('./models/Laporan');
 const StokMasuk = require('./models/StokMasuk');
 const StokKeluar = require('./models/StokKeluar');
@@ -1815,14 +1816,8 @@ app.post('/pengajuan-harga/simpan', isUserAuthenticated, jalankanUploadFotoPenga
 // ============================================================
 //  RUTE: CATATAN KEUANGAN PER PROJECT (ADMIN & USER)
 // ============================================================
-const KATEGORI_CATATAN_KEUANGAN = [
-  'Makan & Minum',
-  'Transportasi',
-  'Belanja',
-  'Tagihan',
-  'Gaji/Pendapatan',
-  'Lainnya',
-];
+// Daftar kategori dikelola terpusat di config/catatan-keuangan.js
+const KATEGORI_CATATAN_KEUANGAN = catatanKeuanganConfig.KATEGORI;
 
 function dasarUrlCatatanKeuangan(req) {
   return req.session && req.session.isAdmin ? '/catatan-keuangan' : '/catatan-keuangan-user';
@@ -1867,11 +1862,13 @@ async function renderCatatanKeuangan(req, res, role, idProject) {
       baseUrl,
       role,
       kategoriList: KATEGORI_CATATAN_KEUANGAN,
+      kategoriDefault: catatanKeuanganConfig.KATEGORI_DEFAULT,
       pageTitle: 'Catatan Keuangan — PT. DIAN GIRI SAPUTRA',
       useTailwind: true,
       user: req.session.user || { username: req.session.adminUser || nama, namaLengkap: nama },
       adminUser: req.session.adminUser || nama,
       berhasil: req.query.simpan === '1',
+      edit: req.query.edit === '1',
       hapus: req.query.hapus === '1',
       gagal: req.query.gagal === '1',
     });
@@ -1921,9 +1918,7 @@ app.post('/catatan-keuangan/transaksi/add', isUserAuthenticated, async (req, res
     const deskripsi = String(body.deskripsi || '').trim();
     const amount = Number(body.amount) || 0;
     const type = String(body.type || 'expense') === 'income' ? 'income' : 'expense';
-    const category = KATEGORI_CATATAN_KEUANGAN.includes(String(body.category || ''))
-      ? String(body.category)
-      : 'Lainnya';
+    const category = catatanKeuanganConfig.validasiKategori(body.category, type);
     const tanggal = body.tanggal ? new Date(body.tanggal) : new Date();
 
     if (!deskripsi || amount <= 0 || isNaN(tanggal.getTime())) {
@@ -1944,6 +1939,56 @@ app.post('/catatan-keuangan/transaksi/add', isUserAuthenticated, async (req, res
     return res.redirect(`${urlProject}?simpan=1`);
   } catch (err) {
     console.error('Gagal menyimpan transaksi catatan keuangan:', err);
+    return res.redirect(`${urlProject}?gagal=1`);
+  }
+});
+
+app.post('/catatan-keuangan/transaksi/edit', isUserAuthenticated, async (req, res) => {
+  const baseUrl = dasarUrlCatatanKeuangan(req);
+  const body = req.body || {};
+  const idProject = String(body.projectId || '');
+  const idTransaksi = String(body.id || '');
+  const idValid = mongoose.Types.ObjectId.isValid(idProject);
+  const urlProject = idValid ? urlProjectCatatanKeuangan(req, idProject) : baseUrl;
+
+  try {
+    if (!idValid || !mongoose.Types.ObjectId.isValid(idTransaksi)) {
+      return res.redirect(`${urlProject}?gagal=1`);
+    }
+
+    const transaksiLama = await TransaksiCatatanKeuangan.findOne({
+      _id: idTransaksi,
+      projectId: idProject,
+    }).lean();
+    if (!transaksiLama) return res.redirect(`${urlProject}?gagal=1`);
+
+    const deskripsi = String(body.deskripsi || '').trim();
+    const amount = Number(body.amount) || 0;
+    const type = String(body.type || 'expense') === 'income' ? 'income' : 'expense';
+    const category = catatanKeuanganConfig.validasiKategori(body.category, type);
+    const tanggal = body.tanggal ? new Date(body.tanggal) : new Date(transaksiLama.tanggal);
+
+    if (!deskripsi || amount <= 0 || isNaN(tanggal.getTime())) {
+      return res.redirect(`${urlProject}?gagal=1`);
+    }
+
+    await TransaksiCatatanKeuangan.updateOne(
+      { _id: idTransaksi, projectId: idProject },
+      {
+        $set: {
+          deskripsi,
+          amount,
+          type,
+          category,
+          tanggal,
+          diupdateOleh: getNamaPenginput(req),
+        },
+      },
+    );
+
+    return res.redirect(`${urlProject}?edit=1`);
+  } catch (err) {
+    console.error('Gagal mengupdate transaksi catatan keuangan:', err);
     return res.redirect(`${urlProject}?gagal=1`);
   }
 });
