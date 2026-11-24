@@ -1,0 +1,1145 @@
+<%
+  var dataPH = (typeof items !== 'undefined' && items) ? items : [];
+  var peranPH = 'user';
+  var userPH = (typeof user !== 'undefined' && user) ? user : { username: 'User', namaLengkap: 'User' };
+  var adminUserPH = (typeof adminUser !== 'undefined' && adminUser) ? adminUser : 'Admin';
+
+  var totalItemPH = dataPH.length;
+  var totalQtyPH = dataPH.reduce(function (a, b) { return a + (Number(b.qty) || 0); }, 0);
+  var totalEstimasiPH = dataPH.reduce(function (a, b) { return a + (Number(b.totalHarga) || 0); }, 0);
+  var rataUnitPH = totalQtyPH > 0 ? Math.round(totalEstimasiPH / totalQtyPH) : 0;
+
+  function jsonUntukScriptPH(nilai) {
+    return JSON.stringify(nilai || [])
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/&/g, '\\u0026')
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
+  }
+%>
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <%- include('partials/head', { pageTitle: (typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Pengajuan Harga') + ' — User', useTailwind: true }) %>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/payment-request.css" />
+    <link rel="stylesheet" href="/css/stat-cards.css" />
+    <style>
+      /* =========================================================
+         PENGAJUAN HARGA — CSS KHALAMAN (inline, file user)
+         ========================================================= */
+      #toast-container { z-index: 3000 !important; }
+      .ph-main { max-width: 1280px !important; }
+
+      /* Card statistik mengikuti model kartu halaman lain */
+      .ph-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 20px; }
+      .ph-card-grid .card-value { font-size: 1.95rem; word-break: break-word; }
+      @media (max-width: 1100px) { .ph-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 700px) { .ph-card-grid { grid-template-columns: 1fr; } }
+
+      /* Panel daftar */
+      .ph-panel {
+        background: rgba(255, 255, 255, 0.97);
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+        overflow: hidden;
+      }
+      .ph-panel-head {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+        gap: 12px; padding: 18px 20px; border-bottom: 1px solid #f1f5f9;
+      }
+      .ph-toolbar {
+        display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 20px;
+        border-bottom: 1px solid #f1f5f9; background: #fcfcfd;
+      }
+      .ph-toolbar select, .ph-toolbar input, .ph-input {
+        width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px;
+        background: #fff; font-size: 13px; color: #1e293b; outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .ph-toolbar select:focus, .ph-toolbar input:focus, .ph-input:focus {
+        border-color: #7a1b1b; box-shadow: 0 0 0 3px rgba(122, 27, 27, 0.08);
+      }
+      .ph-toolbar input::placeholder, .ph-input::placeholder { color: #94a3b8; }
+      .ph-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+        padding: 10px 14px; border-radius: 10px; border: 1px solid transparent;
+        font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
+      }
+      .ph-btn-primary { background: #7a1b1b; color: #fff; box-shadow: 0 6px 16px rgba(122,27,27,.2); }
+      .ph-btn-primary:hover { background: #5e1414; }
+      .ph-btn-ghost { background: #fff; color: #7a1b1b; border-color: #f2d7d7; }
+      .ph-btn-ghost:hover { background: #fdf2f2; }
+      .ph-btn-neutral { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
+      .ph-btn-neutral:hover { background: #f1f5f9; }
+      .ph-badge {
+        display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px;
+        background: #fef3c7; color: #92400e; font-size: 10.5px; font-weight: 700;
+      }
+      .ph-table-wrap { width: 100%; overflow-x: auto; }
+      .ph-table { width: 100%; min-width: 1120px; border-collapse: collapse; }
+      .ph-table thead th {
+        padding: 12px 14px; background: #fdf2f2; border-bottom: 1px solid #f4d7d7;
+        color: #7a1b1b; font-size: 10.5px; font-weight: 800; letter-spacing: .05em;
+        text-transform: uppercase; text-align: left; white-space: nowrap;
+      }
+      .ph-table tbody td {
+        padding: 13px 14px; border-bottom: 1px solid #f1f5f9; font-size: 12.5px;
+        color: #334155; vertical-align: top;
+      }
+      .ph-table tbody tr.ph-row { cursor: pointer; transition: background .18s ease; }
+      .ph-table tbody tr.ph-row:hover { background: #fffafa; }
+      .ph-table tbody tr.ph-row:last-child td { border-bottom: none; }
+      .ph-nama { font-weight: 700; color: #0f172a; font-size: 13px; }
+      .ph-sub { display: block; margin-top: 4px; font-size: 11px; color: #94a3b8; }
+      .ph-total-row td {
+        background: #f8fafc; font-weight: 800; color: #7a1b1b;
+        border-top: 2px solid #f1f5f9;
+      }
+      .ph-empty { padding: 48px 20px; text-align: center; color: #94a3b8; font-size: 13px; }
+
+      /* ========================= MODAL ========================= */
+      .ph-modal {
+        position: fixed; inset: 0; z-index: 2000; display: none;
+        align-items: center; justify-content: center; padding: 24px;
+        background: rgba(15, 23, 42, 0.68); backdrop-filter: blur(5px);
+      }
+      .ph-modal.terbuka { display: flex; }
+      .ph-modal-dialog {
+        width: min(1120px, 100%); max-height: calc(100vh - 48px); margin: auto;
+        display: flex; flex-direction: column; overflow: hidden;
+        background: #fff; border-radius: 20px; box-shadow: 0 24px 70px rgba(0,0,0,.3);
+      }
+      .ph-form-dialog { width: min(1080px, 100%); }
+      .ph-detail-dialog { width: min(1140px, 100%); }
+      .ph-modal-head {
+        flex-shrink: 0; display: flex; align-items: flex-start; justify-content: space-between;
+        gap: 12px; padding: 18px 22px;
+        background: linear-gradient(135deg, #7a1b1b 0%, #4d0e0e 100%); color: #fff;
+      }
+      .ph-modal-head h2 { font-size: 18px; font-weight: 800; margin-top: 2px; }
+      .ph-modal-head p { font-size: 11px; color: rgba(255,255,255,.75); margin-top: 2px; }
+      .ph-modal-close {
+        width: 34px; height: 34px; border-radius: 999px; border: none;
+        background: rgba(255,255,255,.14); color: #fff; font-size: 20px; line-height: 1; cursor: pointer;
+        transition: background .2s;
+      }
+      .ph-modal-close:hover { background: rgba(255,255,255,.26); }
+      .ph-modal-body { flex: 1; overflow-y: auto; padding: 20px; background: #f8fafc; }
+      .ph-form-body { padding-bottom: 8px; }
+
+      /* Form di dalam popup */
+      .ph-form-card {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(15,23,42,.05); padding: 18px; margin-bottom: 16px;
+      }
+      .ph-section-title {
+        display: flex; align-items: flex-start; gap: 10px; padding-bottom: 12px;
+        margin-bottom: 15px; border-bottom: 1px solid #f1f5f9;
+      }
+      .ph-section-number {
+        width: 28px; height: 28px; border-radius: 999px; background: #7a1b1b; color: #fff;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 800; flex-shrink: 0;
+      }
+      .ph-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+      .ph-field label, .ph-field > label:not(.ph-switch) {
+        display: block; margin-bottom: 6px; font-size: 11.5px; font-weight: 700; color: #475569;
+      }
+      .ph-field .ph-hint { display: block; margin-top: 5px; font-size: 10.5px; color: #94a3b8; }
+      .ph-col-span-2 { grid-column: span 2; }
+      .ph-hide { display: none !important; }
+
+      /* Toggle on/off */
+      .ph-switch-wrap {
+        display: flex; align-items: center; justify-content: space-between; gap: 14px;
+        padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc;
+      }
+      .ph-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+      .ph-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+      .ph-switch-track {
+        width: 48px; height: 27px; border-radius: 999px; background: #cbd5e1;
+        position: relative; transition: background .25s ease, box-shadow .25s ease;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,.15);
+      }
+      .ph-switch-dot {
+        position: absolute; top: 3px; left: 3px; width: 21px; height: 21px; border-radius: 50%;
+        background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.28); transition: transform .25s ease;
+      }
+      .ph-switch input:checked + .ph-switch-track {
+        background: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.16), inset 0 1px 3px rgba(0,0,0,.12);
+      }
+      .ph-switch input:checked + .ph-switch-track .ph-switch-dot { transform: translateX(21px); }
+      .ph-switch input:focus-visible + .ph-switch-track { outline: 3px solid rgba(34,197,94,.35); outline-offset: 2px; }
+      .ph-switch-teks { display: block; font-size: 12px; font-weight: 700; color: #334155; }
+      .ph-switch-keterangan { display: block; margin-top: 2px; font-size: 10.5px; color: #94a3b8; }
+      .ph-include-note {
+        display: none; align-items: center; gap: 8px; margin-top: 8px; padding: 9px 12px;
+        border-radius: 10px; background: #ecfdf5; border: 1px solid #a7f3d0;
+        color: #047857; font-size: 11px; font-weight: 600;
+      }
+      .ph-include-note.terlihat { display: flex; }
+
+      .ph-cost-block {
+        border: 1px solid #f1e4e4; border-radius: 14px; padding: 14px;
+        background: #fffafa; margin-bottom: 13px;
+      }
+      .ph-cost-head {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px;
+      }
+      .ph-cost-title {
+        font-size: 12px; font-weight: 800; color: #7a1b1b;
+        text-transform: uppercase; letter-spacing: .04em;
+      }
+      .ph-cost-row {
+        display: grid; grid-template-columns: minmax(0, 1fr) 170px auto;
+        gap: 10px; align-items: end; margin-top: 10px;
+      }
+      .ph-price-wrap { display: none; }
+      .ph-price-wrap.terlihat { display: block; }
+      .ph-fixed-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+      .ph-preview-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+      .ph-preview-grid img { width: 82px; height: 82px; object-fit: cover; border-radius: 10px; border: 1px solid #e2e8f0; }
+
+      /* Footer form + kalkulasi */
+      .ph-form-footer {
+        flex-shrink: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+        gap: 14px; padding: 14px 20px; background: #fff; border-top: 1px solid #e2e8f0;
+      }
+      .ph-live-ringkas { display: flex; flex-wrap: wrap; gap: 26px; }
+      .ph-live-label {
+        display: block; font-size: 9.5px; font-weight: 800; letter-spacing: .07em;
+        text-transform: uppercase; color: #94a3b8;
+      }
+      .ph-live-ringkas strong { display: block; margin-top: 3px; font-size: 18px; font-weight: 800; color: #7a1b1b; }
+      .ph-form-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+      .ph-simpan-btn {
+        display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px;
+        border: none; border-radius: 11px; background: #7a1b1b; color: #fff;
+        font-size: 12.5px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 16px rgba(122,27,27,.22);
+      }
+      .ph-simpan-btn:hover { background: #5e1414; }
+
+      /* ===================== DETAIL MODAL ===================== */
+      .ph-detail-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; }
+      .ph-detail-aside, .ph-detail-main { display: flex; flex-direction: column; gap: 14px; }
+      .ph-detail-card {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px;
+        box-shadow: 0 6px 18px rgba(15,23,42,.05);
+      }
+      .ph-detail-card-head {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        padding-bottom: 10px; margin-bottom: 13px; border-bottom: 1px solid #f1f5f9;
+      }
+      .ph-detail-card-head h3 {
+        font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: #7a1b1b;
+      }
+      .ph-detail-card-head span { font-size: 10px; color: #94a3b8; }
+      .ph-status-badge {
+        display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+        background: rgba(255,255,255,.16); color: #fff; font-size: 10.5px; font-weight: 700;
+      }
+      .ph-status-badge::before {
+        content: ''; width: 6px; height: 6px; border-radius: 50%; background: #4ade80;
+        box-shadow: 0 0 6px #4ade80;
+      }
+      .ph-gallery-main {
+        width: 100%; height: 250px; object-fit: contain; background: #f8fafc;
+        border: 1px solid #e2e8f0; border-radius: 12px;
+      }
+      .ph-gallery-empty {
+        height: 250px; display: flex; align-items: center; justify-content: center; text-align: center;
+        padding: 20px; border: 1px dashed #cbd5e1; border-radius: 12px;
+        background: #f8fafc; color: #94a3b8; font-size: 12px;
+      }
+      .ph-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+      .ph-thumbs img {
+        width: 56px; height: 56px; object-fit: cover; border-radius: 8px;
+        border: 2px solid transparent; cursor: pointer; transition: border-color .2s, transform .2s;
+      }
+      .ph-thumbs img:hover { transform: translateY(-2px); }
+      .ph-thumbs img.aktif { border-color: #7a1b1b; }
+      .ph-side-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 12px; }
+      .ph-side-row:last-child { margin-bottom: 0; }
+      .ph-info-label {
+        display: block; font-size: 9.5px; font-weight: 800; letter-spacing: .07em;
+        text-transform: uppercase; color: #94a3b8; margin-bottom: 3px;
+      }
+      .ph-info-value { display: block; font-size: 13px; font-weight: 600; color: #1e293b; word-break: break-word; }
+      .ph-info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .ph-detail-note {
+        margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: #f8fafc;
+        border: 1px solid #e2e8f0;
+      }
+      .ph-detail-note p { margin: 0; font-size: 12px; line-height: 1.65; color: #475569; white-space: pre-line; }
+      .ph-detail-note + .ph-detail-note { margin-top: 10px; }
+      .ph-detail-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      .ph-detail-table thead th {
+        padding: 9px 10px; background: #fdf2f2; color: #7a1b1b; font-size: 9.5px;
+        text-transform: uppercase; letter-spacing: .06em; text-align: left; border-bottom: 1px solid #f4d7d7;
+      }
+      .ph-detail-table thead th:last-child { text-align: right; }
+      .ph-detail-table tbody th, .ph-detail-table tbody td {
+        padding: 9px 10px; border-bottom: 1px solid #f1f5f9; text-align: left;
+      }
+      .ph-detail-table tbody th { font-weight: 600; color: #475569; }
+      .ph-detail-table tbody td { text-align: right; font-weight: 700; color: #1e293b; white-space: nowrap; }
+      .ph-detail-table tbody tr:last-child th, .ph-detail-table tbody tr:last-child td { border-bottom: none; }
+      .ph-callout {
+        display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; padding: 10px 12px;
+        border-radius: 10px; font-size: 11px; font-weight: 600; line-height: 1.5;
+      }
+      .ph-callout-amber { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+      .ph-detail-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .ph-detail-summary-item {
+        padding: 15px 17px; border-radius: 14px; background: #fff;
+        border: 1px solid #e2e8f0; box-shadow: 0 6px 18px rgba(15,23,42,.05);
+      }
+      .ph-detail-summary-item strong { display: block; margin-top: 5px; font-size: 20px; font-weight: 800; color: #1e293b; }
+      .ph-detail-summary-item small { display: block; margin-top: 4px; font-size: 10px; color: #94a3b8; }
+      .ph-detail-summary-item.ph-total {
+        background: linear-gradient(135deg, #7a1b1b 0%, #4d0e0e 100%); border-color: transparent;
+      }
+      .ph-detail-summary-item.ph-total .ph-info-label,
+      .ph-detail-summary-item.ph-total small { color: rgba(255,255,255,.72); }
+      .ph-detail-summary-item.ph-total strong { color: #fff; font-size: 23px; }
+
+      /* Responsif */
+      @media (max-width: 1000px) {
+        .ph-detail-layout { grid-template-columns: 1fr; }
+        .ph-detail-aside { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+      }
+      @media (max-width: 760px) {
+        .ph-main { padding: 18px 14px 40px; }
+        .ph-grid, .ph-fixed-grid, .ph-info-grid, .ph-detail-summary { grid-template-columns: 1fr; }
+        .ph-col-span-2 { grid-column: span 1; }
+        .ph-cost-row { grid-template-columns: 1fr; }
+        .ph-detail-aside { grid-template-columns: 1fr; }
+        .ph-modal { padding: 10px; }
+        .ph-modal-dialog { max-height: calc(100vh - 20px); border-radius: 16px; }
+        .ph-modal-body { padding: 14px; }
+        .ph-modal-head { padding: 15px 16px; }
+        .ph-gallery-main, .ph-gallery-empty { height: 210px; }
+        .ph-form-footer { padding: 13px 14px; }
+      }
+
+      /* Cetak */
+      @media print {
+        body::before, .sidebar, .sidebar-overlay, .system-banner,
+        .ph-modal, .no-print, #toast-container { display: none !important; }
+        body, .ph-main { display: block !important; padding: 0 !important; margin: 0 !important; background: #fff !important; }
+        .ph-panel, .stat-card { box-shadow: none !important; border: 1px solid #d4d4d8 !important; }
+        .ph-table { min-width: 0 !important; }
+        .ph-table thead th { background: #f4f4f5 !important; color: #000 !important; }
+      }
+    </style>
+  </head>
+  <body class="text-slate-800 antialiased selection:bg-maroon-800 selection:text-white">
+    <%- include('partials/sidebar-user', { activePage: 'pengajuan-harga', user: userPH }) %>
+
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none no-print"></div>
+
+    <main class="pr-main ph-main">
+      <header class="system-banner no-print">
+        <div class="banner-title-wrap">
+          <button type="button" class="banner-toggle-btn" onclick="toggleSidebar()" aria-label="Buka menu navigasi" title="Buka Menu">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <div class="banner-text">
+            <span>System Pengadaan &bull; User</span>
+            <h1>Pengajuan Harga Merchandise</h1>
+          </div>
+        </div>
+        <div class="banner-actions">
+          <button type="button" onclick="eksporCSV()" class="ph-btn ph-btn-neutral cursor-pointer" title="Unduh data dalam format CSV">
+            <i data-lucide="file-down" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Export CSV</span>
+          </button>
+          <button type="button" onclick="window.print()" class="ph-btn ph-btn-neutral cursor-pointer" title="Cetak / simpan PDF">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Cetak</span>
+          </button>
+          <button type="button" onclick="bukaForm()" class="btn-banner-primary cursor-pointer" title="Buat pengajuan baru">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Input Pengajuan Baru</span>
+            <span class="sm:hidden">Input Baru</span>
+          </button>
+        </div>
+      </header>
+
+      <section id="view-list" class="space-y-5">
+        <div class="card-grid ph-card-grid">
+          <div class="stat-card card-blue">
+            <div class="card-header">
+              <span class="card-title">Total Item Barang</span>
+              <div class="icon-wrapper icon-blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="card-body">
+              <span class="card-value"><%= totalItemPH %></span>
+              <span class="card-unit">Item</span>
+            </div>
+            <div class="card-footer">
+              <span class="text-blue">Jenis merchandise</span>
+              <span>Diajukan</span>
+            </div>
+          </div>
+
+          <div class="stat-card card-green">
+            <div class="card-header">
+              <span class="card-title">Total Volume</span>
+              <div class="icon-wrapper icon-green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="card-body">
+              <span class="card-value"><%= Number(totalQtyPH).toLocaleString('id-ID') %></span>
+              <span class="card-unit">Unit</span>
+            </div>
+            <div class="card-footer">
+              <span class="text-green">Siap produksi</span>
+              <span>Seluruh pengajuan</span>
+            </div>
+          </div>
+
+          <div class="stat-card card-gold">
+            <div class="card-header">
+              <span class="card-title">Total Estimasi Harga</span>
+              <div class="icon-wrapper icon-gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="card-body">
+              <span class="card-value">Rp <%= Number(totalEstimasiPH).toLocaleString('id-ID') %></span>
+            </div>
+            <div class="card-footer">
+              <span class="text-orange">Akumulasi all-in</span>
+              <span>Keseluruhan</span>
+            </div>
+          </div>
+
+          <div class="stat-card card-red">
+            <div class="card-header">
+              <span class="card-title">Rata-rata Unit All-In</span>
+              <div class="icon-wrapper icon-red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="card-body">
+              <span class="card-value">Rp <%= Number(rataUnitPH).toLocaleString('id-ID') %></span>
+            </div>
+            <div class="card-footer">
+              <span class="text-red">Per satuan unit</span>
+              <span>All-in</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ph-panel">
+          <div class="ph-panel-head">
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">Daftar Pengajuan Harga</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Klik salah satu baris untuk melihat seluruh detail pengajuan.</p>
+            </div>
+            <span class="ph-badge"><%= totalItemPH %> Pengajuan</span>
+          </div>
+
+          <div class="ph-toolbar no-print">
+            <div class="flex-1 min-w-[220px] relative">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="ph-search" class="pl-9" placeholder="Cari barang, spesifikasi, tim..." oninput="renderTabel()" />
+            </div>
+            <div class="w-full sm:w-64">
+              <select id="ph-filter-tim" onchange="renderTabel()">
+                <option value="">Semua Tim Produksi</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="ph-table-wrap">
+            <table class="ph-table">
+              <thead>
+                <tr>
+                  <th>Nama Barang</th>
+                  <th>Tim Produksi</th>
+                  <th>Qty &amp; Satuan</th>
+                  <th>Harga Produksi</th>
+                  <th>Biaya Tambahan</th>
+                  <th>Harga All-In</th>
+                  <th>Total Harga</th>
+                  <th>PIC &amp; Waktu</th>
+                  <th class="no-print">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="ph-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FORM POPUP -->
+    <div id="ph-form-modal" class="ph-modal ph-form-modal" onclick="if (event.target === this) tutupForm()">
+      <div class="ph-modal-dialog ph-form-dialog">
+        <div class="ph-modal-head">
+          <div>
+            <span class="text-[10px] uppercase tracking-widest text-maroon-100 font-bold">Form Pengajuan</span>
+            <h2>Input Pengajuan Baru</h2>
+            <p>Lengkapi data merchandise, rincian biaya, dan foto produk.</p>
+          </div>
+          <button type="button" class="ph-modal-close" onclick="tutupForm()" aria-label="Tutup form">&times;</button>
+        </div>
+
+        <form id="ph-form" action="/pengajuan-harga/simpan" method="POST" enctype="multipart/form-data" onsubmit="return validasiForm()">
+          <div class="ph-modal-body ph-form-body">
+            <div class="ph-form-card">
+              <div class="ph-section-title">
+                <span class="ph-section-number">1</span>
+                <div>
+                  <h2 class="text-sm sm:text-base font-bold text-slate-900">Informasi Utama Merchandise</h2>
+                  <p class="text-[11px] text-slate-500">Data dasar barang dan harga produksi per unit.</p>
+                </div>
+              </div>
+              <div class="ph-grid">
+                <div class="ph-field ph-col-span-2">
+                  <label for="ph-nama">Nama Barang *</label>
+                  <input type="text" id="ph-nama" name="namaBarang" class="ph-input" required placeholder="Contoh: Tumbler Stainless Steel / Goodie Bag Spunbond" />
+                </div>
+                <div class="ph-field">
+                  <label for="ph-qty">Jumlah (Qty) *</label>
+                  <input type="number" id="ph-qty" name="qty" class="ph-input" min="1" value="1" required oninput="hitungLive()" />
+                </div>
+                <div class="ph-field">
+                  <label for="ph-satuan">Satuan *</label>
+                  <input type="text" id="ph-satuan" name="satuan" class="ph-input" value="pcs" required />
+                </div>
+                <div class="ph-field">
+                  <label for="ph-tim">Tim Produksi / Vendor *</label>
+                  <input type="text" id="ph-tim" name="timProduksi" class="ph-input" required placeholder="Contoh: Corkcicle Official / Mandiri Printing" />
+                </div>
+                <div class="ph-field">
+                  <label for="ph-harga-produksi">Harga Tim Produksi (Rp/Unit) *</label>
+                  <input type="number" id="ph-harga-produksi" name="hargaProduksi" class="ph-input" min="0" value="0" required oninput="hitungLive()" />
+                </div>
+                <div class="ph-field ph-col-span-2">
+                  <div class="ph-switch-wrap">
+                    <div>
+                      <span class="ph-switch-teks">Termasuk Include All in Harga Produksi</span>
+                      <span class="ph-switch-keterangan">Aktifkan jika harga produksi sudah mencakup seluruh biaya tambahan.</span>
+                    </div>
+                    <label class="ph-switch" title="Aktif / Nonaktif">
+                      <input type="checkbox" id="ph-include" name="includeAllIn" onchange="saatIncludeBerubah()" />
+                      <span class="ph-switch-track"><span class="ph-switch-dot"></span></span>
+                    </label>
+                  </div>
+                  <div id="ph-include-note" class="ph-include-note">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 flex-shrink-0"></i>
+                    <span>Rincian biaya tambahan disembunyikan dan tidak dihitung karena sudah termasuk dalam harga produksi.</span>
+                  </div>
+                </div>
+                <div class="ph-field ph-col-span-2">
+                  <label>Total Keseluruhan (Qty &times; Harga All-In)</label>
+                  <input type="text" id="ph-total-qty-display" class="ph-input bg-slate-50 font-bold" value="Rp 0" readonly />
+                </div>
+              </div>
+            </div>
+
+            <div id="ph-bagian-biaya" class="ph-form-card">
+              <div class="ph-section-title">
+                <span class="ph-section-number">2</span>
+                <div>
+                  <h2 class="text-sm sm:text-base font-bold text-slate-900">Rincian Biaya Tambahan (per Unit)</h2>
+                  <p class="text-[11px] text-slate-500">Pilih rincian dari dropdown. Kolom harga muncul setelah pilihan dipilih.</p>
+                </div>
+              </div>
+
+              <div class="ph-cost-block">
+                <div class="ph-cost-head">
+                  <span class="ph-cost-title">Branding &amp; Printing</span>
+                  <button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="tambahBiayaRow('branding')">+ Tambah Rincian</button>
+                </div>
+                <div id="rows-branding"></div>
+              </div>
+
+              <div class="ph-cost-block">
+                <div class="ph-cost-head">
+                  <span class="ph-cost-title">Packaging</span>
+                  <button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="tambahBiayaRow('packaging')">+ Tambah Rincian</button>
+                </div>
+                <div id="rows-packaging"></div>
+              </div>
+
+              <div class="ph-cost-block">
+                <div class="ph-cost-head">
+                  <span class="ph-cost-title">Packing Akhir</span>
+                  <button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="tambahBiayaRow('packing')">+ Tambah Rincian</button>
+                </div>
+                <div id="rows-packing"></div>
+              </div>
+
+              <div class="ph-cost-block">
+                <div class="ph-cost-head"><span class="ph-cost-title">Logistik Tim &amp; Sampel</span></div>
+                <div class="ph-fixed-grid">
+                  <div class="ph-field">
+                    <label for="ph-ongkir-tim">Ongkir Tim Produksi - DGS (pp)</label>
+                    <input type="number" id="ph-ongkir-tim" name="ongkirTimDgs" class="ph-input" min="0" value="0" oninput="hitungLive()" />
+                  </div>
+                  <div class="ph-field">
+                    <label for="ph-sampel">Sampel / Survey (per Unit)</label>
+                    <input type="number" id="ph-sampel" name="sampelSurvey" class="ph-input" min="0" value="0" oninput="hitungLive()" />
+                  </div>
+                  <div class="ph-field">
+                    <label for="ph-ongkir-client">Ongkir DGS - Client (Jakarta)</label>
+                    <input type="number" id="ph-ongkir-client" name="ongkirDgsClient" class="ph-input" min="0" value="0" oninput="hitungLive()" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ph-form-card">
+              <div class="ph-section-title">
+                <span class="ph-section-number">3</span>
+                <div>
+                  <h2 class="text-sm sm:text-base font-bold text-slate-900">Spesifikasi, PIC &amp; Foto Produk</h2>
+                  <p class="text-[11px] text-slate-500">Foto produk wajib di-upload dari perangkat, bukan URL/link.</p>
+                </div>
+              </div>
+              <div class="ph-grid">
+                <div class="ph-field ph-col-span-2">
+                  <label for="ph-spesifikasi">Spesifikasi Lengkap Barang</label>
+                  <textarea id="ph-spesifikasi" name="spesifikasi" class="ph-input" rows="4" placeholder="Warna: Matte black&#10;Ukuran: 20oz (270 ml)&#10;Fitur: Triple-insulated stainless steel"></textarea>
+                </div>
+                <div class="ph-field ph-col-span-2">
+                  <label for="ph-keterangan">Keterangan / Catatan Tambahan</label>
+                  <textarea id="ph-keterangan" name="keterangan" class="ph-input" rows="3" placeholder="Catatan khusus, ketentuan garansi, atau opsi sampel..."></textarea>
+                </div>
+                <div class="ph-field">
+                  <label for="ph-pic">PIC (Person in Charge)</label>
+                  <input type="text" id="ph-pic" name="pic" class="ph-input" placeholder="Contoh: Tim Marketing / Budi" />
+                </div>
+                <div class="ph-field">
+                  <label for="ph-waktu">Jangka Waktu Produksi</label>
+                  <input type="text" id="ph-waktu" name="jangkaWaktu" class="ph-input" placeholder="Contoh: 14 Hari Kerja" />
+                </div>
+                <div class="ph-field ph-col-span-2">
+                  <label for="ph-foto">Foto Produk Model</label>
+                  <input type="file" id="ph-foto" name="foto" class="ph-input" accept="image/*" multiple required onchange="pratinjauFoto(this)" />
+                  <span class="ph-hint">Maksimal 5 file gambar (JPG, PNG, WebP), masing-masing maksimal 5 MB.</span>
+                  <div id="ph-preview-foto" class="ph-preview-grid"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ph-form-footer no-print">
+            <div class="ph-live-ringkas">
+              <div>
+                <span class="ph-live-label">Harga All-In / Unit</span>
+                <strong id="ph-live-allin">Rp 0</strong>
+              </div>
+              <div>
+                <span class="ph-live-label">Total Pengajuan</span>
+                <strong id="ph-live-total">Rp 0</strong>
+              </div>
+            </div>
+            <div class="ph-form-actions">
+              <button type="button" onclick="tutupForm()" class="ph-btn ph-btn-neutral cursor-pointer">Batal</button>
+              <button type="submit" class="ph-simpan-btn cursor-pointer">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                Simpan Pengajuan
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- DETAIL POPUP -->
+    <div id="ph-detail-modal" class="ph-modal" onclick="if (event.target === this) tutupDetail()">
+      <div class="ph-modal-dialog ph-detail-dialog">
+        <div class="ph-modal-head">
+          <div>
+            <span class="text-[10px] uppercase tracking-widest text-maroon-100 font-bold">Detail Pengajuan Harga</span>
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 id="ph-detail-judul">-</h2>
+              <span id="ph-detail-status" class="ph-status-badge">Diajukan</span>
+            </div>
+            <p id="ph-detail-kode">-</p>
+          </div>
+          <button type="button" class="ph-modal-close" onclick="tutupDetail()" aria-label="Tutup detail">&times;</button>
+        </div>
+        <div id="ph-detail-body" class="ph-modal-body"></div>
+      </div>
+    </div>
+
+    <script>
+      var PH_DATA = <%- jsonUntukScriptPH(dataPH) %>;
+      var PH_BERHASIL = <%- JSON.stringify(Boolean(typeof berhasil !== 'undefined' && berhasil)) %>;
+      var PH_GAGAL = <%- JSON.stringify(Boolean(typeof gagal !== 'undefined' && gagal)) %>;
+
+      var OPSI_PH = {
+        branding: ['sablon', 'bordir', 'grafir 1 sisi', 'grafir 2 sisi', 'print'],
+        packaging: ['plastic sealed', 'slongsong', 'custom box'],
+        packing: ['kardus', 'karung']
+      };
+      var JUDUL_GRUP_PH = {
+        branding: 'Branding & Printing',
+        packaging: 'Packaging',
+        packing: 'Packing Akhir'
+      };
+      var nomorRowPH = 0;
+
+      function toggleSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        if (sidebar) sidebar.classList.toggle('active');
+        if (overlay) overlay.classList.toggle('active');
+      }
+
+      function toggleDropdown(element) {
+        var parent = element.closest('.nav-item.dropdown');
+        if (parent) parent.classList.toggle('active');
+      }
+
+      function initIcons() {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          try { window.lucide.createIcons(); } catch (err) {}
+        }
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function rupiah(value) {
+        return 'Rp ' + Number(value || 0).toLocaleString('id-ID');
+      }
+
+      function formatTanggal(value) {
+        if (!value) return '-';
+        var d = new Date(value);
+        if (isNaN(d.getTime())) return String(value);
+        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+
+      function teksAman(value) {
+        return String(value == null || value === '' ? '-' : value);
+      }
+
+      function fotoUrl(nama) {
+        if (!nama) return '';
+        if (/^https?:\/\//i.test(nama)) return nama;
+        return '/uploads/' + encodeURIComponent(nama);
+      }
+
+      function tampilToast(pesan, jenis) {
+        var container = document.getElementById('toast-container');
+        if (!container) return;
+        var warna = jenis === 'gagal' ? 'bg-red-600' : 'bg-emerald-600';
+        var el = document.createElement('div');
+        el.className = 'px-4 py-3 rounded-xl text-white text-xs font-semibold shadow-lg ' + warna;
+        el.textContent = pesan;
+        container.appendChild(el);
+        setTimeout(function () { el.remove(); }, 3500);
+      }
+
+      function dataTersaring() {
+        var teks = String((document.getElementById('ph-search') || {}).value || '').toLowerCase().trim();
+        var tim = String((document.getElementById('ph-filter-tim') || {}).value || '');
+        return PH_DATA.filter(function (item) {
+          var gabungan = [
+            item.namaBarang, item.timProduksi, item.spesifikasi, item.pic, item.kode,
+            Array.isArray(item.biayaTambahan) ? item.biayaTambahan.map(function (b) { return b.item; }).join(' ') : ''
+          ].join(' ').toLowerCase();
+          return (!teks || gabungan.indexOf(teks) !== -1) && (!tim || item.timProduksi === tim);
+        });
+      }
+
+      function isiOpsiTim() {
+        var select = document.getElementById('ph-filter-tim');
+        if (!select) return;
+        var tim = [];
+        PH_DATA.forEach(function (item) {
+          if (item.timProduksi && tim.indexOf(item.timProduksi) === -1) tim.push(item.timProduksi);
+        });
+        tim.sort();
+        tim.forEach(function (nama) {
+          var opsi = document.createElement('option');
+          opsi.value = nama;
+          opsi.textContent = nama;
+          select.appendChild(opsi);
+        });
+      }
+
+      function renderTabel() {
+        var body = document.getElementById('ph-table-body');
+        if (!body) return;
+        var data = dataTersaring();
+
+        if (!data.length) {
+          body.innerHTML = '<tr><td colspan="9" class="ph-empty">Belum ada pengajuan harga yang cocok.</td></tr>';
+          return;
+        }
+
+        var baris = data.map(function (item) {
+          var biaya = Number(item.totalBiayaTambahan) || 0;
+          return '<tr class="ph-row" onclick="bukaDetail(\'' + item._id + '\')">' +
+            '<td><span class="ph-nama">' + escapeHtml(item.namaBarang) + '</span>' +
+              '<span class="ph-sub">' + escapeHtml(item.kode || '-') + ' &bull; ' + formatTanggal(item.createdAt) + '</span></td>' +
+            '<td>' + escapeHtml(teksAman(item.timProduksi)) + '</td>' +
+            '<td><strong>' + Number(item.qty || 0).toLocaleString('id-ID') + '</strong> ' + escapeHtml(item.satuan || 'pcs') + '</td>' +
+            '<td>' + rupiah(item.hargaProduksi) + '</td>' +
+            '<td>' + rupiah(biaya) + '</td>' +
+            '<td><strong class="text-maroon-700">' + rupiah(item.hargaAllIn) + '</strong></td>' +
+            '<td><strong class="text-maroon-700">' + rupiah(item.totalHarga) + '</strong></td>' +
+            '<td>' + escapeHtml(teksAman(item.pic)) + '<span class="ph-sub">' + escapeHtml(teksAman(item.jangkaWaktu)) + '</span></td>' +
+            '<td class="no-print"><button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="event.stopPropagation(); bukaDetail(\'' + item._id + '\')">Lihat Detail</button></td>' +
+            '</tr>';
+        });
+
+        var totalQty = data.reduce(function (a, b) { return a + (Number(b.qty) || 0); }, 0);
+        var totalProduksi = data.reduce(function (a, b) { return a + (Number(b.hargaProduksi) || 0); }, 0);
+        var totalBiaya = data.reduce(function (a, b) { return a + (Number(b.totalBiayaTambahan) || 0); }, 0);
+        var totalSemua = data.reduce(function (a, b) { return a + (Number(b.totalHarga) || 0); }, 0);
+        var rata = totalQty > 0 ? Math.round(totalSemua / totalQty) : 0;
+
+        baris.push('<tr class="ph-total-row">' +
+          '<td>TOTAL KESELURUHAN</td><td>' + data.length + ' pengajuan</td>' +
+          '<td>' + Number(totalQty).toLocaleString('id-ID') + '</td>' +
+          '<td>' + rupiah(totalProduksi) + '</td>' +
+          '<td>' + rupiah(totalBiaya) + '</td>' +
+          '<td>' + rupiah(rata) + '</td>' +
+          '<td>' + rupiah(totalSemua) + '</td>' +
+          '<td colspan="2" class="no-print">-</td>' +
+          '</tr>');
+
+        body.innerHTML = baris.join('');
+      }
+
+      function bukaDetail(id) {
+        var item = PH_DATA.find(function (x) { return String(x._id) === String(id); });
+        if (!item) return;
+        tutupForm();
+
+        document.getElementById('ph-detail-judul').textContent = item.namaBarang || '-';
+        document.getElementById('ph-detail-status').textContent = teksAman(item.status || 'Diajukan');
+        document.getElementById('ph-detail-kode').textContent =
+          (item.kode || '-') + ' • ' + (item.timProduksi || '-') + ' • ' + formatTanggal(item.createdAt);
+
+        var fotoList = Array.isArray(item.gambar) ? item.gambar.filter(Boolean) : [];
+        var gambarHtml = fotoList.length
+          ? '<img id="ph-foto-utama" class="ph-gallery-main" src="' + fotoUrl(fotoList[0]) + '" alt="Foto ' + escapeHtml(item.namaBarang) + '" />' +
+            '<div class="ph-thumbs">' + fotoList.map(function (f, i) {
+              return '<img src="' + fotoUrl(f) + '" class="' + (i === 0 ? 'aktif' : '') + '" onclick="gantiFotoDetail(this)" alt="Thumbnail ' + (i + 1) + '" />';
+            }).join('') + '</div>'
+          : '<div class="ph-gallery-empty">Belum ada foto produk yang di-upload.</div>';
+
+        var biayaRows = ['<tr><th>Harga Tim Produksi</th><td>' + rupiah(item.hargaProduksi) + '</td></tr>'];
+        (Array.isArray(item.biayaTambahan) ? item.biayaTambahan : []).forEach(function (b) {
+          biayaRows.push('<tr><th>' + escapeHtml(JUDUL_GRUP_PH[b.grup] || b.grup || 'Rincian') + ' &bull; ' + escapeHtml(b.item) + '</th><td>' + rupiah(b.harga) + '</td></tr>');
+        });
+        biayaRows.push('<tr><th>Ongkir Tim Produksi - DGS (pp)</th><td>' + rupiah(item.ongkirTimDgs) + '</td></tr>');
+        biayaRows.push('<tr><th>Sampel / Survey (per Unit)</th><td>' + rupiah(item.sampelSurvey) + '</td></tr>');
+        biayaRows.push('<tr><th>Ongkir DGS - Client (Jakarta)</th><td>' + rupiah(item.ongkirDgsClient) + '</td></tr>');
+
+        var catatanInclude = item.includeAllIn
+          ? '<div class="ph-callout ph-callout-amber"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i><span>Biaya tambahan di atas sudah termasuk dalam harga produksi, sehingga tidak dijumlahkan lagi ke harga all-in.</span></div>'
+          : '';
+
+        document.getElementById('ph-detail-body').innerHTML =
+          '<div class="ph-detail-layout">' +
+            '<aside class="ph-detail-aside">' +
+              '<div class="ph-detail-card">' +
+                '<div class="ph-detail-card-head"><h3>Foto Produk</h3><span>' + fotoList.length + ' file</span></div>' +
+                gambarHtml +
+              '</div>' +
+              '<div class="ph-detail-card">' +
+                '<div class="ph-detail-card-head"><h3>Informasi Pengajuan</h3></div>' +
+                '<div class="ph-side-row"><span class="ph-info-label">Kode Pengajuan</span><span class="ph-info-value">' + escapeHtml(item.kode || '-') + '</span></div>' +
+                '<div class="ph-side-row"><span class="ph-info-label">Tanggal Diajukan</span><span class="ph-info-value">' + formatTanggal(item.createdAt) + '</span></div>' +
+                '<div class="ph-side-row"><span class="ph-info-label">Diinput Oleh</span><span class="ph-info-value">' + escapeHtml(teksAman(item.diinputOleh)) + '</span></div>' +
+                '<div class="ph-side-row"><span class="ph-info-label">Status</span><span class="ph-info-value">' + escapeHtml(teksAman(item.status || 'Diajukan')) + '</span></div>' +
+              '</div>' +
+            '</aside>' +
+            '<div class="ph-detail-main">' +
+              '<div class="ph-detail-card">' +
+                '<div class="ph-detail-card-head"><h3>Informasi Produk</h3><span>Data merchandise</span></div>' +
+                '<div class="ph-info-grid">' +
+                  '<div><span class="ph-info-label">Qty &amp; Satuan</span><span class="ph-info-value">' + Number(item.qty || 0).toLocaleString('id-ID') + ' ' + escapeHtml(item.satuan || 'pcs') + '</span></div>' +
+                  '<div><span class="ph-info-label">Tim Produksi / Vendor</span><span class="ph-info-value">' + escapeHtml(teksAman(item.timProduksi)) + '</span></div>' +
+                  '<div><span class="ph-info-label">PIC</span><span class="ph-info-value">' + escapeHtml(teksAman(item.pic)) + '</span></div>' +
+                  '<div><span class="ph-info-label">Waktu Produksi</span><span class="ph-info-value">' + escapeHtml(teksAman(item.jangkaWaktu)) + '</span></div>' +
+                '</div>' +
+                '<div class="ph-detail-note"><span class="ph-info-label">Spesifikasi Detail Produk</span><p>' + escapeHtml(teksAman(item.spesifikasi)) + '</p></div>' +
+                '<div class="ph-detail-note"><span class="ph-info-label">Keterangan Tambahan</span><p>' + escapeHtml(teksAman(item.keterangan)) + '</p></div>' +
+              '</div>' +
+              '<div class="ph-detail-card">' +
+                '<div class="ph-detail-card-head"><h3>Rincian Komponen Biaya</h3><span>Nominal per unit</span></div>' +
+                '<table class="ph-detail-table">' +
+                  '<thead><tr><th>Komponen</th><th>Nominal</th></tr></thead>' +
+                  '<tbody>' + biayaRows.join('') + '</tbody>' +
+                '</table>' +
+                catatanInclude +
+              '</div>' +
+              '<div class="ph-detail-summary">' +
+                '<div class="ph-detail-summary-item">' +
+                  '<span class="ph-info-label">Harga All-In per Unit</span>' +
+                  '<strong>' + rupiah(item.hargaAllIn) + '</strong>' +
+                  '<small>' + (item.includeAllIn ? 'Sudah termasuk biaya tambahan' : 'Termasuk rincian biaya di atas') + '</small>' +
+                '</div>' +
+                '<div class="ph-detail-summary-item ph-total">' +
+                  '<span class="ph-info-label">Total Keseluruhan</span>' +
+                  '<strong>' + rupiah(item.totalHarga) + '</strong>' +
+                  '<small>' + Number(item.qty || 0).toLocaleString('id-ID') + ' ' + escapeHtml(item.satuan || 'pcs') + ' &times; ' + rupiah(item.hargaAllIn) + '</small>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+
+        document.getElementById('ph-detail-modal').classList.add('terbuka');
+        document.body.style.overflow = 'hidden';
+        initIcons();
+      }
+
+      function gantiFotoDetail(gambar) {
+        var utama = document.getElementById('ph-foto-utama');
+        if (utama) utama.src = gambar.src;
+        document.querySelectorAll('#ph-detail-modal .ph-thumbs img').forEach(function (img) { img.classList.remove('aktif'); });
+        gambar.classList.add('aktif');
+      }
+
+      function tutupDetail() {
+        var modal = document.getElementById('ph-detail-modal');
+        if (modal) modal.classList.remove('terbuka');
+        if (!document.getElementById('ph-form-modal').classList.contains('terbuka')) document.body.style.overflow = '';
+      }
+
+      function tambahBiayaRow(grup) {
+        var wadah = document.getElementById('rows-' + grup);
+        if (!wadah) return;
+        nomorRowPH += 1;
+        var opsi = ['<option value="">-- Pilih rincian --</option>'].concat(
+          (OPSI_PH[grup] || []).map(function (item) {
+            return '<option value="' + item + '">' + item.charAt(0).toUpperCase() + item.slice(1) + '</option>';
+          })
+        ).join('');
+        var row = document.createElement('div');
+        row.className = 'ph-cost-row';
+        row.innerHTML =
+          '<input type="hidden" name="biayaGrup[]" value="' + grup + '" />' +
+          '<div class="ph-field">' +
+            '<label>Pilihan ' + JUDUL_GRUP_PH[grup] + '</label>' +
+            '<select name="biayaItem[]" class="ph-input item-select" data-grup="' + grup + '" onchange="saatItemBerubah(this)">' + opsi + '</select>' +
+          '</div>' +
+          '<div class="ph-field ph-price-wrap">' +
+            '<label>Harga per Unit (Rp)</label>' +
+            '<input type="number" name="biayaHarga[]" class="ph-input harga-input" min="0" value="0" oninput="hitungLive()" />' +
+          '</div>' +
+          '<button type="button" class="ph-btn ph-btn-neutral cursor-pointer" onclick="hapusBiayaRow(this)">Hapus</button>';
+        wadah.appendChild(row);
+      }
+
+      function saatItemBerubah(select) {
+        var row = select.closest('.ph-cost-row');
+        var wrap = row.querySelector('.ph-price-wrap');
+        var input = row.querySelector('.harga-input');
+        if (select.value) {
+          wrap.classList.add('terlihat');
+          if (!input.value) input.value = '0';
+        } else {
+          wrap.classList.remove('terlihat');
+          input.value = '0';
+        }
+        segarOpsi();
+        hitungLive();
+      }
+
+      function segarOpsi() {
+        var dipakai = {};
+        document.querySelectorAll('.item-select').forEach(function (select) {
+          if (select.value) dipakai[select.value] = select;
+        });
+        document.querySelectorAll('.item-select').forEach(function (select) {
+          Array.from(select.options).forEach(function (option) {
+            if (!option.value) return;
+            option.disabled = Boolean(dipakai[option.value] && dipakai[option.value] !== select);
+          });
+        });
+      }
+
+      function hapusBiayaRow(tombol) {
+        var row = tombol.closest('.ph-cost-row');
+        if (row) row.remove();
+        segarOpsi();
+        hitungLive();
+      }
+
+      function saatIncludeBerubah() {
+        var include = Boolean((document.getElementById('ph-include') || {}).checked);
+        var bagian = document.getElementById('ph-bagian-biaya');
+        var catatan = document.getElementById('ph-include-note');
+        if (bagian) bagian.classList.toggle('ph-hide', include);
+        if (catatan) catatan.classList.toggle('terlihat', include);
+        hitungLive();
+      }
+
+      function hitungLive() {
+        var qty = Math.max(1, Number((document.getElementById('ph-qty') || {}).value) || 1);
+        var produksi = Math.max(0, Number((document.getElementById('ph-harga-produksi') || {}).value) || 0);
+        var include = Boolean((document.getElementById('ph-include') || {}).checked);
+        var tambahan = 0;
+
+        document.querySelectorAll('.item-select').forEach(function (select) {
+          if (!select.value) return;
+          var row = select.closest('.ph-cost-row');
+          var harga = Number(row.querySelector('.harga-input').value) || 0;
+          tambahan += harga;
+        });
+
+        tambahan += Math.max(0, Number((document.getElementById('ph-ongkir-tim') || {}).value) || 0);
+        tambahan += Math.max(0, Number((document.getElementById('ph-sampel') || {}).value) || 0);
+        tambahan += Math.max(0, Number((document.getElementById('ph-ongkir-client') || {}).value) || 0);
+
+        var efektif = include ? 0 : tambahan;
+        var allIn = produksi + efektif;
+        var total = allIn * qty;
+
+        var elemenAllIn = document.getElementById('ph-live-allin');
+        var elemenTotal = document.getElementById('ph-live-total');
+        var elemenTotalDisplay = document.getElementById('ph-total-qty-display');
+        if (elemenAllIn) elemenAllIn.textContent = rupiah(allIn);
+        if (elemenTotal) elemenTotal.textContent = rupiah(total);
+        if (elemenTotalDisplay) elemenTotalDisplay.value = rupiah(total);
+      }
+
+      function pratinjauFoto(input) {
+        var wadah = document.getElementById('ph-preview-foto');
+        if (!wadah) return;
+        wadah.innerHTML = '';
+        Array.from(input.files || []).slice(0, 5).forEach(function (file) {
+          if (!file.type || file.type.indexOf('image/') !== 0) return;
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var img = document.createElement('img');
+            img.src = e.target.result;
+            img.alt = file.name;
+            wadah.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function validasiForm() {
+        var nama = String((document.getElementById('ph-nama') || {}).value || '').trim();
+        var tim = String((document.getElementById('ph-tim') || {}).value || '').trim();
+        if (!nama || !tim) {
+          alert('Nama barang dan tim produksi wajib diisi.');
+          return false;
+        }
+        var include = Boolean((document.getElementById('ph-include') || {}).checked);
+        var valid = true;
+        if (!include) {
+          document.querySelectorAll('.item-select').forEach(function (select) {
+            if (!select.value || !valid) return;
+            var row = select.closest('.ph-cost-row');
+            var harga = Number(row.querySelector('.harga-input').value) || 0;
+            if (harga <= 0) {
+              alert('Isi harga untuk rincian "' + select.value + '" dengan nilai lebih dari 0.');
+              valid = false;
+            }
+          });
+        }
+        return valid;
+      }
+
+      function bukaForm() {
+        var form = document.getElementById('ph-form');
+        if (form) form.reset();
+        ['branding', 'packaging', 'packing'].forEach(function (grup) {
+          var wadah = document.getElementById('rows-' + grup);
+          if (wadah) wadah.innerHTML = '';
+          tambahBiayaRow(grup);
+        });
+        var preview = document.getElementById('ph-preview-foto');
+        if (preview) preview.innerHTML = '';
+        var include = document.getElementById('ph-include');
+        if (include) include.checked = false;
+        segarOpsi();
+        saatIncludeBerubah();
+        document.getElementById('ph-form-modal').classList.add('terbuka');
+        document.body.style.overflow = 'hidden';
+        initIcons();
+        setTimeout(function () {
+          var nama = document.getElementById('ph-nama');
+          if (nama) nama.focus();
+        }, 60);
+      }
+
+      function tutupForm() {
+        var modal = document.getElementById('ph-form-modal');
+        if (modal) modal.classList.remove('terbuka');
+        if (!document.getElementById('ph-detail-modal').classList.contains('terbuka')) document.body.style.overflow = '';
+      }
+
+      function eksporCSV() {
+        var data = dataTersaring();
+        var kepala = ['Kode', 'Nama Barang', 'Tim Produksi', 'Qty', 'Satuan', 'Harga Produksi', 'Biaya Tambahan', 'Harga All-In', 'Total Harga', 'PIC', 'Waktu Produksi'];
+        var baris = data.map(function (item) {
+          return [
+            item.kode, item.namaBarang, item.timProduksi, item.qty, item.satuan,
+            item.hargaProduksi, item.totalBiayaTambahan, item.hargaAllIn, item.totalHarga,
+            item.pic, item.jangkaWaktu
+          ];
+        });
+        var isi = [kepala].concat(baris).map(function (row) {
+          return row.map(function (sel) {
+            return '"' + String(sel == null ? '' : sel).replace(/"/g, '""') + '"';
+          }).join(',');
+        }).join('\r\n');
+        var blob = new Blob(['\ufeff' + isi], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'pengajuan-harga.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        isiOpsiTim();
+        renderTabel();
+        saatIncludeBerubah();
+        initIcons();
+        if (PH_BERHASIL) tampilToast('Pengajuan harga berhasil disimpan.');
+        if (PH_GAGAL) tampilToast('Gagal menyimpan pengajuan harga. Periksa kembali input Anda.', 'gagal');
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (document.getElementById('ph-detail-modal').classList.contains('terbuka')) tutupDetail();
+        else if (document.getElementById('ph-form-modal').classList.contains('terbuka')) tutupForm();
+      });
+    </script>
+  </body>
+</html>

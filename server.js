@@ -1588,7 +1588,9 @@ async function renderPengajuanHarga(req, res, role) {
       ? req.session.user.namaLengkap || req.session.user.username || 'User'
       : req.session.adminUser || 'Admin';
 
-    res.render('pengajuan-harga', {
+    const namaView = role === 'admin' ? 'pengajuan-harga-admin' : 'pengajuan-harga-user';
+
+    res.render(namaView, {
       items,
       role,
       pageTitle: 'Pengajuan Harga — PT. DIAN GIRI SAPUTRA',
