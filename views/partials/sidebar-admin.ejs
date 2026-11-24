@@ -102,6 +102,18 @@
         </a>
       </li>
 
+      <li class="nav-item <%= _active === 'catatan-keuangan' ? 'active' : '' %>">
+        <a href="/catatan-keuangan">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet preview-icon">
+            <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 1-1 1H5a2 2 0 0 1 0-4h15"></path>
+            <path d="M5 3v18"></path><path d="M19 15v3a2 2 0 0 1-2 2H5"></path>
+          </svg>
+          <span>Catatan Keuangan</span>
+        </a>
+      </li>
+
       <li class="nav-item dropdown <%= _stokActive ? 'active' : '' %>">
         <a href="javascript:void(0)" class="dropdown-toggle" onclick="toggleDropdown(this)">
           <div class="dropdown-toggle-left">

@@ -1,0 +1,984 @@
+<%
+  var dataCK = (typeof items !== 'undefined' && items) ? items : [];
+  var daftarProjectCK = (typeof projects !== 'undefined' && projects) ? projects : [];
+  var projectCK = (typeof projectAktif !== 'undefined' && projectAktif) ? projectAktif : null;
+  var baseCK = (typeof baseUrl !== 'undefined' && baseUrl)
+    ? baseUrl
+    : ((typeof role !== 'undefined' && role === 'admin') ? '/catatan-keuangan' : '/catatan-keuangan-user');
+  var daftarKategoriCK = (typeof kategoriList !== 'undefined' && kategoriList && kategoriList.length)
+    ? kategoriList
+    : ['Makan & Minum', 'Transportasi', 'Belanja', 'Tagihan', 'Gaji/Pendapatan', 'Lainnya'];
+  var modeProyekCK = Boolean(projectCK);
+  var adminUserCK = (typeof adminUser !== 'undefined' && adminUser) ? adminUser : 'Admin';
+  var userCK = (typeof user !== 'undefined' && user) ? user : { username: adminUserCK, namaLengkap: adminUserCK };
+
+  function rupiahCK(nilai) {
+    return 'Rp ' + Math.round(Number(nilai) || 0).toLocaleString('id-ID');
+  }
+
+  function angkaCK(nilai) {
+    return Math.round(Number(nilai) || 0).toLocaleString('id-ID');
+  }
+
+  function statsTransaksiCK(list) {
+    var masuk = 0;
+    var keluar = 0;
+    list.forEach(function (t) {
+      if (t.type === 'income') masuk += Number(t.amount) || 0;
+      else keluar += Number(t.amount) || 0;
+    });
+    return { jumlah: list.length, masuk: masuk, keluar: keluar, saldo: masuk - keluar };
+  }
+
+  function statsProjectCK(idProject) {
+    return statsTransaksiCK(dataCK.filter(function (t) { return String(t.projectId) === String(idProject); }));
+  }
+
+  var statsSemuaCK = statsTransaksiCK(dataCK);
+
+  function jsonUntukScriptCK(nilai) {
+    return JSON.stringify(nilai == null ? null : nilai)
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/&/g, '\\u0026')
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
+  }
+%>
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <%- include('partials/head', { pageTitle: (typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Catatan Keuangan') + ' — User', useTailwind: true }) %>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/payment-request.css" />
+    <link rel="stylesheet" href="/css/stat-cards.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      /* =========================================================
+         CATATAN KEUANGAN — CSS KHALAMAN (inline, file user)
+         ========================================================= */
+      #toast-container { z-index: 3000 !important; }
+      .ck-main { max-width: 1280px !important; }
+      .ck-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 20px; }
+      .ck-card-grid .card-value { font-size: 1.8rem; word-break: break-word; }
+      .ck-card-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      @media (max-width: 1100px) { .ck-card-grid, .ck-card-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 700px) { .ck-card-grid, .ck-card-grid-3 { grid-template-columns: 1fr; } }
+
+      /* Card project (draft) */
+      .ck-project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+      @media (max-width: 1050px) { .ck-project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 700px) { .ck-project-grid { grid-template-columns: 1fr; } }
+      .ck-project-card { cursor: pointer; min-height: 176px; outline: none; }
+      .ck-project-card:focus-visible { box-shadow: 0 0 0 3px rgba(122,27,27,.25); }
+      .ck-project-card .card-title { max-width: 200px; line-height: 1.35; }
+      .ck-project-empty {
+        padding: 46px 20px; text-align: center; color: #94a3b8; font-size: 13px;
+        border: 1px dashed #cbd5e1; border-radius: 16px; background: #fff;
+      }
+
+      /* Panel */
+      .ck-panel {
+        background: rgba(255, 255, 255, 0.97);
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+      .ck-panel-head {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+        gap: 12px; padding: 18px 20px; border-bottom: 1px solid #f1f5f9;
+      }
+      .ck-panel-body { padding: 20px; }
+      .ck-badge {
+        display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px;
+        background: #fef3c7; color: #92400e; font-size: 10.5px; font-weight: 700;
+      }
+      .ck-badge-green { background: #ecfdf5; color: #047857; }
+      .ck-badge-rose { background: #fff1f2; color: #be123c; }
+
+      /* Tombol */
+      .ck-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+        padding: 10px 14px; border-radius: 10px; border: 1px solid transparent;
+        font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all .2s ease; white-space: nowrap;
+      }
+      .ck-btn-primary { background: #7a1b1b; color: #fff; box-shadow: 0 6px 16px rgba(122,27,27,.2); }
+      .ck-btn-primary:hover { background: #5e1414; }
+      .ck-btn-ghost { background: #fff; color: #7a1b1b; border-color: #f2d7d7; }
+      .ck-btn-ghost:hover { background: #fdf2f2; }
+      .ck-btn-neutral { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
+      .ck-btn-neutral:hover { background: #f1f5f9; }
+      .ck-btn-emerald { background: #059669; color: #fff; box-shadow: 0 6px 16px rgba(5,150,105,.18); }
+      .ck-btn-emerald:hover { background: #047857; }
+
+      /* Form transaksi */
+      .ck-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+      @media (max-width: 700px) { .ck-form-grid { grid-template-columns: 1fr; } }
+      .ck-field label, .ck-field > label:not(.ck-type-option) {
+        display: block; margin-bottom: 6px; font-size: 11px; font-weight: 800;
+        letter-spacing: .05em; text-transform: uppercase; color: #64748b;
+      }
+      .ck-input {
+        width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 11px;
+        background: #fff; font-size: 13px; color: #1e293b; outline: none;
+        transition: border-color .2s, box-shadow .2s;
+      }
+      .ck-input:focus { border-color: #7a1b1b; box-shadow: 0 0 0 3px rgba(122,27,27,.08); }
+      .ck-input::placeholder { color: #94a3b8; }
+      .ck-amount-wrap { position: relative; }
+      .ck-amount-wrap span {
+        position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+        font-size: 12px; font-weight: 800; color: #94a3b8;
+      }
+      .ck-amount-wrap .ck-input { padding-left: 38px; font-weight: 700; }
+      .ck-type-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .ck-type-option {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 12px 8px; border-radius: 12px; border: 1px solid #e2e8f0;
+        background: #fff; color: #475569; font-size: 12.5px; font-weight: 700;
+        cursor: pointer; transition: all .2s ease; user-select: none;
+      }
+      .ck-type-option input { position: absolute; opacity: 0; width: 0; height: 0; }
+      .ck-type-option.aktif-ekspense {
+        border-color: #7a1b1b; background: #fdf2f2; color: #7a1b1b;
+        box-shadow: 0 0 0 3px rgba(122,27,27,.07);
+      }
+      .ck-type-option.aktif-income {
+        border-color: #059669; background: #ecfdf5; color: #047857;
+        box-shadow: 0 0 0 3px rgba(5,150,105,.07);
+      }
+      .ck-type-option svg { width: 15px; height: 15px; }
+
+      /* Chart */
+      .ck-chart-head {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+        gap: 10px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9;
+      }
+      .ck-tab-wrap {
+        display: inline-flex; gap: 3px; padding: 4px; border-radius: 11px; background: #f1f5f9;
+      }
+      .ck-tab {
+        padding: 7px 11px; border: none; border-radius: 8px; background: transparent;
+        color: #64748b; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .2s;
+      }
+      .ck-tab.aktif { background: #fff; color: #0f172a; box-shadow: 0 1px 4px rgba(15,23,42,.12); }
+      .ck-chart-box { position: relative; height: 290px; }
+      .ck-chart-box canvas { width: 100% !important; height: 100% !important; }
+      .ck-chart-fallback {
+        height: 100%; display: flex; align-items: center; justify-content: center;
+        text-align: center; color: #94a3b8; font-size: 12px;
+        border: 1px dashed #cbd5e1; border-radius: 12px; background: #f8fafc;
+      }
+
+      /* Tabel riwayat */
+      .ck-toolbar {
+        display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+      }
+      .ck-search-wrap { position: relative; width: 100%; max-width: 280px; }
+      .ck-search-wrap svg {
+        position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+        width: 15px; height: 15px; color: #94a3b8;
+      }
+      .ck-search-wrap .ck-input { padding-left: 34px; }
+      .ck-filter-wrap { display: inline-flex; gap: 3px; padding: 4px; border-radius: 11px; background: #f1f5f9; }
+      .ck-filter-btn {
+        padding: 7px 12px; border: none; border-radius: 8px; background: transparent;
+        color: #64748b; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .2s;
+      }
+      .ck-filter-btn.aktif { background: #fff; color: #0f172a; box-shadow: 0 1px 4px rgba(15,23,42,.12); }
+      .ck-table-wrap { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+      .ck-table { width: 100%; min-width: 720px; border-collapse: collapse; }
+      .ck-table thead th {
+        padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+        color: #64748b; font-size: 10px; font-weight: 800; letter-spacing: .06em;
+        text-transform: uppercase; text-align: left; white-space: nowrap;
+      }
+      .ck-table tbody td { padding: 13px 16px; border-bottom: 1px solid #f1f5f9; font-size: 12.5px; color: #334155; }
+      .ck-table tbody tr:last-child td { border-bottom: none; }
+      .ck-table tbody tr:hover { background: #fdf2f2; }
+      .ck-table .num { text-align: right; white-space: nowrap; font-weight: 800; }
+      .ck-table .aksi { text-align: center; }
+      .ck-cat {
+        display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px;
+        border-radius: 999px; font-size: 10.5px; font-weight: 700; white-space: nowrap;
+      }
+      .ck-cat svg { width: 12px; height: 12px; }
+      .ck-cat-amber { background: #fef3c7; color: #b45309; }
+      .ck-cat-blue { background: #dbeafe; color: #1d4ed8; }
+      .ck-cat-pink { background: #fce7f3; color: #be185d; }
+      .ck-cat-purple { background: #ede9fe; color: #6d28d9; }
+      .ck-cat-emerald { background: #d1fae5; color: #047857; }
+      .ck-cat-slate { background: #f1f5f9; color: #475569; }
+      .ck-hapus {
+        width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+        border: none; border-radius: 8px; background: transparent; color: #94a3b8; cursor: pointer;
+      }
+      .ck-hapus:hover { background: #fff1f2; color: #e11d48; }
+      .ck-hapus svg { width: 15px; height: 15px; }
+      .ck-empty { padding: 44px 20px; text-align: center; color: #94a3b8; font-size: 12.5px; }
+      .ck-empty strong { display: block; color: #475569; font-size: 14px; margin-bottom: 4px; }
+
+      /* Toast */
+      #ck-toast {
+        position: fixed; right: 20px; bottom: 20px; z-index: 3000;
+        display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+        border-radius: 13px; background: #0f172a; color: #fff; font-size: 12px; font-weight: 600;
+        box-shadow: 0 14px 35px rgba(15,23,42,.3);
+        transform: translateY(24px); opacity: 0; pointer-events: none; transition: all .3s ease;
+      }
+      #ck-toast.muncul { transform: translateY(0); opacity: 1; }
+      #ck-toast svg { width: 17px; height: 17px; color: #34d399; }
+      #ck-toast.gagal svg { color: #fb7185; }
+
+      /* Modal tambah project */
+      .ck-modal {
+        position: fixed; inset: 0; z-index: 2500; display: none;
+        align-items: center; justify-content: center; padding: 24px;
+        background: rgba(15,23,42,.68); backdrop-filter: blur(5px);
+      }
+      .ck-modal.terbuka { display: flex; }
+      .ck-modal-dialog {
+        width: min(480px, 100%); max-height: calc(100vh - 48px); margin: auto;
+        display: flex; flex-direction: column; overflow: hidden;
+        background: #fff; border-radius: 18px; box-shadow: 0 24px 70px rgba(0,0,0,.3);
+      }
+      .ck-modal-dialog form { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+      .ck-modal-head {
+        flex-shrink: 0; display: flex; align-items: flex-start; justify-content: space-between;
+        gap: 12px; padding: 18px 20px;
+        background: linear-gradient(135deg, #7a1b1b 0%, #4d0e0e 100%); color: #fff;
+      }
+      .ck-modal-head h2 { font-size: 17px; font-weight: 800; margin-top: 2px; }
+      .ck-modal-head p { font-size: 11px; color: rgba(255,255,255,.75); margin-top: 2px; }
+      .ck-modal-close {
+        width: 32px; height: 32px; border-radius: 999px; border: none;
+        background: rgba(255,255,255,.14); color: #fff; font-size: 19px; line-height: 1; cursor: pointer;
+      }
+      .ck-modal-close:hover { background: rgba(255,255,255,.26); }
+      .ck-modal-body {
+        flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch; padding: 20px; background: #f8fafc;
+      }
+      .ck-modal-footer {
+        flex-shrink: 0; display: flex; justify-content: flex-end; gap: 9px;
+        padding: 14px 20px; background: #fff; border-top: 1px solid #e2e8f0;
+      }
+
+      @media (max-width: 760px) {
+        .ck-main { padding: 18px 14px 40px; }
+        .ck-panel-head, .ck-panel-body { padding: 15px; }
+        .ck-modal { padding: 10px; }
+        .ck-modal-dialog { max-height: calc(100vh - 20px); border-radius: 14px; }
+        .ck-chart-box { height: 250px; }
+        .ck-toolbar { justify-content: flex-start; }
+        .ck-search-wrap { max-width: none; }
+      }
+
+      @media print {
+        body::before, .sidebar, .sidebar-overlay, .system-banner, .no-print,
+        #toast-container, #ck-toast, .ck-modal { display: none !important; }
+        body, .ck-main { display: block !important; padding: 0 !important; margin: 0 !important; background: #fff !important; }
+        .ck-panel, .stat-card { box-shadow: none !important; border: 1px solid #d4d4d8 !important; }
+      }
+    </style>
+  </head>
+  <body class="text-slate-800 antialiased selection:bg-maroon-800 selection:text-white">
+    <%- include('partials/sidebar-user', { activePage: 'catatan-keuangan', user: userCK }) %>
+
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none no-print"></div>
+    <div id="ck-toast"><i data-lucide="check-circle-2"></i><span id="ck-toast-pesan">Notifikasi</span></div>
+
+    <main class="pr-main ck-main">
+      <header class="system-banner no-print">
+        <div class="banner-title-wrap">
+          <button type="button" class="banner-toggle-btn" onclick="toggleSidebar()" aria-label="Buka menu navigasi" title="Buka Menu">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <div class="banner-text">
+            <span>System Pengadaan &bull; User</span>
+            <h1><% if (modeProyekCK) { %>Catatan Keuangan &mdash; <%= projectCK.namaProject %><% } else { %>Catatan Keuangan &mdash; Draft Project<% } %></h1>
+          </div>
+        </div>
+        <div class="banner-actions">
+          <% if (modeProyekCK) { %>
+          <button type="button" onclick="kembaliKeProjectCK()" class="ck-btn ck-btn-neutral cursor-pointer" title="Kembali ke draft project">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Daftar Project</span>
+          </button>
+          <button type="button" onclick="kosongkanDataCK()" class="ck-btn ck-btn-neutral cursor-pointer" title="Hapus semua transaksi pada project ini">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Kosongkan Data</span>
+          </button>
+          <button type="button" onclick="fokusTransaksiCK()" class="btn-banner-primary cursor-pointer" title="Tambah transaksi baru">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Tambah Transaksi</span>
+          </button>
+          <% } else { %>
+          <button type="button" onclick="bukaProjectModal()" class="btn-banner-primary cursor-pointer" title="Tambah project baru">
+            <i data-lucide="folder-plus" class="w-4 h-4"></i>
+            <span>Tambah Project</span>
+          </button>
+          <% } %>
+        </div>
+      </header>
+
+      <% if (!modeProyekCK) { %>
+      <!-- ============ LANDING: DRAFT PROJECT ============ -->
+      <section id="view-project" class="space-y-5">
+        <div class="card-grid ck-card-grid">
+          <div class="stat-card card-blue">
+            <div class="card-header">
+              <span class="card-title">Total Project</span>
+              <div class="icon-wrapper icon-blue"><i data-lucide="folder-open" class="w-5 h-5"></i></div>
+            </div>
+            <div class="card-body">
+              <span class="card-value"><%= daftarProjectCK.length %></span>
+              <span class="card-unit">Project</span>
+            </div>
+            <div class="card-footer"><span class="text-blue">Tersedia</span><span>Catatan keuangan</span></div>
+          </div>
+
+          <div class="stat-card card-gold">
+            <div class="card-header">
+              <span class="card-title">Total Transaksi</span>
+              <div class="icon-wrapper icon-gold"><i data-lucide="receipt-text" class="w-5 h-5"></i></div>
+            </div>
+            <div class="card-body">
+              <span class="card-value"><%= angkaCK(statsSemuaCK.jumlah) %></span>
+              <span class="card-unit">Transaksi</span>
+            </div>
+            <div class="card-footer"><span class="text-orange">Seluruh project</span><span>Tercatat</span></div>
+          </div>
+
+          <div class="stat-card card-green">
+            <div class="card-header">
+              <span class="card-title">Total Pemasukan</span>
+              <div class="icon-wrapper icon-green"><i data-lucide="trending-up" class="w-5 h-5"></i></div>
+            </div>
+            <div class="card-body"><span class="card-value"><%= rupiahCK(statsSemuaCK.masuk) %></span></div>
+            <div class="card-footer"><span class="text-green">Akumulasi</span><span>Semua project</span></div>
+          </div>
+
+          <div class="stat-card card-red">
+            <div class="card-header">
+              <span class="card-title">Total Pengeluaran</span>
+              <div class="icon-wrapper icon-red"><i data-lucide="trending-down" class="w-5 h-5"></i></div>
+            </div>
+            <div class="card-body"><span class="card-value"><%= rupiahCK(statsSemuaCK.keluar) %></span></div>
+            <div class="card-footer"><span class="text-red">Akumulasi</span><span>Semua project</span></div>
+          </div>
+        </div>
+
+        <div class="ck-panel">
+          <div class="ck-panel-head">
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">Draft Project</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Setiap project memiliki catatan keuangan tersendiri. Klik card untuk membukanya.</p>
+            </div>
+            <span class="ck-badge"><%= daftarProjectCK.length %> Project</span>
+          </div>
+          <div class="ck-panel-body">
+            <% if (daftarProjectCK.length) { %>
+            <div class="ck-project-grid">
+              <% daftarProjectCK.forEach(function (project) { %>
+              <% var statCK = statsProjectCK(project._id); %>
+              <div class="stat-card card-gold ck-project-card" role="button" tabindex="0"
+                   onclick="bukaProjectCK('<%= String(project._id) %>')"
+                   onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); bukaProjectCK('<%= String(project._id) %>'); }">
+                <div class="card-header">
+                  <span class="card-title"><%= project.namaProject %></span>
+                  <div class="icon-wrapper icon-gold"><i data-lucide="wallet" class="w-5 h-5"></i></div>
+                </div>
+                <div class="card-body">
+                  <span class="card-value"><%= rupiahCK(statCK.saldo) %></span>
+                  <span class="card-unit">Saldo saat ini</span>
+                </div>
+                <div class="card-footer">
+                  <span class="text-orange"><%= angkaCK(statCK.jumlah) %> transaksi</span>
+                  <span>Buka &rarr;</span>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+            <% } else { %>
+            <div class="ck-project-empty">Belum ada project. Klik <strong>Tambah Project</strong> untuk membuat catatan keuangan baru.</div>
+            <% } %>
+          </div>
+        </div>
+      </section>
+      <% } else { %>
+      <!-- ============ HALAMAN PER PROJECT ============ -->
+      <section id="view-project-detail" class="space-y-5">
+        <div class="card-grid ck-card-grid ck-card-grid-3">
+          <div class="stat-card card-blue">
+            <div class="card-header">
+              <span class="card-title">Total Saldo Saat Ini</span>
+              <div class="icon-wrapper icon-blue"><i data-lucide="scale" class="w-5 h-5"></i></div>
+            </div>
+            <div class="card-body">
+              <span class="card-value" id="ck-total-saldo">Rp 0</span>
+            </div>
+            <div class="card-footer">
+              <span id="ck-saldo-badge" class="ck-badge ck-badge-green">Surplus</span>
+              <span>Akumulasi semua transaksi</span>
+            </div>
+          </div>
+
+          <div class="stat-card card-green">
+            <div class="card-header">
+              <span class="card-title">Pemasukan (Bulan Ini)</span>
+              <div class="icon-wrapper icon-green"><i data-lucide="arrow-down-left" class="w-5 h-5"></i></div>
+            </div>
+            <div class="card-body"><span class="card-value" id="ck-total-masuk">Rp 0</span></div>
+            <div class="card-footer"><span class="text-green">Terhitung bulan ini</span><span>Pemasukan</span></div>
+          </div>
+
+          <div class="stat-card card-red">
+            <div class="card-header">
+              <span class="card-title">Pengeluaran (Bulan Ini)</span>
+              <div class="icon-wrapper icon-red"><i data-lucide="arrow-up-right" class="w-5 h-5"></i></div>
+            </div>
+            <div class="card-body"><span class="card-value" id="ck-total-keluar">Rp 0</span></div>
+            <div class="card-footer"><span class="text-red">Terhitung bulan ini</span><span>Pengeluaran</span></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <section class="lg:col-span-5 ck-panel" id="ck-form-panel">
+            <div class="ck-panel-head">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">Tambah Transaksi</h2>
+                <p class="text-[11px] text-slate-500 mt-0.5">Catat pemasukan atau pengeluaran project ini.</p>
+              </div>
+              <span class="ck-badge">Input Cepat</span>
+            </div>
+            <div class="ck-panel-body">
+              <form id="ck-form" action="/catatan-keuangan/transaksi/add" method="POST" class="ck-form-grid">
+                <input type="hidden" name="projectId" value="<%= String(projectCK._id) %>" />
+                <div class="ck-field" style="grid-column: 1 / -1;">
+                  <label>Jenis Transaksi</label>
+                  <div class="ck-type-options">
+                    <label class="ck-type-option aktif-ekspense" id="ck-label-expense">
+                      <input type="radio" name="type" value="expense" checked onchange="saatJenisBerubah()" />
+                      <i data-lucide="trending-down"></i>
+                      <span>Pengeluaran</span>
+                    </label>
+                    <label class="ck-type-option" id="ck-label-income">
+                      <input type="radio" name="type" value="income" onchange="saatJenisBerubah()" />
+                      <i data-lucide="trending-up"></i>
+                      <span>Pemasukan</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="ck-field" style="grid-column: 1 / -1;">
+                  <label for="ck-deskripsi">Deskripsi Transaksi</label>
+                  <input type="text" id="ck-deskripsi" name="deskripsi" class="ck-input" required placeholder="Contoh: Belanja merchandise, Gaji produksi..." />
+                </div>
+                <div class="ck-field" style="grid-column: 1 / -1;">
+                  <label for="ck-amount">Jumlah (Rp)</label>
+                  <div class="ck-amount-wrap">
+                    <span>Rp</span>
+                    <input type="number" id="ck-amount" name="amount" class="ck-input" min="1" step="any" required placeholder="0" />
+                  </div>
+                </div>
+                <div class="ck-field">
+                  <label for="ck-category">Kategori</label>
+                  <select id="ck-category" name="category" class="ck-input" required>
+                    <option value="" disabled selected>Pilih Kategori</option>
+                    <% daftarKategoriCK.forEach(function (kategori) { %>
+                    <option value="<%= kategori %>"><%= kategori %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="ck-field">
+                  <label for="ck-tanggal">Tanggal</label>
+                  <input type="date" id="ck-tanggal" name="tanggal" class="ck-input" required />
+                </div>
+                <div class="ck-field" style="grid-column: 1 / -1;">
+                  <button type="submit" class="ck-btn ck-btn-primary cursor-pointer" style="width:100%; padding:12px;">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    Simpan Transaksi
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <section class="lg:col-span-7 ck-panel">
+            <div class="ck-panel-body">
+              <div class="ck-chart-head">
+                <div>
+                  <h2 class="text-base font-bold text-slate-900">Analisis Keuangan</h2>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Visualisasi transaksi pada project ini.</p>
+                </div>
+                <div class="ck-tab-wrap">
+                  <button type="button" id="ck-tab-category" class="ck-tab aktif" onclick="gantiTabCK('category')">Pengeluaran Per Kategori</button>
+                  <button type="button" id="ck-tab-comparison" class="ck-tab" onclick="gantiTabCK('comparison')">Pemasukan vs Pengeluaran</button>
+                </div>
+              </div>
+              <div id="ck-wrap-category" class="ck-chart-box">
+                <canvas id="ck-chart-category"></canvas>
+                <div id="ck-fallback-category" class="ck-chart-fallback hidden">Grafik tidak dapat ditampilkan. Pastikan koneksi internet tersedia.</div>
+              </div>
+              <div id="ck-wrap-comparison" class="ck-chart-box hidden">
+                <canvas id="ck-chart-comparison"></canvas>
+                <div id="ck-fallback-comparison" class="ck-chart-fallback hidden">Grafik tidak dapat ditampilkan. Pastikan koneksi internet tersedia.</div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section class="ck-panel">
+          <div class="ck-panel-head">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">Riwayat Transaksi</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Daftar transaksi yang telah dicatat pada project ini.</p>
+            </div>
+            <div class="ck-toolbar">
+              <div class="ck-search-wrap">
+                <i data-lucide="search"></i>
+                <input type="text" id="ck-search" class="ck-input" placeholder="Cari transaksi..." oninput="renderTabelCK()" />
+              </div>
+              <div class="ck-filter-wrap">
+                <button type="button" class="ck-filter-btn aktif" data-filter="all" onclick="gantiFilterCK(this)">Semua</button>
+                <button type="button" class="ck-filter-btn" data-filter="income" onclick="gantiFilterCK(this)">Pemasukan</button>
+                <button type="button" class="ck-filter-btn" data-filter="expense" onclick="gantiFilterCK(this)">Pengeluaran</button>
+              </div>
+            </div>
+          </div>
+          <div class="ck-table-wrap">
+            <table class="ck-table">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Deskripsi</th>
+                  <th>Kategori</th>
+                  <th class="num">Nominal (Rp)</th>
+                  <th class="aksi">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="ck-table-body"></tbody>
+            </table>
+            <div id="ck-empty" class="ck-empty hidden">
+              <strong>Tidak ada transaksi ditemukan</strong>
+              Coba sesuaikan pencarian atau kata kunci filter Anda.
+            </div>
+          </div>
+        </section>
+      </section>
+      <% } %>
+    </main>
+
+    <!-- POPUP TAMBAH PROJECT -->
+    <div id="ck-project-modal" class="ck-modal" onclick="if (event.target === this) tutupProjectModal()">
+      <div class="ck-modal-dialog">
+        <div class="ck-modal-head">
+          <div>
+            <span class="text-[10px] uppercase tracking-widest text-maroon-100 font-bold">Project Baru</span>
+            <h2>Tambah Project</h2>
+            <p>Buat wadah catatan keuangan untuk satu project.</p>
+          </div>
+          <button type="button" class="ck-modal-close" onclick="tutupProjectModal()" aria-label="Tutup">&times;</button>
+        </div>
+        <form action="/catatan-keuangan/project/add" method="POST" onsubmit="return validasiProjectCK()">
+          <div class="ck-modal-body">
+            <div class="ck-field">
+              <label for="ck-nama-project">Nama Project *</label>
+              <input type="text" id="ck-nama-project" name="namaProject" class="ck-input" required placeholder="Contoh: Merchandise Event Q4 2026" />
+              <span class="text-[10.5px] text-slate-400 mt-1.5 block">Setiap project menyimpan transaksi, saldo, dan grafiknya sendiri.</span>
+            </div>
+          </div>
+          <div class="ck-modal-footer">
+            <button type="button" class="ck-btn ck-btn-neutral cursor-pointer" onclick="tutupProjectModal()">Batal</button>
+            <button type="submit" class="ck-btn ck-btn-primary cursor-pointer">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              Simpan Project
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      var CK_DATA = <%- jsonUntukScriptCK(dataCK) %>;
+      var CK_PROJECT = <%- jsonUntukScriptCK(projectCK ? {
+        id: String(projectCK._id),
+        namaProject: projectCK.namaProject || ''
+      } : null) %>;
+      var CK_BASE_URL = <%- jsonUntukScriptCK(baseCK) %>;
+      var CK_KATEGORI = <%- jsonUntukScriptCK({
+        'Makan & Minum': { kelas: 'ck-cat-amber', hex: '#f59e0b', icon: 'utensils' },
+        'Transportasi': { kelas: 'ck-cat-blue', hex: '#3b82f6', icon: 'car' },
+        'Belanja': { kelas: 'ck-cat-pink', hex: '#ec4899', icon: 'shopping-bag' },
+        'Tagihan': { kelas: 'ck-cat-purple', hex: '#8b5cf6', icon: 'receipt' },
+        'Gaji/Pendapatan': { kelas: 'ck-cat-emerald', hex: '#10b981', icon: 'wallet' },
+        'Lainnya': { kelas: 'ck-cat-slate', hex: '#64748b', icon: 'ellipsis' }
+      }) %>;
+      var CK_BERHASIL = <%- JSON.stringify(Boolean(typeof berhasil !== 'undefined' && berhasil)) %>;
+      var CK_HAPUS = <%- JSON.stringify(Boolean(typeof hapus !== 'undefined' && hapus)) %>;
+      var CK_GAGAL = <%- JSON.stringify(Boolean(typeof gagal !== 'undefined' && gagal)) %>;
+
+      var filterCK = 'all';
+      var cariCK = '';
+      var chartKategoriCK = null;
+      var chartBandingCK = null;
+      var tabGrafikCK = 'category';
+
+      function toggleSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        if (sidebar) sidebar.classList.toggle('active');
+        if (overlay) overlay.classList.toggle('active');
+      }
+
+      function toggleDropdown(element) {
+        var parent = element.closest('.nav-item.dropdown');
+        if (parent) parent.classList.toggle('active');
+      }
+
+      function initIconsCK() {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          try { window.lucide.createIcons(); } catch (err) {}
+        }
+      }
+
+      function escapeHtmlCK(nilai) {
+        return String(nilai == null ? '' : nilai).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function rupiahCK(nilai) {
+        return 'Rp ' + Math.round(Number(nilai) || 0).toLocaleString('id-ID');
+      }
+
+      function formatTanggalCK(nilai) {
+        if (!nilai) return '-';
+        var d = new Date(nilai);
+        if (isNaN(d.getTime())) return String(nilai);
+        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+
+      function tampilToastCK(pesan, gagal) {
+        var el = document.getElementById('ck-toast');
+        var teks = document.getElementById('ck-toast-pesan');
+        if (!el || !teks) return;
+        teks.textContent = pesan;
+        el.classList.toggle('gagal', Boolean(gagal));
+        el.classList.add('muncul');
+        clearTimeout(window.ckToastTimer);
+        window.ckToastTimer = setTimeout(function () { el.classList.remove('muncul'); }, 3200);
+      }
+
+      function bukaProjectCK(id) {
+        window.location.href = CK_BASE_URL + '/project/' + encodeURIComponent(id);
+      }
+
+      function kembaliKeProjectCK() {
+        window.location.href = CK_BASE_URL;
+      }
+
+      function bukaProjectModal() {
+        var form = document.getElementById('ck-project-form');
+        if (form) form.reset();
+        var input = document.getElementById('ck-nama-project');
+        if (input) input.value = '';
+        document.getElementById('ck-project-modal').classList.add('terbuka');
+        document.body.style.overflow = 'hidden';
+        initIconsCK();
+        setTimeout(function () { if (input) input.focus(); }, 60);
+      }
+
+      function tutupProjectModal() {
+        document.getElementById('ck-project-modal').classList.remove('terbuka');
+        document.body.style.overflow = '';
+      }
+
+      function validasiProjectCK() {
+        var nama = String((document.getElementById('ck-nama-project') || {}).value || '').trim();
+        if (!nama) {
+          alert('Nama project wajib diisi.');
+          return false;
+        }
+        return true;
+      }
+
+      function fokusTransaksiCK() {
+        var form = document.getElementById('ck-form');
+        if (!form) return;
+        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function () {
+          var input = document.getElementById('ck-deskripsi');
+          if (input) input.focus();
+        }, 250);
+      }
+
+      function saatJenisBerubah() {
+        var expense = document.querySelector('input[name="type"][value="expense"]');
+        var income = document.querySelector('input[name="type"][value="income"]');
+        var labelExpense = document.getElementById('ck-label-expense');
+        var labelIncome = document.getElementById('ck-label-income');
+        if (!expense || !income || !labelExpense || !labelIncome) return;
+        var iniIncome = income.checked;
+        labelIncome.classList.toggle('aktif-income', iniIncome);
+        labelExpense.classList.toggle('aktif-ekspense', !iniIncome);
+      }
+
+      function ringkasCK(list) {
+        var masuk = 0;
+        var keluar = 0;
+        var sekarang = new Date();
+        var bulanIni = sekarang.getMonth();
+        var tahunIni = sekarang.getFullYear();
+        var masukBulanIni = 0;
+        var keluarBulanIni = 0;
+        var kategori = {};
+
+        list.forEach(function (t) {
+          var jumlah = Number(t.amount) || 0;
+          var tgl = new Date(t.tanggal);
+          var diBulanIni = !isNaN(tgl.getTime()) && tgl.getMonth() === bulanIni && tgl.getFullYear() === tahunIni;
+
+          if (t.type === 'income') {
+            masuk += jumlah;
+            if (diBulanIni) masukBulanIni += jumlah;
+          } else {
+            keluar += jumlah;
+            if (diBulanIni) keluarBulanIni += jumlah;
+            var kat = t.category || 'Lainnya';
+            kategori[kat] = (kategori[kat] || 0) + jumlah;
+          }
+        });
+
+        return {
+          masuk: masuk,
+          keluar: keluar,
+          saldo: masuk - keluar,
+          masukBulanIni: masukBulanIni,
+          keluarBulanIni: keluarBulanIni,
+          kategori: kategori,
+          totalMasuk: masuk,
+          totalKeluar: keluar
+        };
+      }
+
+      function renderRingkasanCK() {
+        var elSaldo = document.getElementById('ck-total-saldo');
+        if (!elSaldo) return;
+        var r = ringkasCK(CK_DATA);
+        elSaldo.textContent = rupiahCK(r.saldo);
+        document.getElementById('ck-total-masuk').textContent = rupiahCK(r.masukBulanIni);
+        document.getElementById('ck-total-keluar').textContent = rupiahCK(r.keluarBulanIni);
+        var badge = document.getElementById('ck-saldo-badge');
+        badge.textContent = r.saldo >= 0 ? 'Surplus' : 'Defisit';
+        badge.className = 'ck-badge ' + (r.saldo >= 0 ? 'ck-badge-green' : 'ck-badge-rose');
+      }
+
+      function dataTersaringCK() {
+        return CK_DATA.filter(function (t) {
+          var cocokFilter = filterCK === 'all' || t.type === filterCK;
+          var teks = (String(t.deskripsi || '') + ' ' + String(t.category || '')).toLowerCase();
+          return cocokFilter && (!cariCK || teks.indexOf(cariCK) !== -1);
+        }).sort(function (a, b) {
+          return new Date(b.tanggal) - new Date(a.tanggal);
+        });
+      }
+
+      function metaKategoriCK(nama) {
+        return CK_KATEGORI[nama] || CK_KATEGORI['Lainnya'];
+      }
+
+      function renderTabelCK() {
+        var body = document.getElementById('ck-table-body');
+        if (!body) return;
+        var data = dataTersaringCK();
+        var empty = document.getElementById('ck-empty');
+
+        if (!data.length) {
+          body.innerHTML = '';
+          if (empty) empty.classList.remove('hidden');
+          return;
+        }
+        if (empty) empty.classList.add('hidden');
+
+        body.innerHTML = data.map(function (t) {
+          var meta = metaKategoriCK(t.category);
+          var income = t.type === 'income';
+          return '<tr>' +
+            '<td class="whitespace-nowrap text-xs text-slate-500 font-medium">' + formatTanggalCK(t.tanggal) + '</td>' +
+            '<td class="font-semibold text-slate-800">' + escapeHtmlCK(t.deskripsi) + '</td>' +
+            '<td class="whitespace-nowrap"><span class="ck-cat ' + meta.kelas + '">' +
+              '<i data-lucide="' + meta.icon + '"></i><span>' + escapeHtmlCK(t.category || 'Lainnya') + '</span></span></td>' +
+            '<td class="num ' + (income ? 'text-emerald-600' : 'text-slate-900') + '">' +
+              (income ? '+ ' : '- ') + rupiahCK(t.amount) + '</td>' +
+            '<td class="aksi"><button type="button" class="ck-hapus" onclick="hapusTransaksiCK(\'' + t._id + '\')" title="Hapus Transaksi">' +
+              '<i data-lucide="trash-2"></i></button></td>' +
+            '</tr>';
+        }).join('');
+        initIconsCK();
+      }
+
+      function renderGrafikCK() {
+        var kanvasKategori = document.getElementById('ck-chart-category');
+        if (!kanvasKategori || typeof Chart === 'undefined') {
+          var fallbackKategori = document.getElementById('ck-fallback-category');
+          var fallbackBanding = document.getElementById('ck-fallback-comparison');
+          if (fallbackKategori) fallbackKategori.classList.remove('hidden');
+          if (fallbackBanding) fallbackBanding.classList.remove('hidden');
+          return;
+        }
+
+        var r = ringkasCK(CK_DATA);
+        var labels = Object.keys(r.kategori);
+        var nilai = labels.map(function (k) { return r.kategori[k]; });
+        var warna = labels.map(function (k) { return metaKategoriCK(k).hex; });
+
+        if (chartKategoriCK) chartKategoriCK.destroy();
+        chartKategoriCK = new Chart(kanvasKategori.getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: labels.length ? labels : ['Belum ada pengeluaran'],
+            datasets: [{
+              data: nilai.length ? nilai : [1],
+              backgroundColor: nilai.length ? warna : ['#e2e8f0'],
+              borderWidth: 2,
+              borderColor: '#ffffff',
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { font: { family: 'Inter', size: 11 }, padding: 14, usePointStyle: true },
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    if (!nilai.length) return ' Tidak ada data';
+                    return ' ' + ctx.label + ': ' + rupiahCK(ctx.raw);
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        if (chartBandingCK) chartBandingCK.destroy();
+        chartBandingCK = new Chart(document.getElementById('ck-chart-comparison').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: ['Pemasukan', 'Pengeluaran'],
+            datasets: [{
+              label: 'Total Akumulasi',
+              data: [r.totalMasuk, r.totalKeluar],
+              backgroundColor: ['#10b981', '#7a1b1b'],
+              borderRadius: 8,
+              barThickness: 44,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: { label: function (ctx) { return ' ' + ctx.dataset.label + ': ' + rupiahCK(ctx.raw); } },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) { return 'Rp ' + (value / 1000).toLocaleString('id-ID') + 'k'; },
+                  font: { family: 'Inter', size: 10 },
+                },
+                grid: { color: '#f1f5f9' },
+              },
+              x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
+            },
+          },
+        });
+      }
+
+      function gantiTabCK(tab) {
+        tabGrafikCK = tab;
+        var kategoriAktif = tab === 'category';
+        document.getElementById('ck-tab-category').classList.toggle('aktif', kategoriAktif);
+        document.getElementById('ck-tab-comparison').classList.toggle('aktif', !kategoriAktif);
+        document.getElementById('ck-wrap-category').classList.toggle('hidden', !kategoriAktif);
+        document.getElementById('ck-wrap-comparison').classList.toggle('hidden', kategoriAktif);
+        if (!kategoriAktif && chartBandingCK) chartBandingCK.resize();
+        if (kategoriAktif && chartKategoriCK) chartKategoriCK.resize();
+      }
+
+      function gantiFilterCK(tombol) {
+        document.querySelectorAll('.ck-filter-btn').forEach(function (b) { b.classList.remove('aktif'); });
+        tombol.classList.add('aktif');
+        filterCK = tombol.getAttribute('data-filter');
+        renderTabelCK();
+      }
+
+      function kirimFormCK(action, fieldTambahan) {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = action;
+        Object.keys(fieldTambahan || {}).forEach(function (nama) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = nama;
+          input.value = fieldTambahan[nama];
+          form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        form.submit();
+      }
+
+      function hapusTransaksiCK(id) {
+        if (!confirm('Hapus transaksi ini?')) return;
+        kirimFormCK('/catatan-keuangan/transaksi/delete', {
+          id: id,
+          projectId: CK_PROJECT ? CK_PROJECT.id : ''
+        });
+      }
+
+      function kosongkanDataCK() {
+        if (!confirm('Kosongkan seluruh transaksi pada project ini? Tindakan ini tidak dapat dibatalkan.')) return;
+        kirimFormCK('/catatan-keuangan/transaksi/kosongkan', {
+          projectId: CK_PROJECT ? CK_PROJECT.id : ''
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var tanggal = document.getElementById('ck-tanggal');
+        if (tanggal) tanggal.value = new Date().toISOString().slice(0, 10);
+
+        var cari = document.getElementById('ck-search');
+        if (cari) cari.addEventListener('input', function (e) {
+          cariCK = String(e.target.value || '').toLowerCase().trim();
+          renderTabelCK();
+        });
+
+        saatJenisBerubah();
+        renderRingkasanCK();
+        renderTabelCK();
+        renderGrafikCK();
+        initIconsCK();
+
+        if (CK_BERHASIL) tampilToastCK(CK_PROJECT ? 'Transaksi berhasil ditambahkan.' : 'Project berhasil ditambahkan.', false);
+        if (CK_HAPUS) tampilToastCK('Data transaksi berhasil diperbarui.', false);
+        if (CK_GAGAL) tampilToastCK('Gagal menyimpan data. Periksa kembali input Anda.', true);
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && document.getElementById('ck-project-modal').classList.contains('terbuka')) {
+          tutupProjectModal();
+        }
+      });
+    </script>
+  </body>
+</html>

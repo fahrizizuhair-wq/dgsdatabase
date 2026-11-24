@@ -173,6 +173,8 @@ const Vendor = require('./models/Vendor');
 const HargaDasar = require('./models/HargaDasar');
 const PengajuanHarga = require('./models/PengajuanHarga');
 const ProjectPengajuanHarga = require('./models/ProjectPengajuanHarga');
+const ProjectCatatanKeuangan = require('./models/ProjectCatatanKeuangan');
+const TransaksiCatatanKeuangan = require('./models/TransaksiCatatanKeuangan');
 const Laporan = require('./models/Laporan');
 const StokMasuk = require('./models/StokMasuk');
 const StokKeluar = require('./models/StokKeluar');
@@ -1807,6 +1809,178 @@ app.post('/pengajuan-harga/simpan', isUserAuthenticated, jalankanUploadFotoPenga
   } catch (err) {
     console.error('Gagal menyimpan pengajuan harga:', err);
     return res.redirect(urlKembali);
+  }
+});
+
+// ============================================================
+//  RUTE: CATATAN KEUANGAN PER PROJECT (ADMIN & USER)
+// ============================================================
+const KATEGORI_CATATAN_KEUANGAN = [
+  'Makan & Minum',
+  'Transportasi',
+  'Belanja',
+  'Tagihan',
+  'Gaji/Pendapatan',
+  'Lainnya',
+];
+
+function dasarUrlCatatanKeuangan(req) {
+  return req.session && req.session.isAdmin ? '/catatan-keuangan' : '/catatan-keuangan-user';
+}
+
+function urlProjectCatatanKeuangan(req, idProject) {
+  return `${dasarUrlCatatanKeuangan(req)}/project/${idProject}`;
+}
+
+async function renderCatatanKeuangan(req, res, role, idProject) {
+  try {
+    const baseUrl = dasarUrlCatatanKeuangan(req);
+    const projects = await ProjectCatatanKeuangan.find().sort({ createdAt: -1, _id: -1 }).lean();
+    let projectAktif = null;
+    let items = [];
+
+    if (idProject) {
+      if (!mongoose.Types.ObjectId.isValid(String(idProject))) return res.redirect(baseUrl);
+
+      projectAktif =
+        projects.find((p) => String(p._id) === String(idProject)) ||
+        (await ProjectCatatanKeuangan.findById(idProject).lean());
+      if (!projectAktif) return res.redirect(`${baseUrl}?gagal=1`);
+
+      items = await TransaksiCatatanKeuangan.find({ projectId: projectAktif._id })
+        .sort({ tanggal: -1, createdAt: -1, _id: -1 })
+        .lean();
+    } else {
+      // Dipakai untuk statistik ringkas pada halaman draft project.
+      items = await TransaksiCatatanKeuangan.find().lean();
+    }
+
+    const nama = req.session && req.session.user
+      ? req.session.user.namaLengkap || req.session.user.username || 'User'
+      : req.session.adminUser || 'Admin';
+    const namaView = role === 'admin' ? 'catatan-keuangan-admin' : 'catatan-keuangan-user';
+
+    return res.render(namaView, {
+      items,
+      projects,
+      projectAktif,
+      baseUrl,
+      role,
+      kategoriList: KATEGORI_CATATAN_KEUANGAN,
+      pageTitle: 'Catatan Keuangan — PT. DIAN GIRI SAPUTRA',
+      useTailwind: true,
+      user: req.session.user || { username: req.session.adminUser || nama, namaLengkap: nama },
+      adminUser: req.session.adminUser || nama,
+      berhasil: req.query.simpan === '1',
+      hapus: req.query.hapus === '1',
+      gagal: req.query.gagal === '1',
+    });
+  } catch (err) {
+    console.error('Gagal memuat catatan keuangan:', err);
+    return res.status(500).send('Gagal memuat catatan keuangan: ' + err.message);
+  }
+}
+
+app.get('/catatan-keuangan', isAdminAuthenticated, (req, res) => renderCatatanKeuangan(req, res, 'admin', null));
+app.get('/catatan-keuangan/project/:id', isAdminAuthenticated, (req, res) =>
+  renderCatatanKeuangan(req, res, 'admin', req.params.id));
+app.get('/catatan-keuangan-user', isUserAuthenticated, (req, res) => renderCatatanKeuangan(req, res, 'user', null));
+app.get('/catatan-keuangan-user/project/:id', isUserAuthenticated, (req, res) =>
+  renderCatatanKeuangan(req, res, 'user', req.params.id));
+
+app.post('/catatan-keuangan/project/add', isUserAuthenticated, async (req, res) => {
+  const baseUrl = dasarUrlCatatanKeuangan(req);
+  try {
+    const namaProject = String((req.body || {}).namaProject || '').trim();
+    if (!namaProject) return res.redirect(`${baseUrl}?gagal=1`);
+
+    await ProjectCatatanKeuangan.create({
+      namaProject,
+      diinputOleh: getNamaPenginput(req),
+    });
+
+    return res.redirect(`${baseUrl}?simpan=1`);
+  } catch (err) {
+    console.error('Gagal menyimpan project catatan keuangan:', err);
+    return res.redirect(`${baseUrl}?gagal=1`);
+  }
+});
+
+app.post('/catatan-keuangan/transaksi/add', isUserAuthenticated, async (req, res) => {
+  const baseUrl = dasarUrlCatatanKeuangan(req);
+  const body = req.body || {};
+  const idProject = String(body.projectId || '');
+  const idValid = mongoose.Types.ObjectId.isValid(idProject);
+  const urlProject = idValid ? urlProjectCatatanKeuangan(req, idProject) : baseUrl;
+
+  try {
+    if (!idValid) return res.redirect(`${baseUrl}?gagal=1`);
+    const project = await ProjectCatatanKeuangan.findById(idProject).lean();
+    if (!project) return res.redirect(`${baseUrl}?gagal=1`);
+
+    const deskripsi = String(body.deskripsi || '').trim();
+    const amount = Number(body.amount) || 0;
+    const type = String(body.type || 'expense') === 'income' ? 'income' : 'expense';
+    const category = KATEGORI_CATATAN_KEUANGAN.includes(String(body.category || ''))
+      ? String(body.category)
+      : 'Lainnya';
+    const tanggal = body.tanggal ? new Date(body.tanggal) : new Date();
+
+    if (!deskripsi || amount <= 0 || isNaN(tanggal.getTime())) {
+      return res.redirect(`${urlProject}?gagal=1`);
+    }
+
+    await TransaksiCatatanKeuangan.create({
+      projectId: project._id,
+      projectNama: project.namaProject || '',
+      deskripsi,
+      amount,
+      type,
+      category,
+      tanggal,
+      diinputOleh: getNamaPenginput(req),
+    });
+
+    return res.redirect(`${urlProject}?simpan=1`);
+  } catch (err) {
+    console.error('Gagal menyimpan transaksi catatan keuangan:', err);
+    return res.redirect(`${urlProject}?gagal=1`);
+  }
+});
+
+app.post('/catatan-keuangan/transaksi/delete', isUserAuthenticated, async (req, res) => {
+  const baseUrl = dasarUrlCatatanKeuangan(req);
+  const body = req.body || {};
+  const idProject = String(body.projectId || '');
+  const idTransaksi = String(body.id || '');
+  const idValid = mongoose.Types.ObjectId.isValid(idProject);
+  const urlProject = idValid ? urlProjectCatatanKeuangan(req, idProject) : baseUrl;
+
+  try {
+    if (!idValid || !mongoose.Types.ObjectId.isValid(idTransaksi)) {
+      return res.redirect(`${urlProject}?gagal=1`);
+    }
+    await TransaksiCatatanKeuangan.deleteOne({ _id: idTransaksi, projectId: idProject });
+    return res.redirect(`${urlProject}?hapus=1`);
+  } catch (err) {
+    console.error('Gagal menghapus transaksi catatan keuangan:', err);
+    return res.redirect(`${urlProject}?gagal=1`);
+  }
+});
+
+app.post('/catatan-keuangan/transaksi/kosongkan', isUserAuthenticated, async (req, res) => {
+  const baseUrl = dasarUrlCatatanKeuangan(req);
+  const idProject = String((req.body || {}).projectId || '');
+  const idValid = mongoose.Types.ObjectId.isValid(idProject);
+  const urlProject = idValid ? urlProjectCatatanKeuangan(req, idProject) : baseUrl;
+
+  try {
+    if (!idValid) return res.redirect(`${baseUrl}?gagal=1`);
+    await TransaksiCatatanKeuangan.deleteMany({ projectId: idProject });
+    return res.redirect(`${urlProject}?hapus=1`);
+  } catch (err) {
+    console.error('Gagal mengosongkan transaksi catatan keuangan:', err);
+    return res.redirect(`${urlProject}?gagal=1`);
   }
 });
 
