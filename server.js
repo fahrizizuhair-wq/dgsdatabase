@@ -171,6 +171,7 @@ async function syncLocalUploadsToMongo() {
 const Admin = require('./models/Admin');
 const Vendor = require('./models/Vendor');
 const HargaDasar = require('./models/HargaDasar');
+const PengajuanHarga = require('./models/PengajuanHarga');
 const Laporan = require('./models/Laporan');
 const StokMasuk = require('./models/StokMasuk');
 const StokKeluar = require('./models/StokKeluar');
@@ -760,6 +761,16 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 const uploadMultiple = upload.array('foto'); // DIPERBAIKI: Koma menggantung dihapus
+
+// Upload khusus foto produk Pengajuan Harga (wajib gambar, maksimal 5 file)
+const uploadFotoPengajuan = multer({
+  storage,
+  limits: { files: 5, fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\//i.test(file.mimetype || '')) return cb(null, true);
+    return cb(new Error('Foto produk harus berupa file gambar (JPG, PNG, WebP).'));
+  },
+}).array('foto', 5);
 
 // ============================================================
 //  REAL-TIME (SSE) — UPDATE DATA ANTAR PENGGUNA
@@ -1539,6 +1550,140 @@ app.post('/harga-dasar/delete/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menghapus harga dasar.');
+  }
+});
+
+// ============================================================
+//  RUTE: PENGAJUAN HARGA (ADMIN & USER)
+// ============================================================
+const OPSI_BIAYA_PENGAJUAN_HARGA = {
+  branding: ['sablon', 'bordir', 'grafir 1 sisi', 'grafir 2 sisi', 'print'],
+  packaging: ['plastic sealed', 'slongsong', 'custom box'],
+  packing: ['kardus', 'karung'],
+};
+
+function arrayBodyPengajuanHarga(value) {
+  if (Array.isArray(value)) return value;
+  if (value === undefined || value === null) return [];
+  return [value];
+}
+
+async function kodePengajuanHargaBaru() {
+  const tahun = new Date().getFullYear();
+  let nomor = (await PengajuanHarga.countDocuments()) + 1;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const kode = `PH-${tahun}-${String(nomor).padStart(4, '0')}`;
+    // eslint-disable-next-line no-await-in-loop
+    const ada = await PengajuanHarga.exists({ kode });
+    if (!ada) return kode;
+    nomor += 1;
+  }
+}
+
+async function renderPengajuanHarga(req, res, role) {
+  try {
+    const items = await PengajuanHarga.find().sort({ createdAt: -1, _id: -1 }).lean();
+    const nama = req.session && req.session.user
+      ? req.session.user.namaLengkap || req.session.user.username || 'User'
+      : req.session.adminUser || 'Admin';
+
+    res.render('pengajuan-harga', {
+      items,
+      role,
+      pageTitle: 'Pengajuan Harga — PT. DIAN GIRI SAPUTRA',
+      useTailwind: true,
+      user: req.session.user || { username: req.session.adminUser || nama, namaLengkap: nama },
+      adminUser: req.session.adminUser || nama,
+      berhasil: req.query.simpan === '1',
+      gagal: req.query.gagal === '1',
+    });
+  } catch (err) {
+    console.error('Gagal memuat pengajuan harga:', err);
+    res.status(500).send('Gagal memuat data pengajuan harga: ' + err.message);
+  }
+}
+
+app.get('/pengajuan-harga', isAdminAuthenticated, (req, res) => renderPengajuanHarga(req, res, 'admin'));
+
+app.get('/pengajuan-harga-user', isUserAuthenticated, (req, res) => renderPengajuanHarga(req, res, 'user'));
+
+app.post('/pengajuan-harga/simpan', isUserAuthenticated, uploadFotoPengajuan, async (req, res) => {
+  try {
+    await syncReqFilesToGridFS(req);
+
+    const body = req.body || {};
+    const grupList = arrayBodyPengajuanHarga(body.biayaGrup);
+    const itemList = arrayBodyPengajuanHarga(body.biayaItem);
+    const hargaList = arrayBodyPengajuanHarga(body.biayaHarga);
+
+    const biayaTambahan = [];
+    for (let i = 0; i < itemList.length; i += 1) {
+      const grup = String(grupList[i] || '').trim().toLowerCase();
+      const item = String(itemList[i] || '').trim().toLowerCase();
+      const harga = Number(hargaList[i]) || 0;
+      const daftarOpsi = OPSI_BIAYA_PENGAJUAN_HARGA[grup] || [];
+
+      if (grup && item && harga > 0 && daftarOpsi.includes(item) && !biayaTambahan.some((b) => b.item === item)) {
+        biayaTambahan.push({ grup, item, harga });
+      }
+    }
+
+    const qty = Math.max(1, Number(body.qty) || 1);
+    const hargaProduksi = Math.max(0, Number(body.hargaProduksi) || 0);
+    const includeAllIn = String(body.includeAllIn || '') === 'on';
+
+    const ongkirTimDgs = Math.max(0, Number(body.ongkirTimDgs) || 0);
+    const sampelSurvey = Math.max(0, Number(body.sampelSurvey) || 0);
+    const ongkirDgsClient = Math.max(0, Number(body.ongkirDgsClient) || 0);
+
+    const biayaDariDropdown = biayaTambahan.reduce((acc, b) => acc + (Number(b.harga) || 0), 0);
+    const totalBiayaTambahan = includeAllIn
+      ? 0
+      : biayaDariDropdown + ongkirTimDgs + sampelSurvey + ongkirDgsClient;
+    const hargaAllIn = hargaProduksi + totalBiayaTambahan;
+    const totalHarga = hargaAllIn * qty;
+
+    const foto = (req.files || [])
+      .filter((f) => /^image\//i.test(f.mimetype || ''))
+      .map((f) => f.filename);
+
+    if (!foto.length) {
+      const tujuanTanpaFoto = req.session && req.session.isAdmin ? '/pengajuan-harga' : '/pengajuan-harga-user';
+      return res.redirect(`${tujuanTanpaFoto}?gagal=1`);
+    }
+
+    const dokumen = new PengajuanHarga({
+      kode: await kodePengajuanHargaBaru(),
+      namaBarang: String(body.namaBarang || '').trim(),
+      qty,
+      satuan: String(body.satuan || 'pcs').trim() || 'pcs',
+      timProduksi: String(body.timProduksi || '').trim(),
+      hargaProduksi,
+      includeAllIn,
+      biayaTambahan,
+      ongkirTimDgs,
+      sampelSurvey,
+      ongkirDgsClient,
+      totalBiayaTambahan,
+      hargaAllIn,
+      totalHarga,
+      spesifikasi: String(body.spesifikasi || '').trim(),
+      keterangan: String(body.keterangan || '').trim(),
+      pic: String(body.pic || '').trim(),
+      jangkaWaktu: String(body.jangkaWaktu || '').trim(),
+      gambar: foto,
+      diinputOleh: getNamaPenginput(req),
+    });
+
+    await dokumen.save();
+
+    const tujuan = req.session && req.session.isAdmin ? '/pengajuan-harga' : '/pengajuan-harga-user';
+    return res.redirect(`${tujuan}?simpan=1`);
+  } catch (err) {
+    console.error('Gagal menyimpan pengajuan harga:', err);
+    const tujuan = req.session && req.session.isAdmin ? '/pengajuan-harga' : '/pengajuan-harga-user';
+    return res.redirect(`${tujuan}?gagal=1`);
   }
 });
 
@@ -2952,6 +3097,40 @@ app.post('/lpj-user/add', isUserAuthenticated, async (req, res) => {
 // STOK GUDANG — KATEGORI & ITEM (ADMIN / USER)
 // ==========================================
 const uploadFotoGudang = upload.array('foto');
+
+// Pastikan kategori gudang bawaan tersedia saat database masih kosong.
+async function pastikanKategoriGudangAwal() {
+  const jumlah = await GudangKategori.countDocuments();
+  if (jumlah > 0) return;
+
+  const bawaan = [
+    {
+      nama: 'Stok/Data Sampel',
+      deskripsi: 'Penyimpanan data dan barang sampel produksi.',
+      warna: 'maroon',
+      urutan: 1,
+      sistem: true,
+      diinputOleh: 'Sistem',
+    },
+    {
+      nama: 'Stok ATK',
+      deskripsi: 'Penyimpanan alat tulis kantor dan kebutuhan operasional.',
+      warna: 'maroon',
+      urutan: 2,
+      sistem: true,
+      diinputOleh: 'Sistem',
+    },
+  ];
+
+  for (const kategori of bawaan) {
+    // eslint-disable-next-line no-await-in-loop
+    const ada = await GudangKategori.exists({ nama: kategori.nama });
+    if (!ada) {
+      // eslint-disable-next-line no-await-in-loop
+      await GudangKategori.create(kategori);
+    }
+  }
+}
 
 function escapeRegexGudang(nilai) {
   return String(nilai || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

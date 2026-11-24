@@ -81,6 +81,9 @@
     if (pathStarts(path, ['/harga-dasar', '/harga-dasar-user', '/guest/harga-dasar'])) {
       return 'harga-dasar';
     }
+    if (pathStarts(path, ['/pengajuan-harga', '/pengajuan-harga-user'])) {
+      return 'pengajuan-harga';
+    }
     if (pathStarts(path, ['/stok-masuk', '/stok-masuk-user'])) {
       return 'stok-masuk';
     }
