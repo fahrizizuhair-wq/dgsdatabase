@@ -1,34 +1,51 @@
 <%
-  var dataPH = (typeof items !== 'undefined' && items) ? items : [];
-  var daftarProjectPH = (typeof projects !== 'undefined' && projects) ? projects : [];
-  var projectPH = (typeof projectAktif !== 'undefined' && projectAktif) ? projectAktif : null;
-  var basePH = (typeof baseUrl !== 'undefined' && baseUrl)
+  var dataCK = (typeof items !== 'undefined' && items) ? items : [];
+  var daftarProjectCK = (typeof projects !== 'undefined' && projects) ? projects : [];
+  var projectCK = (typeof projectAktif !== 'undefined' && projectAktif) ? projectAktif : null;
+  var baseCK = (typeof baseUrl !== 'undefined' && baseUrl)
     ? baseUrl
-    : ((typeof role !== 'undefined' && role === 'admin') ? '/pengajuan-harga' : '/pengajuan-harga-user');
-  var modeProyekPH = Boolean(projectPH);
-  var peranPH = 'user';
-  var userPH = (typeof user !== 'undefined' && user) ? user : { username: 'User', namaLengkap: 'User' };
-  var adminUserPH = (typeof adminUser !== 'undefined' && adminUser) ? adminUser : 'Admin';
+    : ((typeof role !== 'undefined' && role === 'admin') ? '/catatan-keuangan' : '/catatan-keuangan-user');
+  var daftarKategoriCK = (typeof kategoriList !== 'undefined' && kategoriList && kategoriList.length)
+    ? kategoriList
+    : [{ nama: 'Lainnya', jenis: 'both', warna: '#64748b', ikon: 'ellipsis' }];
+  var kategoriDefaultCK = (typeof kategoriDefault !== 'undefined' && kategoriDefault)
+    ? kategoriDefault
+    : 'Lainnya';
 
-  var totalProjectPH = daftarProjectPH.length;
-  var totalKasbonPH = daftarProjectPH.reduce(function (a, b) { return a + (Number(b.totalKasbonSampel) || 0); }, 0);
-  var totalBoqPH = daftarProjectPH.reduce(function (a, b) { return a + (Number(b.totalQtyBoq) || 0); }, 0);
-  var rataSampelPH = totalBoqPH > 0 ? totalKasbonPH / totalBoqPH : 0;
+  function kategoriUntukCK(jenis) {
+    return daftarKategoriCK.filter(function (k) {
+      return k.jenis === 'both' || k.jenis === jenis;
+    });
+  }
+  var modeProyekCK = Boolean(projectCK);
+  var adminUserCK = (typeof adminUser !== 'undefined' && adminUser) ? adminUser : 'Admin';
+  var userCK = (typeof user !== 'undefined' && user) ? user : { username: adminUserCK, namaLengkap: adminUserCK };
 
-  var totalItemPH = dataPH.length;
-  var totalQtyPH = dataPH.reduce(function (a, b) { return a + (Number(b.qty) || 0); }, 0);
-  var totalEstimasiPH = dataPH.reduce(function (a, b) { return a + (Number(b.totalHarga) || 0); }, 0);
-  var rataUnitPH = totalQtyPH > 0 ? totalEstimasiPH / totalQtyPH : 0;
-
-  function rupiahPH(nilai) {
+  function rupiahCK(nilai) {
     return 'Rp ' + Math.round(Number(nilai) || 0).toLocaleString('id-ID');
   }
 
-  function angkaPH(nilai) {
+  function angkaCK(nilai) {
     return Math.round(Number(nilai) || 0).toLocaleString('id-ID');
   }
 
-  function jsonUntukScriptPH(nilai) {
+  function statsTransaksiCK(list) {
+    var masuk = 0;
+    var keluar = 0;
+    list.forEach(function (t) {
+      if (t.type === 'income') masuk += Number(t.amount) || 0;
+      else keluar += Number(t.amount) || 0;
+    });
+    return { jumlah: list.length, masuk: masuk, keluar: keluar, saldo: masuk - keluar };
+  }
+
+  function statsProjectCK(idProject) {
+    return statsTransaksiCK(dataCK.filter(function (t) { return String(t.projectId) === String(idProject); }));
+  }
+
+  var statsSemuaCK = statsTransaksiCK(dataCK);
+
+  function jsonUntukScriptCK(nilai) {
     return JSON.stringify(nilai == null ? null : nilai)
       .replace(/</g, '\\u003c')
       .replace(/>/g, '\\u003e')
@@ -40,42 +57,37 @@
 <!DOCTYPE html>
 <html lang="id">
   <head>
-    <%- include('partials/head', { pageTitle: (typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Pengajuan Harga') + ' — User', useTailwind: true }) %>
+    <%- include('partials/head', { pageTitle: (typeof pageTitle !== 'undefined' && pageTitle ? pageTitle : 'Catatan Keuangan') + ' — User', useTailwind: true }) %>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/payment-request.css" />
     <link rel="stylesheet" href="/css/stat-cards.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       /* =========================================================
-         PENGAJUAN HARGA — CSS KHALAMAN (inline, file user)
+         CATATAN KEUANGAN — CSS KHALAMAN (inline, file user)
          ========================================================= */
       #toast-container { z-index: 3000 !important; }
-      .ph-main { max-width: 1280px !important; }
+      .ck-main { max-width: 1280px !important; }
+      .ck-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 20px; }
+      .ck-card-grid .card-value { font-size: 1.8rem; word-break: break-word; }
+      .ck-card-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      @media (max-width: 1100px) { .ck-card-grid, .ck-card-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 700px) { .ck-card-grid, .ck-card-grid-3 { grid-template-columns: 1fr; } }
 
-      /* Card statistik mengikuti model kartu halaman lain */
-      .ph-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 20px; }
-      .ph-card-grid .card-value { font-size: 1.85rem; word-break: break-word; }
-      @media (max-width: 1100px) { .ph-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-      @media (max-width: 700px) { .ph-card-grid { grid-template-columns: 1fr; } }
-
-      /* Card project */
-      .ph-project-grid {
-        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
-      }
-      @media (max-width: 1050px) { .ph-project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-      @media (max-width: 700px) { .ph-project-grid { grid-template-columns: 1fr; } }
-      .ph-project-card {
-        cursor: pointer; min-height: 176px; outline: none;
-      }
-      .ph-project-card:focus-visible { box-shadow: 0 0 0 3px rgba(122,27,27,.25); }
-      .ph-project-card .card-title { max-width: 190px; line-height: 1.35; }
-      .ph-project-card .card-footer { gap: 8px; }
-      .ph-project-empty {
+      /* Card project (draft) */
+      .ck-project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+      @media (max-width: 1050px) { .ck-project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 700px) { .ck-project-grid { grid-template-columns: 1fr; } }
+      .ck-project-card { cursor: pointer; min-height: 176px; outline: none; }
+      .ck-project-card:focus-visible { box-shadow: 0 0 0 3px rgba(122,27,27,.25); }
+      .ck-project-card .card-title { max-width: 200px; line-height: 1.35; }
+      .ck-project-empty {
         padding: 46px 20px; text-align: center; color: #94a3b8; font-size: 13px;
         border: 1px dashed #cbd5e1; border-radius: 16px; background: #fff;
       }
 
       /* Panel */
-      .ph-panel {
+      .ck-panel {
         background: rgba(255, 255, 255, 0.97);
         border: 1px solid rgba(226, 232, 240, 0.95);
         border-radius: 18px;
@@ -83,923 +95,603 @@
         overflow: hidden;
         margin-bottom: 20px;
       }
-      .ph-panel-head {
+      .ck-panel-head {
         display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
         gap: 12px; padding: 18px 20px; border-bottom: 1px solid #f1f5f9;
       }
-      .ph-panel-body { padding: 18px 20px; }
-      .ph-toolbar {
-        display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 20px;
-        border-bottom: 1px solid #f1f5f9; background: #fcfcfd;
-      }
-      .ph-toolbar select, .ph-toolbar input, .ph-input {
-        width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px;
-        background: #fff; font-size: 13px; color: #1e293b; outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-      }
-      .ph-toolbar select:focus, .ph-toolbar input:focus, .ph-input:focus {
-        border-color: #7a1b1b; box-shadow: 0 0 0 3px rgba(122, 27, 27, 0.08);
-      }
-      .ph-toolbar input::placeholder, .ph-input::placeholder { color: #94a3b8; }
-      .ph-input[readonly] { background: #f8fafc; color: #475569; cursor: not-allowed; }
-      .ph-btn {
-        display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-        padding: 10px 14px; border-radius: 10px; border: 1px solid transparent;
-        font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
-      }
-      .ph-btn-primary { background: #7a1b1b; color: #fff; box-shadow: 0 6px 16px rgba(122,27,27,.2); }
-      .ph-btn-primary:hover { background: #5e1414; }
-      .ph-btn-ghost { background: #fff; color: #7a1b1b; border-color: #f2d7d7; }
-      .ph-btn-ghost:hover { background: #fdf2f2; }
-      .ph-btn-neutral { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
-      .ph-btn-neutral:hover { background: #f1f5f9; }
-      .ph-badge {
+      .ck-panel-body { padding: 20px; }
+      .ck-badge {
         display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px;
         background: #fef3c7; color: #92400e; font-size: 10.5px; font-weight: 700;
       }
+      .ck-badge-green { background: #ecfdf5; color: #047857; }
+      .ck-badge-rose { background: #fff1f2; color: #be123c; }
 
-      /* Form tambah project di halaman awal */
-      .ph-project-form-grid {
-        display: grid; grid-template-columns: minmax(220px, 1.4fr) repeat(2, minmax(150px, 1fr)) minmax(180px, 1fr) auto;
-        gap: 14px; align-items: end;
+      /* Tombol */
+      .ck-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+        padding: 10px 14px; border-radius: 10px; border: 1px solid transparent;
+        font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all .2s ease; white-space: nowrap;
       }
-      @media (max-width: 1100px) { .ph-project-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-      @media (max-width: 700px) { .ph-project-form-grid { grid-template-columns: 1fr; } }
-      .ph-field label, .ph-field > label:not(.ph-switch) {
-        display: block; margin-bottom: 6px; font-size: 11.5px; font-weight: 700; color: #475569;
-      }
-      .ph-field .ph-hint { display: block; margin-top: 5px; font-size: 10.5px; color: #94a3b8; }
-      .ph-preview-sampel {
-        padding: 9px 12px; border-radius: 10px; background: #ecfdf5;
-        border: 1px solid #a7f3d0; min-height: 42px; display: flex; align-items: center;
-      }
-      .ph-preview-sampel strong { color: #047857; font-size: 12.5px; font-weight: 800; }
+      .ck-btn-primary { background: #7a1b1b; color: #fff; box-shadow: 0 6px 16px rgba(122,27,27,.2); }
+      .ck-btn-primary:hover { background: #5e1414; }
+      .ck-btn-ghost { background: #fff; color: #7a1b1b; border-color: #f2d7d7; }
+      .ck-btn-ghost:hover { background: #fdf2f2; }
+      .ck-btn-neutral { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
+      .ck-btn-neutral:hover { background: #f1f5f9; }
+      .ck-btn-emerald { background: #059669; color: #fff; box-shadow: 0 6px 16px rgba(5,150,105,.18); }
+      .ck-btn-emerald:hover { background: #047857; }
 
-      /* Tabel */
-      .ph-table-wrap { width: 100%; overflow-x: auto; }
-      .ph-table { width: 100%; min-width: 1120px; border-collapse: collapse; }
-      .ph-table thead th {
-        padding: 12px 14px; background: #fdf2f2; border-bottom: 1px solid #f4d7d7;
-        color: #7a1b1b; font-size: 10.5px; font-weight: 800; letter-spacing: .05em;
+      /* Form transaksi */
+      .ck-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+      @media (max-width: 700px) { .ck-form-grid { grid-template-columns: 1fr; } }
+      .ck-field label, .ck-field > label:not(.ck-type-option) {
+        display: block; margin-bottom: 6px; font-size: 11px; font-weight: 800;
+        letter-spacing: .05em; text-transform: uppercase; color: #64748b;
+      }
+      .ck-input {
+        width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 11px;
+        background: #fff; font-size: 13px; color: #1e293b; outline: none;
+        transition: border-color .2s, box-shadow .2s;
+      }
+      .ck-input:focus { border-color: #7a1b1b; box-shadow: 0 0 0 3px rgba(122,27,27,.08); }
+      .ck-input::placeholder { color: #94a3b8; }
+      .ck-amount-wrap { position: relative; }
+      .ck-amount-wrap span {
+        position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+        font-size: 12px; font-weight: 800; color: #94a3b8;
+      }
+      .ck-amount-wrap .ck-input { padding-left: 38px; font-weight: 700; }
+      .ck-type-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .ck-type-option {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 12px 8px; border-radius: 12px; border: 1px solid #e2e8f0;
+        background: #fff; color: #475569; font-size: 12.5px; font-weight: 700;
+        cursor: pointer; transition: all .2s ease; user-select: none;
+      }
+      .ck-type-option input { position: absolute; opacity: 0; width: 0; height: 0; }
+      .ck-type-option.aktif-ekspense {
+        border-color: #7a1b1b; background: #fdf2f2; color: #7a1b1b;
+        box-shadow: 0 0 0 3px rgba(122,27,27,.07);
+      }
+      .ck-type-option.aktif-income {
+        border-color: #059669; background: #ecfdf5; color: #047857;
+        box-shadow: 0 0 0 3px rgba(5,150,105,.07);
+      }
+      .ck-type-option svg { width: 15px; height: 15px; }
+
+      /* Chart */
+      .ck-chart-head {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+        gap: 10px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9;
+      }
+      .ck-tab-wrap {
+        display: inline-flex; gap: 3px; padding: 4px; border-radius: 11px; background: #f1f5f9;
+      }
+      .ck-tab {
+        padding: 7px 11px; border: none; border-radius: 8px; background: transparent;
+        color: #64748b; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .2s;
+      }
+      .ck-tab.aktif { background: #fff; color: #0f172a; box-shadow: 0 1px 4px rgba(15,23,42,.12); }
+      .ck-chart-box { position: relative; height: 290px; }
+      .ck-chart-box canvas { width: 100% !important; height: 100% !important; }
+      .ck-chart-fallback {
+        height: 100%; display: flex; align-items: center; justify-content: center;
+        text-align: center; color: #94a3b8; font-size: 12px;
+        border: 1px dashed #cbd5e1; border-radius: 12px; background: #f8fafc;
+      }
+
+      /* Tabel riwayat */
+      .ck-toolbar {
+        display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+      }
+      .ck-search-wrap { position: relative; width: 100%; max-width: 280px; }
+      .ck-search-wrap svg {
+        position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+        width: 15px; height: 15px; color: #94a3b8;
+      }
+      .ck-search-wrap .ck-input { padding-left: 34px; }
+      .ck-filter-wrap { display: inline-flex; gap: 3px; padding: 4px; border-radius: 11px; background: #f1f5f9; }
+      .ck-filter-btn {
+        padding: 7px 12px; border: none; border-radius: 8px; background: transparent;
+        color: #64748b; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .2s;
+      }
+      .ck-filter-btn.aktif { background: #fff; color: #0f172a; box-shadow: 0 1px 4px rgba(15,23,42,.12); }
+      .ck-table-wrap { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+      .ck-table { width: 100%; min-width: 960px; border-collapse: collapse; }
+      .ck-table thead th {
+        padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+        color: #64748b; font-size: 10px; font-weight: 800; letter-spacing: .06em;
         text-transform: uppercase; text-align: left; white-space: nowrap;
       }
-      .ph-table tbody td {
-        padding: 13px 14px; border-bottom: 1px solid #f1f5f9; font-size: 12.5px;
-        color: #334155; vertical-align: top;
+      .ck-table tbody td { padding: 13px 16px; border-bottom: 1px solid #f1f5f9; font-size: 12.5px; color: #334155; }
+      .ck-table tbody tr:last-child td { border-bottom: none; }
+      .ck-table tbody tr:hover { background: #fdf2f2; }
+      .ck-table .num { text-align: right; white-space: nowrap; font-weight: 800; }
+      .ck-table .aksi { text-align: center; }
+      .ck-cat {
+        display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px;
+        border-radius: 999px; font-size: 10.5px; font-weight: 700; white-space: nowrap;
       }
-      .ph-table tbody tr.ph-row { cursor: pointer; transition: background .18s ease; }
-      .ph-table tbody tr.ph-row:hover { background: #fffafa; }
-      .ph-table tbody tr.ph-row:last-child td { border-bottom: none; }
-      .ph-nama { font-weight: 700; color: #0f172a; font-size: 13px; }
-      .ph-sub { display: block; margin-top: 4px; font-size: 11px; color: #94a3b8; }
-      .ph-total-row td {
-        background: #f8fafc; font-weight: 800; color: #7a1b1b;
-        border-top: 2px solid #f1f5f9;
+      .ck-cat svg { width: 12px; height: 12px; }
+      .ck-pelaku { font-size: 11px; line-height: 1.5; color: #475569; white-space: nowrap; }
+      .ck-pelaku span { color: #94a3b8; }
+      .ck-pelaku .ck-update { color: #7a1b1b; font-weight: 700; }
+      .ck-aksi-wrap { display: inline-flex; gap: 4px; align-items: center; justify-content: center; }
+      .ck-hapus, .ck-edit {
+        width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+        border: none; border-radius: 8px; background: transparent; color: #94a3b8; cursor: pointer;
       }
-      .ph-empty { padding: 48px 20px; text-align: center; color: #94a3b8; font-size: 13px; }
+      .ck-hapus:hover { background: #fff1f2; color: #e11d48; }
+      .ck-edit:hover { background: #eff6ff; color: #1d4ed8; }
+      .ck-hapus svg, .ck-edit svg { width: 15px; height: 15px; }
+      .ck-empty { padding: 44px 20px; text-align: center; color: #94a3b8; font-size: 12.5px; }
+      .ck-empty strong { display: block; color: #475569; font-size: 14px; margin-bottom: 4px; }
 
-      /* ========================= MODAL ========================= */
-      .ph-modal {
-        position: fixed; inset: 0; z-index: 2000; display: none;
+      /* Toast */
+      #ck-toast {
+        position: fixed; right: 20px; bottom: 20px; z-index: 3000;
+        display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+        border-radius: 13px; background: #0f172a; color: #fff; font-size: 12px; font-weight: 600;
+        box-shadow: 0 14px 35px rgba(15,23,42,.3);
+        transform: translateY(24px); opacity: 0; pointer-events: none; transition: all .3s ease;
+      }
+      #ck-toast.muncul { transform: translateY(0); opacity: 1; }
+      #ck-toast svg { width: 17px; height: 17px; color: #34d399; }
+      #ck-toast.gagal svg { color: #fb7185; }
+
+      /* Modal tambah project */
+      .ck-modal {
+        position: fixed; inset: 0; z-index: 2500; display: none;
         align-items: center; justify-content: center; padding: 24px;
-        background: rgba(15, 23, 42, 0.68); backdrop-filter: blur(5px);
+        background: rgba(15,23,42,.68); backdrop-filter: blur(5px);
       }
-      .ph-modal.terbuka { display: flex; }
-      .ph-modal-dialog {
-        width: min(1120px, 100%); max-height: calc(100vh - 48px); margin: auto;
+      .ck-modal.terbuka { display: flex; }
+      .ck-modal-dialog {
+        width: min(480px, 100%); max-height: calc(100vh - 48px); margin: auto;
         display: flex; flex-direction: column; overflow: hidden;
-        background: #fff; border-radius: 20px; box-shadow: 0 24px 70px rgba(0,0,0,.3);
+        background: #fff; border-radius: 18px; box-shadow: 0 24px 70px rgba(0,0,0,.3);
       }
-      .ph-form-dialog { width: min(1080px, 100%); }
-      .ph-detail-dialog { width: min(1140px, 100%); }
-      /* Form adalah flex child supaya ph-modal-body bisa benar-benar scroll */
-      .ph-modal-dialog form {
-        flex: 1; min-height: 0; display: flex; flex-direction: column;
-      }
-      .ph-modal-head {
+      .ck-modal-dialog form { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+      .ck-modal-head {
         flex-shrink: 0; display: flex; align-items: flex-start; justify-content: space-between;
-        gap: 12px; padding: 18px 22px;
+        gap: 12px; padding: 18px 20px;
         background: linear-gradient(135deg, #7a1b1b 0%, #4d0e0e 100%); color: #fff;
       }
-      .ph-modal-head h2 { font-size: 18px; font-weight: 800; margin-top: 2px; }
-      .ph-modal-head p { font-size: 11px; color: rgba(255,255,255,.75); margin-top: 2px; }
-      .ph-modal-close {
-        width: 34px; height: 34px; border-radius: 999px; border: none;
-        background: rgba(255,255,255,.14); color: #fff; font-size: 20px; line-height: 1; cursor: pointer;
-        transition: background .2s;
+      .ck-modal-head h2 { font-size: 17px; font-weight: 800; margin-top: 2px; }
+      .ck-modal-head p { font-size: 11px; color: rgba(255,255,255,.75); margin-top: 2px; }
+      .ck-modal-close {
+        width: 32px; height: 32px; border-radius: 999px; border: none;
+        background: rgba(255,255,255,.14); color: #fff; font-size: 19px; line-height: 1; cursor: pointer;
       }
-      .ph-modal-close:hover { background: rgba(255,255,255,.26); }
-      .ph-modal-body {
+      .ck-modal-close:hover { background: rgba(255,255,255,.26); }
+      .ck-modal-body {
         flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch; padding: 20px; background: #f8fafc;
       }
-      .ph-form-body { padding-bottom: 8px; }
-
-      /* Form di dalam popup */
-      .ph-form-card {
-        background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
-        box-shadow: 0 6px 18px rgba(15,23,42,.05); padding: 18px; margin-bottom: 16px;
-      }
-      .ph-section-title {
-        display: flex; align-items: flex-start; gap: 10px; padding-bottom: 12px;
-        margin-bottom: 15px; border-bottom: 1px solid #f1f5f9;
-      }
-      .ph-section-number {
-        width: 28px; height: 28px; border-radius: 999px; background: #7a1b1b; color: #fff;
-        display: inline-flex; align-items: center; justify-content: center;
-        font-size: 12px; font-weight: 800; flex-shrink: 0;
-      }
-      .ph-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
-      .ph-col-span-2 { grid-column: span 2; }
-      .ph-hide { display: none !important; }
-      .ph-project-info {
-        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-        gap: 10px; padding: 12px 14px; margin-bottom: 16px;
-        border-radius: 12px; background: #fdf2f2; border: 1px solid #f4d7d7;
-      }
-      .ph-project-info strong { display: block; font-size: 13px; color: #7a1b1b; }
-      .ph-project-info span { display: block; font-size: 10.5px; color: #94a3b8; margin-top: 3px; }
-      .ph-auto-badge {
-        display: inline-block; margin-left: 6px; padding: 2px 7px; border-radius: 999px;
-        background: #dcfce7; color: #15803d; font-size: 9px; font-weight: 800; letter-spacing: .04em;
+      .ck-modal-footer {
+        flex-shrink: 0; display: flex; justify-content: flex-end; gap: 9px;
+        padding: 14px 20px; background: #fff; border-top: 1px solid #e2e8f0;
       }
 
-      /* Toggle on/off */
-      .ph-switch-wrap {
-        display: flex; align-items: center; justify-content: space-between; gap: 14px;
-        padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc;
-      }
-      .ph-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
-      .ph-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
-      .ph-switch-track {
-        width: 48px; height: 27px; border-radius: 999px; background: #cbd5e1;
-        position: relative; transition: background .25s ease, box-shadow .25s ease;
-        box-shadow: inset 0 1px 3px rgba(0,0,0,.15);
-      }
-      .ph-switch-dot {
-        position: absolute; top: 3px; left: 3px; width: 21px; height: 21px; border-radius: 50%;
-        background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.28); transition: transform .25s ease;
-      }
-      .ph-switch input:checked + .ph-switch-track {
-        background: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.16), inset 0 1px 3px rgba(0,0,0,.12);
-      }
-      .ph-switch input:checked + .ph-switch-track .ph-switch-dot { transform: translateX(21px); }
-      .ph-switch input:focus-visible + .ph-switch-track { outline: 3px solid rgba(34,197,94,.35); outline-offset: 2px; }
-      .ph-switch-teks { display: block; font-size: 12px; font-weight: 700; color: #334155; }
-      .ph-switch-keterangan { display: block; margin-top: 2px; font-size: 10.5px; color: #94a3b8; }
-      .ph-include-note {
-        display: none; align-items: center; gap: 8px; margin-top: 8px; padding: 9px 12px;
-        border-radius: 10px; background: #ecfdf5; border: 1px solid #a7f3d0;
-        color: #047857; font-size: 11px; font-weight: 600;
-      }
-      .ph-include-note.terlihat { display: flex; }
-
-      .ph-cost-block {
-        border: 1px solid #f1e4e4; border-radius: 14px; padding: 14px;
-        background: #fffafa; margin-bottom: 13px;
-      }
-      .ph-cost-head {
-        display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px;
-      }
-      .ph-cost-title {
-        font-size: 12px; font-weight: 800; color: #7a1b1b;
-        text-transform: uppercase; letter-spacing: .04em;
-      }
-      .ph-cost-row {
-        display: grid; grid-template-columns: minmax(0, 1fr) 170px auto;
-        gap: 10px; align-items: end; margin-top: 10px;
-      }
-      .ph-price-wrap { display: none; }
-      .ph-price-wrap.terlihat { display: block; }
-      .ph-fixed-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-      .ph-preview-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
-      .ph-preview-grid img { width: 82px; height: 82px; object-fit: cover; border-radius: 10px; border: 1px solid #e2e8f0; }
-
-      /* Footer form + kalkulasi */
-      .ph-form-footer {
-        flex-shrink: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-        gap: 14px; padding: 14px 20px; background: #fff; border-top: 1px solid #e2e8f0;
-      }
-      .ph-live-ringkas { display: flex; flex-wrap: wrap; gap: 26px; }
-      .ph-live-label {
-        display: block; font-size: 9.5px; font-weight: 800; letter-spacing: .07em;
-        text-transform: uppercase; color: #94a3b8;
-      }
-      .ph-live-ringkas strong { display: block; margin-top: 3px; font-size: 18px; font-weight: 800; color: #7a1b1b; }
-      .ph-form-actions { display: flex; flex-wrap: wrap; gap: 9px; }
-      .ph-simpan-btn {
-        display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px;
-        border: none; border-radius: 11px; background: #7a1b1b; color: #fff;
-        font-size: 12.5px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 16px rgba(122,27,27,.22);
-      }
-      .ph-simpan-btn:hover { background: #5e1414; }
-
-      /* ===================== DETAIL MODAL ===================== */
-      .ph-detail-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; }
-      .ph-detail-aside, .ph-detail-main { display: flex; flex-direction: column; gap: 14px; }
-      .ph-detail-card {
-        background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px;
-        box-shadow: 0 6px 18px rgba(15,23,42,.05);
-      }
-      .ph-detail-card-head {
-        display: flex; align-items: center; justify-content: space-between; gap: 10px;
-        padding-bottom: 10px; margin-bottom: 13px; border-bottom: 1px solid #f1f5f9;
-      }
-      .ph-detail-card-head h3 {
-        font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: #7a1b1b;
-      }
-      .ph-detail-card-head span { font-size: 10px; color: #94a3b8; }
-      .ph-status-badge {
-        display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
-        background: rgba(255,255,255,.16); color: #fff; font-size: 10.5px; font-weight: 700;
-      }
-      .ph-status-badge::before {
-        content: ''; width: 6px; height: 6px; border-radius: 50%; background: #4ade80;
-        box-shadow: 0 0 6px #4ade80;
-      }
-      .ph-gallery-main {
-        width: 100%; height: 250px; object-fit: contain; background: #f8fafc;
-        border: 1px solid #e2e8f0; border-radius: 12px;
-      }
-      .ph-gallery-empty {
-        height: 250px; display: flex; align-items: center; justify-content: center; text-align: center;
-        padding: 20px; border: 1px dashed #cbd5e1; border-radius: 12px;
-        background: #f8fafc; color: #94a3b8; font-size: 12px;
-      }
-      .ph-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-      .ph-thumbs img {
-        width: 56px; height: 56px; object-fit: cover; border-radius: 8px;
-        border: 2px solid transparent; cursor: pointer; transition: border-color .2s, transform .2s;
-      }
-      .ph-thumbs img:hover { transform: translateY(-2px); }
-      .ph-thumbs img.aktif { border-color: #7a1b1b; }
-      .ph-side-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 12px; }
-      .ph-side-row:last-child { margin-bottom: 0; }
-      .ph-info-label {
-        display: block; font-size: 9.5px; font-weight: 800; letter-spacing: .07em;
-        text-transform: uppercase; color: #94a3b8; margin-bottom: 3px;
-      }
-      .ph-info-value { display: block; font-size: 13px; font-weight: 600; color: #1e293b; word-break: break-word; }
-      .ph-info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-      .ph-detail-note {
-        margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: #f8fafc;
-        border: 1px solid #e2e8f0;
-      }
-      .ph-detail-note p { margin: 0; font-size: 12px; line-height: 1.65; color: #475569; white-space: pre-line; }
-      .ph-detail-note + .ph-detail-note { margin-top: 10px; }
-      .ph-detail-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-      .ph-detail-table thead th {
-        padding: 9px 10px; background: #fdf2f2; color: #7a1b1b; font-size: 9.5px;
-        text-transform: uppercase; letter-spacing: .06em; text-align: left; border-bottom: 1px solid #f4d7d7;
-      }
-      .ph-detail-table thead th:last-child { text-align: right; }
-      .ph-detail-table tbody th, .ph-detail-table tbody td {
-        padding: 9px 10px; border-bottom: 1px solid #f1f5f9; text-align: left;
-      }
-      .ph-detail-table tbody th { font-weight: 600; color: #475569; }
-      .ph-detail-table tbody td { text-align: right; font-weight: 700; color: #1e293b; white-space: nowrap; }
-      .ph-detail-table tbody tr:last-child th, .ph-detail-table tbody tr:last-child td { border-bottom: none; }
-      .ph-callout {
-        display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; padding: 10px 12px;
-        border-radius: 10px; font-size: 11px; font-weight: 600; line-height: 1.5;
-      }
-      .ph-callout-amber { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-      .ph-callout-green { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
-      .ph-detail-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-      .ph-detail-summary-item {
-        padding: 15px 17px; border-radius: 14px; background: #fff;
-        border: 1px solid #e2e8f0; box-shadow: 0 6px 18px rgba(15,23,42,.05);
-      }
-      .ph-detail-summary-item strong { display: block; margin-top: 5px; font-size: 20px; font-weight: 800; color: #1e293b; }
-      .ph-detail-summary-item small { display: block; margin-top: 4px; font-size: 10px; color: #94a3b8; }
-      .ph-detail-summary-item.ph-total {
-        background: linear-gradient(135deg, #7a1b1b 0%, #4d0e0e 100%); border-color: transparent;
-      }
-      .ph-detail-summary-item.ph-total .ph-info-label,
-      .ph-detail-summary-item.ph-total small { color: rgba(255,255,255,.72); }
-      .ph-detail-summary-item.ph-total strong { color: #fff; font-size: 23px; }
-
-      /* Responsif */
-      @media (max-width: 1000px) {
-        .ph-detail-layout { grid-template-columns: 1fr; }
-        .ph-detail-aside { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
-      }
       @media (max-width: 760px) {
-        .ph-main { padding: 18px 14px 40px; }
-        .ph-grid, .ph-fixed-grid, .ph-info-grid, .ph-detail-summary { grid-template-columns: 1fr; }
-        .ph-col-span-2 { grid-column: span 1; }
-        .ph-cost-row { grid-template-columns: 1fr; }
-        .ph-detail-aside { grid-template-columns: 1fr; }
-        .ph-modal { padding: 10px; }
-        .ph-modal-dialog { max-height: calc(100vh - 20px); border-radius: 16px; }
-        .ph-modal-body { padding: 14px; }
-        .ph-modal-head { padding: 15px 16px; }
-        .ph-gallery-main, .ph-gallery-empty { height: 210px; }
-        .ph-form-footer { padding: 13px 14px; }
+        .ck-main { padding: 18px 14px 40px; }
+        .ck-panel-head, .ck-panel-body { padding: 15px; }
+        .ck-modal { padding: 10px; }
+        .ck-modal-dialog { max-height: calc(100vh - 20px); border-radius: 14px; }
+        .ck-chart-box { height: 250px; }
+        .ck-toolbar { justify-content: flex-start; }
+        .ck-search-wrap { max-width: none; }
       }
 
-      /* Cetak */
       @media print {
-        body::before, .sidebar, .sidebar-overlay, .system-banner,
-        .ph-modal, .no-print, #toast-container { display: none !important; }
-        body, .ph-main { display: block !important; padding: 0 !important; margin: 0 !important; background: #fff !important; }
-        .ph-panel, .stat-card { box-shadow: none !important; border: 1px solid #d4d4d8 !important; }
-        .ph-table { min-width: 0 !important; }
-        .ph-table thead th { background: #f4f4f5 !important; color: #000 !important; }
-      }
-      /* Pastikan wadah tombol di banner memakai flex */
-      .banner-actions,
-      .ph-banner-actions {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        width: 100%;
-      }
-
-      /* Dorong tombol Input Pengajuan Baru ke paling kanan */
-      .btn-banner-primary {
-        margin-left: auto;
-      }
-
-      @media (max-width: 639px) {
-        .btn-banner-primary {
-          margin-left: 0;
-        }
+        body::before, .sidebar, .sidebar-overlay, .system-banner, .no-print,
+        #toast-container, #ck-toast, .ck-modal { display: none !important; }
+        body, .ck-main { display: block !important; padding: 0 !important; margin: 0 !important; background: #fff !important; }
+        .ck-panel, .stat-card { box-shadow: none !important; border: 1px solid #d4d4d8 !important; }
       }
     </style>
   </head>
   <body class="text-slate-800 antialiased selection:bg-maroon-800 selection:text-white">
-    <%- include('partials/sidebar-user', { activePage: 'pengajuan-harga', user: userPH }) %>
+    <%- include('partials/sidebar-user', { activePage: 'catatan-keuangan', user: userCK }) %>
 
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none no-print"></div>
+    <div id="ck-toast"><i data-lucide="check-circle-2"></i><span id="ck-toast-pesan">Notifikasi</span></div>
 
-    <main class="pr-main ph-main">
+    <main class="pr-main ck-main">
       <header class="system-banner no-print">
         <div class="banner-title-wrap">
           <button type="button" class="banner-toggle-btn" onclick="toggleSidebar()" aria-label="Buka menu navigasi" title="Buka Menu">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
           <div class="banner-text">
-            <span>System Pengadaan &bull; User</span>
-            <h1><% if (modeProyekPH) { %>Pengajuan Harga &mdash; <%= projectPH.namaProject %><% } else { %>Pengajuan Harga &mdash; Daftar Project<% } %></h1>
+            <span>System Pengadaan • User</span>
+            <h1><% if (modeProyekCK) { %>Catatan Keuangan — <%= projectCK.namaProject %><% } else { %>Catatan Keuangan — Draft Project<% } %></h1>
           </div>
         </div>
         <div class="banner-actions">
-          <% if (modeProyekPH) { %>
-          <button type="button" onclick="kembaliKeProject()" class="ph-btn ph-btn-neutral cursor-pointer" title="Kembali ke daftar project">
+          <% if (modeProyekCK) { %>
+          <button type="button" onclick="kembaliKeProjectCK()" class="ck-btn ck-btn-neutral cursor-pointer" title="Kembali ke draft project">
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
             <span>Daftar Project</span>
           </button>
-          <button type="button" onclick="window.print()" class="ph-btn ph-btn-neutral cursor-pointer" title="Cetak / simpan PDF">
-            <i data-lucide="printer" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Cetak</span>
+          <button type="button" onclick="kosongkanDataCK()" class="ck-btn ck-btn-neutral cursor-pointer" title="Hapus semua transaksi pada project ini">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Kosongkan Data</span>
           </button>
-          <button type="button" onclick="eksporCSV()" class="ph-btn ph-btn-neutral cursor-pointer" title="Unduh data dalam format CSV">
-            <i data-lucide="file-down" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Export CSV</span>
-          </button>
-          <button type="button" onclick="bukaForm()" class="btn-banner-primary cursor-pointer" title="Buat pengajuan baru pada project ini">
+          <button type="button" onclick="fokusTransaksiCK()" class="btn-banner-primary cursor-pointer" title="Tambah transaksi baru">
             <i data-lucide="plus" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Input Pengajuan Baru</span>
-            <span class="sm:hidden">Input Baru</span>
+            <span>Tambah Transaksi</span>
           </button>
           <% } else { %>
-          <button type="button" onclick="fokusTambahProject()" class="btn-banner-primary cursor-pointer" title="Tambah project baru">
-            <i data-lucide="plus" class="w-4 h-4"></i>
+          <button type="button" onclick="bukaProjectModal()" class="btn-banner-primary cursor-pointer" title="Tambah project baru">
+            <i data-lucide="folder-plus" class="w-4 h-4"></i>
             <span>Tambah Project</span>
           </button>
           <% } %>
         </div>
       </header>
 
-      <% if (!modeProyekPH) { %>
-      <!-- ===================== LANDING: CARD PROJECT ===================== -->
+      <% if (!modeProyekCK) { %>
+      <!-- ============ LANDING: DRAFT PROJECT ============ -->
       <section id="view-project" class="space-y-5">
-        <div class="card-grid ph-card-grid">
+        <div class="card-grid ck-card-grid">
           <div class="stat-card card-blue">
             <div class="card-header">
               <span class="card-title">Total Project</span>
-              <div class="icon-wrapper icon-blue">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                  stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dock preview-icon">
-                  <path d="M2 8h20"/><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 16h12"/>
-                </svg>
-              </div>
+              <div class="icon-wrapper icon-blue"><i data-lucide="folder-open" class="w-5 h-5"></i></div>
             </div>
             <div class="card-body">
-              <span class="card-value"><%= totalProjectPH %></span>
+              <span class="card-value"><%= daftarProjectCK.length %></span>
               <span class="card-unit">Project</span>
             </div>
-            <div class="card-footer">
-              <span class="text-blue">Terdaftar</span>
-              <span>Pengajuan harga</span>
-            </div>
+            <div class="card-footer"><span class="text-blue">Tersedia</span><span>Catatan keuangan</span></div>
           </div>
 
           <div class="stat-card card-gold">
             <div class="card-header">
-              <span class="card-title">Total Kasbon Sampel</span>
-              <div class="icon-wrapper icon-gold">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-                  <line x1="2" y1="10" x2="22" y2="10"></line>
-                </svg>
-              </div>
+              <span class="card-title">Total Transaksi</span>
+              <div class="icon-wrapper icon-gold"><i data-lucide="receipt-text" class="w-5 h-5"></i></div>
             </div>
             <div class="card-body">
-              <span class="card-value"><%= rupiahPH(totalKasbonPH) %></span>
+              <span class="card-value"><%= angkaCK(statsSemuaCK.jumlah) %></span>
+              <span class="card-unit">Transaksi</span>
             </div>
-            <div class="card-footer">
-              <span class="text-orange">Seluruh project</span>
-              <span>Dasar sampel</span>
-            </div>
+            <div class="card-footer"><span class="text-orange">Seluruh project</span><span>Tercatat</span></div>
           </div>
 
           <div class="stat-card card-green">
             <div class="card-header">
-              <span class="card-title">Total Qty BOQ</span>
-              <div class="icon-wrapper icon-green">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                </svg>
-              </div>
+              <span class="card-title">Total Pemasukan</span>
+              <div class="icon-wrapper icon-green"><i data-lucide="trending-up" class="w-5 h-5"></i></div>
             </div>
-            <div class="card-body">
-              <span class="card-value"><%= angkaPH(totalBoqPH) %></span>
-              <span class="card-unit">Unit</span>
-            </div>
-            <div class="card-footer">
-              <span class="text-green">Akumulasi BOQ</span>
-              <span>Seluruh project</span>
-            </div>
+            <div class="card-body"><span class="card-value"><%= rupiahCK(statsSemuaCK.masuk) %></span></div>
+            <div class="card-footer"><span class="text-green">Akumulasi</span><span>Semua project</span></div>
           </div>
 
           <div class="stat-card card-red">
             <div class="card-header">
-              <span class="card-title">Rata-rata Sampel / Unit</span>
-              <div class="icon-wrapper icon-red">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-                class="lucide lucide-chart-no-axes-combined preview-icon"><path d="M12 16v5"/><path d="M16 14.639V21"/>
-                <path d="M20 10.656V21"/><path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"/>
-                <path d="M4 18.463V21"/><path d="M8 14.656V21"/></svg>
-              </div>
+              <span class="card-title">Total Pengeluaran</span>
+              <div class="icon-wrapper icon-red"><i data-lucide="trending-down" class="w-5 h-5"></i></div>
             </div>
-            <div class="card-body">
-              <span class="card-value"><%= rupiahPH(rataSampelPH) %></span>
-            </div>
-            <div class="card-footer">
-              <span class="text-red">Kasbon &divide; BOQ</span>
-              <span>Float penuh</span>
-            </div>
+            <div class="card-body"><span class="card-value"><%= rupiahCK(statsSemuaCK.keluar) %></span></div>
+            <div class="card-footer"><span class="text-red">Akumulasi</span><span>Semua project</span></div>
           </div>
         </div>
 
-        <form id="ph-project-form" class="ph-panel" action="/pengajuan-harga/project/add" method="POST" onsubmit="return validasiProject()">
-          <div class="ph-panel-head">
+        <div class="ck-panel">
+          <div class="ck-panel-head">
             <div>
-              <h2 class="text-base sm:text-lg font-bold text-slate-900">Tambah Project Baru</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Sampel / Survey per Unit dihitung otomatis dari kasbon sampel dibagi total qty BOQ.</p>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">Draft Project</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Setiap project memiliki catatan keuangan tersendiri. Klik card untuk membukanya.</p>
             </div>
-            <span class="ph-badge">Data Project</span>
+            <span class="ck-badge"><%= daftarProjectCK.length %> Project</span>
           </div>
-          <div class="ph-panel-body">
-            <div class="ph-project-form-grid">
-              <div class="ph-field">
-                <label for="ph-project-nama-input">Nama Project *</label>
-                <input type="text" id="ph-project-nama-input" name="namaProject" class="ph-input" required placeholder="Contoh: Merchandise Event Q4 2026" />
-              </div>
-              <div class="ph-field">
-                <label for="ph-project-kasbon">Total Kasbon Sampel (Rp) *</label>
-                <input type="number" id="ph-project-kasbon" name="totalKasbonSampel" class="ph-input" min="0" step="any" value="0" required oninput="hitungPreviewSampel()" />
-              </div>
-              <div class="ph-field">
-                <label for="ph-project-boq">Total Qty BOQ *</label>
-                <input type="number" id="ph-project-boq" name="totalQtyBoq" class="ph-input" min="1" step="any" value="1" required oninput="hitungPreviewSampel()" />
-              </div>
-              <div class="ph-field">
-                <label>Sampel / Survey per Unit</label>
-                <div class="ph-preview-sampel"><strong id="ph-preview-sampel">Rp 0</strong></div>
-              </div>
-              <button type="submit" class="ph-simpan-btn cursor-pointer">
-                <i data-lucide="folder-plus" class="w-4 h-4"></i>
-                Simpan Project
-              </button>
-            </div>
-          </div>
-        </form>
-
-        <div class="ph-panel">
-          <div class="ph-panel-head">
-            <div>
-              <h2 class="text-base sm:text-lg font-bold text-slate-900">Daftar Project Pengajuan Harga</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Klik card project untuk melihat daftar pengajuan harga pada project tersebut.</p>
-            </div>
-            <span class="ph-badge"><%= totalProjectPH %> Project</span>
-          </div>
-          <div class="ph-panel-body">
-            <% if (totalProjectPH) { %>
-            <div class="ph-project-grid">
-              <% daftarProjectPH.forEach(function (project) { %>
-              <div class="stat-card card-gold ph-project-card" role="button" tabindex="0"
-                   onclick="bukaProject('<%= String(project._id) %>')"
-                   onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); bukaProject('<%= String(project._id) %>'); }"
-                   title="Perhitungan: <%= Number(project.totalKasbonSampel) || 0 %> &divide; <%= Number(project.totalQtyBoq) || 0 %> = <%= Number(project.sampelPerUnit) || 0 %>">
+          <div class="ck-panel-body">
+            <% if (daftarProjectCK.length) { %>
+            <div class="ck-project-grid">
+              <% daftarProjectCK.forEach(function (project) { %>
+              <% var statCK = statsProjectCK(project._id); %>
+              <div class="stat-card card-gold ck-project-card" role="button" tabindex="0"
+                   onclick="bukaProjectCK('<%= String(project._id) %>')"
+                   onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); bukaProjectCK('<%= String(project._id) %>'); }">
                 <div class="card-header">
                   <span class="card-title"><%= project.namaProject %></span>
-                  <div class="icon-wrapper icon-gold">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                  </div>
-                </div>  
+                  <div class="icon-wrapper icon-gold"><i data-lucide="wallet" class="w-5 h-5"></i></div>
+                </div>
+                <div class="card-body">
+                  <span class="card-value"><%= rupiahCK(statCK.saldo) %></span>
+                  <span class="card-unit">Saldo saat ini</span>
+                </div>
                 <div class="card-footer">
-                  <span class="text-orange">Kasbon <%= rupiahPH(project.totalKasbonSampel) %></span>
-                  <span>BOQ <%= angkaPH(project.totalQtyBoq) %> &rarr;</span>
+                  <span class="text-orange"><%= angkaCK(statCK.jumlah) %> transaksi</span>
+                  <span>Buka →</span>
                 </div>
               </div>
               <% }); %>
             </div>
             <% } else { %>
-            <div class="ph-project-empty">Belum ada project. Tambahkan project baru melalui form di atas untuk mulai membuat pengajuan harga.</div>
+            <div class="ck-project-empty">Belum ada project. Klik <strong>Tambah Project</strong> untuk membuat catatan keuangan baru.</div>
             <% } %>
           </div>
         </div>
       </section>
       <% } else { %>
-      <!-- ===================== DAFTAR PENGAJUAN PER PROJECT ===================== -->
-      <section id="view-list" class="space-y-5">
-        <div class="card-grid ph-card-grid">
+      <!-- ============ HALAMAN PER PROJECT ============ -->
+      <section id="view-project-detail" class="space-y-5">
+        <div class="card-grid ck-card-grid ck-card-grid-3">
           <div class="stat-card card-blue">
             <div class="card-header">
-              <span class="card-title">Total Item Barang</span>
-              <div class="icon-wrapper icon-blue">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                </svg>
-              </div>
+              <span class="card-title">Total Saldo Saat Ini</span>
+              <div class="icon-wrapper icon-blue"><i data-lucide="scale" class="w-5 h-5"></i></div>
             </div>
             <div class="card-body">
-              <span class="card-value"><%= totalItemPH %></span>
-              <span class="card-unit">Item</span>
+              <span class="card-value" id="ck-total-saldo">Rp 0</span>
             </div>
             <div class="card-footer">
-              <span class="text-blue">Jenis merchandise</span>
-              <span>Pada project ini</span>
+              <span id="ck-saldo-badge" class="ck-badge ck-badge-green">Surplus</span>
+              <span>Akumulasi semua transaksi</span>
             </div>
           </div>
 
           <div class="stat-card card-green">
             <div class="card-header">
-              <span class="card-title">Total Volume</span>
-              <div class="icon-wrapper icon-green">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                </svg>
-              </div>
+              <span class="card-title">Pemasukan (Bulan Ini)</span>
+              <div class="icon-wrapper icon-green"><i data-lucide="arrow-down-left" class="w-5 h-5"></i></div>
             </div>
-            <div class="card-body">
-              <span class="card-value"><%= angkaPH(totalQtyPH) %></span>
-              <span class="card-unit">Unit</span>
-            </div>
-            <div class="card-footer">
-              <span class="text-green">Siap produksi</span>
-              <span>Pada project ini</span>
-            </div>
-          </div>
-
-          <div class="stat-card card-gold">
-            <div class="card-header">
-              <span class="card-title">Total Estimasi Harga</span>
-              <div class="icon-wrapper icon-gold">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-                  <line x1="2" y1="10" x2="22" y2="10"></line>
-                </svg>
-              </div>
-            </div>
-            <div class="card-body">
-              <span class="card-value"><%= rupiahPH(totalEstimasiPH) %></span>
-            </div>
-            <div class="card-footer">
-              <span class="text-orange">Akumulasi all-in</span>
-              <span>Keseluruhan</span>
-            </div>
+            <div class="card-body"><span class="card-value" id="ck-total-masuk">Rp 0</span></div>
+            <div class="card-footer"><span class="text-green">Terhitung bulan ini</span><span>Pemasukan</span></div>
           </div>
 
           <div class="stat-card card-red">
             <div class="card-header">
-              <span class="card-title">Rata-rata Unit All-In</span>
-              <div class="icon-wrapper icon-red">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                  <polyline points="17 6 23 6 23 12"></polyline>
-                </svg>
+              <span class="card-title">Pengeluaran (Bulan Ini)</span>
+              <div class="icon-wrapper icon-red"><i data-lucide="arrow-up-right" class="w-5 h-5"></i></div>
+            </div>
+            <div class="card-body"><span class="card-value" id="ck-total-keluar">Rp 0</span></div>
+            <div class="card-footer"><span class="text-red">Terhitung bulan ini</span><span>Pengeluaran</span></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <section class="lg:col-span-5 ck-panel" id="ck-form-panel">
+            <div class="ck-panel-head">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">Tambah Transaksi</h2>
+                <p class="text-[11px] text-slate-500 mt-0.5">Catat pemasukan atau pengeluaran project ini.</p>
+              </div>
+              <span class="ck-badge">Input Cepat</span>
+            </div>
+            <div class="ck-panel-body">
+              <form id="ck-form" action="/catatan-keuangan/transaksi/add" method="POST" class="ck-form-grid">
+                <input type="hidden" name="projectId" value="<%= String(projectCK._id) %>" />
+                <div class="ck-field" style="grid-column: 1 / -1;">
+                  <label>Jenis Transaksi</label>
+                  <div class="ck-type-options">
+                    <label class="ck-type-option aktif-ekspense" id="ck-label-expense">
+                      <input type="radio" name="type" value="expense" checked onchange="saatJenisBerubah()" />
+                      <i data-lucide="trending-down"></i>
+                      <span>Pengeluaran</span>
+                    </label>
+                    <label class="ck-type-option" id="ck-label-income">
+                      <input type="radio" name="type" value="income" onchange="saatJenisBerubah()" />
+                      <i data-lucide="trending-up"></i>
+                      <span>Pemasukan</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="ck-field" style="grid-column: 1 / -1;">
+                  <label for="ck-deskripsi">Deskripsi Transaksi</label>
+                  <input type="text" id="ck-deskripsi" name="deskripsi" class="ck-input" required placeholder="Contoh: Belanja merchandise, Gaji produksi..." />
+                </div>
+                <div class="ck-field" style="grid-column: 1 / -1;">
+                  <label for="ck-amount">Jumlah (Rp)</label>
+                  <div class="ck-amount-wrap">
+                    <span>Rp</span>
+                    <input type="number" id="ck-amount" name="amount" class="ck-input" min="1" step="any" required placeholder="0" />
+                  </div>
+                </div>
+                <div class="ck-field">
+                  <label for="ck-category">Kategori</label>
+                  <select id="ck-category" name="category" class="ck-input" required>
+                    <option value="" disabled selected>Pilih Kategori</option>
+                    <% kategoriUntukCK('expense').forEach(function (kategori) { %>
+                    <option value="<%= kategori.nama %>"><%= kategori.nama %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="ck-field">
+                  <label for="ck-tanggal">Tanggal</label>
+                  <input type="date" id="ck-tanggal" name="tanggal" class="ck-input" required />
+                </div>
+                <div class="ck-field" style="grid-column: 1 / -1;">
+                  <button type="submit" class="ck-btn ck-btn-primary cursor-pointer" style="width:100%; padding:12px;">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    Simpan Transaksi
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <section class="lg:col-span-7 ck-panel">
+            <div class="ck-panel-body">
+              <div class="ck-chart-head">
+                <div>
+                  <h2 class="text-base font-bold text-slate-900">Analisis Keuangan</h2>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Visualisasi transaksi pada project ini.</p>
+                </div>
+                <div class="ck-tab-wrap">
+                  <button type="button" id="ck-tab-category" class="ck-tab aktif" onclick="gantiTabCK('category')">Pengeluaran Per Kategori</button>
+                  <button type="button" id="ck-tab-comparison" class="ck-tab" onclick="gantiTabCK('comparison')">Pemasukan vs Pengeluaran</button>
+                </div>
+              </div>
+              <div id="ck-wrap-category" class="ck-chart-box">
+                <canvas id="ck-chart-category"></canvas>
+                <div id="ck-fallback-category" class="ck-chart-fallback hidden">Grafik tidak dapat ditampilkan. Pastikan koneksi internet tersedia.</div>
+              </div>
+              <div id="ck-wrap-comparison" class="ck-chart-box hidden">
+                <canvas id="ck-chart-comparison"></canvas>
+                <div id="ck-fallback-comparison" class="ck-chart-fallback hidden">Grafik tidak dapat ditampilkan. Pastikan koneksi internet tersedia.</div>
               </div>
             </div>
-            <div class="card-body">
-              <span class="card-value"><%= rupiahPH(rataUnitPH) %></span>
-            </div>
-            <div class="card-footer">
-              <span class="text-red">Per satuan unit</span>
-              <span>All-in</span>
-            </div>
-          </div>
+          </section>
         </div>
 
-        <div class="ph-panel">
-          <div class="ph-panel-head">
+        <section class="ck-panel">
+          <div class="ck-panel-head">
             <div>
-              <h2 class="text-base sm:text-lg font-bold text-slate-900">Daftar Pengajuan Harga</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">
-                Project: <strong class="text-slate-700"><%= projectPH.namaProject %></strong>
-                &bull; Sampel otomatis <strong class="text-slate-700"><%= rupiahPH(projectPH.sampelPerUnit) %></strong> / unit
-              </p>
+              <h2 class="text-base font-bold text-slate-900">Riwayat Transaksi</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Daftar transaksi yang telah dicatat pada project ini.</p>
             </div>
-            <span class="ph-badge"><%= totalItemPH %> Pengajuan</span>
-          </div>
-
-          <div class="ph-toolbar no-print">
-            <div class="flex-1 min-w-[220px] relative">
-              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-              <input type="text" id="ph-search" class="pl-9" placeholder="         Cari barang, spesifikasi, tim..." oninput="renderTabel()" />
-            </div>
-            <div class="w-full sm:w-64">
-              <select id="ph-filter-tim" onchange="renderTabel()">
-                <option value="">Semua Tim Produksi</option>
-              </select>
+            <div class="ck-toolbar">
+              <div class="ck-search-wrap">
+                <i data-lucide="search"></i>
+                <input type="text" id="ck-search" class="ck-input" placeholder="Cari transaksi..." oninput="renderTabelCK()" />
+              </div>
+              <div class="ck-filter-wrap">
+                <button type="button" class="ck-filter-btn aktif" data-filter="all" onclick="gantiFilterCK(this)">Semua</button>
+                <button type="button" class="ck-filter-btn" data-filter="income" onclick="gantiFilterCK(this)">Pemasukan</button>
+                <button type="button" class="ck-filter-btn" data-filter="expense" onclick="gantiFilterCK(this)">Pengeluaran</button>
+              </div>
             </div>
           </div>
-
-          <div class="ph-table-wrap">
-            <table class="ph-table">
+          <div class="ck-table-wrap">
+            <table class="ck-table">
               <thead>
                 <tr>
-                  <th>Nama Barang</th>
-                  <th>Tim Produksi</th>
-                  <th>Qty &amp; Satuan</th>
-                  <th>Harga Produksi</th>
-                  <th>Biaya Tambahan</th>
-                  <th>Harga All-In</th>
-                  <th>Total Harga</th>
-                  <th>PIC &amp; Waktu</th>
-                  <th class="no-print">Aksi</th>
+                  <th>Tanggal</th>
+                  <th>Deskripsi</th>
+                  <th>Kategori</th>
+                  <th class="num">Nominal (Rp)</th>
+                  <th>Dicatat / Diubah</th>
+                  <th class="aksi">Aksi</th>
                 </tr>
               </thead>
-              <tbody id="ph-table-body"></tbody>
+              <tbody id="ck-table-body"></tbody>
             </table>
+            <div id="ck-empty" class="ck-empty hidden">
+              <strong>Tidak ada transaksi ditemukan</strong>
+              Coba sesuaikan pencarian atau kata kunci filter Anda.
+            </div>
           </div>
-        </div>
+        </section>
       </section>
       <% } %>
     </main>
 
-    <% if (modeProyekPH) { %>
-    <!-- FORM POPUP -->
-    <div id="ph-form-modal" class="ph-modal ph-form-modal" onclick="if (event.target === this) tutupForm()">
-      <div class="ph-modal-dialog ph-form-dialog">
-        <div class="ph-modal-head">
+    <!-- POPUP TAMBAH PROJECT -->
+    <div id="ck-project-modal" class="ck-modal" onclick="if (event.target === this) tutupProjectModal()">
+      <div class="ck-modal-dialog">
+        <div class="ck-modal-head">
           <div>
-            <span class="text-[10px] uppercase tracking-widest text-maroon-100 font-bold">Form Pengajuan</span>
-            <h2>Input Pengajuan Baru</h2>
-            <p>Lengkapi data merchandise, rincian biaya, dan foto produk.</p>
+            <span class="text-[10px] uppercase tracking-widest text-maroon-100 font-bold">Project Baru</span>
+            <h2>Tambah Project</h2>
+            <p>Buat wadah catatan keuangan untuk satu project.</p>
           </div>
-          <button type="button" class="ph-modal-close" onclick="tutupForm()" aria-label="Tutup form">&times;</button>
+          <button type="button" class="ck-modal-close" onclick="tutupProjectModal()" aria-label="Tutup">×</button>
         </div>
-
-        <form id="ph-form" action="/pengajuan-harga/simpan" method="POST" enctype="multipart/form-data" onsubmit="return validasiForm()">
-          <input type="hidden" id="ph-project-id" name="projectId" value="<%= String(projectPH._id) %>" />
-          <div class="ph-modal-body ph-form-body">
-            <div class="ph-form-card">
-              <div class="ph-section-title">
-                <span class="ph-section-number">1</span>
-                <div>
-                  <h2 class="text-sm sm:text-base font-bold text-slate-900">Informasi Utama Merchandise</h2>
-                  <p class="text-[11px] text-slate-500">Data dasar barang dan harga produksi per unit.</p>
-                </div>
-              </div>
-
-              <div class="ph-project-info">
-                <div>
-                  <span class="ph-info-label">Project</span>
-                  <strong><%= projectPH.namaProject %></strong>
-                  <span>Kasbon sampel <%= rupiahPH(projectPH.totalKasbonSampel) %> &divide; Qty BOQ <%= angkaPH(projectPH.totalQtyBoq) %></span>
-                </div>
-                <span class="ph-badge">Sampel otomatis</span>
-              </div>
-
-              <div class="ph-grid">
-                <div class="ph-field ph-col-span-2">
-                  <label for="ph-nama">Nama Barang *</label>
-                  <input type="text" id="ph-nama" name="namaBarang" class="ph-input" required placeholder="Contoh: Tumbler Stainless Steel / Goodie Bag Spunbond" />
-                </div>
-                <div class="ph-field">
-                  <label for="ph-qty">Jumlah (Qty) *</label>
-                  <input type="number" id="ph-qty" name="qty" class="ph-input" min="1" value="1" required oninput="hitungLive()" />
-                </div>
-                <div class="ph-field">
-                  <label for="ph-satuan">Satuan *</label>
-                  <input type="text" id="ph-satuan" name="satuan" class="ph-input" value="pcs" required />
-                </div>
-                <div class="ph-field">
-                  <label for="ph-tim">Tim Produksi / Vendor *</label>
-                  <input type="text" id="ph-tim" name="timProduksi" class="ph-input" required placeholder="Contoh: Corkcicle Official / Mandiri Printing" />
-                </div>
-                <div class="ph-field">
-                  <label for="ph-harga-produksi">Harga Tim Produksi (Rp/Unit) *</label>
-                  <input type="number" id="ph-harga-produksi" name="hargaProduksi" class="ph-input" min="0" step="any" value="0" required oninput="hitungLive()" />
-                </div>
-                <div class="ph-field ph-col-span-2">
-                  <div class="ph-switch-wrap">
-                    <div>
-                      <span class="ph-switch-teks">Termasuk Include All in Harga Produksi</span>
-                      <span class="ph-switch-keterangan">Aktifkan jika harga produksi sudah mencakup seluruh biaya tambahan.</span>
-                    </div>
-                    <label class="ph-switch" title="Aktif / Nonaktif">
-                      <input type="checkbox" id="ph-include" name="includeAllIn" onchange="saatIncludeBerubah()" />
-                      <span class="ph-switch-track"><span class="ph-switch-dot"></span></span>
-                    </label>
-                  </div>
-                  <div id="ph-include-note" class="ph-include-note">
-                    <i data-lucide="check-circle-2" class="w-4 h-4 flex-shrink-0"></i>
-                    <span>Rincian biaya tambahan disembunyikan dan tidak dihitung karena sudah termasuk dalam harga produksi.</span>
-                  </div>
-                </div>
-                <div class="ph-field">
-                  <label for="ph-total-manual">Total Keseluruhan Manual (Opsional)</label>
-                  <input type="number" id="ph-total-manual" name="totalManual" class="ph-input" min="0" step="any" value="0" oninput="hitungLive()" />
-                  <span class="ph-hint">Jika diisi lebih dari 0, angka ini dipakai sebagai total akhir. Jika 0/kosong, total = Harga All-In &times; Qty.</span>
-                </div>
-                <div class="ph-field">
-                  <label>Total Keseluruhan (Qty &times; Harga All-In)</label>
-                  <input type="text" id="ph-total-qty-display" class="ph-input bg-slate-50 font-bold" value="Rp 0" readonly />
-                  <span class="ph-hint">Nilai desial penuh digunakan saat menghitung, dibulatkan hanya saat ditampilkan.</span>
-                </div>
-              </div>
-            </div>
-
-            <div id="ph-bagian-biaya" class="ph-form-card">
-              <div class="ph-section-title">
-                <span class="ph-section-number">2</span>
-                <div>
-                  <h2 class="text-sm sm:text-base font-bold text-slate-900">Rincian Biaya Tambahan (per Unit)</h2>
-                  <p class="text-[11px] text-slate-500">Pilih rincian dari dropdown. Kolom harga muncul setelah pilihan dipilih.</p>
-                </div>
-              </div>
-
-              <div class="ph-cost-block">
-                <div class="ph-cost-head">
-                  <span class="ph-cost-title">Branding &amp; Printing</span>
-                  <button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="tambahBiayaRow('branding')">+ Tambah Rincian</button>
-                </div>
-                <div id="rows-branding"></div>
-              </div>
-
-              <div class="ph-cost-block">
-                <div class="ph-cost-head">
-                  <span class="ph-cost-title">Packaging</span>
-                  <button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="tambahBiayaRow('packaging')">+ Tambah Rincian</button>
-                </div>
-                <div id="rows-packaging"></div>
-              </div>
-
-              <div class="ph-cost-block">
-                <div class="ph-cost-head">
-                  <span class="ph-cost-title">Packing Akhir</span>
-                  <button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="tambahBiayaRow('packing')">+ Tambah Rincian</button>
-                </div>
-                <div id="rows-packing"></div>
-              </div>
-
-              <div class="ph-cost-block">
-                <div class="ph-cost-head"><span class="ph-cost-title">Logistik Tim &amp; Sampel</span></div>
-                <div class="ph-fixed-grid">
-                  <div class="ph-field">
-                    <label for="ph-ongkir-tim">Ongkir Tim Produksi - DGS (pp)</label>
-                    <input type="number" id="ph-ongkir-tim" name="ongkirTimDgs" class="ph-input" min="0" step="any" value="0" oninput="hitungLive()" />
-                  </div>
-                  <div class="ph-field">
-                    <label for="ph-sampel">Sampel / Survey (per Unit)<span class="ph-auto-badge">Otomatis</span></label>
-                    <input type="number" id="ph-sampel" name="sampelSurvey" class="ph-input" min="0" step="any" value="<%= Number(projectPH.sampelPerUnit) || 0 %>" readonly oninput="hitungLive()" />
-                    <span class="ph-hint">Terisi otomatis dari project, tidak perlu diinput manual.</span>
-                  </div>
-                  <div class="ph-field">
-                    <label for="ph-ongkir-client">Ongkir DGS - Client (Jakarta)</label>
-                    <input type="number" id="ph-ongkir-client" name="ongkirDgsClient" class="ph-input" min="0" step="any" value="0" oninput="hitungLive()" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="ph-form-card">
-              <div class="ph-section-title">
-                <span class="ph-section-number">3</span>
-                <div>
-                  <h2 class="text-sm sm:text-base font-bold text-slate-900">Spesifikasi, PIC &amp; Foto Produk</h2>
-                  <p class="text-[11px] text-slate-500">Foto produk wajib di-upload dari perangkat, bukan URL/link.</p>
-                </div>
-              </div>
-              <div class="ph-grid">
-                <div class="ph-field ph-col-span-2">
-                  <label for="ph-spesifikasi">Spesifikasi Lengkap Barang</label>
-                  <textarea id="ph-spesifikasi" name="spesifikasi" class="ph-input" rows="4" placeholder="Warna: Matte black&#10;Ukuran: 20oz (270 ml)&#10;Fitur: Triple-insulated stainless steel"></textarea>
-                </div>
-                <div class="ph-field ph-col-span-2">
-                  <label for="ph-keterangan">Keterangan / Catatan Tambahan</label>
-                  <textarea id="ph-keterangan" name="keterangan" class="ph-input" rows="3" placeholder="Catatan khusus, ketentuan garansi, atau opsi sampel..."></textarea>
-                </div>
-                <div class="ph-field">
-                  <label for="ph-pic">PIC (Person in Charge)</label>
-                  <input type="text" id="ph-pic" name="pic" class="ph-input" placeholder="Contoh: Tim Marketing / Budi" />
-                </div>
-                <div class="ph-field">
-                  <label for="ph-waktu">Jangka Waktu Produksi</label>
-                  <input type="text" id="ph-waktu" name="jangkaWaktu" class="ph-input" placeholder="Contoh: 14 Hari Kerja" />
-                </div>
-                <div class="ph-field ph-col-span-2">
-                  <label for="ph-foto">Foto Produk Model</label>
-                  <input type="file" id="ph-foto" name="foto" class="ph-input" accept="image/*" multiple required onchange="pratinjauFoto(this)" />
-                  <span class="ph-hint">Maksimal 10 file gambar (JPG, PNG, WebP), masing-masing maksimal 20 MB.</span>
-                  <div id="ph-preview-foto" class="ph-preview-grid"></div>
-                </div>
-              </div>
+        <form action="/catatan-keuangan/project/add" method="POST" onsubmit="return validasiProjectCK()">
+          <div class="ck-modal-body">
+            <div class="ck-field">
+              <label for="ck-nama-project">Nama Project *</label>
+              <input type="text" id="ck-nama-project" name="namaProject" class="ck-input" required placeholder="Contoh: Merchandise Event Q4 2026" />
+              <span class="text-[10.5px] text-slate-400 mt-1.5 block">Setiap project menyimpan transaksi, saldo, dan grafiknya sendiri.</span>
             </div>
           </div>
-
-          <div class="ph-form-footer no-print">
-            <div class="ph-live-ringkas">
-              <div>
-                <span class="ph-live-label">Harga All-In / Unit</span>
-                <strong id="ph-live-allin">Rp 0</strong>
-              </div>
-              <div>
-                <span class="ph-live-label">Total Pengajuan</span>
-                <strong id="ph-live-total">Rp 0</strong>
-              </div>
-            </div>
-            <div class="ph-form-actions">
-              <button type="button" onclick="tutupForm()" class="ph-btn ph-btn-neutral cursor-pointer">Batal</button>
-              <button type="submit" class="ph-simpan-btn cursor-pointer">
-                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-                Simpan Pengajuan
-              </button>
-            </div>
+          <div class="ck-modal-footer">
+            <button type="button" class="ck-btn ck-btn-neutral cursor-pointer" onclick="tutupProjectModal()">Batal</button>
+            <button type="submit" class="ck-btn ck-btn-primary cursor-pointer">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              Simpan Project
+            </button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- DETAIL POPUP -->
-    <div id="ph-detail-modal" class="ph-modal" onclick="if (event.target === this) tutupDetail()">
-      <div class="ph-modal-dialog ph-detail-dialog">
-        <div class="ph-modal-head">
+    <!-- POPUP EDIT TRANSAKSI -->
+    <% if (modeProyekCK) { %>
+    <div id="ck-edit-modal" class="ck-modal" onclick="if (event.target === this) tutupEditModal()">
+      <div class="ck-modal-dialog">
+        <div class="ck-modal-head">
           <div>
-            <span class="text-[10px] uppercase tracking-widest text-maroon-100 font-bold">Detail Pengajuan Harga</span>
-            <div class="flex flex-wrap items-center gap-2">
-              <h2 id="ph-detail-judul">-</h2>
-              <span id="ph-detail-status" class="ph-status-badge">Diajukan</span>
-            </div>
-            <p id="ph-detail-kode">-</p>
+            <span class="text-[10px] uppercase tracking-widest text-maroon-100 font-bold">Ubah Transaksi</span>
+            <h2>Edit Transaksi</h2>
+            <p>Perubahan akan dicatat dengan nama Anda.</p>
           </div>
-          <button type="button" class="ph-modal-close" onclick="tutupDetail()" aria-label="Tutup detail">&times;</button>
+          <button type="button" class="ck-modal-close" onclick="tutupEditModal()" aria-label="Tutup">×</button>
         </div>
-        <div id="ph-detail-body" class="ph-modal-body"></div>
+        <form id="ck-edit-form" action="/catatan-keuangan/transaksi/edit" method="POST" onsubmit="return validasiEditCK()">
+          <input type="hidden" name="projectId" value="<%= String(projectCK._id) %>" />
+          <input type="hidden" id="ck-edit-id" name="id" value="" />
+          <div class="ck-modal-body">
+            <div class="ck-field" style="margin-bottom:15px;">
+              <label>Jenis Transaksi</label>
+              <div class="ck-type-options">
+                <label class="ck-type-option aktif-ekspense" id="ck-edit-label-expense">
+                  <input type="radio" id="ck-edit-type-expense" name="type" value="expense" checked onchange="saatJenisBerubah()" />
+                  <i data-lucide="trending-down"></i>
+                  <span>Pengeluaran</span>
+                </label>
+                <label class="ck-type-option" id="ck-edit-label-income">
+                  <input type="radio" id="ck-edit-type-income" name="type" value="income" onchange="saatJenisBerubah()" />
+                  <i data-lucide="trending-up"></i>
+                  <span>Pemasukan</span>
+                </label>
+              </div>
+            </div>
+            <div class="ck-field" style="margin-bottom:15px;">
+              <label for="ck-edit-deskripsi">Deskripsi Transaksi</label>
+              <input type="text" id="ck-edit-deskripsi" name="deskripsi" class="ck-input" required placeholder="Deskripsi transaksi" />
+            </div>
+            <div class="ck-field" style="margin-bottom:15px;">
+              <label for="ck-edit-amount">Jumlah (Rp)</label>
+              <div class="ck-amount-wrap">
+                <span>Rp</span>
+                <input type="number" id="ck-edit-amount" name="amount" class="ck-input" min="1" step="any" required placeholder="0" />
+              </div>
+            </div>
+            <div class="ck-field" style="margin-bottom:15px;">
+              <label for="ck-edit-category">Kategori</label>
+              <select id="ck-edit-category" name="category" class="ck-input" required></select>
+            </div>
+            <div class="ck-field">
+              <label for="ck-edit-tanggal">Tanggal</label>
+              <input type="date" id="ck-edit-tanggal" name="tanggal" class="ck-input" required />
+            </div>
+          </div>
+          <div class="ck-modal-footer">
+            <button type="button" class="ck-btn ck-btn-neutral cursor-pointer" onclick="tutupEditModal()">Batal</button>
+            <button type="submit" class="ck-btn ck-btn-primary cursor-pointer">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              Simpan Perubahan
+            </button>
+          </div>
+        </form>
       </div>
     </div>
     <% } %>
 
     <script>
-      var PH_DATA = <%- jsonUntukScriptPH(dataPH) %>;
-      var PH_PROJECT = <%- jsonUntukScriptPH(projectPH ? {
-        id: String(projectPH._id),
-        namaProject: projectPH.namaProject || '',
-        totalKasbonSampel: Number(projectPH.totalKasbonSampel) || 0,
-        totalQtyBoq: Number(projectPH.totalQtyBoq) || 0,
-        sampelPerUnit: Number(projectPH.sampelPerUnit) || 0
+      var CK_DATA = <%- jsonUntukScriptCK(dataCK) %>;
+      var CK_PROJECT = <%- jsonUntukScriptCK(projectCK ? {
+        id: String(projectCK._id),
+        namaProject: projectCK.namaProject || ''
       } : null) %>;
-      var PH_BASE_URL = <%- jsonUntukScriptPH(basePH) %>;
-      var PH_BERHASIL = <%- JSON.stringify(Boolean(typeof berhasil !== 'undefined' && berhasil)) %>;
-      var PH_GAGAL = <%- JSON.stringify(Boolean(typeof gagal !== 'undefined' && gagal)) %>;
+      var CK_BASE_URL = <%- jsonUntukScriptCK(baseCK) %>;
+      var CK_KATEGORI = <%- jsonUntukScriptCK(daftarKategoriCK) %>;
+      var CK_KATEGORI_DEFAULT = <%- jsonUntukScriptCK(kategoriDefaultCK) %>;
+      var CK_BERHASIL = <%- JSON.stringify(Boolean(typeof berhasil !== 'undefined' && berhasil)) %>;
+      var CK_EDIT = <%- JSON.stringify(Boolean(typeof edit !== 'undefined' && edit)) %>;
+      var CK_HAPUS = <%- JSON.stringify(Boolean(typeof hapus !== 'undefined' && hapus)) %>;
+      var CK_GAGAL = <%- JSON.stringify(Boolean(typeof gagal !== 'undefined' && gagal)) %>;
 
-      var OPSI_PH = {
-        branding: ['sablon', 'bordir', 'grafir 1 sisi', 'grafir 2 sisi', 'print'],
-        packaging: ['plastic sealed', 'slongsong', 'custom box'],
-        packing: ['kardus', 'karung']
-      };
-      var JUDUL_GRUP_PH = {
-        branding: 'Branding & Printing',
-        packaging: 'Packaging',
-        packing: 'Packing Akhir'
-      };
-      var nomorRowPH = 0;
+      var filterCK = 'all';
+      var cariCK = '';
+      var chartKategoriCK = null;
+      var chartBandingCK = null;
+      var tabGrafikCK = 'category';
 
       function toggleSidebar() {
         var sidebar = document.getElementById('sidebar');
@@ -1013,489 +705,454 @@
         if (parent) parent.classList.toggle('active');
       }
 
-      function initIcons() {
+      function initIconsCK() {
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
           try { window.lucide.createIcons(); } catch (err) {}
         }
       }
 
-      function escapeHtml(value) {
-        return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
-          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      function escapeHtmlCK(nilai) {
+        return String(nilai == null ? '' : nilai).replace(/[&<>"']/g, function (c) {
+          return { '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' }[c];
         });
       }
 
-      // Bulatkan HANYA saat ditampilkan. Perhitungan tetap memakai float penuh.
-      function rupiah(value) {
-        return 'Rp ' + Math.round(Number(value || 0)).toLocaleString('id-ID');
+      function rupiahCK(nilai) {
+        return 'Rp ' + Math.round(Number(nilai) || 0).toLocaleString('id-ID');
       }
 
-      function formatTanggal(value) {
-        if (!value) return '-';
-        var d = new Date(value);
-        if (isNaN(d.getTime())) return String(value);
+      function formatTanggalCK(nilai) {
+        if (!nilai) return '-';
+        var d = new Date(nilai);
+        if (isNaN(d.getTime())) return String(nilai);
         return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
       }
 
-      function teksAman(value) {
-        return String(value == null || value === '' ? '-' : value);
+      function formatWaktuCK(nilai) {
+        if (!nilai) return '-';
+        var d = new Date(nilai);
+        if (isNaN(d.getTime())) return String(nilai);
+        return d.toLocaleString('id-ID', {
+          day: 'numeric', month: 'short', year: 'numeric',
+          hour: '2-digit', minute: '2-digit',
+        });
       }
 
-      function fotoUrl(nama) {
-        if (!nama) return '';
-        if (/^https?:\/\//i.test(nama)) return nama;
-        return '/uploads/' + encodeURIComponent(nama);
+      function tampilToastCK(pesan, gagal) {
+        var el = document.getElementById('ck-toast');
+        var teks = document.getElementById('ck-toast-pesan');
+        if (!el || !teks) return;
+        teks.textContent = pesan;
+        el.classList.toggle('gagal', Boolean(gagal));
+        el.classList.add('muncul');
+        clearTimeout(window.ckToastTimer);
+        window.ckToastTimer = setTimeout(function () { el.classList.remove('muncul'); }, 3200);
       }
 
-      function tampilToast(pesan, jenis) {
-        var container = document.getElementById('toast-container');
-        if (!container) return;
-        var warna = jenis === 'gagal' ? 'bg-red-600' : 'bg-emerald-600';
-        var el = document.createElement('div');
-        el.className = 'px-4 py-3 rounded-xl text-white text-xs font-semibold shadow-lg ' + warna;
-        el.textContent = pesan;
-        container.appendChild(el);
-        setTimeout(function () { el.remove(); }, 3500);
+      function bukaProjectCK(id) {
+        window.location.href = CK_BASE_URL + '/project/' + encodeURIComponent(id);
       }
 
-      function bukaProject(id) {
-        window.location.href = PH_BASE_URL + '/project/' + encodeURIComponent(id);
+      function kembaliKeProjectCK() {
+        window.location.href = CK_BASE_URL;
       }
 
-      function kembaliKeProject() {
-        window.location.href = PH_BASE_URL;
+      function bukaProjectModal() {
+        var form = document.getElementById('ck-project-form');
+        if (form) form.reset();
+        var input = document.getElementById('ck-nama-project');
+        if (input) input.value = '';
+        document.getElementById('ck-project-modal').classList.add('terbuka');
+        document.body.style.overflow = 'hidden';
+        initIconsCK();
+        setTimeout(function () { if (input) input.focus(); }, 60);
       }
 
-      function fokusTambahProject() {
-        var form = document.getElementById('ph-project-form');
-        if (!form) return;
-        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        var input = document.getElementById('ph-project-nama-input');
-        if (input) setTimeout(function () { input.focus(); }, 250);
+      function tutupProjectModal() {
+        document.getElementById('ck-project-modal').classList.remove('terbuka');
+        document.body.style.overflow = '';
       }
 
-      function hitungPreviewSampel() {
-        var kasbon = Math.max(0, Number((document.getElementById('ph-project-kasbon') || {}).value) || 0);
-        var boq = Number((document.getElementById('ph-project-boq') || {}).value) || 0;
-        var sampel = boq > 0 ? kasbon / boq : 0;
-        var el = document.getElementById('ph-preview-sampel');
-        if (el) el.textContent = rupiah(sampel) + ' / unit';
-      }
-
-      function validasiProject() {
-        var nama = String((document.getElementById('ph-project-nama-input') || {}).value || '').trim();
-        var boq = Number((document.getElementById('ph-project-boq') || {}).value) || 0;
+      function validasiProjectCK() {
+        var nama = String((document.getElementById('ck-nama-project') || {}).value || '').trim();
         if (!nama) {
           alert('Nama project wajib diisi.');
-          return false;
-        }
-        if (boq <= 0) {
-          alert('Total Qty BOQ harus lebih dari 0.');
           return false;
         }
         return true;
       }
 
-      function dataTersaring() {
-        var teks = String((document.getElementById('ph-search') || {}).value || '').toLowerCase().trim();
-        var tim = String((document.getElementById('ph-filter-tim') || {}).value || '');
-        return PH_DATA.filter(function (item) {
-          var gabungan = [
-            item.namaBarang, item.timProduksi, item.spesifikasi, item.pic, item.kode,
-            Array.isArray(item.biayaTambahan) ? item.biayaTambahan.map(function (b) { return b.item; }).join(' ') : ''
-          ].join(' ').toLowerCase();
-          return (!teks || gabungan.indexOf(teks) !== -1) && (!tim || item.timProduksi === tim);
-        });
+      function fokusTransaksiCK() {
+        var form = document.getElementById('ck-form');
+        if (!form) return;
+        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function () {
+          var input = document.getElementById('ck-deskripsi');
+          if (input) input.focus();
+        }, 250);
       }
 
-      function isiOpsiTim() {
-        var select = document.getElementById('ph-filter-tim');
+      function perbaruiKategoriCK(idSelect, jenis) {
+        var select = document.getElementById(idSelect);
         if (!select) return;
-        var tim = [];
-        PH_DATA.forEach(function (item) {
-          if (item.timProduksi && tim.indexOf(item.timProduksi) === -1) tim.push(item.timProduksi);
+        var dipilih = select.value;
+        var tersedia = CK_KATEGORI.filter(function (k) {
+          return k.jenis === 'both' || k.jenis === jenis;
         });
-        tim.sort();
-        tim.forEach(function (nama) {
-          var opsi = document.createElement('option');
-          opsi.value = nama;
-          opsi.textContent = nama;
-          select.appendChild(opsi);
+        select.innerHTML = tersedia.map(function (k) {
+          return '<option value="' + escapeHtmlCK(k.nama) + '">' + escapeHtmlCK(k.nama) + '</option>';
+        }).join('');
+        var masihAda = tersedia.some(function (k) { return k.nama === dipilih; });
+        select.value = masihAda ? dipilih : (tersedia.length ? tersedia[0].nama : '');
+      }
+
+      function saatJenisBerubah() {
+        var daftarForm = [
+          { form: document.getElementById('ck-form'), labelExpense: 'ck-label-expense', labelIncome: 'ck-label-income', select: 'ck-category' },
+          { form: document.getElementById('ck-edit-form'), labelExpense: 'ck-edit-label-expense', labelIncome: 'ck-edit-label-income', select: 'ck-edit-category' },
+        ];
+
+        daftarForm.forEach(function (konf) {
+          if (!konf.form) return;
+          var income = konf.form.querySelector('input[name="type"][value="income"]');
+          var expense = konf.form.querySelector('input[name="type"][value="expense"]');
+          var labelIncome = document.getElementById(konf.labelIncome);
+          var labelExpense = document.getElementById(konf.labelExpense);
+          if (!income || !expense || !labelIncome || !labelExpense) return;
+
+          var iniIncome = income.checked;
+          labelIncome.classList.toggle('aktif-income', iniIncome);
+          labelExpense.classList.toggle('aktif-ekspense', !iniIncome);
+          perbaruiKategoriCK(konf.select, iniIncome ? 'income' : 'expense');
         });
       }
 
-      function renderTabel() {
-        var body = document.getElementById('ph-table-body');
+      function ringkasCK(list) {
+        var masuk = 0;
+        var keluar = 0;
+        var sekarang = new Date();
+        var bulanIni = sekarang.getMonth();
+        var tahunIni = sekarang.getFullYear();
+        var masukBulanIni = 0;
+        var keluarBulanIni = 0;
+        var kategori = {};
+
+        list.forEach(function (t) {
+          var jumlah = Number(t.amount) || 0;
+          var tgl = new Date(t.tanggal);
+          var diBulanIni = !isNaN(tgl.getTime()) && tgl.getMonth() === bulanIni && tgl.getFullYear() === tahunIni;
+
+          if (t.type === 'income') {
+            masuk += jumlah;
+            if (diBulanIni) masukBulanIni += jumlah;
+          } else {
+            keluar += jumlah;
+            if (diBulanIni) keluarBulanIni += jumlah;
+            var kat = t.category || 'Lainnya';
+            kategori[kat] = (kategori[kat] || 0) + jumlah;
+          }
+        });
+
+        return {
+          masuk: masuk,
+          keluar: keluar,
+          saldo: masuk - keluar,
+          masukBulanIni: masukBulanIni,
+          keluarBulanIni: keluarBulanIni,
+          kategori: kategori,
+          totalMasuk: masuk,
+          totalKeluar: keluar
+        };
+      }
+
+      function renderRingkasanCK() {
+        var elSaldo = document.getElementById('ck-total-saldo');
+        if (!elSaldo) return;
+        var r = ringkasCK(CK_DATA);
+        elSaldo.textContent = rupiahCK(r.saldo);
+        document.getElementById('ck-total-masuk').textContent = rupiahCK(r.masukBulanIni);
+        document.getElementById('ck-total-keluar').textContent = rupiahCK(r.keluarBulanIni);
+        var badge = document.getElementById('ck-saldo-badge');
+        badge.textContent = r.saldo >= 0 ? 'Surplus' : 'Defisit';
+        badge.className = 'ck-badge ' + (r.saldo >= 0 ? 'ck-badge-green' : 'ck-badge-rose');
+      }
+
+      function dataTersaringCK() {
+        return CK_DATA.filter(function (t) {
+          var cocokFilter = filterCK === 'all' || t.type === filterCK;
+          var teks = (String(t.deskripsi || '') + ' ' + String(t.category || '')).toLowerCase();
+          return cocokFilter && (!cariCK || teks.indexOf(cariCK) !== -1);
+        }).sort(function (a, b) {
+          return new Date(b.tanggal) - new Date(a.tanggal);
+        });
+      }
+
+      function metaKategoriCK(nama) {
+        var ditemukan = CK_KATEGORI.find(function (k) { return k.nama === String(nama || ''); });
+        if (ditemukan) return ditemukan;
+        return CK_KATEGORI.find(function (k) { return k.nama === CK_KATEGORI_DEFAULT; }) || {
+          nama: CK_KATEGORI_DEFAULT,
+          warna: '#64748b',
+          ikon: 'ellipsis',
+        };
+      }
+
+      function warnaBadgeCK(hex) {
+        return 'background:' + hex + '18;color:' + hex + ';';
+      }
+
+      function renderTabelCK() {
+        var body = document.getElementById('ck-table-body');
         if (!body) return;
-        var data = dataTersaring();
+        var data = dataTersaringCK();
+        var empty = document.getElementById('ck-empty');
 
         if (!data.length) {
-          body.innerHTML = '<tr><td colspan="9" class="ph-empty">Belum ada pengajuan harga pada project ini.</td></tr>';
+          body.innerHTML = '';
+          if (empty) empty.classList.remove('hidden');
+          return;
+        }
+        if (empty) empty.classList.add('hidden');
+
+        body.innerHTML = data.map(function (t) {
+          var meta = metaKategoriCK(t.category);
+          var income = t.type === 'income';
+          var infoInput = '<div class="ck-pelaku"><span>Dicatat:</span> ' +
+            escapeHtmlCK(t.diinputOleh || '-') + ' • ' + formatWaktuCK(t.createdAt) + '</div>';
+          var infoUpdate = t.diupdateOleh
+            ? '<div class="ck-pelaku ck-update"><span>Diubah:</span> ' +
+              escapeHtmlCK(t.diupdateOleh) + ' • ' + formatWaktuCK(t.updatedAt) + '</div>'
+            : '';
+
+          return '<tr>' +
+            '<td class="whitespace-nowrap text-xs text-slate-500 font-medium">' + formatTanggalCK(t.tanggal) + '</td>' +
+            '<td class="font-semibold text-slate-800">' + escapeHtmlCK(t.deskripsi) + '</td>' +
+            '<td class="whitespace-nowrap"><span class="ck-cat" style="' + warnaBadgeCK(meta.warna) + '">' +
+              '<i data-lucide="' + meta.ikon + '"></i><span>' + escapeHtmlCK(t.category || CK_KATEGORI_DEFAULT) + '</span></span></td>' +
+            '<td class="num ' + (income ? 'text-emerald-600' : 'text-rose-600') + '">' +
+              (income ? '+ ' : '- ') + rupiahCK(t.amount) + '</td>' +
+            '<td>' + infoInput + infoUpdate + '</td>' +
+            '<td class="aksi"><div class="ck-aksi-wrap">' +
+              '<button type="button" class="ck-edit" onclick="bukaEditCK(\'' + t._id + '\')" title="Edit Transaksi">' +
+                '<i data-lucide="pencil"></i></button>' +
+              '<button type="button" class="ck-hapus" onclick="hapusTransaksiCK(\'' + t._id + '\')" title="Hapus Transaksi">' +
+                '<i data-lucide="trash-2"></i></button>' +
+            '</div></td>' +
+            '</tr>';
+        }).join('');
+        initIconsCK();
+      }
+
+      function renderGrafikCK() {
+        var kanvasKategori = document.getElementById('ck-chart-category');
+        if (!kanvasKategori || typeof Chart === 'undefined') {
+          var fallbackKategori = document.getElementById('ck-fallback-category');
+          var fallbackBanding = document.getElementById('ck-fallback-comparison');
+          if (fallbackKategori) fallbackKategori.classList.remove('hidden');
+          if (fallbackBanding) fallbackBanding.classList.remove('hidden');
           return;
         }
 
-        var baris = data.map(function (item) {
-          var biaya = Number(item.totalBiayaTambahan) || 0;
-          return '<tr class="ph-row" onclick="bukaDetail(\'' + item._id + '\')">' +
-            '<td><span class="ph-nama">' + escapeHtml(item.namaBarang) + '</span>' +
-              '<span class="ph-sub">' + escapeHtml(item.kode || '-') + ' &bull; ' + formatTanggal(item.createdAt) + '</span></td>' +
-            '<td>' + escapeHtml(teksAman(item.timProduksi)) + '</td>' +
-            '<td><strong>' + Number(item.qty || 0).toLocaleString('id-ID') + '</strong> ' + escapeHtml(item.satuan || 'pcs') + '</td>' +
-            '<td>' + rupiah(item.hargaProduksi) + '</td>' +
-            '<td>' + rupiah(biaya) + '</td>' +
-            '<td><strong class="text-maroon-700">' + rupiah(item.hargaAllIn) + '</strong></td>' +
-            '<td><strong class="text-maroon-700">' + rupiah(item.totalHarga) + '</strong></td>' +
-            '<td>' + escapeHtml(teksAman(item.pic)) + '<span class="ph-sub">' + escapeHtml(teksAman(item.jangkaWaktu)) + '</span></td>' +
-            '<td class="no-print"><button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="event.stopPropagation(); bukaDetail(\'' + item._id + '\')">Lihat Detail</button></td>' +
-            '</tr>';
+        var r = ringkasCK(CK_DATA);
+        var labels = Object.keys(r.kategori);
+        var nilai = labels.map(function (k) { return r.kategori[k]; });
+        var warna = labels.map(function (k) { return metaKategoriCK(k).warna; });
+
+        if (chartKategoriCK) chartKategoriCK.destroy();
+        chartKategoriCK = new Chart(kanvasKategori.getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: labels.length ? labels : ['Belum ada pengeluaran'],
+            datasets: [{
+              data: nilai.length ? nilai : [1],
+              backgroundColor: nilai.length ? warna : ['#e2e8f0'],
+              borderWidth: 2,
+              borderColor: '#ffffff',
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { font: { family: 'Inter', size: 11 }, padding: 14, usePointStyle: true },
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    if (!nilai.length) return ' Tidak ada data';
+                    return ' ' + ctx.label + ': ' + rupiahCK(ctx.raw);
+                  },
+                },
+              },
+            },
+          },
         });
 
-        var totalQty = data.reduce(function (a, b) { return a + (Number(b.qty) || 0); }, 0);
-        var totalProduksi = data.reduce(function (a, b) { return a + (Number(b.hargaProduksi) || 0); }, 0);
-        var totalBiaya = data.reduce(function (a, b) { return a + (Number(b.totalBiayaTambahan) || 0); }, 0);
-        var totalSemua = data.reduce(function (a, b) { return a + (Number(b.totalHarga) || 0); }, 0);
-        var rata = totalQty > 0 ? totalSemua / totalQty : 0;
-
-        baris.push('<tr class="ph-total-row">' +
-          '<td>TOTAL KESELURUHAN</td><td>' + data.length + ' pengajuan</td>' +
-          '<td>' + Number(totalQty).toLocaleString('id-ID') + '</td>' +
-          '<td>' + rupiah(totalProduksi) + '</td>' +
-          '<td>' + rupiah(totalBiaya) + '</td>' +
-          '<td>' + rupiah(rata) + '</td>' +
-          '<td>' + rupiah(totalSemua) + '</td>' +
-          '<td colspan="2" class="no-print">-</td>' +
-          '</tr>');
-
-        body.innerHTML = baris.join('');
+        if (chartBandingCK) chartBandingCK.destroy();
+        chartBandingCK = new Chart(document.getElementById('ck-chart-comparison').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: ['Pemasukan', 'Pengeluaran'],
+            datasets: [{
+              label: 'Total Akumulasi',
+              data: [r.totalMasuk, r.totalKeluar],
+              backgroundColor: ['#10b981', '#7a1b1b'],
+              borderRadius: 8,
+              barThickness: 44,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: { label: function (ctx) { return ' ' + ctx.dataset.label + ': ' + rupiahCK(ctx.raw); } },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) { return 'Rp ' + (value / 1000).toLocaleString('id-ID') + 'k'; },
+                  font: { family: 'Inter', size: 10 },
+                },
+                grid: { color: '#f1f5f9' },
+              },
+              x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
+            },
+          },
+        });
       }
 
-      function bukaDetail(id) {
-        var item = PH_DATA.find(function (x) { return String(x._id) === String(id); });
-        if (!item) return;
-        tutupForm();
+      function gantiTabCK(tab) {
+        tabGrafikCK = tab;
+        var kategoriAktif = tab === 'category';
+        document.getElementById('ck-tab-category').classList.toggle('aktif', kategoriAktif);
+        document.getElementById('ck-tab-comparison').classList.toggle('aktif', !kategoriAktif);
+        document.getElementById('ck-wrap-category').classList.toggle('hidden', !kategoriAktif);
+        document.getElementById('ck-wrap-comparison').classList.toggle('hidden', kategoriAktif);
+        if (!kategoriAktif && chartBandingCK) chartBandingCK.resize();
+        if (kategoriAktif && chartKategoriCK) chartKategoriCK.resize();
+      }
 
-        document.getElementById('ph-detail-judul').textContent = item.namaBarang || '-';
-        document.getElementById('ph-detail-status').textContent = teksAman(item.status || 'Diajukan');
-        document.getElementById('ph-detail-kode').textContent =
-          (item.kode || '-') + ' • ' + (item.projectNama || (PH_PROJECT && PH_PROJECT.namaProject) || '-') + ' • ' +
-          (item.timProduksi || '-') + ' • ' + formatTanggal(item.createdAt);
+      function gantiFilterCK(tombol) {
+        document.querySelectorAll('.ck-filter-btn').forEach(function (b) { b.classList.remove('aktif'); });
+        tombol.classList.add('aktif');
+        filterCK = tombol.getAttribute('data-filter');
+        renderTabelCK();
+      }
 
-        var fotoList = Array.isArray(item.gambar) ? item.gambar.filter(Boolean) : [];
-        var gambarHtml = fotoList.length
-          ? '<img id="ph-foto-utama" class="ph-gallery-main" src="' + fotoUrl(fotoList[0]) + '" alt="Foto ' + escapeHtml(item.namaBarang) + '" />' +
-            '<div class="ph-thumbs">' + fotoList.map(function (f, i) {
-              return '<img src="' + fotoUrl(f) + '" class="' + (i === 0 ? 'aktif' : '') + '" onclick="gantiFotoDetail(this)" alt="Thumbnail ' + (i + 1) + '" />';
-            }).join('') + '</div>'
-          : '<div class="ph-gallery-empty">Belum ada foto produk yang di-upload.</div>';
-
-        var biayaRows = ['<tr><th>Harga Tim Produksi</th><td>' + rupiah(item.hargaProduksi) + '</td></tr>'];
-        (Array.isArray(item.biayaTambahan) ? item.biayaTambahan : []).forEach(function (b) {
-          biayaRows.push('<tr><th>' + escapeHtml(JUDUL_GRUP_PH[b.grup] || b.grup || 'Rincian') + ' &bull; ' + escapeHtml(b.item) + '</th><td>' + rupiah(b.harga) + '</td></tr>');
+      function kirimFormCK(action, fieldTambahan) {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = action;
+        Object.keys(fieldTambahan || {}).forEach(function (nama) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = nama;
+          input.value = fieldTambahan[nama];
+          form.appendChild(input);
         });
-        biayaRows.push('<tr><th>Ongkir Tim Produksi - DGS (pp)</th><td>' + rupiah(item.ongkirTimDgs) + '</td></tr>');
-        biayaRows.push('<tr><th>Sampel / Survey (per Unit, otomatis)</th><td>' + rupiah(item.sampelSurvey) + '</td></tr>');
-        biayaRows.push('<tr><th>Ongkir DGS - Client (Jakarta)</th><td>' + rupiah(item.ongkirDgsClient) + '</td></tr>');
+        document.body.appendChild(form);
+        form.submit();
+      }
 
-        var catatanInclude = item.includeAllIn
-          ? '<div class="ph-callout ph-callout-amber"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i><span>Biaya tambahan di atas sudah termasuk dalam harga produksi, sehingga tidak dijumlahkan lagi ke harga all-in.</span></div>'
-          : '';
-        var catatanManual = Number(item.totalManual) > 0
-          ? '<div class="ph-callout ph-callout-green"><i data-lucide="check-circle-2" class="w-4 h-4 flex-shrink-0"></i><span>Total Keseluruhan memakai input manual ' + rupiah(item.totalManual) + ', bukan hasil perkalian otomatis.</span></div>'
-          : '';
+      function tanggalInputCK(nilai) {
+        var d = new Date(nilai);
+        if (isNaN(d.getTime())) return '';
+        var bulan = String(d.getMonth() + 1).padStart(2, '0');
+        var hari = String(d.getDate()).padStart(2, '0');
+        return d.getFullYear() + '-' + bulan + '-' + hari;
+      }
 
-        document.getElementById('ph-detail-body').innerHTML =
-          '<div class="ph-detail-layout">' +
-            '<aside class="ph-detail-aside">' +
-              '<div class="ph-detail-card">' +
-                '<div class="ph-detail-card-head"><h3>Foto Produk</h3><span>' + fotoList.length + ' file</span></div>' +
-                gambarHtml +
-              '</div>' +
-              '<div class="ph-detail-card">' +
-                '<div class="ph-detail-card-head"><h3>Informasi Pengajuan</h3></div>' +
-                '<div class="ph-side-row"><span class="ph-info-label">Kode Pengajuan</span><span class="ph-info-value">' + escapeHtml(item.kode || '-') + '</span></div>' +
-                '<div class="ph-side-row"><span class="ph-info-label">Project</span><span class="ph-info-value">' + escapeHtml(teksAman(item.projectNama || (PH_PROJECT && PH_PROJECT.namaProject))) + '</span></div>' +
-                '<div class="ph-side-row"><span class="ph-info-label">Tanggal Diajukan</span><span class="ph-info-value">' + formatTanggal(item.createdAt) + '</span></div>' +
-                '<div class="ph-side-row"><span class="ph-info-label">Diinput Oleh</span><span class="ph-info-value">' + escapeHtml(teksAman(item.diinputOleh)) + '</span></div>' +
-                '<div class="ph-side-row"><span class="ph-info-label">Status</span><span class="ph-info-value">' + escapeHtml(teksAman(item.status || 'Diajukan')) + '</span></div>' +
-              '</div>' +
-            '</aside>' +
-            '<div class="ph-detail-main">' +
-              '<div class="ph-detail-card">' +
-                '<div class="ph-detail-card-head"><h3>Informasi Produk</h3><span>Data merchandise</span></div>' +
-                '<div class="ph-info-grid">' +
-                  '<div><span class="ph-info-label">Qty &amp; Satuan</span><span class="ph-info-value">' + Number(item.qty || 0).toLocaleString('id-ID') + ' ' + escapeHtml(item.satuan || 'pcs') + '</span></div>' +
-                  '<div><span class="ph-info-label">Tim Produksi / Vendor</span><span class="ph-info-value">' + escapeHtml(teksAman(item.timProduksi)) + '</span></div>' +
-                  '<div><span class="ph-info-label">PIC</span><span class="ph-info-value">' + escapeHtml(teksAman(item.pic)) + '</span></div>' +
-                  '<div><span class="ph-info-label">Waktu Produksi</span><span class="ph-info-value">' + escapeHtml(teksAman(item.jangkaWaktu)) + '</span></div>' +
-                '</div>' +
-                '<div class="ph-detail-note"><span class="ph-info-label">Spesifikasi Detail Produk</span><p>' + escapeHtml(teksAman(item.spesifikasi)) + '</p></div>' +
-                '<div class="ph-detail-note"><span class="ph-info-label">Keterangan Tambahan</span><p>' + escapeHtml(teksAman(item.keterangan)) + '</p></div>' +
-              '</div>' +
-              '<div class="ph-detail-card">' +
-                '<div class="ph-detail-card-head"><h3>Rincian Komponen Biaya</h3><span>Nominal per unit</span></div>' +
-                '<table class="ph-detail-table">' +
-                  '<thead><tr><th>Komponen</th><th>Nominal</th></tr></thead>' +
-                  '<tbody>' + biayaRows.join('') + '</tbody>' +
-                '</table>' +
-                catatanInclude + catatanManual +
-              '</div>' +
-              '<div class="ph-detail-summary">' +
-                '<div class="ph-detail-summary-item">' +
-                  '<span class="ph-info-label">Harga All-In per Unit</span>' +
-                  '<strong>' + rupiah(item.hargaAllIn) + '</strong>' +
-                  '<small>' + (item.includeAllIn ? 'Sudah termasuk biaya tambahan' : 'Termasuk rincian biaya di atas') + '</small>' +
-                '</div>' +
-                '<div class="ph-detail-summary-item ph-total">' +
-                  '<span class="ph-info-label">Total Keseluruhan</span>' +
-                  '<strong>' + rupiah(item.totalHarga) + '</strong>' +
-                  '<small>' + (Number(item.totalManual) > 0
-                    ? 'Input manual ' + rupiah(item.totalManual)
-                    : Number(item.qty || 0).toLocaleString('id-ID') + ' ' + escapeHtml(item.satuan || 'pcs') + ' &times; ' + rupiah(item.hargaAllIn)) + '</small>' +
-                '</div>' +
-              '</div>' +
-            '</div>' +
-          '</div>';
+      function bukaEditCK(id) {
+        var t = CK_DATA.find(function (item) { return String(item._id) === String(id); });
+        if (!t) return;
 
-        document.getElementById('ph-detail-modal').classList.add('terbuka');
+        document.getElementById('ck-edit-id').value = String(t._id);
+        document.getElementById('ck-edit-deskripsi').value = String(t.deskripsi || '');
+        document.getElementById('ck-edit-amount').value = Number(t.amount) || 0;
+        document.getElementById('ck-edit-tanggal').value = tanggalInputCK(t.tanggal);
+
+        var iniIncome = t.type === 'income';
+        document.getElementById('ck-edit-type-income').checked = iniIncome;
+        document.getElementById('ck-edit-type-expense').checked = !iniIncome;
+        saatJenisBerubah();
+
+        var selectKategori = document.getElementById('ck-edit-category');
+        if (selectKategori) selectKategori.value = String(t.category || CK_KATEGORI_DEFAULT);
+
+        document.getElementById('ck-edit-modal').classList.add('terbuka');
         document.body.style.overflow = 'hidden';
-        initIcons();
-      }
-
-      function gantiFotoDetail(gambar) {
-        var utama = document.getElementById('ph-foto-utama');
-        if (utama) utama.src = gambar.src;
-        document.querySelectorAll('#ph-detail-modal .ph-thumbs img').forEach(function (img) { img.classList.remove('aktif'); });
-        gambar.classList.add('aktif');
-      }
-
-      function tutupDetail() {
-        var modal = document.getElementById('ph-detail-modal');
-        if (modal) modal.classList.remove('terbuka');
-        if (!document.getElementById('ph-form-modal').classList.contains('terbuka')) document.body.style.overflow = '';
-      }
-
-      function tambahBiayaRow(grup) {
-        var wadah = document.getElementById('rows-' + grup);
-        if (!wadah) return;
-        nomorRowPH += 1;
-        var opsi = ['<option value="">-- Pilih rincian --</option>'].concat(
-          (OPSI_PH[grup] || []).map(function (item) {
-            return '<option value="' + item + '">' + item.charAt(0).toUpperCase() + item.slice(1) + '</option>';
-          })
-        ).join('');
-        var row = document.createElement('div');
-        row.className = 'ph-cost-row';
-        row.innerHTML =
-          '<input type="hidden" name="biayaGrup[]" value="' + grup + '" />' +
-          '<div class="ph-field">' +
-            '<label>Pilihan ' + JUDUL_GRUP_PH[grup] + '</label>' +
-            '<select name="biayaItem[]" class="ph-input item-select" data-grup="' + grup + '" onchange="saatItemBerubah(this)">' + opsi + '</select>' +
-          '</div>' +
-          '<div class="ph-field ph-price-wrap">' +
-            '<label>Harga per Unit (Rp)</label>' +
-            '<input type="number" name="biayaHarga[]" class="ph-input harga-input" min="0" step="any" value="0" oninput="hitungLive()" />' +
-          '</div>' +
-          '<button type="button" class="ph-btn ph-btn-neutral cursor-pointer" onclick="hapusBiayaRow(this)">Hapus</button>';
-        wadah.appendChild(row);
-      }
-
-      function saatItemBerubah(select) {
-        var row = select.closest('.ph-cost-row');
-        var wrap = row.querySelector('.ph-price-wrap');
-        var input = row.querySelector('.harga-input');
-        if (select.value) {
-          wrap.classList.add('terlihat');
-          if (!input.value) input.value = '0';
-        } else {
-          wrap.classList.remove('terlihat');
-          input.value = '0';
-        }
-        segarOpsi();
-        hitungLive();
-      }
-
-      function segarOpsi() {
-        var dipakai = {};
-        document.querySelectorAll('.item-select').forEach(function (select) {
-          if (select.value) dipakai[select.value] = select;
-        });
-        document.querySelectorAll('.item-select').forEach(function (select) {
-          Array.from(select.options).forEach(function (option) {
-            if (!option.value) return;
-            option.disabled = Boolean(dipakai[option.value] && dipakai[option.value] !== select);
-          });
-        });
-      }
-
-      function hapusBiayaRow(tombol) {
-        var row = tombol.closest('.ph-cost-row');
-        if (row) row.remove();
-        segarOpsi();
-        hitungLive();
-      }
-
-      function saatIncludeBerubah() {
-        var include = Boolean((document.getElementById('ph-include') || {}).checked);
-        var bagian = document.getElementById('ph-bagian-biaya');
-        var catatan = document.getElementById('ph-include-note');
-        if (bagian) bagian.classList.toggle('ph-hide', include);
-        if (catatan) catatan.classList.toggle('terlihat', include);
-        hitungLive();
-      }
-
-      function hitungLive() {
-        var qty = Math.max(1, Number((document.getElementById('ph-qty') || {}).value) || 1);
-        var produksi = Math.max(0, Number((document.getElementById('ph-harga-produksi') || {}).value) || 0);
-        var include = Boolean((document.getElementById('ph-include') || {}).checked);
-        var tambahan = 0;
-
-        document.querySelectorAll('.item-select').forEach(function (select) {
-          if (!select.value) return;
-          var row = select.closest('.ph-cost-row');
-          var harga = Number(row.querySelector('.harga-input').value) || 0;
-          tambahan += harga;
-        });
-
-        tambahan += Math.max(0, Number((document.getElementById('ph-ongkir-tim') || {}).value) || 0);
-        // Sampel / Survey berasal dari project (float penuh), bukan input manual.
-        tambahan += Math.max(0, Number((document.getElementById('ph-sampel') || {}).value) || 0);
-        tambahan += Math.max(0, Number((document.getElementById('ph-ongkir-client') || {}).value) || 0);
-
-        var efektif = include ? 0 : tambahan;
-        var allIn = produksi + efektif;
-        var manual = Math.max(0, Number((document.getElementById('ph-total-manual') || {}).value) || 0);
-        // Tidak ada Math.round di sini. Pembulatan hanya di rupiah() saat ditampilkan.
-        var total = manual > 0 ? manual : allIn * qty;
-
-        var elemenAllIn = document.getElementById('ph-live-allin');
-        var elemenTotal = document.getElementById('ph-live-total');
-        var elemenTotalDisplay = document.getElementById('ph-total-qty-display');
-        if (elemenAllIn) elemenAllIn.textContent = rupiah(allIn);
-        if (elemenTotal) elemenTotal.textContent = rupiah(total);
-        if (elemenTotalDisplay) elemenTotalDisplay.value = rupiah(total);
-      }
-
-      function pratinjauFoto(input) {
-        var wadah = document.getElementById('ph-preview-foto');
-        if (!wadah) return;
-        wadah.innerHTML = '';
-        Array.from(input.files || []).slice(0, 5).forEach(function (file) {
-          if (!file.type || file.type.indexOf('image/') !== 0) return;
-          var reader = new FileReader();
-          reader.onload = function (e) {
-            var img = document.createElement('img');
-            img.src = e.target.result;
-            img.alt = file.name;
-            wadah.appendChild(img);
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-
-      function validasiForm() {
-        var nama = String((document.getElementById('ph-nama') || {}).value || '').trim();
-        var tim = String((document.getElementById('ph-tim') || {}).value || '').trim();
-        if (!nama || !tim) {
-          alert('Nama barang dan tim produksi wajib diisi.');
-          return false;
-        }
-        var include = Boolean((document.getElementById('ph-include') || {}).checked);
-        var valid = true;
-        if (!include) {
-          document.querySelectorAll('.item-select').forEach(function (select) {
-            if (!select.value || !valid) return;
-            var row = select.closest('.ph-cost-row');
-            var harga = Number(row.querySelector('.harga-input').value) || 0;
-            if (harga <= 0) {
-              alert('Isi harga untuk rincian "' + select.value + '" dengan nilai lebih dari 0.');
-              valid = false;
-            }
-          });
-        }
-        return valid;
-      }
-
-      function bukaForm() {
-        var form = document.getElementById('ph-form');
-        if (form) form.reset();
-        ['branding', 'packaging', 'packing'].forEach(function (grup) {
-          var wadah = document.getElementById('rows-' + grup);
-          if (wadah) wadah.innerHTML = '';
-          tambahBiayaRow(grup);
-        });
-        var preview = document.getElementById('ph-preview-foto');
-        if (preview) preview.innerHTML = '';
-        var include = document.getElementById('ph-include');
-        if (include) include.checked = false;
-        // Selalu isi ulang sampel dari project dengan nilai float penuh.
-        var sampel = document.getElementById('ph-sampel');
-        if (sampel) sampel.value = PH_PROJECT ? PH_PROJECT.sampelPerUnit : 0;
-        segarOpsi();
-        saatIncludeBerubah();
-        document.getElementById('ph-form-modal').classList.add('terbuka');
-        document.body.style.overflow = 'hidden';
-        initIcons();
+        initIconsCK();
         setTimeout(function () {
-          var nama = document.getElementById('ph-nama');
-          if (nama) nama.focus();
+          var input = document.getElementById('ck-edit-deskripsi');
+          if (input) input.focus();
         }, 60);
       }
 
-      function tutupForm() {
-        var modal = document.getElementById('ph-form-modal');
-        if (!modal) return;
-        modal.classList.remove('terbuka');
-        if (!document.getElementById('ph-detail-modal').classList.contains('terbuka')) document.body.style.overflow = '';
+      function tutupEditModal() {
+        document.getElementById('ck-edit-modal').classList.remove('terbuka');
+        document.body.style.overflow = '';
       }
 
-      function angkaCsv(value) {
-        return Math.round(Number(value) || 0);
+      function validasiEditCK() {
+        var deskripsi = String((document.getElementById('ck-edit-deskripsi') || {}).value || '').trim();
+        var amount = Number((document.getElementById('ck-edit-amount') || {}).value) || 0;
+        if (!deskripsi || amount <= 0) {
+          alert('Deskripsi dan jumlah transaksi wajib diisi dengan benar.');
+          return false;
+        }
+        return true;
       }
 
-      function eksporCSV() {
-        var data = dataTersaring();
-        var kepala = [
-          'Kode', 'Nama Barang', 'Tim Produksi', 'Qty', 'Satuan', 'Harga Produksi',
-          'Biaya Tambahan', 'Sampel per Unit', 'Harga All-In', 'Total Manual', 'Total Harga', 'PIC', 'Waktu Produksi'
-        ];
-        var baris = data.map(function (item) {
-          return [
-            item.kode, item.namaBarang, item.timProduksi, angkaCsv(item.qty), item.satuan,
-            angkaCsv(item.hargaProduksi), angkaCsv(item.totalBiayaTambahan), angkaCsv(item.sampelSurvey),
-            angkaCsv(item.hargaAllIn), angkaCsv(item.totalManual), angkaCsv(item.totalHarga),
-            item.pic, item.jangkaWaktu
-          ];
+      function hapusTransaksiCK(id) {
+        if (!confirm('Hapus transaksi ini?')) return;
+        kirimFormCK('/catatan-keuangan/transaksi/delete', {
+          id: id,
+          projectId: CK_PROJECT ? CK_PROJECT.id : ''
         });
-        var isi = [kepala].concat(baris).map(function (row) {
-          return row.map(function (sel) {
-            return '"' + String(sel == null ? '' : sel).replace(/"/g, '""') + '"';
-          }).join(',');
-        }).join('\r\n');
-        var blob = new Blob(['\ufeff' + isi], { type: 'text/csv;charset=utf-8;' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'pengajuan-harga.csv';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+      }
+
+      function kosongkanDataCK() {
+        if (!confirm('Kosongkan seluruh transaksi pada project ini? Tindakan ini tidak dapat dibatalkan.')) return;
+        kirimFormCK('/catatan-keuangan/transaksi/kosongkan', {
+          projectId: CK_PROJECT ? CK_PROJECT.id : ''
+        });
       }
 
       document.addEventListener('DOMContentLoaded', function () {
-        hitungPreviewSampel();
-        isiOpsiTim();
-        renderTabel();
-        saatIncludeBerubah();
-        initIcons();
-        if (PH_BERHASIL) tampilToast(PH_PROJECT ? 'Pengajuan harga berhasil disimpan.' : 'Project berhasil ditambahkan.');
-        if (PH_GAGAL) tampilToast('Gagal menyimpan data. Periksa kembali input Anda.', 'gagal');
+        var tanggal = document.getElementById('ck-tanggal');
+        if (tanggal) tanggal.value = new Date().toISOString().slice(0, 10);
+
+        var cari = document.getElementById('ck-search');
+        if (cari) cari.addEventListener('input', function (e) {
+          cariCK = String(e.target.value || '').toLowerCase().trim();
+          renderTabelCK();
+        });
+
+        saatJenisBerubah();
+        renderRingkasanCK();
+        renderTabelCK();
+        renderGrafikCK();
+        initIconsCK();
+
+        if (CK_BERHASIL) tampilToastCK(CK_PROJECT ? 'Transaksi berhasil ditambahkan.' : 'Project berhasil ditambahkan.', false);
+        if (CK_EDIT) tampilToastCK('Transaksi berhasil diubah.', false);
+        if (CK_HAPUS) tampilToastCK('Data transaksi berhasil diperbarui.', false);
+        if (CK_GAGAL) tampilToastCK('Gagal menyimpan data. Periksa kembali input Anda.', true);
       });
 
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
-        if (document.getElementById('ph-detail-modal') && document.getElementById('ph-detail-modal').classList.contains('terbuka')) tutupDetail();
-        else if (document.getElementById('ph-form-modal') && document.getElementById('ph-form-modal').classList.contains('terbuka')) tutupForm();
+        var modalProject = document.getElementById('ck-project-modal');
+        var modalEdit = document.getElementById('ck-edit-modal');
+        if (modalProject && modalProject.classList.contains('terbuka')) tutupProjectModal();
+        if (modalEdit && modalEdit.classList.contains('terbuka')) tutupEditModal();
       });
     </script>
   </body>
