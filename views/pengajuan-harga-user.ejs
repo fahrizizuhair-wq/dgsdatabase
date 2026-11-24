@@ -5,9 +5,22 @@
   var baseCK = (typeof baseUrl !== 'undefined' && baseUrl)
     ? baseUrl
     : ((typeof role !== 'undefined' && role === 'admin') ? '/catatan-keuangan' : '/catatan-keuangan-user');
-  var daftarKategoriCK = (typeof kategoriList !== 'undefined' && kategoriList && kategoriList.length)
-    ? kategoriList
-    : [{ nama: 'Lainnya', jenis: 'both', warna: '#64748b', ikon: 'ellipsis' }];
+
+  // Atur tambah / hapus kategori di sini (jenis: 'expense' | 'income' | 'both')
+  var kategoriInternalCK = [
+    { nama: 'Anggaran Kasbon', jenis: 'expense', warna: '#f59e0b', ikon: 'wallet' },
+    { nama: 'Pencairan Kembali', jenis: 'expense', warna: '#10b981', ikon: 'banknote' },
+    { nama: 'Makan & Minum', jenis: 'expense', warna: '#f59e0b', ikon: 'utensils' },
+    { nama: 'Transportasi', jenis: 'expense', warna: '#3b82f6', ikon: 'car' },
+    { nama: 'Belanja', jenis: 'expense', warna: '#ec4899', ikon: 'shopping-bag' },
+    { nama: 'Tagihan', jenis: 'expense', warna: '#8b5cf6', ikon: 'receipt' },
+    { nama: 'Gaji / Pendapatan', jenis: 'income', warna: '#10b981', ikon: 'wallet' },
+    { nama: 'Kasbon Cair', jenis: 'income', warna: '#059669', ikon: 'banknote' },
+    { nama: 'Bonus', jenis: 'income', warna: '#2563eb', ikon: 'award' },
+    { nama: 'Lainnya', jenis: 'both', warna: '#64748b', ikon: 'ellipsis' }
+  ];
+
+  var daftarKategoriCK = kategoriInternalCK;
   var kategoriDefaultCK = (typeof kategoriDefault !== 'undefined' && kategoriDefault)
     ? kategoriDefault
     : 'Lainnya';
