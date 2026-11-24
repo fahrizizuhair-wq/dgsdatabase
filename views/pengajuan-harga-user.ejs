@@ -451,14 +451,6 @@
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
             <span>Daftar Project</span>
           </button>
-          <button type="button" onclick="window.print()" class="ph-btn ph-btn-neutral cursor-pointer" title="Cetak / simpan PDF">
-            <i data-lucide="printer" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Cetak</span>
-          </button>
-          <button type="button" onclick="eksporCSV()" class="ph-btn ph-btn-neutral cursor-pointer" title="Unduh data dalam format CSV">
-            <i data-lucide="file-down" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Export CSV</span>
-          </button>
           <button type="button" onclick="bukaForm()" class="btn-banner-primary cursor-pointer" title="Buat pengajuan baru pada project ini">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span class="hidden sm:inline">Input Pengajuan Baru</span>
@@ -599,6 +591,14 @@
             </div>
             <span class="ph-badge"><%= totalProjectPH %> Project</span>
           </div>
+          <button type="button" onclick="window.print()" class="ph-btn ph-btn-neutral cursor-pointer" title="Cetak / simpan PDF">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Cetak</span>
+          </button>
+          <button type="button" onclick="eksporCSV()" class="ph-btn ph-btn-neutral cursor-pointer" title="Unduh data dalam format CSV">
+            <i data-lucide="file-down" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Export CSV</span>
+          </button>
           <div class="ph-panel-body">
             <% if (totalProjectPH) { %>
             <div class="ph-project-grid">
@@ -732,7 +732,7 @@
           <div class="ph-toolbar no-print">
             <div class="flex-1 min-w-[220px] relative">
               <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-              <input type="text" id="ph-search" class="pl-9" placeholder="Cari barang, spesifikasi, tim..." oninput="renderTabel()" />
+              <input type="text" id="ph-search" class="pl-9" placeholder="          Cari barang, spesifikasi, tim..." oninput="renderTabel()" />
             </div>
             <div class="w-full sm:w-64">
               <select id="ph-filter-tim" onchange="renderTabel()">
