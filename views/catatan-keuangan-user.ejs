@@ -5,9 +5,20 @@
   var baseCK = (typeof baseUrl !== 'undefined' && baseUrl)
     ? baseUrl
     : ((typeof role !== 'undefined' && role === 'admin') ? '/catatan-keuangan' : '/catatan-keuangan-user');
-  var daftarKategoriCK = (typeof kategoriList !== 'undefined' && kategoriList && kategoriList.length)
-    ? kategoriList
-    : ['Makan & Minum', 'Transportasi', 'Belanja', 'Tagihan', 'Gaji/Pendapatan', 'Lainnya'];
+  var KATEGORI_CK_PER_TIPE = {
+    pengeluaran: [
+      'Makan & Minum',
+      'Transportasi',
+      'Belanja',
+      'Tagihan',
+      'Lainnya'
+    ],
+    pemasukan: [
+      'Anggaran Kasbon',
+      'Pencairan Kembali',
+      'Lainnya'
+    ]
+  };
   var modeProyekCK = Boolean(projectCK);
   var adminUserCK = (typeof adminUser !== 'undefined' && adminUser) ? adminUser : 'Admin';
   var userCK = (typeof user !== 'undefined' && user) ? user : { username: adminUserCK, namaLengkap: adminUserCK };
