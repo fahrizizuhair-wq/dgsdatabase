@@ -766,7 +766,7 @@ const uploadMultiple = upload.array('foto'); // DIPERBAIKI: Koma menggantung dih
 // Upload khusus foto produk Pengajuan Harga (wajib gambar, maksimal 5 file)
 const uploadFotoPengajuan = multer({
   storage,
-  limits: { files: 5, fileSize: 5 * 1024 * 1024 },
+  limits: { files: 10, fileSize: 20 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (/^image\//i.test(file.mimetype || '')) return cb(null, true);
     return cb(new Error('Foto produk harus berupa file gambar (JPG, PNG, WebP).'));
