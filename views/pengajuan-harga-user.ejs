@@ -407,6 +407,26 @@
         .ph-table { min-width: 0 !important; }
         .ph-table thead th { background: #f4f4f5 !important; color: #000 !important; }
       }
+      /* Pastikan wadah tombol di banner memakai flex */
+      .banner-actions,
+      .ph-banner-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        width: 100%;
+      }
+
+      /* Dorong tombol Input Pengajuan Baru ke paling kanan */
+      .btn-banner-primary {
+        margin-left: auto;
+      }
+
+      @media (max-width: 639px) {
+        .btn-banner-primary {
+          margin-left: 0;
+        }
+      }
     </style>
   </head>
   <body class="text-slate-800 antialiased selection:bg-maroon-800 selection:text-white">
