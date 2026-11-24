@@ -1597,6 +1597,23 @@ function urlProjectPengajuanHarga(req, idProject) {
   return `${dasarUrlPengajuanHarga(req)}/project/${idProject}`;
 }
 
+function jalankanUploadFotoPengajuan(req, res, next) {
+  uploadFotoPengajuan(req, res, function (err) {
+    if (err) {
+      const baseUrl = dasarUrlPengajuanHarga(req);
+      const idProject = req.body && req.body.projectId;
+      const tujuanGagal =
+        idProject && mongoose.Types.ObjectId.isValid(String(idProject))
+          ? `${urlProjectPengajuanHarga(req, idProject)}?gagal=1`
+          : `${baseUrl}?gagal=1`;
+
+      console.error('Error upload foto pengajuan harga:', err.code || err.name, err.message);
+      return res.redirect(tujuanGagal);
+    }
+    return next();
+  });
+}
+
 async function renderPengajuanHarga(req, res, role, idProject) {
   try {
     const baseUrl = dasarUrlPengajuanHarga(req);
@@ -1695,7 +1712,7 @@ app.post('/pengajuan-harga/project/add', isUserAuthenticated, async (req, res) =
   }
 });
 
-app.post('/pengajuan-harga/simpan', isUserAuthenticated, uploadFotoPengajuan, async (req, res) => {
+app.post('/pengajuan-harga/simpan', isUserAuthenticated, jalankanUploadFotoPengajuan, async (req, res) => {
   const baseUrl = dasarUrlPengajuanHarga(req);
   let urlKembali = `${baseUrl}?gagal=1`;
 
