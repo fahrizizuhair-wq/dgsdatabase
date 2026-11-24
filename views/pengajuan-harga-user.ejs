@@ -1,16 +1,35 @@
 <%
   var dataPH = (typeof items !== 'undefined' && items) ? items : [];
+  var daftarProjectPH = (typeof projects !== 'undefined' && projects) ? projects : [];
+  var projectPH = (typeof projectAktif !== 'undefined' && projectAktif) ? projectAktif : null;
+  var basePH = (typeof baseUrl !== 'undefined' && baseUrl)
+    ? baseUrl
+    : ((typeof role !== 'undefined' && role === 'admin') ? '/pengajuan-harga' : '/pengajuan-harga-user');
+  var modeProyekPH = Boolean(projectPH);
   var peranPH = 'user';
   var userPH = (typeof user !== 'undefined' && user) ? user : { username: 'User', namaLengkap: 'User' };
   var adminUserPH = (typeof adminUser !== 'undefined' && adminUser) ? adminUser : 'Admin';
 
+  var totalProjectPH = daftarProjectPH.length;
+  var totalKasbonPH = daftarProjectPH.reduce(function (a, b) { return a + (Number(b.totalKasbonSampel) || 0); }, 0);
+  var totalBoqPH = daftarProjectPH.reduce(function (a, b) { return a + (Number(b.totalQtyBoq) || 0); }, 0);
+  var rataSampelPH = totalBoqPH > 0 ? totalKasbonPH / totalBoqPH : 0;
+
   var totalItemPH = dataPH.length;
   var totalQtyPH = dataPH.reduce(function (a, b) { return a + (Number(b.qty) || 0); }, 0);
   var totalEstimasiPH = dataPH.reduce(function (a, b) { return a + (Number(b.totalHarga) || 0); }, 0);
-  var rataUnitPH = totalQtyPH > 0 ? Math.round(totalEstimasiPH / totalQtyPH) : 0;
+  var rataUnitPH = totalQtyPH > 0 ? totalEstimasiPH / totalQtyPH : 0;
+
+  function rupiahPH(nilai) {
+    return 'Rp ' + Math.round(Number(nilai) || 0).toLocaleString('id-ID');
+  }
+
+  function angkaPH(nilai) {
+    return Math.round(Number(nilai) || 0).toLocaleString('id-ID');
+  }
 
   function jsonUntukScriptPH(nilai) {
-    return JSON.stringify(nilai || [])
+    return JSON.stringify(nilai == null ? null : nilai)
       .replace(/</g, '\\u003c')
       .replace(/>/g, '\\u003e')
       .replace(/&/g, '\\u0026')
@@ -34,22 +53,41 @@
 
       /* Card statistik mengikuti model kartu halaman lain */
       .ph-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 20px; }
-      .ph-card-grid .card-value { font-size: 1.95rem; word-break: break-word; }
+      .ph-card-grid .card-value { font-size: 1.85rem; word-break: break-word; }
       @media (max-width: 1100px) { .ph-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
       @media (max-width: 700px) { .ph-card-grid { grid-template-columns: 1fr; } }
 
-      /* Panel daftar */
+      /* Card project */
+      .ph-project-grid {
+        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
+      }
+      @media (max-width: 1050px) { .ph-project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 700px) { .ph-project-grid { grid-template-columns: 1fr; } }
+      .ph-project-card {
+        cursor: pointer; min-height: 176px; outline: none;
+      }
+      .ph-project-card:focus-visible { box-shadow: 0 0 0 3px rgba(122,27,27,.25); }
+      .ph-project-card .card-title { max-width: 190px; line-height: 1.35; }
+      .ph-project-card .card-footer { gap: 8px; }
+      .ph-project-empty {
+        padding: 46px 20px; text-align: center; color: #94a3b8; font-size: 13px;
+        border: 1px dashed #cbd5e1; border-radius: 16px; background: #fff;
+      }
+
+      /* Panel */
       .ph-panel {
         background: rgba(255, 255, 255, 0.97);
         border: 1px solid rgba(226, 232, 240, 0.95);
         border-radius: 18px;
         box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
         overflow: hidden;
+        margin-bottom: 20px;
       }
       .ph-panel-head {
         display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
         gap: 12px; padding: 18px 20px; border-bottom: 1px solid #f1f5f9;
       }
+      .ph-panel-body { padding: 18px 20px; }
       .ph-toolbar {
         display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 20px;
         border-bottom: 1px solid #f1f5f9; background: #fcfcfd;
@@ -63,6 +101,7 @@
         border-color: #7a1b1b; box-shadow: 0 0 0 3px rgba(122, 27, 27, 0.08);
       }
       .ph-toolbar input::placeholder, .ph-input::placeholder { color: #94a3b8; }
+      .ph-input[readonly] { background: #f8fafc; color: #475569; cursor: not-allowed; }
       .ph-btn {
         display: inline-flex; align-items: center; justify-content: center; gap: 7px;
         padding: 10px 14px; border-radius: 10px; border: 1px solid transparent;
@@ -78,6 +117,25 @@
         display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px;
         background: #fef3c7; color: #92400e; font-size: 10.5px; font-weight: 700;
       }
+
+      /* Form tambah project di halaman awal */
+      .ph-project-form-grid {
+        display: grid; grid-template-columns: minmax(220px, 1.4fr) repeat(2, minmax(150px, 1fr)) minmax(180px, 1fr) auto;
+        gap: 14px; align-items: end;
+      }
+      @media (max-width: 1100px) { .ph-project-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 700px) { .ph-project-form-grid { grid-template-columns: 1fr; } }
+      .ph-field label, .ph-field > label:not(.ph-switch) {
+        display: block; margin-bottom: 6px; font-size: 11.5px; font-weight: 700; color: #475569;
+      }
+      .ph-field .ph-hint { display: block; margin-top: 5px; font-size: 10.5px; color: #94a3b8; }
+      .ph-preview-sampel {
+        padding: 9px 12px; border-radius: 10px; background: #ecfdf5;
+        border: 1px solid #a7f3d0; min-height: 42px; display: flex; align-items: center;
+      }
+      .ph-preview-sampel strong { color: #047857; font-size: 12.5px; font-weight: 800; }
+
+      /* Tabel */
       .ph-table-wrap { width: 100%; overflow-x: auto; }
       .ph-table { width: 100%; min-width: 1120px; border-collapse: collapse; }
       .ph-table thead th {
@@ -114,6 +172,10 @@
       }
       .ph-form-dialog { width: min(1080px, 100%); }
       .ph-detail-dialog { width: min(1140px, 100%); }
+      /* Form adalah flex child supaya ph-modal-body bisa benar-benar scroll */
+      .ph-modal-dialog form {
+        flex: 1; min-height: 0; display: flex; flex-direction: column;
+      }
       .ph-modal-head {
         flex-shrink: 0; display: flex; align-items: flex-start; justify-content: space-between;
         gap: 12px; padding: 18px 22px;
@@ -127,7 +189,10 @@
         transition: background .2s;
       }
       .ph-modal-close:hover { background: rgba(255,255,255,.26); }
-      .ph-modal-body { flex: 1; overflow-y: auto; padding: 20px; background: #f8fafc; }
+      .ph-modal-body {
+        flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch; padding: 20px; background: #f8fafc;
+      }
       .ph-form-body { padding-bottom: 8px; }
 
       /* Form di dalam popup */
@@ -145,12 +210,19 @@
         font-size: 12px; font-weight: 800; flex-shrink: 0;
       }
       .ph-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
-      .ph-field label, .ph-field > label:not(.ph-switch) {
-        display: block; margin-bottom: 6px; font-size: 11.5px; font-weight: 700; color: #475569;
-      }
-      .ph-field .ph-hint { display: block; margin-top: 5px; font-size: 10.5px; color: #94a3b8; }
       .ph-col-span-2 { grid-column: span 2; }
       .ph-hide { display: none !important; }
+      .ph-project-info {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+        gap: 10px; padding: 12px 14px; margin-bottom: 16px;
+        border-radius: 12px; background: #fdf2f2; border: 1px solid #f4d7d7;
+      }
+      .ph-project-info strong { display: block; font-size: 13px; color: #7a1b1b; }
+      .ph-project-info span { display: block; font-size: 10.5px; color: #94a3b8; margin-top: 3px; }
+      .ph-auto-badge {
+        display: inline-block; margin-left: 6px; padding: 2px 7px; border-radius: 999px;
+        background: #dcfce7; color: #15803d; font-size: 9px; font-weight: 800; letter-spacing: .04em;
+      }
 
       /* Toggle on/off */
       .ph-switch-wrap {
@@ -292,6 +364,7 @@
         border-radius: 10px; font-size: 11px; font-weight: 600; line-height: 1.5;
       }
       .ph-callout-amber { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+      .ph-callout-green { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
       .ph-detail-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
       .ph-detail-summary-item {
         padding: 15px 17px; border-radius: 14px; background: #fff;
@@ -349,26 +422,198 @@
           </button>
           <div class="banner-text">
             <span>System Pengadaan &bull; User</span>
-            <h1>Pengajuan Harga Merchandise</h1>
+            <h1><% if (modeProyekPH) { %>Pengajuan Harga &mdash; <%= projectPH.namaProject %><% } else { %>Pengajuan Harga &mdash; Daftar Project<% } %></h1>
           </div>
         </div>
         <div class="banner-actions">
-          <button type="button" onclick="eksporCSV()" class="ph-btn ph-btn-neutral cursor-pointer" title="Unduh data dalam format CSV">
-            <i data-lucide="file-down" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Export CSV</span>
+          <% if (modeProyekPH) { %>
+          <button type="button" onclick="kembaliKeProject()" class="ph-btn ph-btn-neutral cursor-pointer" title="Kembali ke daftar project">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Daftar Project</span>
           </button>
           <button type="button" onclick="window.print()" class="ph-btn ph-btn-neutral cursor-pointer" title="Cetak / simpan PDF">
             <i data-lucide="printer" class="w-4 h-4"></i>
             <span class="hidden sm:inline">Cetak</span>
           </button>
-          <button type="button" onclick="bukaForm()" class="btn-banner-primary cursor-pointer" title="Buat pengajuan baru">
+          <button type="button" onclick="eksporCSV()" class="ph-btn ph-btn-neutral cursor-pointer" title="Unduh data dalam format CSV">
+            <i data-lucide="file-down" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Export CSV</span>
+          </button>
+          <button type="button" onclick="bukaForm()" class="btn-banner-primary cursor-pointer" title="Buat pengajuan baru pada project ini">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span class="hidden sm:inline">Input Pengajuan Baru</span>
             <span class="sm:hidden">Input Baru</span>
           </button>
+          <% } else { %>
+          <button type="button" onclick="fokusTambahProject()" class="btn-banner-primary cursor-pointer" title="Tambah project baru">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Tambah Project</span>
+          </button>
+          <% } %>
         </div>
       </header>
 
+      <% if (!modeProyekPH) { %>
+      <!-- ===================== LANDING: CARD PROJECT ===================== -->
+      <section id="view-project" class="space-y-5">
+        <div class="card-grid ph-card-grid">
+          <div class="stat-card card-blue">
+            <div class="card-header">
+              <span class="card-title">Total Project</span>
+              <div class="icon-wrapper icon-blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="card-body">
+              <span class="card-value"><%= totalProjectPH %></span>
+              <span class="card-unit">Project</span>
+            </div>
+            <div class="card-footer">
+              <span class="text-blue">Terdaftar</span>
+              <span>Pengajuan harga</span>
+            </div>
+          </div>
+
+          <div class="stat-card card-gold">
+            <div class="card-header">
+              <span class="card-title">Total Kasbon Sampel</span>
+              <div class="icon-wrapper icon-gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="card-body">
+              <span class="card-value"><%= rupiahPH(totalKasbonPH) %></span>
+            </div>
+            <div class="card-footer">
+              <span class="text-orange">Seluruh project</span>
+              <span>Dasar sampel</span>
+            </div>
+          </div>
+
+          <div class="stat-card card-green">
+            <div class="card-header">
+              <span class="card-title">Total Qty BOQ</span>
+              <div class="icon-wrapper icon-green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="card-body">
+              <span class="card-value"><%= angkaPH(totalBoqPH) %></span>
+              <span class="card-unit">Unit</span>
+            </div>
+            <div class="card-footer">
+              <span class="text-green">Akumulasi BOQ</span>
+              <span>Seluruh project</span>
+            </div>
+          </div>
+
+          <div class="stat-card card-red">
+            <div class="card-header">
+              <span class="card-title">Rata-rata Sampel / Unit</span>
+              <div class="icon-wrapper icon-red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="card-body">
+              <span class="card-value"><%= rupiahPH(rataSampelPH) %></span>
+            </div>
+            <div class="card-footer">
+              <span class="text-red">Kasbon &divide; BOQ</span>
+              <span>Float penuh</span>
+            </div>
+          </div>
+        </div>
+
+        <form id="ph-project-form" class="ph-panel" action="/pengajuan-harga/project/add" method="POST" onsubmit="return validasiProject()">
+          <div class="ph-panel-head">
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">Tambah Project Baru</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Sampel / Survey per Unit dihitung otomatis dari kasbon sampel dibagi total qty BOQ.</p>
+            </div>
+            <span class="ph-badge">Data Project</span>
+          </div>
+          <div class="ph-panel-body">
+            <div class="ph-project-form-grid">
+              <div class="ph-field">
+                <label for="ph-project-nama-input">Nama Project *</label>
+                <input type="text" id="ph-project-nama-input" name="namaProject" class="ph-input" required placeholder="Contoh: Merchandise Event Q4 2026" />
+              </div>
+              <div class="ph-field">
+                <label for="ph-project-kasbon">Total Kasbon Sampel (Rp) *</label>
+                <input type="number" id="ph-project-kasbon" name="totalKasbonSampel" class="ph-input" min="0" step="any" value="0" required oninput="hitungPreviewSampel()" />
+              </div>
+              <div class="ph-field">
+                <label for="ph-project-boq">Total Qty BOQ *</label>
+                <input type="number" id="ph-project-boq" name="totalQtyBoq" class="ph-input" min="1" step="any" value="1" required oninput="hitungPreviewSampel()" />
+              </div>
+              <div class="ph-field">
+                <label>Sampel / Survey per Unit</label>
+                <div class="ph-preview-sampel"><strong id="ph-preview-sampel">Rp 0</strong></div>
+              </div>
+              <button type="submit" class="ph-simpan-btn cursor-pointer">
+                <i data-lucide="folder-plus" class="w-4 h-4"></i>
+                Simpan Project
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="ph-panel">
+          <div class="ph-panel-head">
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">Daftar Project Pengajuan Harga</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Klik card project untuk melihat daftar pengajuan harga pada project tersebut.</p>
+            </div>
+            <span class="ph-badge"><%= totalProjectPH %> Project</span>
+          </div>
+          <div class="ph-panel-body">
+            <% if (totalProjectPH) { %>
+            <div class="ph-project-grid">
+              <% daftarProjectPH.forEach(function (project) { %>
+              <div class="stat-card card-gold ph-project-card" role="button" tabindex="0"
+                   onclick="bukaProject('<%= String(project._id) %>')"
+                   onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); bukaProject('<%= String(project._id) %>'); }"
+                   title="Perhitungan: <%= Number(project.totalKasbonSampel) || 0 %> &divide; <%= Number(project.totalQtyBoq) || 0 %> = <%= Number(project.sampelPerUnit) || 0 %>">
+                <div class="card-header">
+                  <span class="card-title"><%= project.namaProject %></span>
+                  <div class="icon-wrapper icon-gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <span class="card-value"><%= rupiahPH(project.sampelPerUnit) %></span>
+                  <span class="card-unit">Sampel / Unit</span>
+                </div>
+                <div class="card-footer">
+                  <span class="text-orange">Kasbon <%= rupiahPH(project.totalKasbonSampel) %></span>
+                  <span>BOQ <%= angkaPH(project.totalQtyBoq) %> &rarr;</span>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+            <% } else { %>
+            <div class="ph-project-empty">Belum ada project. Tambahkan project baru melalui form di atas untuk mulai membuat pengajuan harga.</div>
+            <% } %>
+          </div>
+        </div>
+      </section>
+      <% } else { %>
+      <!-- ===================== DAFTAR PENGAJUAN PER PROJECT ===================== -->
       <section id="view-list" class="space-y-5">
         <div class="card-grid ph-card-grid">
           <div class="stat-card card-blue">
@@ -388,7 +633,7 @@
             </div>
             <div class="card-footer">
               <span class="text-blue">Jenis merchandise</span>
-              <span>Diajukan</span>
+              <span>Pada project ini</span>
             </div>
           </div>
 
@@ -404,12 +649,12 @@
               </div>
             </div>
             <div class="card-body">
-              <span class="card-value"><%= Number(totalQtyPH).toLocaleString('id-ID') %></span>
+              <span class="card-value"><%= angkaPH(totalQtyPH) %></span>
               <span class="card-unit">Unit</span>
             </div>
             <div class="card-footer">
               <span class="text-green">Siap produksi</span>
-              <span>Seluruh pengajuan</span>
+              <span>Pada project ini</span>
             </div>
           </div>
 
@@ -424,7 +669,7 @@
               </div>
             </div>
             <div class="card-body">
-              <span class="card-value">Rp <%= Number(totalEstimasiPH).toLocaleString('id-ID') %></span>
+              <span class="card-value"><%= rupiahPH(totalEstimasiPH) %></span>
             </div>
             <div class="card-footer">
               <span class="text-orange">Akumulasi all-in</span>
@@ -443,7 +688,7 @@
               </div>
             </div>
             <div class="card-body">
-              <span class="card-value">Rp <%= Number(rataUnitPH).toLocaleString('id-ID') %></span>
+              <span class="card-value"><%= rupiahPH(rataUnitPH) %></span>
             </div>
             <div class="card-footer">
               <span class="text-red">Per satuan unit</span>
@@ -456,7 +701,10 @@
           <div class="ph-panel-head">
             <div>
               <h2 class="text-base sm:text-lg font-bold text-slate-900">Daftar Pengajuan Harga</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Klik salah satu baris untuk melihat seluruh detail pengajuan.</p>
+              <p class="text-[11px] text-slate-500 mt-0.5">
+                Project: <strong class="text-slate-700"><%= projectPH.namaProject %></strong>
+                &bull; Sampel otomatis <strong class="text-slate-700"><%= rupiahPH(projectPH.sampelPerUnit) %></strong> / unit
+              </p>
             </div>
             <span class="ph-badge"><%= totalItemPH %> Pengajuan</span>
           </div>
@@ -493,8 +741,10 @@
           </div>
         </div>
       </section>
+      <% } %>
     </main>
 
+    <% if (modeProyekPH) { %>
     <!-- FORM POPUP -->
     <div id="ph-form-modal" class="ph-modal ph-form-modal" onclick="if (event.target === this) tutupForm()">
       <div class="ph-modal-dialog ph-form-dialog">
@@ -508,6 +758,7 @@
         </div>
 
         <form id="ph-form" action="/pengajuan-harga/simpan" method="POST" enctype="multipart/form-data" onsubmit="return validasiForm()">
+          <input type="hidden" id="ph-project-id" name="projectId" value="<%= String(projectPH._id) %>" />
           <div class="ph-modal-body ph-form-body">
             <div class="ph-form-card">
               <div class="ph-section-title">
@@ -517,6 +768,16 @@
                   <p class="text-[11px] text-slate-500">Data dasar barang dan harga produksi per unit.</p>
                 </div>
               </div>
+
+              <div class="ph-project-info">
+                <div>
+                  <span class="ph-info-label">Project</span>
+                  <strong><%= projectPH.namaProject %></strong>
+                  <span>Kasbon sampel <%= rupiahPH(projectPH.totalKasbonSampel) %> &divide; Qty BOQ <%= angkaPH(projectPH.totalQtyBoq) %></span>
+                </div>
+                <span class="ph-badge">Sampel otomatis</span>
+              </div>
+
               <div class="ph-grid">
                 <div class="ph-field ph-col-span-2">
                   <label for="ph-nama">Nama Barang *</label>
@@ -536,7 +797,7 @@
                 </div>
                 <div class="ph-field">
                   <label for="ph-harga-produksi">Harga Tim Produksi (Rp/Unit) *</label>
-                  <input type="number" id="ph-harga-produksi" name="hargaProduksi" class="ph-input" min="0" value="0" required oninput="hitungLive()" />
+                  <input type="number" id="ph-harga-produksi" name="hargaProduksi" class="ph-input" min="0" step="any" value="0" required oninput="hitungLive()" />
                 </div>
                 <div class="ph-field ph-col-span-2">
                   <div class="ph-switch-wrap">
@@ -554,9 +815,15 @@
                     <span>Rincian biaya tambahan disembunyikan dan tidak dihitung karena sudah termasuk dalam harga produksi.</span>
                   </div>
                 </div>
-                <div class="ph-field ph-col-span-2">
+                <div class="ph-field">
+                  <label for="ph-total-manual">Total Keseluruhan Manual (Opsional)</label>
+                  <input type="number" id="ph-total-manual" name="totalManual" class="ph-input" min="0" step="any" value="0" oninput="hitungLive()" />
+                  <span class="ph-hint">Jika diisi lebih dari 0, angka ini dipakai sebagai total akhir. Jika 0/kosong, total = Harga All-In &times; Qty.</span>
+                </div>
+                <div class="ph-field">
                   <label>Total Keseluruhan (Qty &times; Harga All-In)</label>
                   <input type="text" id="ph-total-qty-display" class="ph-input bg-slate-50 font-bold" value="Rp 0" readonly />
+                  <span class="ph-hint">Nilai desial penuh digunakan saat menghitung, dibulatkan hanya saat ditampilkan.</span>
                 </div>
               </div>
             </div>
@@ -599,15 +866,16 @@
                 <div class="ph-fixed-grid">
                   <div class="ph-field">
                     <label for="ph-ongkir-tim">Ongkir Tim Produksi - DGS (pp)</label>
-                    <input type="number" id="ph-ongkir-tim" name="ongkirTimDgs" class="ph-input" min="0" value="0" oninput="hitungLive()" />
+                    <input type="number" id="ph-ongkir-tim" name="ongkirTimDgs" class="ph-input" min="0" step="any" value="0" oninput="hitungLive()" />
                   </div>
                   <div class="ph-field">
-                    <label for="ph-sampel">Sampel / Survey (per Unit)</label>
-                    <input type="number" id="ph-sampel" name="sampelSurvey" class="ph-input" min="0" value="0" oninput="hitungLive()" />
+                    <label for="ph-sampel">Sampel / Survey (per Unit)<span class="ph-auto-badge">Otomatis</span></label>
+                    <input type="number" id="ph-sampel" name="sampelSurvey" class="ph-input" min="0" step="any" value="<%= Number(projectPH.sampelPerUnit) || 0 %>" readonly oninput="hitungLive()" />
+                    <span class="ph-hint">Terisi otomatis dari project, tidak perlu diinput manual.</span>
                   </div>
                   <div class="ph-field">
                     <label for="ph-ongkir-client">Ongkir DGS - Client (Jakarta)</label>
-                    <input type="number" id="ph-ongkir-client" name="ongkirDgsClient" class="ph-input" min="0" value="0" oninput="hitungLive()" />
+                    <input type="number" id="ph-ongkir-client" name="ongkirDgsClient" class="ph-input" min="0" step="any" value="0" oninput="hitungLive()" />
                   </div>
                 </div>
               </div>
@@ -688,9 +956,18 @@
         <div id="ph-detail-body" class="ph-modal-body"></div>
       </div>
     </div>
+    <% } %>
 
     <script>
       var PH_DATA = <%- jsonUntukScriptPH(dataPH) %>;
+      var PH_PROJECT = <%- jsonUntukScriptPH(projectPH ? {
+        id: String(projectPH._id),
+        namaProject: projectPH.namaProject || '',
+        totalKasbonSampel: Number(projectPH.totalKasbonSampel) || 0,
+        totalQtyBoq: Number(projectPH.totalQtyBoq) || 0,
+        sampelPerUnit: Number(projectPH.sampelPerUnit) || 0
+      } : null) %>;
+      var PH_BASE_URL = <%- jsonUntukScriptPH(basePH) %>;
       var PH_BERHASIL = <%- JSON.stringify(Boolean(typeof berhasil !== 'undefined' && berhasil)) %>;
       var PH_GAGAL = <%- JSON.stringify(Boolean(typeof gagal !== 'undefined' && gagal)) %>;
 
@@ -730,8 +1007,9 @@
         });
       }
 
+      // Bulatkan HANYA saat ditampilkan. Perhitungan tetap memakai float penuh.
       function rupiah(value) {
-        return 'Rp ' + Number(value || 0).toLocaleString('id-ID');
+        return 'Rp ' + Math.round(Number(value || 0)).toLocaleString('id-ID');
       }
 
       function formatTanggal(value) {
@@ -760,6 +1038,44 @@
         el.textContent = pesan;
         container.appendChild(el);
         setTimeout(function () { el.remove(); }, 3500);
+      }
+
+      function bukaProject(id) {
+        window.location.href = PH_BASE_URL + '/project/' + encodeURIComponent(id);
+      }
+
+      function kembaliKeProject() {
+        window.location.href = PH_BASE_URL;
+      }
+
+      function fokusTambahProject() {
+        var form = document.getElementById('ph-project-form');
+        if (!form) return;
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        var input = document.getElementById('ph-project-nama-input');
+        if (input) setTimeout(function () { input.focus(); }, 250);
+      }
+
+      function hitungPreviewSampel() {
+        var kasbon = Math.max(0, Number((document.getElementById('ph-project-kasbon') || {}).value) || 0);
+        var boq = Number((document.getElementById('ph-project-boq') || {}).value) || 0;
+        var sampel = boq > 0 ? kasbon / boq : 0;
+        var el = document.getElementById('ph-preview-sampel');
+        if (el) el.textContent = rupiah(sampel) + ' / unit';
+      }
+
+      function validasiProject() {
+        var nama = String((document.getElementById('ph-project-nama-input') || {}).value || '').trim();
+        var boq = Number((document.getElementById('ph-project-boq') || {}).value) || 0;
+        if (!nama) {
+          alert('Nama project wajib diisi.');
+          return false;
+        }
+        if (boq <= 0) {
+          alert('Total Qty BOQ harus lebih dari 0.');
+          return false;
+        }
+        return true;
       }
 
       function dataTersaring() {
@@ -796,7 +1112,7 @@
         var data = dataTersaring();
 
         if (!data.length) {
-          body.innerHTML = '<tr><td colspan="9" class="ph-empty">Belum ada pengajuan harga yang cocok.</td></tr>';
+          body.innerHTML = '<tr><td colspan="9" class="ph-empty">Belum ada pengajuan harga pada project ini.</td></tr>';
           return;
         }
 
@@ -820,7 +1136,7 @@
         var totalProduksi = data.reduce(function (a, b) { return a + (Number(b.hargaProduksi) || 0); }, 0);
         var totalBiaya = data.reduce(function (a, b) { return a + (Number(b.totalBiayaTambahan) || 0); }, 0);
         var totalSemua = data.reduce(function (a, b) { return a + (Number(b.totalHarga) || 0); }, 0);
-        var rata = totalQty > 0 ? Math.round(totalSemua / totalQty) : 0;
+        var rata = totalQty > 0 ? totalSemua / totalQty : 0;
 
         baris.push('<tr class="ph-total-row">' +
           '<td>TOTAL KESELURUHAN</td><td>' + data.length + ' pengajuan</td>' +
@@ -843,7 +1159,8 @@
         document.getElementById('ph-detail-judul').textContent = item.namaBarang || '-';
         document.getElementById('ph-detail-status').textContent = teksAman(item.status || 'Diajukan');
         document.getElementById('ph-detail-kode').textContent =
-          (item.kode || '-') + ' • ' + (item.timProduksi || '-') + ' • ' + formatTanggal(item.createdAt);
+          (item.kode || '-') + ' • ' + (item.projectNama || (PH_PROJECT && PH_PROJECT.namaProject) || '-') + ' • ' +
+          (item.timProduksi || '-') + ' • ' + formatTanggal(item.createdAt);
 
         var fotoList = Array.isArray(item.gambar) ? item.gambar.filter(Boolean) : [];
         var gambarHtml = fotoList.length
@@ -858,11 +1175,14 @@
           biayaRows.push('<tr><th>' + escapeHtml(JUDUL_GRUP_PH[b.grup] || b.grup || 'Rincian') + ' &bull; ' + escapeHtml(b.item) + '</th><td>' + rupiah(b.harga) + '</td></tr>');
         });
         biayaRows.push('<tr><th>Ongkir Tim Produksi - DGS (pp)</th><td>' + rupiah(item.ongkirTimDgs) + '</td></tr>');
-        biayaRows.push('<tr><th>Sampel / Survey (per Unit)</th><td>' + rupiah(item.sampelSurvey) + '</td></tr>');
+        biayaRows.push('<tr><th>Sampel / Survey (per Unit, otomatis)</th><td>' + rupiah(item.sampelSurvey) + '</td></tr>');
         biayaRows.push('<tr><th>Ongkir DGS - Client (Jakarta)</th><td>' + rupiah(item.ongkirDgsClient) + '</td></tr>');
 
         var catatanInclude = item.includeAllIn
           ? '<div class="ph-callout ph-callout-amber"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i><span>Biaya tambahan di atas sudah termasuk dalam harga produksi, sehingga tidak dijumlahkan lagi ke harga all-in.</span></div>'
+          : '';
+        var catatanManual = Number(item.totalManual) > 0
+          ? '<div class="ph-callout ph-callout-green"><i data-lucide="check-circle-2" class="w-4 h-4 flex-shrink-0"></i><span>Total Keseluruhan memakai input manual ' + rupiah(item.totalManual) + ', bukan hasil perkalian otomatis.</span></div>'
           : '';
 
         document.getElementById('ph-detail-body').innerHTML =
@@ -875,6 +1195,7 @@
               '<div class="ph-detail-card">' +
                 '<div class="ph-detail-card-head"><h3>Informasi Pengajuan</h3></div>' +
                 '<div class="ph-side-row"><span class="ph-info-label">Kode Pengajuan</span><span class="ph-info-value">' + escapeHtml(item.kode || '-') + '</span></div>' +
+                '<div class="ph-side-row"><span class="ph-info-label">Project</span><span class="ph-info-value">' + escapeHtml(teksAman(item.projectNama || (PH_PROJECT && PH_PROJECT.namaProject))) + '</span></div>' +
                 '<div class="ph-side-row"><span class="ph-info-label">Tanggal Diajukan</span><span class="ph-info-value">' + formatTanggal(item.createdAt) + '</span></div>' +
                 '<div class="ph-side-row"><span class="ph-info-label">Diinput Oleh</span><span class="ph-info-value">' + escapeHtml(teksAman(item.diinputOleh)) + '</span></div>' +
                 '<div class="ph-side-row"><span class="ph-info-label">Status</span><span class="ph-info-value">' + escapeHtml(teksAman(item.status || 'Diajukan')) + '</span></div>' +
@@ -898,7 +1219,7 @@
                   '<thead><tr><th>Komponen</th><th>Nominal</th></tr></thead>' +
                   '<tbody>' + biayaRows.join('') + '</tbody>' +
                 '</table>' +
-                catatanInclude +
+                catatanInclude + catatanManual +
               '</div>' +
               '<div class="ph-detail-summary">' +
                 '<div class="ph-detail-summary-item">' +
@@ -909,7 +1230,9 @@
                 '<div class="ph-detail-summary-item ph-total">' +
                   '<span class="ph-info-label">Total Keseluruhan</span>' +
                   '<strong>' + rupiah(item.totalHarga) + '</strong>' +
-                  '<small>' + Number(item.qty || 0).toLocaleString('id-ID') + ' ' + escapeHtml(item.satuan || 'pcs') + ' &times; ' + rupiah(item.hargaAllIn) + '</small>' +
+                  '<small>' + (Number(item.totalManual) > 0
+                    ? 'Input manual ' + rupiah(item.totalManual)
+                    : Number(item.qty || 0).toLocaleString('id-ID') + ' ' + escapeHtml(item.satuan || 'pcs') + ' &times; ' + rupiah(item.hargaAllIn)) + '</small>' +
                 '</div>' +
               '</div>' +
             '</div>' +
@@ -952,7 +1275,7 @@
           '</div>' +
           '<div class="ph-field ph-price-wrap">' +
             '<label>Harga per Unit (Rp)</label>' +
-            '<input type="number" name="biayaHarga[]" class="ph-input harga-input" min="0" value="0" oninput="hitungLive()" />' +
+            '<input type="number" name="biayaHarga[]" class="ph-input harga-input" min="0" step="any" value="0" oninput="hitungLive()" />' +
           '</div>' +
           '<button type="button" class="ph-btn ph-btn-neutral cursor-pointer" onclick="hapusBiayaRow(this)">Hapus</button>';
         wadah.appendChild(row);
@@ -1016,12 +1339,15 @@
         });
 
         tambahan += Math.max(0, Number((document.getElementById('ph-ongkir-tim') || {}).value) || 0);
+        // Sampel / Survey berasal dari project (float penuh), bukan input manual.
         tambahan += Math.max(0, Number((document.getElementById('ph-sampel') || {}).value) || 0);
         tambahan += Math.max(0, Number((document.getElementById('ph-ongkir-client') || {}).value) || 0);
 
         var efektif = include ? 0 : tambahan;
         var allIn = produksi + efektif;
-        var total = allIn * qty;
+        var manual = Math.max(0, Number((document.getElementById('ph-total-manual') || {}).value) || 0);
+        // Tidak ada Math.round di sini. Pembulatan hanya di rupiah() saat ditampilkan.
+        var total = manual > 0 ? manual : allIn * qty;
 
         var elemenAllIn = document.getElementById('ph-live-allin');
         var elemenTotal = document.getElementById('ph-live-total');
@@ -1083,6 +1409,9 @@
         if (preview) preview.innerHTML = '';
         var include = document.getElementById('ph-include');
         if (include) include.checked = false;
+        // Selalu isi ulang sampel dari project dengan nilai float penuh.
+        var sampel = document.getElementById('ph-sampel');
+        if (sampel) sampel.value = PH_PROJECT ? PH_PROJECT.sampelPerUnit : 0;
         segarOpsi();
         saatIncludeBerubah();
         document.getElementById('ph-form-modal').classList.add('terbuka');
@@ -1096,17 +1425,26 @@
 
       function tutupForm() {
         var modal = document.getElementById('ph-form-modal');
-        if (modal) modal.classList.remove('terbuka');
+        if (!modal) return;
+        modal.classList.remove('terbuka');
         if (!document.getElementById('ph-detail-modal').classList.contains('terbuka')) document.body.style.overflow = '';
+      }
+
+      function angkaCsv(value) {
+        return Math.round(Number(value) || 0);
       }
 
       function eksporCSV() {
         var data = dataTersaring();
-        var kepala = ['Kode', 'Nama Barang', 'Tim Produksi', 'Qty', 'Satuan', 'Harga Produksi', 'Biaya Tambahan', 'Harga All-In', 'Total Harga', 'PIC', 'Waktu Produksi'];
+        var kepala = [
+          'Kode', 'Nama Barang', 'Tim Produksi', 'Qty', 'Satuan', 'Harga Produksi',
+          'Biaya Tambahan', 'Sampel per Unit', 'Harga All-In', 'Total Manual', 'Total Harga', 'PIC', 'Waktu Produksi'
+        ];
         var baris = data.map(function (item) {
           return [
-            item.kode, item.namaBarang, item.timProduksi, item.qty, item.satuan,
-            item.hargaProduksi, item.totalBiayaTambahan, item.hargaAllIn, item.totalHarga,
+            item.kode, item.namaBarang, item.timProduksi, angkaCsv(item.qty), item.satuan,
+            angkaCsv(item.hargaProduksi), angkaCsv(item.totalBiayaTambahan), angkaCsv(item.sampelSurvey),
+            angkaCsv(item.hargaAllIn), angkaCsv(item.totalManual), angkaCsv(item.totalHarga),
             item.pic, item.jangkaWaktu
           ];
         });
@@ -1127,18 +1465,19 @@
       }
 
       document.addEventListener('DOMContentLoaded', function () {
+        hitungPreviewSampel();
         isiOpsiTim();
         renderTabel();
         saatIncludeBerubah();
         initIcons();
-        if (PH_BERHASIL) tampilToast('Pengajuan harga berhasil disimpan.');
-        if (PH_GAGAL) tampilToast('Gagal menyimpan pengajuan harga. Periksa kembali input Anda.', 'gagal');
+        if (PH_BERHASIL) tampilToast(PH_PROJECT ? 'Pengajuan harga berhasil disimpan.' : 'Project berhasil ditambahkan.');
+        if (PH_GAGAL) tampilToast('Gagal menyimpan data. Periksa kembali input Anda.', 'gagal');
       });
 
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
-        if (document.getElementById('ph-detail-modal').classList.contains('terbuka')) tutupDetail();
-        else if (document.getElementById('ph-form-modal').classList.contains('terbuka')) tutupForm();
+        if (document.getElementById('ph-detail-modal') && document.getElementById('ph-detail-modal').classList.contains('terbuka')) tutupDetail();
+        else if (document.getElementById('ph-form-modal') && document.getElementById('ph-form-modal').classList.contains('terbuka')) tutupForm();
       });
     </script>
   </body>

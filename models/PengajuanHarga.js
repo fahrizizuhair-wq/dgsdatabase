@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const pengajuanHargaSchema = new mongoose.Schema(
   {
     kode: { type: String, required: true, unique: true },
+    projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'ProjectPengajuanHarga', default: null },
+    projectNama: { type: String, default: '' },
     namaBarang: { type: String, required: true },
     qty: { type: Number, required: true, default: 1 },
     satuan: { type: String, default: 'pcs' },
@@ -21,10 +23,15 @@ const pengajuanHargaSchema = new mongoose.Schema(
 
     // Field tetap mengikuti gambar acuan (bukan dropdown)
     ongkirTimDgs: { type: Number, default: 0 },
+    // Sampel per unit dihitung otomatis dari project: kasbon sampel / qty BOQ (float penuh).
     sampelSurvey: { type: Number, default: 0 },
     ongkirDgsClient: { type: Number, default: 0 },
     totalBiayaTambahan: { type: Number, default: 0 },
+    totalKasbonSampel: { type: Number, default: 0 },
+    totalQtyBoq: { type: Number, default: 0 },
+    totalManual: { type: Number, default: 0 },
 
+    // Seluruh nilai di bawah disimpan sebagai float penuh, dibulatkan hanya saat ditampilkan.
     hargaAllIn: { type: Number, default: 0 },
     totalHarga: { type: Number, default: 0 },
 

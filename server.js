@@ -172,6 +172,7 @@ const Admin = require('./models/Admin');
 const Vendor = require('./models/Vendor');
 const HargaDasar = require('./models/HargaDasar');
 const PengajuanHarga = require('./models/PengajuanHarga');
+const ProjectPengajuanHarga = require('./models/ProjectPengajuanHarga');
 const Laporan = require('./models/Laporan');
 const StokMasuk = require('./models/StokMasuk');
 const StokKeluar = require('./models/StokKeluar');
@@ -1581,17 +1582,70 @@ async function kodePengajuanHargaBaru() {
   }
 }
 
-async function renderPengajuanHarga(req, res, role) {
+// Sampel per unit = kasbon sampel / qty BOQ. Sengaja TIDAK dibulatkan di sini.
+function hitungSampelPerUnitPengajuanHarga(kasbonSampel, qtyBoq) {
+  const qty = Number(qtyBoq) || 0;
+  const kasbon = Math.max(0, Number(kasbonSampel) || 0);
+  return qty > 0 ? kasbon / qty : 0;
+}
+
+function dasarUrlPengajuanHarga(req) {
+  return req.session && req.session.isAdmin ? '/pengajuan-harga' : '/pengajuan-harga-user';
+}
+
+function urlProjectPengajuanHarga(req, idProject) {
+  return `${dasarUrlPengajuanHarga(req)}/project/${idProject}`;
+}
+
+async function renderPengajuanHarga(req, res, role, idProject) {
   try {
-    const items = await PengajuanHarga.find().sort({ createdAt: -1, _id: -1 }).lean();
+    const baseUrl = dasarUrlPengajuanHarga(req);
+    const projects = await ProjectPengajuanHarga.find().sort({ createdAt: -1, _id: -1 }).lean();
+    projects.forEach((project) => {
+      project.sampelPerUnit = hitungSampelPerUnitPengajuanHarga(
+        project.totalKasbonSampel,
+        project.totalQtyBoq,
+      );
+    });
+
+    let projectAktif = null;
+    let items = [];
+
+    if (idProject) {
+      if (!mongoose.Types.ObjectId.isValid(String(idProject))) {
+        return res.redirect(baseUrl);
+      }
+
+      projectAktif = projects.find((p) => String(p._id) === String(idProject)) || null;
+      if (!projectAktif) {
+        const proyekDariDb = await ProjectPengajuanHarga.findById(idProject).lean();
+        if (proyekDariDb) {
+          proyekDariDb.sampelPerUnit = hitungSampelPerUnitPengajuanHarga(
+            proyekDariDb.totalKasbonSampel,
+            proyekDariDb.totalQtyBoq,
+          );
+          projectAktif = proyekDariDb;
+        }
+      }
+
+      if (!projectAktif) return res.redirect(`${baseUrl}?gagal=1`);
+
+      items = await PengajuanHarga.find({ projectId: projectAktif._id })
+        .sort({ createdAt: -1, _id: -1 })
+        .lean();
+    }
+
     const nama = req.session && req.session.user
       ? req.session.user.namaLengkap || req.session.user.username || 'User'
       : req.session.adminUser || 'Admin';
 
     const namaView = role === 'admin' ? 'pengajuan-harga-admin' : 'pengajuan-harga-user';
 
-    res.render(namaView, {
+    return res.render(namaView, {
       items,
+      projects,
+      projectAktif,
+      baseUrl,
       role,
       pageTitle: 'Pengajuan Harga — PT. DIAN GIRI SAPUTRA',
       useTailwind: true,
@@ -1606,15 +1660,64 @@ async function renderPengajuanHarga(req, res, role) {
   }
 }
 
-app.get('/pengajuan-harga', isAdminAuthenticated, (req, res) => renderPengajuanHarga(req, res, 'admin'));
+app.get('/pengajuan-harga', isAdminAuthenticated, (req, res) => renderPengajuanHarga(req, res, 'admin', null));
+app.get('/pengajuan-harga/project/:id', isAdminAuthenticated, (req, res) =>
+  renderPengajuanHarga(req, res, 'admin', req.params.id));
 
-app.get('/pengajuan-harga-user', isUserAuthenticated, (req, res) => renderPengajuanHarga(req, res, 'user'));
+app.get('/pengajuan-harga-user', isUserAuthenticated, (req, res) => renderPengajuanHarga(req, res, 'user', null));
+app.get('/pengajuan-harga-user/project/:id', isUserAuthenticated, (req, res) =>
+  renderPengajuanHarga(req, res, 'user', req.params.id));
+
+app.post('/pengajuan-harga/project/add', isUserAuthenticated, async (req, res) => {
+  const baseUrl = dasarUrlPengajuanHarga(req);
+  try {
+    const body = req.body || {};
+    const namaProject = String(body.namaProject || '').trim();
+    const totalKasbonSampel = Math.max(0, Number(body.totalKasbonSampel) || 0);
+    const totalQtyBoq = Number(body.totalQtyBoq) || 0;
+
+    if (!namaProject || totalQtyBoq <= 0) {
+      return res.redirect(`${baseUrl}?gagal=1`);
+    }
+
+    await ProjectPengajuanHarga.create({
+      namaProject,
+      totalKasbonSampel,
+      totalQtyBoq,
+      sampelPerUnit: hitungSampelPerUnitPengajuanHarga(totalKasbonSampel, totalQtyBoq),
+      diinputOleh: getNamaPenginput(req),
+    });
+
+    return res.redirect(`${baseUrl}?simpan=1`);
+  } catch (err) {
+    console.error('Gagal menyimpan project pengajuan harga:', err);
+    return res.redirect(`${baseUrl}?gagal=1`);
+  }
+});
 
 app.post('/pengajuan-harga/simpan', isUserAuthenticated, uploadFotoPengajuan, async (req, res) => {
+  const baseUrl = dasarUrlPengajuanHarga(req);
+  let urlKembali = `${baseUrl}?gagal=1`;
+
   try {
     await syncReqFilesToGridFS(req);
 
     const body = req.body || {};
+    const idProject = String(body.projectId || '');
+
+    if (!mongoose.Types.ObjectId.isValid(idProject)) {
+      return res.redirect(`${baseUrl}?gagal=1`);
+    }
+
+    const project = await ProjectPengajuanHarga.findById(idProject).lean();
+    if (!project) return res.redirect(`${baseUrl}?gagal=1`);
+
+    urlKembali = `${urlProjectPengajuanHarga(req, idProject)}?gagal=1`;
+
+    const totalKasbonSampel = Math.max(0, Number(project.totalKasbonSampel) || 0);
+    const totalQtyBoq = Number(project.totalQtyBoq) || 0;
+    const sampelSurvey = hitungSampelPerUnitPengajuanHarga(totalKasbonSampel, totalQtyBoq);
+
     const grupList = arrayBodyPengajuanHarga(body.biayaGrup);
     const itemList = arrayBodyPengajuanHarga(body.biayaItem);
     const hargaList = arrayBodyPengajuanHarga(body.biayaHarga);
@@ -1634,9 +1737,9 @@ app.post('/pengajuan-harga/simpan', isUserAuthenticated, uploadFotoPengajuan, as
     const qty = Math.max(1, Number(body.qty) || 1);
     const hargaProduksi = Math.max(0, Number(body.hargaProduksi) || 0);
     const includeAllIn = String(body.includeAllIn || '') === 'on';
+    const totalManual = Math.max(0, Number(body.totalManual) || 0);
 
     const ongkirTimDgs = Math.max(0, Number(body.ongkirTimDgs) || 0);
-    const sampelSurvey = Math.max(0, Number(body.sampelSurvey) || 0);
     const ongkirDgsClient = Math.max(0, Number(body.ongkirDgsClient) || 0);
 
     const biayaDariDropdown = biayaTambahan.reduce((acc, b) => acc + (Number(b.harga) || 0), 0);
@@ -1644,19 +1747,19 @@ app.post('/pengajuan-harga/simpan', isUserAuthenticated, uploadFotoPengajuan, as
       ? 0
       : biayaDariDropdown + ongkirTimDgs + sampelSurvey + ongkirDgsClient;
     const hargaAllIn = hargaProduksi + totalBiayaTambahan;
-    const totalHarga = hargaAllIn * qty;
+    // Float penuh. Pembulatan hanya terjadi di fungsi rupiah() saat ditampilkan.
+    const totalHarga = totalManual > 0 ? totalManual : hargaAllIn * qty;
 
     const foto = (req.files || [])
       .filter((f) => /^image\//i.test(f.mimetype || ''))
       .map((f) => f.filename);
 
-    if (!foto.length) {
-      const tujuanTanpaFoto = req.session && req.session.isAdmin ? '/pengajuan-harga' : '/pengajuan-harga-user';
-      return res.redirect(`${tujuanTanpaFoto}?gagal=1`);
-    }
+    if (!foto.length) return res.redirect(urlKembali);
 
     const dokumen = new PengajuanHarga({
       kode: await kodePengajuanHargaBaru(),
+      projectId: project._id,
+      projectNama: project.namaProject || '',
       namaBarang: String(body.namaBarang || '').trim(),
       qty,
       satuan: String(body.satuan || 'pcs').trim() || 'pcs',
@@ -1668,6 +1771,9 @@ app.post('/pengajuan-harga/simpan', isUserAuthenticated, uploadFotoPengajuan, as
       sampelSurvey,
       ongkirDgsClient,
       totalBiayaTambahan,
+      totalKasbonSampel,
+      totalQtyBoq,
+      totalManual,
       hargaAllIn,
       totalHarga,
       spesifikasi: String(body.spesifikasi || '').trim(),
@@ -1680,12 +1786,10 @@ app.post('/pengajuan-harga/simpan', isUserAuthenticated, uploadFotoPengajuan, as
 
     await dokumen.save();
 
-    const tujuan = req.session && req.session.isAdmin ? '/pengajuan-harga' : '/pengajuan-harga-user';
-    return res.redirect(`${tujuan}?simpan=1`);
+    return res.redirect(`${urlProjectPengajuanHarga(req, idProject)}?simpan=1`);
   } catch (err) {
     console.error('Gagal menyimpan pengajuan harga:', err);
-    const tujuan = req.session && req.session.isAdmin ? '/pengajuan-harga' : '/pengajuan-harga-user';
-    return res.redirect(`${tujuan}?gagal=1`);
+    return res.redirect(urlKembali);
   }
 });
 
