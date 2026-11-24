@@ -496,12 +496,9 @@
                 </div>
                 <div class="ck-field">
                   <label for="ck-category">Kategori</label>
-                  <select id="ck-category" name="category" class="ck-input" required>
-                    <option value="" disabled selected>Pilih Kategori</option>
-                    <% daftarKategoriCK.forEach(function (kategori) { %>
-                    <option value="<%= kategori %>"><%= kategori %></option>
-                    <% }); %>
-                  </select>
+                 <select id="ck-category" name="category" class="ck-input" required>
+                  <option value="" disabled selected>Pilih Kategori</option>
+                 </select>
                 </div>
                 <div class="ck-field">
                   <label for="ck-tanggal">Tanggal</label>
@@ -625,8 +622,25 @@
         'Belanja': { kelas: 'ck-cat-pink', hex: '#ec4899', icon: 'shopping-bag' },
         'Tagihan': { kelas: 'ck-cat-purple', hex: '#8b5cf6', icon: 'receipt' },
         'Gaji/Pendapatan': { kelas: 'ck-cat-emerald', hex: '#10b981', icon: 'wallet' },
+        'Kasbon / Cair': { kelas: 'ck-cat-emerald', hex: '#059669', icon: 'banknote' },
+        'Bonus / Komisi': { kelas: 'ck-cat-blue', hex: '#2563eb', icon: 'award' },
         'Lainnya': { kelas: 'ck-cat-slate', hex: '#64748b', icon: 'ellipsis' }
       }) %>;
+      var KATEGORI_CK_PER_TIPE = {
+        expense: [
+          'Makan & Minum',
+          'Transportasi',
+          'Belanja',
+          'Tagihan',
+          'Lainnya'
+        ],
+        income: [
+          'Gaji/Pendapatan',
+          'Kasbon / Cair',
+          'Bonus / Komisi',
+          'Lainnya'
+        ]
+      };
       var CK_BERHASIL = <%- JSON.stringify(Boolean(typeof berhasil !== 'undefined' && berhasil)) %>;
       var CK_HAPUS = <%- JSON.stringify(Boolean(typeof hapus !== 'undefined' && hapus)) %>;
       var CK_GAGAL = <%- JSON.stringify(Boolean(typeof gagal !== 'undefined' && gagal)) %>;
@@ -657,7 +671,7 @@
 
       function escapeHtmlCK(nilai) {
         return String(nilai == null ? '' : nilai).replace(/[&<>"']/g, function (c) {
-          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+          return { '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' }[c];
         });
       }
 
@@ -726,6 +740,26 @@
         }, 250);
       }
 
+      function renderOpsiKategoriCK(tipe, nilaiTerpilih) {
+        var selectEl = document.getElementById('ck-category');
+        if (!selectEl) return;
+
+        var keyTipe = String(tipe || 'expense').toLowerCase();
+        var daftar = KATEGORI_CK_PER_TIPE[keyTipe] || KATEGORI_CK_PER_TIPE.expense || [];
+
+        selectEl.innerHTML = '<option value="" disabled selected>Pilih Kategori</option>';
+
+        daftar.forEach(function (kategori) {
+          var opt = document.createElement('option');
+          opt.value = kategori;
+          opt.textContent = kategori;
+          if (nilaiTerpilih && nilaiTerpilih === kategori) {
+            opt.selected = true;
+          }
+          selectEl.appendChild(opt);
+        });
+      }
+
       function saatJenisBerubah() {
         var expense = document.querySelector('input[name="type"][value="expense"]');
         var income = document.querySelector('input[name="type"][value="income"]');
@@ -735,6 +769,7 @@
         var iniIncome = income.checked;
         labelIncome.classList.toggle('aktif-income', iniIncome);
         labelExpense.classList.toggle('aktif-ekspense', !iniIncome);
+        renderOpsiKategoriCK(iniIncome ? 'income' : 'expense', '');
       }
 
       function ringkasCK(list) {
@@ -972,6 +1007,10 @@
         if (cari) cari.addEventListener('input', function (e) {
           cariCK = String(e.target.value || '').toLowerCase().trim();
           renderTabelCK();
+        });
+
+        document.querySelectorAll('input[name="type"]').forEach(function (radio) {
+          radio.addEventListener('change', saatJenisBerubah);
         });
 
         saatJenisBerubah();
