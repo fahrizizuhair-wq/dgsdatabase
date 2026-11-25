@@ -913,14 +913,17 @@
       </section>
 
       <!-- DAFTAR CARD PROJECT -->
-      <section class="project-cards-section">
-        <div class="section-heading">
-          <h2>Daftar Project Harga Sampel</h2>
-          <span><%= projects ? projects.length : 0 %> Project</span>
+      <section
+        class="project-cards-section"
+        style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 20px 24px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);"
+      >
+        <div class="section-heading" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px;">
+          <h2 style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 800;">Daftar Project Harga Sampel</h2>
+          <span style="background: #f1f5f9; color: #334155; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;"><%= projects ? projects.length : 0 %> Project</span>
         </div>
 
         <% if (!projects || projects.length === 0) { %>
-        <div class="project-empty-state">
+        <div class="project-empty-state" style="color: #64748b; text-align: center; padding: 28px 16px;">
           <i class="fa-regular fa-folder-open" style="font-size: 32px; margin-bottom: 10px; color: #94a3b8; display: block;"></i>
           Belum ada project harga sampel. Silakan tambahkan project baru melalui form di atas.
         </div>
