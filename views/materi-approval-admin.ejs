@@ -1172,7 +1172,7 @@
           tglStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
         }
       }
-      document.getElementById('valUnitKerjaDanTgl').textContent = `Diajukan oleh: ${unit} | ${tglStr}`;
+      document.getElementById('valUnitKerjaDanTgl').textContent = `Nama Pekerjaan: ${unit} | ${tglStr}`;
       document.getElementById('valVendor').textContent = materi.vendor || '-';
 
       const urg = (materi.urgensi || 'Normal').trim();
