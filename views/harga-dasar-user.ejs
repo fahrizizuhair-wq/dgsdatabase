@@ -747,34 +747,61 @@
     <%- include('partials/sidebar-user', { activePage: 'harga-dasar' }) %>
 
     <main class="main-content">
-      <header class="header-section">
-        <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
+      <header class="system-banner no-print" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 18px 22px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div class="banner-title-wrap" style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+          <button type="button" class="banner-toggle-btn toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar" aria-label="Buka Sidebar" style="flex-shrink: 0; margin: 0;">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
 
-        <% if (!projectAktif) { %>
-        <h1>Harga Sampel &bull; Project</h1>
-        <p>Pilih project untuk melihat rincian harga sampel atau tambahkan project baru.</p>
-        <% } else { %>
-        <a href="/harga-dasar-user" class="btn-back">
-          <i class="fa-solid fa-arrow-left"></i> &larr; Kembali ke Daftar Project
-        </a>
-        <h1><%= projectAktif.namaProject %></h1>
-        <p>Lihat dan tambahkan item sampel serta kalkulasi harga pada project ini.</p>
-        <% } %>
+          <div class="banner-text" style="min-width: 0;">
+            <% if (!projectAktif) { %>
+            <span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; text-shadow: none;">
+              System Pengadaan • User
+            </span>
+            <h1 style="margin: 2px 0 0; font-size: 22px; font-weight: 800; color: #0f172a; text-shadow: none;">
+              Harga Sampel • Project
+            </h1>
+            <p style="margin: 2px 0 0; font-size: 12px; color: #64748b; text-shadow: none;">
+              Pilih project untuk melihat rincian harga sampel atau tambahkan project baru.
+            </p>
+            <% } else { %>
+            <span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; text-shadow: none;">
+              System Pengadaan • User • Harga Sampel
+            </span>
+            <h1 style="margin: 2px 0 0; font-size: 20px; font-weight: 800; color: #0f172a; text-shadow: none;">
+              <%= projectAktif.namaProject %>
+            </h1>
+            <p style="margin: 2px 0 0; font-size: 12px; color: #64748b; text-shadow: none;">
+              Lihat dan tambahkan item sampel serta kalkulasi harga pada project ini.
+            </p>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="banner-actions" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+          <% if (!projectAktif) { %>
+          <button type="button" onclick="fokusTambahProject()" class="btn-banner-primary cursor-pointer" title="Tambah project baru" style="margin-top: 0;">
+            <span>+ Tambah Project</span>
+          </button>
+          <% } else { %>
+          <a href="/harga-dasar-user" class="btn-back ph-btn ph-btn-neutral" style="margin-top: 0; text-decoration: none;">
+            ← Kembali ke Daftar Project
+          </a>
+          <% } %>
+        </div>
       </header>
 
       <% if (!projectAktif) { %>
