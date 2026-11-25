@@ -531,7 +531,7 @@
 
       .item-row {
         display: grid;
-        grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 36px;
+        grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 80px;
         gap: 8px;
         align-items: stretch;
         margin-bottom: 8px;
@@ -556,7 +556,7 @@
       }
       .item-head {
         display: grid;
-        grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 36px;
+        grid-template-columns: 38px minmax(0, 1fr) 64px 64px minmax(0, 1fr) 80px;
         gap: 8px;
         margin-bottom: 6px;
         font-size: 11.5px;
@@ -617,6 +617,21 @@
         align-items: center;
         justify-content: center;
       }
+      .btn-duplikat-item {
+        background: #dbeafe;
+        color: #1d4ed8;
+        border: none;
+        width: 36px;
+        height: 100%;
+        min-height: 40px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn-duplikat-item:hover { background: #bfdbfe; }
+      .item-actions { display: flex; gap: 6px; align-items: stretch; }
       .modal-actions {
         display: flex;
         justify-content: flex-end;
@@ -1131,8 +1146,12 @@
                 placeholder="Keterangan (opsional)..."
                 rows="2"
               ></textarea>
-              <button type="button" class="btn-remove-item" onclick="removeItemRow(this)"
-                ><i class="fa-solid fa-trash"></i></button>
+              <div class="item-actions">
+                <button type="button" class="btn-duplikat-item" onclick="duplikatItemRow(this)" title="Duplikat barang"
+                  ><i class="fa-solid fa-copy"></i></button>
+                <button type="button" class="btn-remove-item" onclick="removeItemRow(this)"
+                  ><i class="fa-solid fa-trash"></i></button>
+              </div>
             </div>
           </div>
             <div
@@ -1259,7 +1278,10 @@
           <textarea data-field="jumlah" name="items[${index}][jumlah]" placeholder="Jml" rows="2" required></textarea>
           <input type="text" data-field="satuan" name="items[${index}][satuan]" placeholder="Satuan" required>
           <textarea data-field="keterangan" name="items[${index}][keterangan]" placeholder="Keterangan (opsional)..." rows="2"></textarea>
-          <button type="button" class="btn-remove-item" onclick="removeItemRow(this)"><i class="fa-solid fa-trash"></i></button>
+          <div class="item-actions">
+            <button type="button" class="btn-duplikat-item" onclick="duplikatItemRow(this)" title="Duplikat barang"><i class="fa-solid fa-copy"></i></button>
+            <button type="button" class="btn-remove-item" onclick="removeItemRow(this)"><i class="fa-solid fa-trash"></i></button>
+          </div>
         `;
         row.querySelector('[data-field="diskripsi"]').value = data.diskripsi || '';
         row.querySelector('[data-field="jumlah"]').value =
@@ -1283,6 +1305,21 @@
         const container = document.getElementById('itemContainer');
         const rowCount = container.getElementsByClassName('item-row').length;
         container.appendChild(buatItemRow(rowCount, {}));
+      }
+
+      function duplikatItemRow(btn) {
+        const baris = btn.closest('.item-row');
+        if (!baris || !baris.parentNode) return;
+        const salinan = baris.cloneNode(true);
+        const asli = baris.querySelectorAll('[data-field]');
+        const salinanField = salinan.querySelectorAll('[data-field]');
+        asli.forEach(function (field, i) {
+          if (salinanField[i]) salinanField[i].value = field.value;
+        });
+        baris.parentNode.insertBefore(salinan, baris.nextSibling);
+        reindexRows();
+        const diskripsi = salinan.querySelector('[data-field="diskripsi"]');
+        if (diskripsi) diskripsi.focus();
       }
 
       function removeItemRow(btn) {

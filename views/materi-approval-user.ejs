@@ -924,6 +924,24 @@
       .btn-remove-item:hover {
         background: #fecaca;
       }
+      .btn-duplikat-item {
+        background: #dbeafe;
+        color: #1d4ed8;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        flex-shrink: 0;
+      }
+      .btn-duplikat-item:hover {
+        background: #bfdbfe;
+      }
+      .item-actions { display: flex; gap: 6px; align-items: center; }
       .btn-add-item {
         background-color: #7a1b1b;
         color: #ffffff;
@@ -1775,7 +1793,7 @@
                       class="item-head"
                       style="
                         display: grid;
-                        grid-template-columns: 2fr 100px 120px 1.5fr 1.5fr 45px;
+                        grid-template-columns: 2fr 100px 120px 1.5fr 1.5fr 82px;
                         gap: 10px;
                         align-items: center;
                         font-weight: 600;
@@ -1796,7 +1814,7 @@
                         class="item-row"
                         style="
                           display: grid;
-                          grid-template-columns: 2fr 100px 120px 1.5fr 1.5fr 45px;
+                          grid-template-columns: 2fr 100px 120px 1.5fr 1.5fr 82px;
                           gap: 10px;
                           align-items: center;
                           margin-bottom: 8px;
@@ -1858,25 +1876,33 @@
                             text-align: right;
                           "
                         />
-                        <button type="button" class="btn-remove-item" onclick="removeItemRow(this)" title="Hapus baris">
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path
-                              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                            ></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
-                        </button>
+                        <div class="item-actions">
+                          <button type="button" class="btn-duplikat-item" onclick="duplikatItemRow(this)" title="Duplikat barang">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                          </button>
+                          <button type="button" class="btn-remove-item" onclick="removeItemRow(this)" title="Hapus baris">
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path
+                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                              ></path>
+                              <line x1="10" y1="11" x2="10" y2="17"></line>
+                              <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1961,24 +1987,48 @@
         const newRow = document.createElement('div');
         newRow.className = 'item-row';
         newRow.style.cssText =
-          'display: grid; grid-template-columns: 2fr 100px 120px 1.5fr 1.5fr 45px; gap: 10px; align-items: center; margin-bottom: 8px;';
+          'display: grid; grid-template-columns: 2fr 100px 120px 1.5fr 1.5fr 82px; gap: 10px; align-items: center; margin-bottom: 8px;';
         newRow.innerHTML = `
-        <textarea data-field="diskripsi" name="items[0][diskripsi]" placeholder="Nama barang / spesifikasi material..." rows="1" required style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>  
+        <textarea data-field="diskripsi" name="items[${rowCount}][diskripsi]" placeholder="Nama barang / spesifikasi material..." rows="1" required style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>  
         <input type="number" min="1" step="any" data-field="jumlah" name="items[${rowCount}][jumlah]" placeholder="Jml" value="1" required oninput="hitungSubtotalItem(this)">
         <input type="text" data-field="satuan" name="items[${rowCount}][satuan]" placeholder="Cth: Batang" required>
         <input type="number" min="0" step="any" data-field="hargaSatuan" name="items[${rowCount}][hargaSatuan]" placeholder="0" required oninput="hitungSubtotalItem(this)">
         <input type="number" min="0" step="any" data-field="subtotal" name="items[${rowCount}][subtotal]" placeholder="0" readonly class="input-subtotal">
-        <button type="button" class="btn-remove-item" onclick="removeItemRow(this)" title="Hapus baris">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            <line x1="10" y1="11" x2="10" y2="17"></line>
-            <line x1="14" y1="11" x2="14" y2="17"></line>
-          </svg>
-        </button>
+        <div class="item-actions">
+          <button type="button" class="btn-duplikat-item" onclick="duplikatItemRow(this)" title="Duplikat barang">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+          <button type="button" class="btn-remove-item" onclick="removeItemRow(this)" title="Hapus baris">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
       `;
         container.appendChild(newRow);
         hitungTotalSemuaBarang();
+      }
+
+      function duplikatItemRow(btn) {
+        const baris = btn.closest('.item-row');
+        if (!baris || !baris.parentNode) return;
+        const salinan = baris.cloneNode(true);
+        const asli = baris.querySelectorAll('[data-field]');
+        const salinanField = salinan.querySelectorAll('[data-field]');
+        asli.forEach(function (field, i) {
+          if (salinanField[i]) salinanField[i].value = field.value;
+        });
+        baris.parentNode.insertBefore(salinan, baris.nextSibling);
+        reindexRows();
+        hitungTotalSemuaBarang();
+        const diskripsi = salinan.querySelector('[data-field="diskripsi"]');
+        if (diskripsi) diskripsi.focus();
       }
 
       function removeItemRow(btn) {

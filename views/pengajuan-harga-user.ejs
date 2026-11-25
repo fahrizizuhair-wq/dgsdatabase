@@ -157,6 +157,16 @@
         border-top: 2px solid #f1f5f9;
       }
       .ph-empty { padding: 48px 20px; text-align: center; color: #94a3b8; font-size: 13px; }
+      .ph-aksi-wrap { display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+      .ph-action-btn {
+        width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+        border: 1px solid #e2e8f0; border-radius: 8px; background: #fff;
+        color: #64748b; cursor: pointer; transition: all .18s ease;
+      }
+      .ph-action-btn svg { width: 14px; height: 14px; }
+      .ph-action-btn:hover { background: #f8fafc; border-color: #cbd5e1; color: #7a1b1b; }
+      .ph-action-btn.ph-duplikat:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+      .ph-action-btn.ph-hapus:hover { background: #fff1f2; border-color: #fecdd3; color: #e11d48; }
 
       /* ========================= MODAL ========================= */
       .ph-modal {
@@ -769,14 +779,15 @@
         <div class="ph-modal-head">
           <div>
             <span class="text-[10px] uppercase tracking-widest text-maroon-100 font-bold">Form Pengajuan</span>
-            <h2>Input Pengajuan Baru</h2>
-            <p>Lengkapi data merchandise, rincian biaya, dan foto produk.</p>
+            <h2 id="ph-form-judul">Input Pengajuan Baru</h2>
+            <p id="ph-form-subjudul">Lengkapi data merchandise, rincian biaya, dan foto produk.</p>
           </div>
           <button type="button" class="ph-modal-close" onclick="tutupForm()" aria-label="Tutup form">&times;</button>
         </div>
 
         <form id="ph-form" action="/pengajuan-harga/simpan" method="POST" enctype="multipart/form-data" onsubmit="return validasiForm()">
           <input type="hidden" id="ph-project-id" name="projectId" value="<%= String(projectPH._id) %>" />
+          <input type="hidden" id="ph-id" name="id" value="" />
           <div class="ph-modal-body ph-form-body">
             <div class="ph-form-card">
               <div class="ph-section-title">
@@ -934,7 +945,7 @@
                 <div class="ph-field ph-col-span-2">
                   <label for="ph-foto">Foto Produk Model</label>
                   <input type="file" id="ph-foto" name="foto" class="ph-input" accept="image/*" multiple required onchange="pratinjauFoto(this)" />
-                  <span class="ph-hint">Maksimal 10 file gambar (JPG, PNG, WebP), masing-masing maksimal 20 MB.</span>
+                  <span class="ph-hint">Maksimal 5 file gambar (JPG, PNG, WebP), masing-masing maksimal 5 MB.</span>
                   <div id="ph-preview-foto" class="ph-preview-grid"></div>
                 </div>
               </div>
@@ -956,7 +967,7 @@
               <button type="button" onclick="tutupForm()" class="ph-btn ph-btn-neutral cursor-pointer">Batal</button>
               <button type="submit" class="ph-simpan-btn cursor-pointer">
                 <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-                Simpan Pengajuan
+                <span id="ph-submit-label">Simpan Pengajuan</span>
               </button>
             </div>
           </div>
@@ -994,6 +1005,9 @@
       } : null) %>;
       var PH_BASE_URL = <%- jsonUntukScriptPH(basePH) %>;
       var PH_BERHASIL = <%- JSON.stringify(Boolean(typeof berhasil !== 'undefined' && berhasil)) %>;
+      var PH_DUPLIKAT = <%- JSON.stringify(Boolean(typeof duplikat !== 'undefined' && duplikat)) %>;
+      var PH_EDIT = <%- JSON.stringify(Boolean(typeof edit !== 'undefined' && edit)) %>;
+      var PH_HAPUS = <%- JSON.stringify(Boolean(typeof hapus !== 'undefined' && hapus)) %>;
       var PH_GAGAL = <%- JSON.stringify(Boolean(typeof gagal !== 'undefined' && gagal)) %>;
 
       var OPSI_PH = {
@@ -1153,7 +1167,12 @@
             '<td><strong class="text-maroon-700">' + rupiah(item.hargaAllIn) + '</strong></td>' +
             '<td><strong class="text-maroon-700">' + rupiah(item.totalHarga) + '</strong></td>' +
             '<td>' + escapeHtml(teksAman(item.pic)) + '<span class="ph-sub">' + escapeHtml(teksAman(item.jangkaWaktu)) + '</span></td>' +
-            '<td class="no-print"><button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="event.stopPropagation(); bukaDetail(\'' + item._id + '\')">Lihat Detail</button></td>' +
+            '<td class="no-print"><div class="ph-aksi-wrap">' +
+              '<button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="event.stopPropagation(); bukaDetail(\'' + item._id + '\')">Lihat Detail</button>' +
+              '<button type="button" class="ph-action-btn" onclick="event.stopPropagation(); bukaEditPH(\'' + item._id + '\')" title="Edit pengajuan"><i data-lucide="pencil"></i></button>' +
+              '<button type="button" class="ph-action-btn ph-duplikat" onclick="event.stopPropagation(); duplikatPH(\'' + item._id + '\')" title="Duplikat ke bawah"><i data-lucide="copy"></i></button>' +
+              '<button type="button" class="ph-action-btn ph-hapus" onclick="event.stopPropagation(); hapusPH(\'' + item._id + '\')" title="Hapus pengajuan"><i data-lucide="trash-2"></i></button>' +
+            '</div></td>' +
             '</tr>';
         });
 
@@ -1174,6 +1193,7 @@
           '</tr>');
 
         body.innerHTML = baris.join('');
+        initIcons();
       }
 
       function bukaDetail(id) {
@@ -1281,7 +1301,7 @@
         if (!document.getElementById('ph-form-modal').classList.contains('terbuka')) document.body.style.overflow = '';
       }
 
-      function tambahBiayaRow(grup) {
+      function tambahBiayaRow(grup, itemTerpilih, hargaAwal) {
         var wadah = document.getElementById('rows-' + grup);
         if (!wadah) return;
         nomorRowPH += 1;
@@ -1303,6 +1323,13 @@
             '<input type="number" name="biayaHarga[]" class="ph-input harga-input" min="0" step="any" value="0" oninput="hitungLive()" />' +
           '</div>' +
           '<button type="button" class="ph-btn ph-btn-neutral cursor-pointer" onclick="hapusBiayaRow(this)">Hapus</button>';
+
+        if (itemTerpilih) {
+          row.querySelector('.item-select').value = itemTerpilih;
+          row.querySelector('.ph-price-wrap').classList.add('terlihat');
+          row.querySelector('.harga-input').value = Number(hargaAwal) || 0;
+        }
+
         wadah.appendChild(row);
       }
 
@@ -1422,9 +1449,81 @@
         return valid;
       }
 
+      function aturModeFormPH(mode) {
+        var edit = mode === 'edit';
+        var form = document.getElementById('ph-form');
+        var judul = document.getElementById('ph-form-judul');
+        var subjudul = document.getElementById('ph-form-subjudul');
+        var label = document.getElementById('ph-submit-label');
+        var file = document.getElementById('ph-foto');
+        var idField = document.getElementById('ph-id');
+
+        if (form) form.action = edit ? '/pengajuan-harga/edit' : '/pengajuan-harga/simpan';
+        if (idField && !edit) idField.value = '';
+        if (judul) judul.textContent = edit ? 'Edit Pengajuan Harga' : 'Input Pengajuan Baru';
+        if (subjudul) {
+          subjudul.textContent = edit
+            ? 'Ubah field yang perlu disesuaikan. Foto lama tetap dipakai jika tidak mengupload baru.'
+            : 'Lengkapi data merchandise, rincian biaya, dan foto produk.';
+        }
+        if (label) label.textContent = edit ? 'Simpan Perubahan' : 'Simpan Pengajuan';
+        if (file) file.required = !edit;
+      }
+
+      function isiBiayaDariDataPH(item) {
+        ['branding', 'packaging', 'packing'].forEach(function (grup) {
+          var wadah = document.getElementById('rows-' + grup);
+          if (!wadah) return;
+          wadah.innerHTML = '';
+          var daftar = (Array.isArray(item.biayaTambahan) ? item.biayaTambahan : []).filter(function (b) {
+            return b.grup === grup;
+          });
+          if (!daftar.length) tambahBiayaRow(grup);
+          else daftar.forEach(function (b) { tambahBiayaRow(grup, b.item, b.harga); });
+        });
+      }
+
+      function isiFieldFormPH(item, mode) {
+        var penetap = {
+          'ph-nama': item.namaBarang || '',
+          'ph-qty': Number(item.qty) || 1,
+          'ph-satuan': item.satuan || 'pcs',
+          'ph-tim': item.timProduksi || '',
+          'ph-harga-produksi': Number(item.hargaProduksi) || 0,
+          'ph-total-manual': Number(item.totalManual) || 0,
+          'ph-ongkir-tim': Number(item.ongkirTimDgs) || 0,
+          'ph-ongkir-client': Number(item.ongkirDgsClient) || 0,
+          'ph-spesifikasi': item.spesifikasi || '',
+          'ph-keterangan': item.keterangan || '',
+          'ph-pic': item.pic || '',
+          'ph-waktu': item.jangkaWaktu || '',
+          'ph-sampel': PH_PROJECT ? PH_PROJECT.sampelPerUnit : (Number(item.sampelSurvey) || 0),
+        };
+        Object.keys(penetap).forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          var nilai = penetap[id];
+          if (el.tagName === 'SELECT') {
+            var cocok = Array.from(el.options).find(function (opsi) {
+              return String(opsi.value).toLowerCase() === String(nilai).toLowerCase();
+            });
+            el.value = cocok ? cocok.value : (el.options.length ? el.options[0].value : '');
+          } else {
+            el.value = nilai;
+          }
+        });
+        var include = document.getElementById('ph-include');
+        if (include) include.checked = Boolean(item.includeAllIn);
+        if (mode === 'edit') {
+          var idField = document.getElementById('ph-id');
+          if (idField) idField.value = String(item._id);
+        }
+      }
+
       function bukaForm() {
         var form = document.getElementById('ph-form');
         if (form) form.reset();
+        aturModeFormPH('tambah');
         ['branding', 'packaging', 'packing'].forEach(function (grup) {
           var wadah = document.getElementById('rows-' + grup);
           if (wadah) wadah.innerHTML = '';
@@ -1432,13 +1531,9 @@
         });
         var preview = document.getElementById('ph-preview-foto');
         if (preview) preview.innerHTML = '';
-        var include = document.getElementById('ph-include');
-        if (include) include.checked = false;
-        // Selalu isi ulang sampel dari project dengan nilai float penuh.
-        var sampel = document.getElementById('ph-sampel');
-        if (sampel) sampel.value = PH_PROJECT ? PH_PROJECT.sampelPerUnit : 0;
         segarOpsi();
         saatIncludeBerubah();
+        hitungLive();
         document.getElementById('ph-form-modal').classList.add('terbuka');
         document.body.style.overflow = 'hidden';
         initIcons();
@@ -1446,6 +1541,57 @@
           var nama = document.getElementById('ph-nama');
           if (nama) nama.focus();
         }, 60);
+      }
+
+      function bukaEditPH(id) {
+        var item = PH_DATA.find(function (x) { return String(x._id) === String(id); });
+        if (!item) return;
+        tutupDetail();
+
+        var form = document.getElementById('ph-form');
+        if (form) form.reset();
+        aturModeFormPH('edit');
+        isiFieldFormPH(item, 'edit');
+        isiBiayaDariDataPH(item);
+
+        var preview = document.getElementById('ph-preview-foto');
+        if (preview) preview.innerHTML = '';
+        segarOpsi();
+        saatIncludeBerubah();
+        hitungLive();
+
+        document.getElementById('ph-form-modal').classList.add('terbuka');
+        document.body.style.overflow = 'hidden';
+        initIcons();
+        setTimeout(function () {
+          var nama = document.getElementById('ph-nama');
+          if (nama) nama.focus();
+        }, 60);
+      }
+
+      function kirimAksiPH(rute, id, querySukses) {
+        if (!PH_PROJECT) return;
+        var badan = new URLSearchParams();
+        badan.append('id', String(id));
+        badan.append('projectId', String(PH_PROJECT.id));
+        fetch(rute, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: badan.toString(),
+        }).then(function () {
+          window.location.href = PH_BASE_URL + '/project/' + encodeURIComponent(PH_PROJECT.id) + '?' + querySukses + '=1';
+        }).catch(function () {
+          window.location.reload();
+        });
+      }
+
+      function duplikatPH(id) {
+        kirimAksiPH('/pengajuan-harga/duplikat', id, 'duplikat');
+      }
+
+      function hapusPH(id) {
+        if (!confirm('Hapus pengajuan harga ini?')) return;
+        kirimAksiPH('/pengajuan-harga/hapus', id, 'hapus');
       }
 
       function tutupForm() {
@@ -1496,6 +1642,9 @@
         saatIncludeBerubah();
         initIcons();
         if (PH_BERHASIL) tampilToast(PH_PROJECT ? 'Pengajuan harga berhasil disimpan.' : 'Project berhasil ditambahkan.');
+        if (PH_DUPLIKAT) tampilToast('Pengajuan berhasil diduplikat di bawah data asal.');
+        if (PH_EDIT) tampilToast('Pengajuan harga berhasil diubah.');
+        if (PH_HAPUS) tampilToast('Pengajuan harga berhasil dihapus.');
         if (PH_GAGAL) tampilToast('Gagal menyimpan data. Periksa kembali input Anda.', 'gagal');
       });
 

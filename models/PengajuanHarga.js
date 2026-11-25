@@ -42,7 +42,10 @@ const pengajuanHargaSchema = new mongoose.Schema(
 
     gambar: [String],
     status: { type: String, default: 'Diajukan' },
+    // Urutan tampil di tabel. Duplikat disisipkan tepat di bawah data sumber.
+    urutan: { type: Number, default: 0, index: true },
     diinputOleh: { type: String, default: '' },
+    diupdateOleh: { type: String, default: '' },
   },
   { timestamps: true, collection: 'pengajuan_harga' },
 );

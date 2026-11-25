@@ -607,15 +607,36 @@
           '<div class="sm:col-span-6"><input type="text" required value="' + escapeHtml(item.desc || '') + '" placeholder="Deskripsi item / biaya..." class="item-desc w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:border-maroon-800" /></div>' +
           '<div class="sm:col-span-2"><input type="number" min="1" required value="' + escapeHtml(item.qty == null ? 1 : item.qty) + '" oninput="recalcFormLiveTotal()" placeholder="Qty" class="item-qty w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-center focus:outline-none focus:border-maroon-800" /></div>' +
           '<div class="sm:col-span-3"><input type="number" min="0" step="500" required value="' + escapeHtml(item.price == null ? 0 : item.price) + '" oninput="recalcFormLiveTotal()" placeholder="Harga Satuan" class="item-price w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-right focus:outline-none focus:border-maroon-800" /></div>' +
-          '<div class="sm:col-span-1 flex justify-end"><button type="button" onclick="removeItemRowFromBlock(this)" class="p-1.5 text-slate-400 hover:text-rose-600 cursor-pointer" title="Hapus baris"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>';
+          '<div class="sm:col-span-1 flex justify-end gap-1">' +
+            '<button type="button" onclick="duplikatItemRowFromBlock(this)" class="p-1 text-slate-400 hover:text-blue-600 cursor-pointer" title="Duplikat item"><i data-lucide="copy" class="w-3 h-3"></i></button>' +
+            '<button type="button" onclick="removeItemRowFromBlock(this)" class="p-1 text-slate-400 hover:text-rose-600 cursor-pointer" title="Hapus baris"><i data-lucide="trash-2" class="w-3 h-3"></i></button>' +
+          '</div>';
         listEl.appendChild(row);
         initIcons();
+        return row;
       }
 
       function addItemRowToBlock(btn) {
         var listEl = btn.closest('.rec-block').querySelector('.rec-items-list');
         createItemRowElement(listEl);
         recalcFormLiveTotal();
+      }
+
+      function duplikatItemRowFromBlock(btn) {
+        var baris = btn.closest('.item-row');
+        var listEl = baris ? baris.parentNode : null;
+        if (!baris || !listEl) return;
+        var data = {
+          desc: baris.querySelector('.item-desc').value,
+          qty: baris.querySelector('.item-qty').value,
+          price: baris.querySelector('.item-price').value,
+        };
+        var salinan = createItemRowElement(listEl, data);
+        listEl.insertBefore(salinan, baris.nextSibling);
+        recalcFormLiveTotal();
+        initIcons();
+        var desc = salinan.querySelector('.item-desc');
+        if (desc) desc.focus();
       }
 
       function removeItemRowFromBlock(btn) {
