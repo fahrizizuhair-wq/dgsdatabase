@@ -1,73 +1,94 @@
 // ============================================================
 //  KONFIGURASI KATEGORI CATATAN KEUANGAN
 // ------------------------------------------------------------
-//  Cara menambah kategori baru:
-//  1. Tambahkan satu objek di array KATEGORI di bawah.
-//  2. Isi `nama` (teks yang tampil), `jenis` ('expense', 'income',
-//     atau 'both'), `warna` (hex warna teks/badge/grafik), dan `ikon`
-//     (nama ikon Lucide).
-//  3. Simpan file ini, lalu restart server.
+//  CARA MENAMBAH / MENGUBAH KATEGORI:
+//  Cukup tambah atau edit SATU BARIS NAMA di salah satu daftar
+//  di bawah ini (mirip menambah <option> pada <select>).
+//
+//    PENGELUARAN  -> muncul hanya di transaksi pengeluaran
+//    PEMASUKAN    -> muncul hanya di transaksi pemasukan
+//    BERSAMA      -> muncul di keduanya
+//
+//  Warna dan ikon untuk grafik dibuat otomatis. Jika ingin
+//  warna/ikon tertentu, tambahkan override di META_KATEGORI.
+//  Setelah mengubah daftar, restart server.
 //
 //  Tidak perlu mengubah server.js, view EJS, atau CSS lagi.
 // ============================================================
 
-const KATEGORI = [
-  // -------------------- PENGELUARAN --------------------
-  {
-    nama: 'Anggaran Kasbon',
-    jenis: 'expense',
-    warna: '#7a1b1b',
-    ikon: 'banknote',
-  },
-  {
-    nama: 'Pencairan Kembali',
-    jenis: 'both',
-    warna: '#8b5cf6',
-    ikon: 'rotate-ccw',
-  },
-  {
-    nama: 'Makan & Minum',
-    jenis: 'expense',
-    warna: '#f59e0b',
-    ikon: 'utensils',
-  },
-  {
-    nama: 'Transportasi',
-    jenis: 'expense',
-    warna: '#3b82f6',
-    ikon: 'car',
-  },
-  {
-    nama: 'Belanja',
-    jenis: 'expense',
-    warna: '#ec4899',
-    ikon: 'shopping-bag',
-  },
-  {
-    nama: 'Tagihan',
-    jenis: 'expense',
-    warna: '#a855f7',
-    ikon: 'receipt',
-  },
-
-  // -------------------- PEMASUKAN ----------------------
-  {
-    nama: 'Gaji/Pendapatan',
-    jenis: 'income',
-    warna: '#059669',
-    ikon: 'wallet',
-  },
-
-  // -------------------- BERSAMA ------------------------
-  {
-    nama: 'Lainnya',
-    jenis: 'both',
-    warna: '#64748b',
-    ikon: 'ellipsis',
-  },
+const PENGELUARAN = [
+  'Makan & Minum',
+  'Transportasi',
+  'Belanja',
+  'Tagihan',
+  // 'Biaya Produksi',  <-- contoh penambahan kategori
 ];
 
+const PEMASUKAN = [
+  'Anggaran Kasbon',
+  'Pencairan Kembali',
+];
+
+const BERSAMA = [
+  'Lainnya',
+];
+
+// Warna & ikon opsional. Tidak wajib diisi untuk kategori baru.
+const META_KATEGORI = {
+  'Anggaran Kasbon': { warna: '#7a1b1b', ikon: 'banknote' },
+  'Pencairan Kembali': { warna: '#8b5cf6', ikon: 'rotate-ccw' },
+  'Makan & Minum': { warna: '#f59e0b', ikon: 'utensils' },
+  Transportasi: { warna: '#3b82f6', ikon: 'car' },
+  Belanja: { warna: '#ec4899', ikon: 'shopping-bag' },
+  Tagihan: { warna: '#a855f7', ikon: 'receipt' },
+  'Gaji/Pendapatan': { warna: '#059669', ikon: 'wallet' },
+  Lainnya: { warna: '#64748b', ikon: 'ellipsis' },
+};
+
 const KATEGORI_DEFAULT = 'Lainnya';
+
+const PALETTE_WARNA = [
+  '#0ea5e9', '#14b8a6', '#f97316', '#6366f1', '#84cc16',
+  '#e11d48', '#0891b2', '#d97706', '#7c3aed', '#65a30d',
+];
+
+let penunjukWarna = 0;
+const warnaTerpakai = new Set(
+  Object.values(META_KATEGORI)
+    .map((meta) => meta.warna)
+    .filter(Boolean),
+);
+
+function warnaOtomatis() {
+  if (warnaTerpakai.size >= PALETTE_WARNA.length) return '#64748b';
+  let warna = PALETTE_WARNA[penunjukWarna % PALETTE_WARNA.length];
+  while (warnaTerpakai.has(warna)) {
+    penunjukWarna += 1;
+    warna = PALETTE_WARNA[penunjukWarna % PALETTE_WARNA.length];
+  }
+  penunjukWarna += 1;
+  warnaTerpakai.add(warna);
+  return warna;
+}
+
+function bangunKategori(daftar, jenis) {
+  return daftar.map((nama) => {
+    const namaBersih = String(nama || '').trim();
+    const meta = META_KATEGORI[namaBersih] || {};
+    return {
+      nama: namaBersih,
+      jenis,
+      warna: meta.warna || warnaOtomatis(),
+      ikon: meta.ikon || 'circle',
+    };
+  });
+}
+
+const KATEGORI = [
+  ...bangunKategori(PENGELUARAN, 'expense'),
+  ...bangunKategori(PEMASUKAN, 'income'),
+  ...bangunKategori(BERSAMA, 'both'),
+].filter((item, indeks, semua) => semua.findIndex((k) => k.nama === item.nama) === indeks);
 
 function daftarKategori(jenis) {
   if (jenis !== 'income' && jenis !== 'expense') return KATEGORI.slice();
