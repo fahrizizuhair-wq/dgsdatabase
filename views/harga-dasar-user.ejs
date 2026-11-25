@@ -782,11 +782,16 @@
               System Pengadaan • User • Harga Sampel
             </span>
             <h1 style="margin: 2px 0 0; font-size: 20px; font-weight: 800; color: #0f172a; text-shadow: none;">
-              <%= projectAktif.namaProject %>
+              Harga Sampel &mdash; <%= projectAktif.namaProject %>
             </h1>
-            <p style="margin: 2px 0 0; font-size: 12px; color: #64748b; text-shadow: none;">
-              Lihat dan tambahkan item sampel serta kalkulasi harga pada project ini.
-            </p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px; align-items: center;">
+              <span style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px; font-size: 11.5px; color: #475569;">
+                Biaya Operasional: <strong style="color: #7a1b1b;">Rp <%= Number(projectAktif.biayaOperasional || 0).toLocaleString('id-ID') %></strong>
+              </span>
+              <span style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px; font-size: 11.5px; color: #475569;">
+                Biaya Transfer: <strong style="color: #7a1b1b;">Rp <%= Number(projectAktif.biayaTransferBedaBank || 0).toLocaleString('id-ID') %></strong>
+              </span>
+            </div>
             <% } %>
           </div>
         </div>
@@ -797,9 +802,15 @@
             <span>+ Tambah Project</span>
           </button>
           <% } else { %>
-          <a href="/harga-dasar-user" class="btn-back ph-btn ph-btn-neutral" style="margin-top: 0; text-decoration: none;">
-            ← Kembali ke Daftar Project
+          <a href="/harga-dasar-user" class="btn-back ph-btn ph-btn-neutral" style="margin: 0; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-arrow-left"></i> <span>Daftar Project</span>
           </a>
+          <a href="/export-harga-dasar-excel?projectId=<%= projectAktif._id %>" class="ph-btn ph-btn-neutral" style="margin: 0; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: #1d6f42; color: #fff; border-color: #1d6f42;">
+            <i class="fa-solid fa-file-excel"></i> <span>Export Excel</span>
+          </a>
+          <button type="button" onclick="openModal()" class="btn-banner-primary cursor-pointer" style="margin: 0;">
+            <i class="fa-solid fa-plus"></i> <span>Tambah Sampel</span>
+          </button>
           <% } %>
         </div>
       </header>
@@ -1045,22 +1056,6 @@
            MODE 2: PROJECT VIEW (DATA TABEL ITEM SAMPEL - USER)
            ============================================================ -->
 
-      <!-- BANNER DETAIL BIAYA PROJECT -->
-      <div class="project-info-banner">
-        <div class="project-info-title">
-          <h2><%= projectAktif.namaProject %></h2>
-          <p>Estimasi Total Kasbon = Seluruh Total Harga Sampel + Biaya Operasional + Biaya Transfer Beda Bank</p>
-        </div>
-        <div class="project-info-chips">
-          <div class="project-chip">
-            Biaya Operasional: <strong>Rp <%= Number(projectAktif.biayaOperasional || 0).toLocaleString('id-ID') %></strong>
-          </div>
-          <div class="project-chip">
-            Biaya Transfer: <strong>Rp <%= Number(projectAktif.biayaTransferBedaBank || 0).toLocaleString('id-ID') %></strong>
-          </div>
-        </div>
-      </div>
-
       <!-- KARTU STATISTIK PROJECT AKTIF -->
       <section class="card-grid">
         <div class="stat-card card-blue">
@@ -1267,6 +1262,14 @@
     </main>
 
     <script>
+      function fokusTambahProject() {
+        const el = document.getElementById('inputNamaProject');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.focus();
+        }
+      }
+
       function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('sidebarOverlay').classList.toggle('active');
