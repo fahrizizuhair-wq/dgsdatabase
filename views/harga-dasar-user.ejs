@@ -617,6 +617,134 @@
         border-radius: 8px;
       }
 
+      /* SYSTEM BANNER / HEADER HALAMAN */
+      .system-banner {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 18px 22px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+      .banner-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+      }
+      .banner-toggle-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 20px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+        margin: 0 !important;
+        padding: 0;
+      }
+      .banner-toggle-btn:hover {
+        background: #f1f5f9;
+        color: #7a1b1b;
+      }
+      .banner-text {
+        min-width: 0;
+      }
+      .banner-text span {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+      }
+      .banner-text h1 {
+        margin: 2px 0 0;
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.25;
+      }
+      .banner-text p {
+        margin: 2px 0 0;
+        font-size: 12px;
+        color: #64748b;
+      }
+      .banner-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+        margin-left: auto;
+        flex-wrap: wrap;
+      }
+      .btn-banner-primary {
+        background: #7a1b1b;
+        color: #ffffff;
+        border: none;
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(122, 27, 27, 0.25);
+        text-decoration: none;
+        margin: 0;
+      }
+      .btn-banner-primary:hover {
+        background: #5c1414;
+        box-shadow: 0 6px 16px rgba(122, 27, 27, 0.35);
+      }
+      .ph-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 15px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: 1px solid transparent;
+        margin: 0;
+      }
+      .ph-btn-neutral {
+        background: #ffffff;
+        color: #334155;
+        border-color: #cbd5e1;
+      }
+      .ph-btn-neutral:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+        color: #0f172a;
+      }
+      .ph-btn-excel {
+        background: #1d6f42;
+        color: #ffffff;
+        border-color: #1d6f42;
+      }
+      .ph-btn-excel:hover {
+        background: #155d35;
+        border-color: #155d35;
+        color: #ffffff;
+      }
+
       /* RESPONSIF */
       @media (max-width: 900px) {
         .project-form-grid {
@@ -738,6 +866,22 @@
         .auto-total-value {
           font-size: 16px;
         }
+        .system-banner {
+          padding: 14px 16px;
+          border-radius: 14px;
+          gap: 12px;
+        }
+        .banner-text h1 {
+          font-size: 17px;
+        }
+        .banner-actions {
+          width: 100%;
+          margin-left: 0;
+        }
+        .banner-actions > * {
+          flex: 1 1 auto;
+          justify-content: center;
+        }
       }
     </style>
     <link rel="stylesheet" href="/css/stat-cards.css" />
@@ -747,9 +891,9 @@
     <%- include('partials/sidebar-user', { activePage: 'harga-dasar' }) %>
 
     <main class="main-content">
-      <header class="system-banner no-print" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 18px 22px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-        <div class="banner-title-wrap" style="display: flex; align-items: center; gap: 14px; min-width: 0;">
-          <button type="button" class="banner-toggle-btn toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar" aria-label="Buka Sidebar" style="flex-shrink: 0; margin: 0;">
+      <header class="system-banner no-print">
+        <div class="banner-title-wrap">
+          <button type="button" class="banner-toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar" aria-label="Buka Sidebar">
             <svg
               width="20"
               height="20"
@@ -766,50 +910,40 @@
             </svg>
           </button>
 
-          <div class="banner-text" style="min-width: 0;">
+          <div class="banner-text">
             <% if (!projectAktif) { %>
-            <span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; text-shadow: none;">
-              System Pengadaan • User
-            </span>
-            <h1 style="margin: 2px 0 0; font-size: 22px; font-weight: 800; color: #0f172a; text-shadow: none;">
-              Harga Sampel - Project
-            </h1>
-            <p style="margin: 2px 0 0; font-size: 12px; color: #64748b; text-shadow: none;">
-              Pilih project untuk melihat rincian harga sampel atau tambahkan project baru.
-            </p>
+            <span>System Pengadaan &bull; User</span>
+            <h1>Harga Sampel &bull; Project</h1>
+            <p>Pilih project untuk melihat rincian harga sampel atau tambahkan project baru.</p>
             <% } else { %>
-            <span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; text-shadow: none;">
-              System Pengadaan • User • Harga Sampel
-            </span>
-            <h1 style="margin: 2px 0 0; font-size: 20px; font-weight: 800; color: #0f172a; text-shadow: none;">
-              Harga Sampel &mdash; <%= projectAktif.namaProject %>
-            </h1>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px; align-items: center;">
-              <span style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px; font-size: 11.5px; color: #475569;">
-                Biaya Operasional: <strong style="color: #7a1b1b;">Rp <%= Number(projectAktif.biayaOperasional || 0).toLocaleString('id-ID') %></strong>
+            <span>System Pengadaan &bull; User &bull; Harga Sampel</span>
+            <h1>Harga Sampel &mdash; <%= projectAktif.namaProject %></h1>
+            <div class="project-info-chips">
+              <span class="project-chip">
+                Biaya Operasional: <strong>Rp <%= Number(projectAktif.biayaOperasional || 0).toLocaleString('id-ID') %></strong>
               </span>
-              <span style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px; font-size: 11.5px; color: #475569;">
-                Biaya Transfer: <strong style="color: #7a1b1b;">Rp <%= Number(projectAktif.biayaTransferBedaBank || 0).toLocaleString('id-ID') %></strong>
+              <span class="project-chip">
+                Biaya Transfer: <strong>Rp <%= Number(projectAktif.biayaTransferBedaBank || 0).toLocaleString('id-ID') %></strong>
               </span>
             </div>
             <% } %>
           </div>
         </div>
 
-        <div class="banner-actions" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+        <div class="banner-actions">
           <% if (!projectAktif) { %>
-          <button type="button" onclick="fokusTambahProject()" class="btn-banner-primary cursor-pointer" title="Tambah project baru" style="margin-top: 0;">
-            <span>+ Tambah Project</span>
+          <button type="button" onclick="fokusTambahProject()" class="btn-banner-primary" title="Tambah project baru">
+            <i class="fa-solid fa-plus"></i> <span>Tambah Project</span>
           </button>
           <% } else { %>
-          <a href="/harga-dasar-user" class="btn-back ph-btn ph-btn-neutral" style="margin: 0; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+          <a href="/harga-dasar-user" class="ph-btn ph-btn-neutral">
             <i class="fa-solid fa-arrow-left"></i> <span>Daftar Project</span>
           </a>
-          <a href="/export-harga-dasar-excel?projectId=<%= projectAktif._id %>" class="ph-btn ph-btn-neutral" style="margin: 0; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: #1d6f42; color: #fff; border-color: #1d6f42;">
+          <a href="/export-harga-dasar-excel?projectId=<%= projectAktif._id %>" class="ph-btn ph-btn-excel">
             <i class="fa-solid fa-file-excel"></i> <span>Export Excel</span>
           </a>
-          <button type="button" onclick="openModal()" class="btn-banner-primary cursor-pointer" style="margin: 0;">
-            <i class="fa-solid fa-plus"></i> <span>Tambah Sampel</span>
+          <button type="button" onclick="openModal()" class="btn-banner-primary">
+            <i class="fa-solid fa-plus"></i> <span>Tambah Harga Sampel</span>
           </button>
           <% } %>
         </div>
