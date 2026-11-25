@@ -782,7 +782,7 @@
             <h2 id="ph-form-judul">Input Pengajuan Baru</h2>
             <p id="ph-form-subjudul">Lengkapi data merchandise, rincian biaya, dan foto produk.</p>
           </div>
-          <button type="button" class="ph-modal-close" onclick="tutupForm()" aria-label="Tutup form">&times;</button>
+          <button type="button" class="ph-modal-close" onclick="tutupForm()" aria-label="Tutup form">×</button>
         </div>
 
         <form id="ph-form" action="/pengajuan-harga/simpan" method="POST" enctype="multipart/form-data" onsubmit="return validasiForm()">
@@ -802,7 +802,7 @@
                 <div>
                   <span class="ph-info-label">Project</span>
                   <strong><%= projectPH.namaProject %></strong>
-                  <span>Kasbon sampel <%= rupiahPH(projectPH.totalKasbonSampel) %> &divide; Qty BOQ <%= angkaPH(projectPH.totalQtyBoq) %></span>
+                  <span>Kasbon sampel <%= rupiahPH(projectPH.totalKasbonSampel) %> ÷ Qty BOQ <%= angkaPH(projectPH.totalQtyBoq) %></span>
                 </div>
                 <span class="ph-badge">Sampel otomatis</span>
               </div>
@@ -854,10 +854,10 @@
                 <div class="ph-field">
                   <label for="ph-total-manual">Total Keseluruhan Manual (Opsional)</label>
                   <input type="number" id="ph-total-manual" name="totalManual" class="ph-input" min="0" step="any" value="0" oninput="hitungLive()" />
-                  <span class="ph-hint">Jika diisi lebih dari 0, angka ini dipakai sebagai total akhir. Jika 0/kosong, total = Harga All-In &times; Qty.</span>
+                  <span class="ph-hint">Jika diisi lebih dari 0, angka ini dipakai sebagai total akhir. Jika 0/kosong, total = Harga All-In × Qty.</span>
                 </div>
                 <div class="ph-field">
-                  <label>Total Keseluruhan (Qty &times; Harga All-In)</label>
+                  <label>Total Keseluruhan (Qty × Harga All-In)</label>
                   <input type="text" id="ph-total-qty-display" class="ph-input bg-slate-50 font-bold" value="Rp 0" readonly />
                   <span class="ph-hint">Nilai desial penuh digunakan saat menghitung, dibulatkan hanya saat ditampilkan.</span>
                 </div>
@@ -875,7 +875,7 @@
 
               <div class="ph-cost-block">
                 <div class="ph-cost-head">
-                  <span class="ph-cost-title">Branding &amp; Printing</span>
+                  <span class="ph-cost-title">Branding & Printing</span>
                   <button type="button" class="ph-btn ph-btn-ghost cursor-pointer" onclick="tambahBiayaRow('branding')">+ Tambah Rincian</button>
                 </div>
                 <div id="rows-branding"></div>
@@ -898,7 +898,7 @@
               </div>
 
               <div class="ph-cost-block">
-                <div class="ph-cost-head"><span class="ph-cost-title">Logistik Tim &amp; Sampel</span></div>
+                <div class="ph-cost-head"><span class="ph-cost-title">Logistik Tim & Sampel</span></div>
                 <div class="ph-fixed-grid">
                   <div class="ph-field">
                     <label for="ph-ongkir-tim">Ongkir Tim Produksi - DGS (pp)</label>
@@ -921,7 +921,7 @@
               <div class="ph-section-title">
                 <span class="ph-section-number">3</span>
                 <div>
-                  <h2 class="text-sm sm:text-base font-bold text-slate-900">Spesifikasi, PIC &amp; Foto Produk</h2>
+                  <h2 class="text-sm sm:text-base font-bold text-slate-900">Spesifikasi, PIC & Foto Produk</h2>
                   <p class="text-[11px] text-slate-500">Foto produk wajib di-upload dari perangkat, bukan URL/link.</p>
                 </div>
               </div>
@@ -944,8 +944,7 @@
                   <textarea id="ph-spesifikasi" name="spesifikasi" class="ph-input" rows="6" placeholder="Warna: Matte black
                   Ukuran: 20oz (270 ml)
                   Fitur: Triple-insulated stainless steel"></textarea>
-                  </div>
-               </div>
+                </div>
                 <div class="ph-field ph-col-span-2">
                   <label for="ph-keterangan">Keterangan / Catatan Tambahan</label>
                   <textarea id="ph-keterangan" name="keterangan" class="ph-input" rows="3" placeholder="Catatan khusus, ketentuan garansi, atau opsi sampel..."></textarea>
