@@ -4,7 +4,7 @@
     <%- include('partials/head') %>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Detail Harga Dasar - <%= barang.namaBarang %></title>
+    <title>Detail Harga Sampel - <%= barang.namaBarang %></title>
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -238,10 +238,7 @@
   <body>
     <div class="container">
       <a href="<%= backUrl %>" class="back-link">&larr; Kembali</a>
-      <h1
-        >Detail Harga Dasar:
-        <%= barang.namaBarang %></h1
-      >
+      <h1>Detail Harga Sampel: <%= barang.namaBarang %></h1>
 
       <% 
         let fotoList = [];
@@ -324,36 +321,30 @@
         </div>
 
         <div class="detail-group">
-          <div class="detail-label">Stok</div>
+          <div class="detail-label">Project</div>
+          <div class="detail-value"><strong><%= barang.projectNama || '-' %></strong></div>
+        </div>
+
+        <div class="detail-group">
+          <div class="detail-label">Qty</div>
           <div class="detail-value"><%= barang.qty %></div>
         </div>
 
         <div class="detail-group">
-          <div class="detail-label">Harga Satuan Dasar</div>
+          <div class="detail-label">Harga Satuan</div>
           <div class="detail-value">Rp <%= Number(barang.harga || 0).toLocaleString('id-ID') %></div>
         </div>
 
         <div class="detail-group">
-          <div class="detail-label">Final Price</div>
+          <div class="detail-label">Total Harga</div>
           <div class="detail-value" style="color: #7a1b1b; font-weight: 700"
-            >Rp <%= Number(barang.final || 0).toLocaleString('id-ID') %></div
+            >Rp <%= Number(barang.final || (barang.qty * barang.harga) || 0).toLocaleString('id-ID') %></div
           >
         </div>
 
         <div class="detail-group full-width">
           <div class="detail-label">Diinput Oleh</div>
           <div class="detail-value"><%= barang.diinputOleh || '-' %></div>
-        </div>
-
-        <div class="detail-group full-width">
-          <div class="detail-label">Status</div>
-          <div class="detail-value">
-            <span
-              class="badge <%= barang.status === 'Ready' ? 'badge-ready' : (barang.status === 'Pending' ? 'badge-pending' : 'badge-tidak') %>"
-            >
-              <%= barang.status || 'Pending' %>
-            </span>
-          </div>
         </div>
 
         <div class="detail-group full-width">

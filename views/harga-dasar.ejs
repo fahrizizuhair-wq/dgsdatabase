@@ -6,9 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Admin - Rincian Harga Sampel</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
       * {
         box-sizing: border-box;
@@ -74,254 +75,19 @@
         opacity: 1;
       }
 
-      /* SIDEBAR */
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 280px;
-        height: 100vh;
-        background: linear-gradient(180deg, #4d0e0e 0%, #7a1b1b 50%, #3e0b0b 100%);
-        color: white;
-        padding: 28px 22px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        z-index: 1000;
-        transform: translateX(-100%);
-        transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25);
-        overflow-y: auto;
-      }
-      .sidebar.active {
-        transform: translateX(0);
-      }
-
-      .sidebar-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 25px;
-        padding-bottom: 18px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-      }
-      .brand-wrap {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      .brand-logo-img {
-        width: 42px;
-        height: 42px;
-        object-fit: contain;
-        background: rgba(255, 255, 255, 0.12);
-        padding: 5px;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-      }
-      .brand-text h2 {
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: -0.3px;
-        line-height: 1.2;
-      }
-      .brand-text span {
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        color: rgba(255, 255, 255, 0.7);
-        font-weight: 600;
-      }
-      .close-sidebar-btn {
-        background: rgba(255, 255, 255, 0.1);
+      .toggle-btn {
+        font-size: 20px;
+        background: #ffffff;
+        color: rgb(0, 0, 0);
         border: none;
-        color: white;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        padding: 8px 14px;
+        border-radius: 6px;
         cursor: pointer;
-        font-size: 16px;
-        transition: all 0.2s;
-      }
-      .close-sidebar-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-      }
-
-      .sidebar-user-card {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 12px;
-        padding: 12px 14px;
-        margin-bottom: 22px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      .user-avatar-circle {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #c9933b 0%, #7a1b1b 100%);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 13px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      }
-      .sidebar-user-info h4 {
-        font-size: 13px;
-        font-weight: 600;
-        color: white;
-      }
-      .sidebar-user-info span {
+        margin-bottom: 20px;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        font-size: 11px;
-        color: #86efac;
-        font-weight: 500;
-      }
-      .sidebar-user-info span::before {
-        content: '';
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #22c55e;
-        box-shadow: 0 0 6px #22c55e;
-      }
-
-      .nav-label {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        color: rgba(255, 255, 255, 0.5);
-        margin: 10px 0 10px 8px;
-      }
-      .nav-menu {
-        list-style: none;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      .nav-item a {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 11px 14px;
-        color: rgba(255, 255, 255, 0.82);
-        text-decoration: none;
-        border-radius: 10px;
-        font-weight: 500;
-        font-size: 13.5px;
-        transition: all 0.2s ease;
-      }
-      .nav-item a svg {
-        width: 18px;
-        height: 18px;
-        opacity: 0.8;
-        transition: transform 0.2s;
-      }
-      .nav-item a:hover {
-        background-color: rgba(255, 255, 255, 0.12);
-        color: #ffffff;
-        transform: translateX(3px);
-      }
-      .nav-item a:hover svg {
-        opacity: 1;
-        transform: scale(1.1);
-      }
-      .nav-item.active a {
-        background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%);
-        color: #ffffff;
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        border-left: 3px solid #f87171;
-      }
-      .nav-item.active a svg {
-        opacity: 1;
-      }
-
-      /* DROPDOWN SIDEBAR */
-      .nav-item.dropdown {
-        position: relative;
-      }
-      .dropdown-toggle {
-        display: flex !important;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-      }
-      .dropdown-toggle-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      .dropdown-toggle .arrow {
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        font-size: 11px;
-        opacity: 0.8;
-      }
-      .dropdown-menu {
-        list-style: none;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        background-color: rgba(50, 10, 10, 0.45);
-        border-radius: 10px;
-        margin-top: 4px;
-        padding-left: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.06);
-      }
-      .dropdown-menu li a {
-        padding: 9px 14px;
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.75);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .dropdown-menu li a:hover {
-        color: #ffffff;
-        background-color: rgba(255, 255, 255, 0.08);
-      }
-      .nav-item.dropdown.active .dropdown-menu {
-        max-height: 200px;
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
-      .nav-item.dropdown.active .arrow {
-        transform: rotate(180deg);
-      }
-
-      .sidebar-footer {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 25px;
-        padding-top: 18px;
-        border-top: 1px solid rgba(255, 255, 255, 0.12);
-      }
-      .btn-bottom {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        color: rgba(255, 255, 255, 0.8);
-        text-decoration: none;
-        font-size: 13.5px;
-        font-weight: 500;
-        border-radius: 8px;
-        transition: all 0.2s;
-      }
-      .btn-bottom:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       }
 
       /* MAIN CONTENT */
@@ -331,47 +97,306 @@
         width: 100%;
         overflow-x: auto;
       }
+      .header-section {
+        margin-bottom: 22px;
+      }
       .header-section h1 {
         font-size: 28px;
-        font-weight: 700;
+        font-weight: 800;
         margin-bottom: 6px;
         color: #ffffff;
       }
       .header-section p {
         color: #ffffff;
+        font-size: 14px;
+        opacity: 0.95;
       }
 
-      .cards-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 20px;
-        margin: 25px 0;
+      .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #ffffff;
+        color: #7a1b1b;
+        padding: 9px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 13px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        transition: all 0.2s ease;
+        margin-bottom: 16px;
       }
-      .card {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 20px;
+      .btn-back:hover {
+        background: #fff5f5;
+        transform: translateX(-3px);
+      }
+
+      .project-info-banner {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid #e2e8f0;
+        border-left: 5px solid #7a1b1b;
         border-radius: 12px;
+        padding: 18px 22px;
+        margin-bottom: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      }
+      .project-info-title h2 {
+        font-size: 19px;
+        font-weight: 800;
+        color: #0f172a;
+      }
+      .project-info-title p {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 3px;
+      }
+      .project-info-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .project-chip {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 7px 13px;
+        border-radius: 8px;
+        font-size: 12px;
+        color: #475569;
+      }
+      .project-chip strong {
+        color: #7a1b1b;
+        margin-left: 5px;
+      }
+
+      /* PROJECT FORM CARD */
+      .project-form-card {
+        background: rgba(255, 255, 255, 0.96);
         border: 1px solid #eef0f4;
-        backdrop-filter: blur(5px);
-        min-height: 120px;
+        border-radius: 14px;
+        padding: 24px;
+        margin-bottom: 26px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      }
+      .project-form-card h2 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #7a1b1b;
+        margin-bottom: 4px;
+      }
+      .project-form-card p {
+        font-size: 12.5px;
+        color: #64748b;
+        margin-bottom: 18px;
+      }
+      .project-form-grid {
+        display: grid;
+        grid-template-columns: 2fr 1.3fr 1.3fr auto;
+        gap: 14px;
+        align-items: flex-end;
+      }
+      .form-field {
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        gap: 6px;
       }
-      .card-title {
-        font-size: 14px;
-        color: #666;
-        margin-bottom: 8px;
-      }
-      .card-value {
-        font-size: 26px;
+      .form-field label {
+        font-size: 12.5px;
         font-weight: 700;
+        color: #334155;
+      }
+      .form-field input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 13.5px;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s;
+        background: #ffffff;
+      }
+      .form-field input:focus {
+        border-color: #7a1b1b;
+      }
+      .btn-submit-project {
+        background: #7a1b1b;
+        color: white;
+        border: none;
+        padding: 11px 22px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13.5px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+        white-space: nowrap;
+        height: 42px;
+      }
+      .btn-submit-project:hover {
+        background: #5c1414;
+      }
+
+      /* PROJECT CARDS GRID */
+      .project-cards-section {
+        margin-top: 10px;
+      }
+      .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+      .section-heading h2 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #ffffff;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      }
+      .section-heading span {
+        background: rgba(255,255,255,0.25);
+        color: #ffffff;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .project-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+      .project-box-card {
+        background: rgba(255, 255, 255, 0.98);
+        border: 1px solid #e2e8f0;
+        border-top: 5px solid #7a1b1b;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .project-box-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+      }
+      .project-box-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .project-box-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.35;
+      }
+      .project-box-body {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        margin-bottom: 16px;
+        padding: 13px 15px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #f1f5f9;
+      }
+      .project-box-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12.5px;
+      }
+      .project-box-row span {
+        color: #64748b;
+      }
+      .project-box-row strong {
+        color: #1e293b;
+        font-weight: 700;
+      }
+      .project-box-row.kasbon-row {
+        border-top: 1px dashed #cbd5e1;
+        padding-top: 9px;
+        margin-top: 3px;
+      }
+      .project-box-row.kasbon-row strong {
         color: #7a1b1b;
+        font-size: 15px;
+        font-weight: 800;
       }
-      .card-value1 {
-        font-size: 26px;
+      .project-box-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-open-project {
+        flex: 1;
+        background: #7a1b1b;
+        color: white;
+        text-align: center;
+        padding: 9px 14px;
+        border-radius: 8px;
+        text-decoration: none;
         font-weight: 700;
-        color: #1fbc53;
+        font-size: 13px;
+        transition: background 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .btn-open-project:hover {
+        background: #5c1414;
+      }
+      .btn-project-edit {
+        background: #e2e8f0;
+        color: #334155;
+        border: none;
+        padding: 9px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .btn-project-edit:hover {
+        background: #cbd5e1;
+      }
+      .btn-project-delete {
+        background: #fee2e2;
+        color: #991b1b;
+        border: none;
+        padding: 9px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .btn-project-delete:hover {
+        background: #fecaca;
+      }
+      .project-empty-state {
+        background: rgba(255,255,255,0.95);
+        border-radius: 12px;
+        padding: 40px 20px;
+        text-align: center;
+        color: #64748b;
+        font-size: 14px;
+        border: 1px dashed #cbd5e1;
       }
 
       /* TABLE STYLING */
@@ -412,13 +437,17 @@
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
+        font-size: 13.5px;
+      }
+      .btn-add:hover {
+        background-color: #5c1414;
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
         text-align: left;
-        min-width: 1000px;
+        min-width: 950px;
       }
       th,
       td {
@@ -430,6 +459,7 @@
       th {
         background-color: #f8f9fa;
         color: #555;
+        font-weight: 700;
       }
 
       .item-row {
@@ -440,31 +470,10 @@
       }
 
       .col-keterangan {
-        max-width: 150px;
+        max-width: 180px;
         white-space: normal;
         word-wrap: break-word;
         overflow-wrap: break-word;
-      }
-
-      /* BADGES STATUS */
-      .badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 600;
-      }
-      .badge-setuju {
-        background-color: #e6f4ea;
-        color: #137333;
-      }
-      .badge-pending {
-        background-color: #fef7e0;
-        color: #b06000;
-      }
-      .badge-tidak {
-        background-color: #fce8e6;
-        color: #c5221f;
       }
 
       .action-buttons {
@@ -517,7 +526,7 @@
         background: white;
         padding: 30px;
         border-radius: 12px;
-        width: 450px;
+        width: 480px;
         max-height: 85vh;
         overflow-y: auto;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -539,10 +548,15 @@
         border-radius: 6px;
         font-family: inherit;
       }
+      .form-group input[readonly] {
+        background: #f1f5f9;
+        color: #7a1b1b;
+        font-weight: 700;
+      }
 
       textarea.input-lg {
         width: 100%;
-        min-height: 100px;
+        min-height: 90px;
         padding: 10px;
         font-size: 13px;
         font-family: inherit;
@@ -571,224 +585,117 @@
         font-weight: 600;
       }
 
-      .toggle-btn {
-        font-size: 20px;
-        background: #ffffff;
-        color: rgb(0, 0, 0);
-        border: none;
-        padding: 8px 14px;
-        border-radius: 6px;
-        cursor: pointer;
-        margin-bottom: 20px;
+      /* RESPONSIF */
+      @media (max-width: 900px) {
+        .project-form-grid {
+          grid-template-columns: 1fr;
+        }
       }
-
-      /* ==========================================
-   RESPONSIF MOBILE (Layar di bawah 768px)
-   ========================================== */
       @media (max-width: 768px) {
-        /* 1. Sesuaikan Padding Kontainer Utama */
-        .header-container,
-        .stats-grid,
-        .main-box,
-        .middle-grid {
-          padding-left: 16px !important;
-          padding-right: 16px !important;
-          margin-left: 0 !important;
-          margin-right: 0 !important;
+        .main-content {
+          padding: 16px !important;
         }
-
-        /* 2. Kartu Statistik Menjadi 1 Kolom ke Bawah */
-        .stats-grid,
-        .middle-grid {
-          grid-template-columns: 1fr !important; /* Bertumpuk vertikal */
-          gap: 12px !important;
+        .table-container {
+          padding: 16px !important;
+          overflow: visible !important;
         }
-
-        /* 3. Banner Salam / Top Header */
-        .box-header,
-        .actions-toolbar {
-          flex-direction: column !important;
-          align-items: stretch !important;
-          gap: 10px !important;
+        #itemTable {
+          min-width: 0 !important;
+          width: 100% !important;
+          border: 0 !important;
+          background: transparent !important;
         }
-
-        .search-input {
-          width: 100% !important; /* Input pencarian memenuhi layar */
+        #itemTable thead {
+          display: none !important;
         }
-
-        /* 4. Tabel Agar Bisa Di-scroll Horizontal di HP */
-        .main-box {
-          overflow-x: auto !important; /* Mencegah tabel merusak lebar layar */
+        #itemTable,
+        #itemTable tbody {
+          display: block !important;
+          width: 100% !important;
         }
-
-        table {
-          min-width: 600px; /* Menjaga ukuran isi tabel tetap terbaca */
+        #itemTable tbody tr {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          grid-template-areas:
+            "code date"
+            "title title"
+            "price price"
+            "actions actions";
+          gap: 4px 12px;
+          align-items: center;
+          margin: 0 0 10px;
+          padding: 12px 14px;
+          background: #ffffff;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
         }
-
-        /* 5. Ukuran Judul & Teks yang Lebih Pas di HP */
-        h1 {
-          font-size: 22px !important;
+        #itemTable tbody td {
+          display: block;
+          padding: 0;
+          border: 0 !important;
+          background: transparent;
+          font-size: 13px;
+          line-height: 1.4;
+          color: #475569;
+          text-align: left !important;
         }
-
-        .stat-value {
-          font-size: 22px !important;
+        #itemTable tbody td[colspan] {
+          display: block !important;
+          grid-column: 1 / -1 !important;
+          padding: 18px 8px !important;
+          text-align: center !important;
+        }
+        #itemTable tbody td:nth-child(1) {
+          grid-area: date;
+          justify-self: end;
+          font-size: 11px;
+          color: #94a3b8;
+        }
+        #itemTable tbody td:nth-child(2) {
+          grid-area: code;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.3px;
+          color: #94a3b8;
+        }
+        #itemTable tbody td:nth-child(3) {
+          grid-area: title;
+          font-size: 14.5px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+        #itemTable tbody td:nth-child(8) {
+          grid-area: price;
+          font-size: 14px;
+          font-weight: 800;
+          color: #7a1b1b;
+          white-space: nowrap;
+        }
+        #itemTable tbody td:nth-child(10) {
+          grid-area: actions;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          align-items: center;
+          justify-content: flex-end;
+          margin-top: 6px;
+        }
+        #itemTable tbody td:nth-child(4),
+        #itemTable tbody td:nth-child(5),
+        #itemTable tbody td:nth-child(6),
+        #itemTable tbody td:nth-child(7),
+        #itemTable tbody td:nth-child(9) {
+          display: none;
         }
       }
     </style>
     <link rel="stylesheet" href="/css/stat-cards.css" />
-
-  <style id="mobile-card-view">
-    /* ============================================================
-       TAMPILAN KARTU MOBILE — HANYA UNTUK LAYAR <= 768px
-       Desktop/laptop tidak berubah.
-       ============================================================ */
-    @media (max-width: 768px) {
-      .main-content {
-        padding: 16px !important;
-      }
-      .main-box {
-        padding: 16px !important;
-        overflow: visible !important;
-      }
-      .table-responsive-container,
-      .table-responsive-wrapper,
-      .table-responsive {
-        overflow: visible !important;
-      }
-      
-      /* dasar kartu */
-      #itemTable {
-        min-width: 0 !important;
-        width: 100% !important;
-        border: 0 !important;
-        background: transparent !important;
-      }
-      #itemTable thead {
-        display: none !important;
-      }
-      #itemTable,
-      #itemTable tbody {
-        display: block !important;
-        width: 100% !important;
-      }
-      #itemTable tbody tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 3px 12px;
-        align-items: center;
-        margin: 0 0 10px;
-        padding: 12px 14px;
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-      }
-      #itemTable tbody td {
-        display: block;
-        padding: 0;
-        border: 0 !important;
-        background: transparent;
-        font-size: 13px;
-        line-height: 1.4;
-        color: #475569;
-        text-align: left !important;
-        vertical-align: middle;
-        white-space: normal;
-      }
-      #itemTable tbody td[colspan] {
-        display: block !important;
-        grid-column: 1 / -1 !important;
-        grid-row: 1 / span 4 !important;
-        padding: 18px 8px !important;
-        text-align: center !important;
-      }
-      #itemTable tbody td .badge {
-        font-size: 10.5px;
-        padding: 4px 9px;
-      }
-      /* tombol aksi kompak */
-      #itemTable tbody td .btn-detail,
-      #itemTable tbody td .btn-edit,
-      #itemTable tbody td .btn-delete,
-      #itemTable tbody td .btn-action,
-      #itemTable tbody td .btn-sub-action {
-        margin: 0 !important;
-        padding: 6px 10px !important;
-        font-size: 11.5px !important;
-        line-height: 1.2;
-        border-radius: 6px;
-        white-space: nowrap;
-      }
-      #itemTable tbody td form {
-        margin: 0 !important;
-        display: inline-flex !important;
-      }
-      
-  
-      
-      #itemTable tbody tr {
-        grid-template-areas:
-          "code status"
-          "title title"
-          "price date"
-          "actions actions";
-      }
-      #itemTable tbody td:nth-child(1) {
-        grid-area: date;
-        justify-self: end;
-        font-size: 11px;
-        color: #94a3b8;
-      }
-      #itemTable tbody td:nth-child(2) {
-        grid-area: code;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
-        color: #94a3b8;
-      }
-      #itemTable tbody td:nth-child(3) {
-        grid-area: title;
-        font-size: 14.5px;
-        font-weight: 700;
-        color: #0f172a;
-      }
-      #itemTable tbody td:nth-child(9) {
-        grid-area: price;
-        font-size: 14px;
-        font-weight: 800;
-        color: #7a1b1b;
-        white-space: nowrap;
-      }
-      #itemTable tbody td:nth-child(11) {
-        grid-area: status;
-        justify-self: end;
-        align-self: start;
-      }
-      #itemTable tbody td:nth-child(12) {
-        grid-area: actions;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        align-items: center;
-        justify-content: flex-end;
-      }
-      #itemTable tbody td:nth-child(4),
-      #itemTable tbody td:nth-child(5),
-      #itemTable tbody td:nth-child(6),
-      #itemTable tbody td:nth-child(7),
-      #itemTable tbody td:nth-child(8),
-      #itemTable tbody td:nth-child(10) {
-        display: none;
-      }
-  
-    }
-  </style>
-
-</head>
+  </head>
   <body>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-     <%- include('partials/sidebar-admin', { activePage: 'harga-dasar' }) %>
+    <%- include('partials/sidebar-admin', { activePage: 'harga-dasar' }) %>
 
     <main class="main-content">
       <header class="header-section">
@@ -808,19 +715,278 @@
             <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
         </button>
-        <h1>Rincian Harga Sampel</h1>
-        <p>Kelola kalkulasi harga barang dan material dasar.</p>
+
+        <% if (!projectAktif) { %>
+        <h1>Rincian Harga Sampel &bull; Project</h1>
+        <p>Pilih project untuk melihat rincian harga sampel atau tambahkan project baru.</p>
+        <% } else { %>
+        <a href="/harga-dasar" class="btn-back">
+          <i class="fa-solid fa-arrow-left"></i> &larr; Kembali ke Daftar Project
+        </a>
+        <h1><%= projectAktif.namaProject %></h1>
+        <p>Kelola daftar item sampel, harga satuan, dan kalkulasi total harga untuk project ini.</p>
+        <% } %>
       </header>
 
-      <%
-  var _hargaItems = (typeof items !== 'undefined' && items) ? items : [];
-  var _hargaReady = _hargaItems.filter(function (i) { return i.status === 'Ready'; }).length;
-  var _hargaPending = _hargaItems.filter(function (i) { return i.status === 'Pending'; }).length;
-%>
+      <% if (!projectAktif) { %>
+      <!-- ============================================================
+           MODE 1: LANDING VIEW (DAFTAR PROJECT)
+           ============================================================ -->
+
+      <!-- KARTU STATISTIK PROJECT -->
       <section class="card-grid">
         <div class="stat-card card-blue">
           <div class="card-header">
-            <span class="card-title">Total Item Harga Sampel</span>
+            <span class="card-title">Total Project</span>
+            <div class="icon-wrapper icon-blue">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="card-body">
+            <span class="card-value"><%= typeof totalProject !== 'undefined' ? totalProject : 0 %></span>
+            <span class="card-unit">Project</span>
+          </div>
+          <div class="card-footer">
+            <span class="text-blue">Terdaftar</span>
+            <span>Project Sampel</span>
+          </div>
+        </div>
+
+        <div class="stat-card card-green">
+          <div class="card-header">
+            <span class="card-title">Total Qty</span>
+            <div class="icon-wrapper icon-green">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="card-body">
+            <span class="card-value"><%= typeof totalQtyAll !== 'undefined' ? totalQtyAll : 0 %></span>
+            <span class="card-unit">Qty</span>
+          </div>
+          <div class="card-footer">
+            <span class="text-green">Seluruh Project</span>
+            <span>Item Sampel</span>
+          </div>
+        </div>
+
+        <div class="stat-card card-red">
+          <div class="card-header">
+            <span class="card-title">Estimasi Total Kasbon</span>
+            <div class="icon-wrapper icon-red">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="card-body">
+            <span class="card-value">Rp <%= Number(typeof estimasiTotalKasbonAll !== 'undefined' ? estimasiTotalKasbonAll : 0).toLocaleString('id-ID') %></span>
+          </div>
+          <div class="card-footer">
+            <span class="text-red">Akumulasi Kasbon</span>
+            <span>Total Sampel + Opr + Trf</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- FORM TAMBAH PROJECT BARU -->
+      <section class="project-form-card">
+        <h2><i class="fa-solid fa-folder-plus"></i> Tambah Project Baru</h2>
+        <p>Input nama project beserta biaya operasional dan biaya transfer beda bank untuk memulai penginputan data sampel.</p>
+        <form action="/harga-dasar/project/add" method="POST">
+          <div class="project-form-grid">
+            <div class="form-field">
+              <label for="inputNamaProject">Nama Project *</label>
+              <input
+                type="text"
+                id="inputNamaProject"
+                name="namaProject"
+                placeholder="Contoh: Merchandise Own Channel 2026"
+                required
+              />
+            </div>
+            <div class="form-field">
+              <label for="inputBiayaOperasional">Biaya Operasional (Rp)</label>
+              <input
+                type="number"
+                id="inputBiayaOperasional"
+                name="biayaOperasional"
+                min="0"
+                value="0"
+                placeholder="0"
+                required
+              />
+            </div>
+            <div class="form-field">
+              <label for="inputBiayaTransfer">Biaya Transfer Beda Bank (Rp)</label>
+              <input
+                type="number"
+                id="inputBiayaTransfer"
+                name="biayaTransferBedaBank"
+                min="0"
+                value="0"
+                placeholder="0"
+                required
+              />
+            </div>
+            <button type="submit" class="btn-submit-project">
+              <i class="fa-solid fa-plus"></i> Simpan Project
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- DAFTAR CARD PROJECT -->
+      <section class="project-cards-section">
+        <div class="section-heading">
+          <h2>Daftar Project Harga Sampel</h2>
+          <span><%= projects ? projects.length : 0 %> Project</span>
+        </div>
+
+        <% if (!projects || projects.length === 0) { %>
+        <div class="project-empty-state">
+          <i class="fa-regular fa-folder-open" style="font-size: 32px; margin-bottom: 10px; color: #94a3b8; display: block;"></i>
+          Belum ada project harga sampel. Silakan tambahkan project baru melalui form di atas.
+        </div>
+        <% } else { %>
+        <div class="project-card-grid">
+          <% projects.forEach(function(p) { %>
+          <div class="project-box-card">
+            <div>
+              <div class="project-box-header">
+                <div class="project-box-title"><%= p.namaProject %></div>
+                <div class="project-box-badge"><%= p.totalItem || 0 %> Item</div>
+              </div>
+              <div class="project-box-body">
+                <div class="project-box-row">
+                  <span>Biaya Operasional:</span>
+                  <strong>Rp <%= Number(p.biayaOperasional || 0).toLocaleString('id-ID') %></strong>
+                </div>
+                <div class="project-box-row">
+                  <span>Biaya Trf Beda Bank:</span>
+                  <strong>Rp <%= Number(p.biayaTransferBedaBank || 0).toLocaleString('id-ID') %></strong>
+                </div>
+                <div class="project-box-row">
+                  <span>Total Qty Item:</span>
+                  <strong><%= p.totalQty || 0 %> Qty</strong>
+                </div>
+                <div class="project-box-row kasbon-row">
+                  <span>Estimasi Kasbon:</span>
+                  <strong>Rp <%= Number(p.estimasiTotalKasbon || 0).toLocaleString('id-ID') %></strong>
+                </div>
+              </div>
+            </div>
+            <div class="project-box-actions">
+              <a href="/harga-dasar/project/<%= p._id %>" class="btn-open-project">
+                Buka Project <i class="fa-solid fa-arrow-right"></i>
+              </a>
+              <button
+                type="button"
+                class="btn-project-edit"
+                data-id="<%= p._id %>"
+                data-nama="<%= p.namaProject %>"
+                data-opr="<%= p.biayaOperasional || 0 %>"
+                data-trf="<%= p.biayaTransferBedaBank || 0 %>"
+                onclick="openEditProjectModal(this)"
+                title="Edit Project"
+              >
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <form
+                action="/harga-dasar/project/delete/<%= p._id %>"
+                method="POST"
+                style="margin: 0"
+                onsubmit="return confirm('Hapus project <%= p.namaProject %> beserta seluruh data item sampel di dalamnya?');"
+              >
+                <button type="submit" class="btn-project-delete" title="Hapus Project">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+        <% } %>
+      </section>
+
+      <!-- MODAL EDIT PROJECT -->
+      <div class="modal" id="editProjectModal">
+        <div class="modal-content">
+          <h3 style="margin-bottom: 15px; color: #7a1b1b">Edit Project</h3>
+          <form id="editProjectForm" action="" method="POST">
+            <div class="form-group">
+              <label>Nama Project *</label>
+              <input type="text" id="editNamaProject" name="namaProject" required />
+            </div>
+            <div class="form-group">
+              <label>Biaya Operasional (Rp)</label>
+              <input type="number" id="editBiayaOperasional" name="biayaOperasional" min="0" required />
+            </div>
+            <div class="form-group">
+              <label>Biaya Transfer Beda Bank (Rp)</label>
+              <input type="number" id="editBiayaTransfer" name="biayaTransferBedaBank" min="0" required />
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" onclick="closeEditProjectModal()">Batal</button>
+              <button type="submit" class="btn-add">Simpan Perubahan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <% } else { %>
+      <!-- ============================================================
+           MODE 2: PROJECT VIEW (DATA TABEL ITEM SAMPEL)
+           ============================================================ -->
+
+      <!-- BANNER DETAIL BIAYA PROJECT -->
+      <div class="project-info-banner">
+        <div class="project-info-title">
+          <h2><%= projectAktif.namaProject %></h2>
+          <p>Estimasi Total Kasbon = Seluruh Total Harga Sampel + Biaya Operasional + Biaya Transfer Beda Bank</p>
+        </div>
+        <div class="project-info-chips">
+          <div class="project-chip">
+            Biaya Operasional: <strong>Rp <%= Number(projectAktif.biayaOperasional || 0).toLocaleString('id-ID') %></strong>
+          </div>
+          <div class="project-chip">
+            Biaya Transfer: <strong>Rp <%= Number(projectAktif.biayaTransferBedaBank || 0).toLocaleString('id-ID') %></strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- KARTU STATISTIK PROJECT AKTIF -->
+      <section class="card-grid">
+        <div class="stat-card card-blue">
+          <div class="card-header">
+            <span class="card-title">Total Item Sampel</span>
             <div class="icon-wrapper icon-blue">
               <svg
                 viewBox="0 0 24 24"
@@ -840,13 +1006,14 @@
             <span class="card-unit">Item</span>
           </div>
           <div class="card-footer">
-            <span class="text-blue">Data Terbaru</span>
-            <span>Harga Material</span>
+            <span class="text-blue">Data Sampel</span>
+            <span>Project Ini</span>
           </div>
         </div>
+
         <div class="stat-card card-green">
           <div class="card-header">
-            <span class="card-title">Status Ready</span>
+            <span class="card-title">Total Qty</span>
             <div class="icon-wrapper icon-green">
               <svg
                 viewBox="0 0 24 24"
@@ -856,23 +1023,25 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
               </svg>
             </div>
           </div>
           <div class="card-body">
-            <span class="card-value"><%= typeof _hargaReady !== 'undefined' ? _hargaReady : 0 %></span>
-            <span class="card-unit">Item</span>
+            <span class="card-value"><%= typeof totalQty !== 'undefined' ? totalQty : 0 %></span>
+            <span class="card-unit">Qty</span>
           </div>
           <div class="card-footer">
-            <span class="text-green">Siap Digunakan</span>
-            <span>Status Valid</span>
+            <span class="text-green">Akumulasi Qty</span>
+            <span>Tabel Sampel</span>
           </div>
         </div>
+
         <div class="stat-card card-red">
           <div class="card-header">
-            <span class="card-title">Status Pending</span>
+            <span class="card-title">Estimasi Total Kasbon</span>
             <div class="icon-wrapper icon-red">
               <svg
                 viewBox="0 0 24 24"
@@ -888,19 +1057,19 @@
             </div>
           </div>
           <div class="card-body">
-            <span class="card-value"><%= typeof _hargaPending !== 'undefined' ? _hargaPending : 0 %></span>
-            <span class="card-unit">Item</span>
+            <span class="card-value">Rp <%= Number(typeof estimasiTotalKasbon !== 'undefined' ? estimasiTotalKasbon : 0).toLocaleString('id-ID') %></span>
           </div>
           <div class="card-footer">
-            <span class="text-red">Menunggu Review</span>
-            <span>Dalam Peninjauan</span>
+            <span class="text-red">Total Sampel + Opr + Trf</span>
+            <span>Project Ini</span>
           </div>
         </div>
       </section>
 
+      <!-- TABEL DATA ITEM SAMPEL -->
       <section class="table-container">
         <div class="table-header">
-          <h2>Daftar Harga Barang</h2>
+          <h2>Daftar Harga Sampel</h2>
           <input
             type="text"
             id="searchInput"
@@ -910,7 +1079,7 @@
           />
           <button class="btn-add" onclick="openModal()">+ Tambah Harga Sampel</button>
           <a
-            href="/export-harga-dasar-excel"
+            href="/export-harga-dasar-excel?projectId=<%= projectAktif._id %>"
             style="
               padding: 10px 18px;
               background-color: #1d6f42;
@@ -938,52 +1107,33 @@
               <th>Merk</th>
               <th>Spesifikasi</th>
               <th>Qty</th>
-              <th>Harga</th>
               <th>Harga Satuan</th>
-              <th>Total</th>
+              <th>Total Harga</th>
               <th>Waktu Produksi</th>
-              <th>Status</th>
               <th style="text-align: center">Aksi</th>
             </tr>
           </thead>
           <tbody>
             <% if (!items || items.length === 0) { %>
             <tr>
-              <td colspan="12" style="text-align: center; padding: 20px; color: #888">Belum ada data harga sampel.</td>
+              <td colspan="10" style="text-align: center; padding: 25px; color: #888">
+                Belum ada data harga sampel pada project ini. Klik "+ Tambah Harga Sampel" di atas.
+              </td>
             </tr>
             <% } else { %>
             <% items.forEach(function(item) { %>
             <tr class="item-row">
               <td><%= item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-' %></td>
-              <td
-                ><strong><%= item.idBarang %></strong></td
-              >
+              <td><strong><%= item.idBarang %></strong></td>
               <td><%= item.namaBarang %></td>
               <td><%= item.namaMerk || '-' %></td>
               <td><%= item.spesifikasi || '-' %></td>
               <td><%= item.qty %></td>
-              <td
-                >Rp
-                <%= Number(item.harga || 0).toLocaleString('id-ID') %></td
-              >
-              <td
-                ><strong
-                  >Rp
-                  <%= Number(item.harga || 0).toLocaleString('id-ID') %></strong
-                ></td
-              >
-              <td><strong style="color: #7a1b1b">Rp <%= Number(item.final || 0).toLocaleString('id-ID') %></strong></td>
+              <td>Rp <%= Number(item.harga || 0).toLocaleString('id-ID') %></td>
+              <td><strong style="color: #7a1b1b">Rp <%= Number(item.final || (item.qty * item.harga) || 0).toLocaleString('id-ID') %></strong></td>
               <td class="col-keterangan"><%= item.keterangan || '-' %></td>
-              <td>
-                <span
-                  class="badge <%= item.status === 'Ready' ? 'badge-setuju' : (item.status === 'Pending' ? 'badge-pending' : 'badge-tidak') %>"
-                >
-                  <%= item.status || 'Pending' %>
-                </span>
-              </td>
               <td style="text-align: center">
                 <div class="action-buttons">
-                  <!-- TOMBOL DETAIL DITAMBAHKAN DI SINI -->
                   <a
                     href="/harga-dasar/detail/<%= item._id %>"
                     style="
@@ -992,12 +1142,12 @@
                       color: white;
                       border-radius: 6px;
                       text-decoration: none;
-                      font-size: 13px;
+                      font-size: 12px;
+                      font-weight: 600;
                       display: inline-flex;
                       align-items: center;
                     "
-                    >Detail</a
-                  >
+                  >Detail</a>
 
                   <button
                     type="button"
@@ -1010,12 +1160,10 @@
                     data-spesifikasi="<%= item.spesifikasi || '' %>"
                     data-qty="<%= item.qty %>"
                     data-harga="<%= item.harga %>"
-                    data-final="<%= item.final || 0 %>"
+                    data-final="<%= item.final || (item.qty * item.harga) || 0 %>"
                     data-keterangan="<%= item.keterangan || '' %>"
-                    data-status="<%= item.status %>"
                     onclick="openEditModalFromBtn(this)"
-                    >Edit</button
-                  >
+                  >Edit</button>
 
                   <form
                     action="/harga-dasar/delete/<%= item._id %>"
@@ -1033,153 +1181,87 @@
           </tbody>
         </table>
       </section>
+
+      <!-- MODAL TAMBAH HARGA SAMPEL -->
+      <div class="modal" id="itemModal">
+        <div class="modal-content">
+          <h3 style="margin-bottom: 15px; color: #7a1b1b">Tambah Harga Sampel Baru</h3>
+          <form action="/harga-dasar/add" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="projectId" value="<%= projectAktif._id %>" />
+            <div class="form-group"><label>Tanggal</label><input type="date" name="tanggal" required /></div>
+            <div class="form-group"><label>ID Barang</label><input type="text" name="idBarang" placeholder="BRG-001" required /></div>
+            <div class="form-group"><label>Nama Barang</label><input type="text" name="namaBarang" placeholder="Masukan Nama Barang" required /></div>
+            <div class="form-group"><label>Merk</label><input type="text" name="namaMerk" placeholder="Nama Merk" required /></div>
+            <div class="form-group"><label>Spesifikasi</label><input type="text" name="spesifikasi" placeholder="Ukuran / Bahan" /></div>
+            <div class="form-group">
+              <label>Qty</label>
+              <input type="number" id="addQty" name="qty" value="1" min="1" required oninput="hitungAddTotal()" />
+            </div>
+            <div class="form-group">
+              <label>Harga Satuan (Rp)</label>
+              <input type="number" id="addHarga" name="harga" placeholder="0" min="0" required oninput="hitungAddTotal()" />
+            </div>
+            <div class="form-group">
+              <label>Total Harga (Otomatis: Qty &times; Harga Satuan)</label>
+              <input type="number" id="addFinal" name="final" placeholder="0" readonly />
+            </div>
+            <div class="form-group">
+              <label>Waktu Produksi / Keterangan</label>
+              <textarea name="keterangan" class="input-lg" placeholder="Catatan waktu produksi atau keterangan tambahan..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Foto Vendor / Produk (Opsional, bisa pilih lebih dari satu)</label>
+              <input type="file" name="foto" accept="image/*" multiple />
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+              <button type="submit" class="btn-add">Simpan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- MODAL EDIT HARGA SAMPEL -->
+      <div class="modal" id="editItemModal">
+        <div class="modal-content">
+          <h3 style="margin-bottom: 15px; color: #7a1b1b">Edit Harga Sampel</h3>
+          <form id="editForm" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group"><label>Tanggal</label><input type="date" id="editTanggal" name="tanggal" required /></div>
+            <div class="form-group"><label>ID Barang</label><input type="text" id="editIdBarang" name="idBarang" required /></div>
+            <div class="form-group"><label>Nama Barang</label><input type="text" id="editNamaBarang" name="namaBarang" required /></div>
+            <div class="form-group"><label>Merk</label><input type="text" id="editNamaMerk" name="namaMerk" required /></div>
+            <div class="form-group"><label>Spesifikasi</label><input type="text" id="editSpesifikasi" name="spesifikasi" /></div>
+            <div class="form-group">
+              <label>Qty</label>
+              <input type="number" id="editQty" name="qty" min="1" required oninput="hitungEditTotal()" />
+            </div>
+            <div class="form-group">
+              <label>Harga Satuan (Rp)</label>
+              <input type="number" id="editHarga" name="harga" min="0" required oninput="hitungEditTotal()" />
+            </div>
+            <div class="form-group">
+              <label>Total Harga (Otomatis: Qty &times; Harga Satuan)</label>
+              <input type="number" id="editFinal" name="final" readonly />
+            </div>
+            <div class="form-group">
+              <label>Waktu Produksi / Keterangan</label>
+              <textarea id="editKeterangan" name="keterangan" class="input-lg"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Foto Vendor / Produk (Opsional, bisa pilih lebih dari satu)</label>
+              <input type="file" name="foto" accept="image/*" multiple />
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
+              <button type="submit" class="btn-add">Simpan Perubahan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <% } %>
     </main>
 
-    <!-- MODAL TAMBAH HARGA DASAR -->
-    <div class="modal" id="itemModal">
-      <div class="modal-content">
-        <h3 style="margin-bottom: 15px; color: #7a1b1b">Tambah Harga Sampel Baru</h3>
-
-        <!-- TAMBAHKAN enctype DI SINI -->
-        <form action="/harga-dasar/add" method="POST" enctype="multipart/form-data">
-          <div class="form-group"><label>Tanggal</label><input type="date" name="tanggal" required /></div>
-          <div class="form-group"
-            ><label>ID Barang</label><input type="text" name="idBarang" placeholder="BRG-008" required
-          /></div>
-          <div class="form-group"
-            ><label>Nama Barang</label><input type="text" name="namaBarang" placeholder="Masukan Nama Barang" required
-          /></div>
-          <div class="form-group"
-            ><label>Merk</label><input type="text" name="namaMerk" placeholder="Nama Merk" required
-          /></div>
-          <div class="form-group"
-            ><label>Spesifikasi</label><input type="text" name="spesifikasi" placeholder="Ukuran / Bahan"
-          /></div>
-          <div class="form-group"><label>Qty</label><input type="number" name="qty" value="1" min="1" required /></div>
-          <div class="form-group"
-            ><label>Harga (Satuan Dasar)</label><input type="number" name="harga" placeholder="0" required
-          /></div>
-          <div class="form-group"
-            ><label>Total Harga</label><input type="number" name="final" placeholder="0" required
-          /></div>
-          <div class="form-group"
-            ><label>Waktu Produksi</label
-            ><textarea name="keterangan" class="input-lg" placeholder="Catatan tambahan..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select name="status">
-              <option value="Ready">Ready</option>
-              <option value="Pending" selected>Pending</option>
-              <option value="Tidak Ready">Tidak Ready</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Foto Vendor / Produk (Opsional, bisa pilih lebih dari satu)</label>
-            <input type="file" name="foto" accept="image/*" multiple />
-          </div>
-          <div class="modal-actions">
-            <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
-            <button type="submit" class="btn-add">Simpan</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- MODAL EDIT HARGA DASAR -->
-    <div class="modal" id="editItemModal">
-      <div class="modal-content">
-        <h3 style="margin-bottom: 15px; color: #7a1b1b">Edit Harga Sampel</h3>
-
-        <!-- TAMBAHKAN enctype DI SINI DAN ACTION SESUAIKAN DENGAN ROUTE EDIT -->
-        <form id="editForm" action="" method="POST" enctype="multipart/form-data">
-          <div class="form-group"
-            ><label>Tanggal</label><input type="date" id="editTanggal" name="tanggal" required
-          /></div>
-          <div class="form-group"
-            ><label>ID Barang</label
-            ><input type="text" id="editIdBarang" name="idBarang" placeholder="BRG-008" required
-          /></div>
-          <div class="form-group"
-            ><label>Nama Barang</label><input type="text" id="editNamaBarang" name="namaBarang" required
-          /></div>
-          <div class="form-group"
-            ><label>Merk</label><input type="text" id="editNamaMerk" name="namaMerk" required
-          /></div>
-          <div class="form-group"
-            ><label>Spesifikasi</label><input type="text" id="editSpesifikasi" name="spesifikasi"
-          /></div>
-          <div class="form-group"
-            ><label>Qty</label><input type="number" id="editQty" name="qty" min="1" required
-          /></div>
-          <div class="form-group"
-            ><label>Harga (Satuan Dasar)</label><input type="number" id="editHarga" name="harga" required
-          /></div>
-          <div class="form-group"
-            ><label>Total Harga</label><input type="number" id="editFinal" name="final" required
-          /></div>
-          <div class="form-group"
-            ><label>Waktu Produksi</label><textarea id="editKeterangan" name="keterangan" class="input-lg"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Foto Vendor / Produk (Opsional, bisa pilih lebih dari satu)</label>
-            <input type="file" name="foto" accept="image/*" multiple />
-          </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select id="editStatus" name="status">
-              <option value="Ready">Ready</option>
-              <option value="Pending">Pending</option>
-              <option value="Not Ready">Not Ready</option>
-            </select>
-          </div>
-          <div class="modal-actions">
-            <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
-            <button type="submit" class="btn-add">Simpan Perubahan</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
     <script>
-      function openModal() {
-        document.getElementById('itemModal').style.display = 'flex';
-      }
-      function closeModal() {
-        document.getElementById('itemModal').style.display = 'none';
-      }
-
-      function openEditModalFromBtn(btn) {
-        const id = btn.getAttribute('data-id');
-        const tanggal = btn.getAttribute('data-tanggal');
-        const idBarang = btn.getAttribute('data-idbarang');
-        const namaBarang = btn.getAttribute('data-namabarang');
-        const namaMerk = btn.getAttribute('data-namamerk');
-        const spesifikasi = btn.getAttribute('data-spesifikasi');
-        const qty = btn.getAttribute('data-qty');
-        const harga = btn.getAttribute('data-harga');
-        const final = btn.getAttribute('data-final');
-        const keterangan = btn.getAttribute('data-keterangan');
-        const status = btn.getAttribute('data-status');
-
-        document.getElementById('editForm').action = '/harga-dasar/edit/' + id;
-        document.getElementById('editTanggal').value = tanggal || '';
-        document.getElementById('editIdBarang').value = idBarang;
-        document.getElementById('editNamaBarang').value = namaBarang;
-        document.getElementById('editNamaMerk').value = namaMerk || '';
-        document.getElementById('editSpesifikasi').value = spesifikasi || '';
-        document.getElementById('editQty').value = qty;
-        document.getElementById('editHarga').value = harga;
-        document.getElementById('editFinal').value = final || 0;
-        document.getElementById('editKeterangan').value = keterangan || '';
-        document.getElementById('editStatus').value = status || 'Pending';
-        document.getElementById('editItemModal').style.display = 'flex';
-      }
-
-      function closeEditModal() {
-        document.getElementById('editItemModal').style.display = 'none';
-      }
-
       function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -1194,9 +1276,70 @@
         }
       }
 
-      function toggleDropdown(element) {
-        const parentLi = element.parentElement;
-        parentLi.classList.toggle('active');
+      function hitungAddTotal() {
+        const qty = parseFloat(document.getElementById('addQty').value) || 0;
+        const harga = parseFloat(document.getElementById('addHarga').value) || 0;
+        document.getElementById('addFinal').value = Math.round(qty * harga);
+      }
+
+      function hitungEditTotal() {
+        const qty = parseFloat(document.getElementById('editQty').value) || 0;
+        const harga = parseFloat(document.getElementById('editHarga').value) || 0;
+        document.getElementById('editFinal').value = Math.round(qty * harga);
+      }
+
+      function openModal() {
+        document.getElementById('itemModal').style.display = 'flex';
+        hitungAddTotal();
+      }
+      function closeModal() {
+        document.getElementById('itemModal').style.display = 'none';
+      }
+
+      function openEditModalFromBtn(btn) {
+        const id = btn.getAttribute('data-id');
+        const tanggal = btn.getAttribute('data-tanggal');
+        const idBarang = btn.getAttribute('data-idbarang');
+        const namaBarang = btn.getAttribute('data-namabarang');
+        const namaMerk = btn.getAttribute('data-namamerk');
+        const spesifikasi = btn.getAttribute('data-spesifikasi');
+        const qty = btn.getAttribute('data-qty') || 1;
+        const harga = btn.getAttribute('data-harga') || 0;
+        const final = btn.getAttribute('data-final') || (qty * harga);
+        const keterangan = btn.getAttribute('data-keterangan');
+
+        document.getElementById('editForm').action = '/harga-dasar/edit/' + id;
+        document.getElementById('editTanggal').value = tanggal || '';
+        document.getElementById('editIdBarang').value = idBarang;
+        document.getElementById('editNamaBarang').value = namaBarang;
+        document.getElementById('editNamaMerk').value = namaMerk || '';
+        document.getElementById('editSpesifikasi').value = spesifikasi || '';
+        document.getElementById('editQty').value = qty;
+        document.getElementById('editHarga').value = harga;
+        document.getElementById('editFinal').value = final;
+        document.getElementById('editKeterangan').value = keterangan || '';
+        document.getElementById('editItemModal').style.display = 'flex';
+      }
+
+      function closeEditModal() {
+        document.getElementById('editItemModal').style.display = 'none';
+      }
+
+      function openEditProjectModal(btn) {
+        const id = btn.getAttribute('data-id');
+        const nama = btn.getAttribute('data-nama');
+        const opr = btn.getAttribute('data-opr');
+        const trf = btn.getAttribute('data-trf');
+
+        document.getElementById('editProjectForm').action = '/harga-dasar/project/edit/' + id;
+        document.getElementById('editNamaProject').value = nama;
+        document.getElementById('editBiayaOperasional').value = opr;
+        document.getElementById('editBiayaTransfer').value = trf;
+        document.getElementById('editProjectModal').style.display = 'flex';
+      }
+
+      function closeEditProjectModal() {
+        document.getElementById('editProjectModal').style.display = 'none';
       }
     </script>
   </body>

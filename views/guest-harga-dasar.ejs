@@ -1,98 +1,358 @@
 <%- include('partials/guest-header', {
-  pageTitle: 'Harga Dasar',
-  pageSubtitle: 'Pantau daftar harga dasar material pokok beserta status datanya. Halaman ini hanya menampilkan informasi, tanpa akses menambah, mengubah, atau menghapus.',
+  pageTitle: projectAktif ? ('Harga Sampel - ' + projectAktif.namaProject) : 'Harga Sampel &bull; Project',
+  pageSubtitle: 'Pantau daftar harga sampel barang dan material dasar. Halaman ini hanya menampilkan informasi (Read-Only).',
   active: 'harga'
 }) %>
 <%- include('partials/head') %>
 
+<style>
+  .btn-back-guest {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: #7a1b1b;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+  .btn-back-guest:hover {
+    background: #fff5f5;
+    transform: translateX(-3px);
+  }
+  .project-info-guest {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 5px solid #7a1b1b;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+  }
+  .project-info-guest h2 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+  }
+  .project-info-guest p {
+    font-size: 12px;
+    color: #64748b;
+    margin: 3px 0 0;
+  }
+  .guest-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .guest-chip {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #475569;
+  }
+  .guest-chip strong {
+    color: #7a1b1b;
+    margin-left: 4px;
+  }
+  .project-guest-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+    margin-bottom: 25px;
+  }
+  .project-guest-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-top: 4px solid #7a1b1b;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .project-guest-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  }
+  .project-guest-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .project-guest-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .project-guest-badge {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .project-guest-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+  }
+  .project-guest-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+  }
+  .project-guest-row span {
+    color: #64748b;
+  }
+  .project-guest-row strong {
+    color: #1e293b;
+    font-weight: 700;
+  }
+  .project-guest-row.kasbon {
+    border-top: 1px dashed #cbd5e1;
+    padding-top: 8px;
+    margin-top: 2px;
+  }
+  .project-guest-row.kasbon strong {
+    color: #7a1b1b;
+    font-size: 14.5px;
+    font-weight: 800;
+  }
+  .btn-guest-open {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: #7a1b1b;
+    color: #ffffff;
+    padding: 9px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    transition: background 0.2s;
+  }
+  .btn-guest-open:hover {
+    background: #5c1414;
+  }
+</style>
+
+<% if (!projectAktif) { %>
+<!-- ===================== MODE 1: DAFTAR PROJECT GUEST ===================== -->
 <section class="card-grid">
   <div class="stat-card card-blue">
     <div class="card-header">
-      <span class="card-title">Total Item Harga Dasar</span>
+      <span class="card-title">Total Project</span>
       <div class="icon-wrapper icon-blue">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-          <line x1="2" y1="10" x2="22" y2="10"></line>
-          <line x1="7" y1="15" x2="7.01" y2="15"></line>
-          <line x1="12" y1="15" x2="12.01" y2="15"></line>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
         </svg>
       </div>
     </div>
     <div class="card-body">
-      <span class="card-value"><%= totalItem || 0 %></span>
-      <span class="card-unit">Item</span>
+      <span class="card-value"><%= typeof totalProject !== 'undefined' ? totalProject : 0 %></span>
+      <span class="card-unit">Project</span>
     </div>
     <div class="card-footer">
-      <span class="text-blue">Data Terbaru</span>
-      <span>Harga Material</span>
+      <span class="text-blue">Terdaftar</span>
+      <span>Project Sampel</span>
     </div>
   </div>
 
   <div class="stat-card card-green">
     <div class="card-header">
-      <span class="card-title">Status Ready</span>
+      <span class="card-title">Total Qty</span>
       <div class="icon-wrapper icon-green">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
         </svg>
       </div>
     </div>
     <div class="card-body">
-      <span class="card-value"><%= totalReady || 0 %></span>
-      <span class="card-unit">Item</span>
+      <span class="card-value"><%= typeof totalQtyAll !== 'undefined' ? totalQtyAll : 0 %></span>
+      <span class="card-unit">Qty</span>
     </div>
     <div class="card-footer">
-      <span class="text-green">Siap Digunakan</span>
-      <span>Status Valid</span>
+      <span class="text-green">Seluruh Project</span>
+      <span>Item Sampel</span>
     </div>
   </div>
 
   <div class="stat-card card-gold">
     <div class="card-header">
-      <span class="card-title">Status Pending</span>
+      <span class="card-title">Estimasi Total Kasbon</span>
       <div class="icon-wrapper icon-gold">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <polyline points="12 6 12 12 16 14"></polyline>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
         </svg>
       </div>
     </div>
     <div class="card-body">
-      <span class="card-value"><%= totalPending || 0 %></span>
-      <span class="card-unit">Item</span>
+      <span class="card-value">Rp <%= Number(typeof estimasiTotalKasbonAll !== 'undefined' ? estimasiTotalKasbonAll : 0).toLocaleString('id-ID') %></span>
     </div>
     <div class="card-footer">
-      <span class="text-orange">Menunggu Review</span>
-      <span>Dalam Peninjauan</span>
+      <span class="text-orange">Akumulasi Kasbon</span>
+      <span>Sampel + Opr + Trf</span>
     </div>
   </div>
 </section>
 
 <section class="main-box">
   <div class="box-header">
-    <div class="box-title">Daftar Harga Dasar</div>
+    <div class="box-title">Daftar Project Harga Sampel</div>
+  </div>
+
+  <% if (!projects || projects.length === 0) { %>
+  <div style="padding: 30px; text-align: center; color: #888;">Belum ada data project harga sampel.</div>
+  <% } else { %>
+  <div class="project-guest-grid">
+    <% projects.forEach(function(p) { %>
+    <div class="project-guest-card">
+      <div>
+        <div class="project-guest-header">
+          <div class="project-guest-title"><%= p.namaProject %></div>
+          <div class="project-guest-badge"><%= p.totalItem || 0 %> Item</div>
+        </div>
+        <div class="project-guest-body">
+          <div class="project-guest-row">
+            <span>Biaya Operasional:</span>
+            <strong>Rp <%= Number(p.biayaOperasional || 0).toLocaleString('id-ID') %></strong>
+          </div>
+          <div class="project-guest-row">
+            <span>Biaya Trf Beda Bank:</span>
+            <strong>Rp <%= Number(p.biayaTransferBedaBank || 0).toLocaleString('id-ID') %></strong>
+          </div>
+          <div class="project-guest-row">
+            <span>Total Qty:</span>
+            <strong><%= p.totalQty || 0 %> Qty</strong>
+          </div>
+          <div class="project-guest-row kasbon">
+            <span>Estimasi Kasbon:</span>
+            <strong>Rp <%= Number(p.estimasiTotalKasbon || 0).toLocaleString('id-ID') %></strong>
+          </div>
+        </div>
+      </div>
+      <a href="/guest/harga-dasar/project/<%= p._id %>" class="btn-guest-open">
+        Buka Detail Project &rarr;
+      </a>
+    </div>
+    <% }); %>
+  </div>
+  <% } %>
+</section>
+
+<% } else { %>
+<!-- ===================== MODE 2: DETAIL ITEM PROJECT GUEST ===================== -->
+<a href="/guest/harga-dasar" class="btn-back-guest">&larr; Kembali ke Daftar Project</a>
+
+<div class="project-info-guest">
+  <div>
+    <h2><%= projectAktif.namaProject %></h2>
+    <p>Estimasi Kasbon = Total Harga Sampel + Biaya Operasional + Biaya Transfer Beda Bank</p>
+  </div>
+  <div class="guest-chips">
+    <div class="guest-chip">
+      Biaya Operasional: <strong>Rp <%= Number(projectAktif.biayaOperasional || 0).toLocaleString('id-ID') %></strong>
+    </div>
+    <div class="guest-chip">
+      Biaya Transfer: <strong>Rp <%= Number(projectAktif.biayaTransferBedaBank || 0).toLocaleString('id-ID') %></strong>
+    </div>
+  </div>
+</div>
+
+<section class="card-grid">
+  <div class="stat-card card-blue">
+    <div class="card-header">
+      <span class="card-title">Total Item Sampel</span>
+      <div class="icon-wrapper icon-blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value"><%= typeof totalItem !== 'undefined' ? totalItem : 0 %></span>
+      <span class="card-unit">Item</span>
+    </div>
+    <div class="card-footer">
+      <span class="text-blue">Data Sampel</span>
+      <span>Project Ini</span>
+    </div>
+  </div>
+
+  <div class="stat-card card-green">
+    <div class="card-header">
+      <span class="card-title">Total Qty</span>
+      <div class="icon-wrapper icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value"><%= typeof totalQty !== 'undefined' ? totalQty : 0 %></span>
+      <span class="card-unit">Qty</span>
+    </div>
+    <div class="card-footer">
+      <span class="text-green">Akumulasi Qty</span>
+      <span>Tabel Sampel</span>
+    </div>
+  </div>
+
+  <div class="stat-card card-gold">
+    <div class="card-header">
+      <span class="card-title">Estimasi Total Kasbon</span>
+      <div class="icon-wrapper icon-gold">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <span class="card-value">Rp <%= Number(typeof estimasiTotalKasbon !== 'undefined' ? estimasiTotalKasbon : 0).toLocaleString('id-ID') %></span>
+    </div>
+    <div class="card-footer">
+      <span class="text-orange">Total Kasbon</span>
+      <span>Project Ini</span>
+    </div>
+  </div>
+</section>
+
+<section class="main-box">
+  <div class="box-header">
+    <div class="box-title">Daftar Harga Sampel &mdash; <%= projectAktif.namaProject %></div>
     <input
       type="search"
       class="search-input"
@@ -112,14 +372,17 @@
           <th>Nama Barang</th>
           <th>Merk</th>
           <th>Spesifikasi</th>
-          <th>Status</th>
+          <th>Qty</th>
+          <th>Harga Satuan</th>
+          <th>Total Harga</th>
+          <th>Waktu Produksi</th>
         </tr>
       </thead>
       <tbody>
         <% if (!items || items.length === 0) { %>
         <tr>
-          <td colspan="6">
-            <div class="empty-state">Belum ada data harga dasar yang ditambahkan.</div>
+          <td colspan="9">
+            <div class="empty-state">Belum ada data harga sampel pada project ini.</div>
           </td>
         </tr>
         <% } else { %>
@@ -130,13 +393,10 @@
           <td class="strong"><%= item.namaBarang || '-' %></td>
           <td><%= item.namaMerk || '-' %></td>
           <td><%= item.spesifikasi || '-' %></td>
-          <td>
-            <span
-              class="badge <%= item.status === 'Ready' ? 'badge-ready' : (item.status === 'Pending' ? 'badge-pending' : 'badge-nonaktif') %>"
-            >
-              <%= item.status || 'Pending' %>
-            </span>
-          </td>
+          <td><%= item.qty %></td>
+          <td>Rp <%= Number(item.harga || 0).toLocaleString('id-ID') %></td>
+          <td><strong style="color: #7a1b1b">Rp <%= Number(item.final || (item.qty * item.harga) || 0).toLocaleString('id-ID') %></strong></td>
+          <td><%= item.keterangan || '-' %></td>
         </tr>
         <% }); %>
         <% } %>
@@ -145,5 +405,6 @@
     <div class="empty-state filter-empty" id="hargaEmpty">Tidak ada data yang cocok dengan pencarian.</div>
   </div>
 </section>
+<% } %>
 
 <%- include('partials/guest-footer') %>

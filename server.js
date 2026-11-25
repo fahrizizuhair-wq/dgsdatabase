@@ -171,6 +171,7 @@ async function syncLocalUploadsToMongo() {
 const Admin = require('./models/Admin');
 const Vendor = require('./models/Vendor');
 const HargaDasar = require('./models/HargaDasar');
+const ProjectHargaDasar = require('./models/ProjectHargaDasar');
 const PengajuanHarga = require('./models/PengajuanHarga');
 const ProjectPengajuanHarga = require('./models/ProjectPengajuanHarga');
 const ProjectCatatanKeuangan = require('./models/ProjectCatatanKeuangan');
@@ -1454,16 +1455,174 @@ app.post('/admin/vendor/delete/:id', async (req, res) => {
 });
 
 // ============================================================
-//  RUTE: HARGA DASAR (ADMIN)
+//  RUTE: HARGA DASAR (ADMIN & USER) — MULTI PROJECT
 // ============================================================
-app.get('/harga-dasar', isAuthenticated, async (req, res) => {
+
+function dasarUrlHargaDasar(req) {
+  if (req.session && req.session.isAdmin) return '/harga-dasar';
+  if (req.session && req.session.isGuest) return '/guest/harga-dasar';
+  return '/harga-dasar-user';
+}
+
+function urlProjectHargaDasar(req, idProject) {
+  return `${dasarUrlHargaDasar(req)}/project/${idProject}`;
+}
+
+async function renderHargaDasar(req, res, role, idProject) {
   try {
-    const items = await HargaDasar.find().sort({ tanggal: -1, _id: -1 });
-    const totalItem = await HargaDasar.countDocuments();
-    res.render('harga-dasar', { items, totalItem });
+    const isAdmin = role === 'admin';
+    const isGuest = role === 'guest';
+    const baseUrl = isAdmin ? '/harga-dasar' : (isGuest ? '/guest/harga-dasar' : '/harga-dasar-user');
+
+    // Cek dan migrasi item lama tanpa projectId ke project default jika ada
+    const allItems = await HargaDasar.find().lean();
+    const orphanItems = allItems.filter((i) => !i.projectId);
+    if (orphanItems.length > 0) {
+      let defaultProject = await ProjectHargaDasar.findOne({ namaProject: 'Project Sampel Utama' });
+      if (!defaultProject) {
+        defaultProject = await ProjectHargaDasar.create({
+          namaProject: 'Project Sampel Utama',
+          biayaOperasional: 0,
+          biayaTransferBedaBank: 0,
+          diinputOleh: 'System',
+        });
+      }
+      await HargaDasar.updateMany(
+        { $or: [{ projectId: null }, { projectId: { $exists: false } }] },
+        { $set: { projectId: defaultProject._id, projectNama: defaultProject.namaProject } }
+      );
+      return res.redirect(idProject ? `${baseUrl}/project/${idProject}` : baseUrl);
+    }
+
+    const projects = await ProjectHargaDasar.find().sort({ createdAt: -1, _id: -1 }).lean();
+
+    projects.forEach((project) => {
+      const pItems = allItems.filter((i) => String(i.projectId) === String(project._id));
+      project.totalItem = pItems.length;
+      project.totalQty = pItems.reduce((acc, i) => acc + (Number(i.qty) || 0), 0);
+      project.totalHargaSampel = pItems.reduce(
+        (acc, i) => acc + (Number(i.final) || (Number(i.qty || 1) * Number(i.harga || 0))),
+        0
+      );
+      project.estimasiTotalKasbon =
+        project.totalHargaSampel +
+        (Number(project.biayaOperasional) || 0) +
+        (Number(project.biayaTransferBedaBank) || 0);
+    });
+
+    const totalProject = projects.length;
+    const totalQtyAll = projects.reduce((acc, p) => acc + p.totalQty, 0);
+    const estimasiTotalKasbonAll = projects.reduce((acc, p) => acc + p.estimasiTotalKasbon, 0);
+
+    let projectAktif = null;
+    let items = [];
+
+    if (idProject) {
+      if (!mongoose.Types.ObjectId.isValid(String(idProject))) {
+        return res.redirect(baseUrl);
+      }
+      projectAktif = projects.find((p) => String(p._id) === String(idProject)) || null;
+      if (!projectAktif) {
+        return res.redirect(baseUrl);
+      }
+      items = allItems.filter((i) => String(i.projectId) === String(projectAktif._id));
+      items.sort((a, b) => new Date(b.tanggal || b.createdAt || 0) - new Date(a.tanggal || a.createdAt || 0));
+    }
+
+    const totalItemProject = items.length;
+    const totalQtyProject = items.reduce((acc, i) => acc + (Number(i.qty) || 0), 0);
+    const totalHargaSampelProject = items.reduce(
+      (acc, i) => acc + (Number(i.final) || (Number(i.qty || 1) * Number(i.harga || 0))),
+      0
+    );
+    const estimasiKasbonProject = projectAktif
+      ? totalHargaSampelProject +
+        (Number(projectAktif.biayaOperasional) || 0) +
+        (Number(projectAktif.biayaTransferBedaBank) || 0)
+      : 0;
+
+    const viewName = isAdmin ? 'harga-dasar' : (isGuest ? 'guest-harga-dasar' : 'harga-dasar-user');
+
+    const nama = req.session && req.session.user
+      ? req.session.user.namaLengkap || req.session.user.username || 'User'
+      : req.session.adminUser || 'Admin';
+
+    res.render(viewName, {
+      role,
+      baseUrl,
+      projects,
+      projectAktif,
+      items,
+      totalProject,
+      totalQtyAll,
+      estimasiTotalKasbonAll,
+      totalItem: totalItemProject,
+      totalQty: totalQtyProject,
+      totalHargaSampel: totalHargaSampelProject,
+      estimasiTotalKasbon: estimasiKasbonProject,
+      user: req.session.user || { username: req.session.adminUser || nama, namaLengkap: nama },
+      adminUser: req.session.adminUser || nama,
+      simpan: req.query.simpan === '1',
+      edit: req.query.edit === '1',
+      hapus: req.query.hapus === '1',
+      gagal: req.query.gagal === '1',
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Gagal memuat data harga dasar.');
+    console.error('Error render harga dasar:', err);
+    res.status(500).send('Gagal memuat data harga dasar: ' + err.message);
+  }
+}
+
+// Rute Admin Harga Dasar
+app.get('/harga-dasar', isAuthenticated, (req, res) => renderHargaDasar(req, res, 'admin', null));
+app.get('/harga-dasar/project/:idProject', isAuthenticated, (req, res) => renderHargaDasar(req, res, 'admin', req.params.idProject));
+
+app.post('/harga-dasar/project/add', isAuthenticated, async (req, res) => {
+  try {
+    const { namaProject, biayaOperasional, biayaTransferBedaBank } = req.body;
+    if (!namaProject || !namaProject.trim()) {
+      return res.redirect('/harga-dasar?gagal=1');
+    }
+    const newProject = await ProjectHargaDasar.create({
+      namaProject: namaProject.trim(),
+      biayaOperasional: Math.max(0, Number(biayaOperasional) || 0),
+      biayaTransferBedaBank: Math.max(0, Number(biayaTransferBedaBank) || 0),
+      diinputOleh: getNamaPenginput(req),
+    });
+    return res.redirect(`/harga-dasar/project/${newProject._id}?simpan=1`);
+  } catch (err) {
+    console.error('Error tambah project harga dasar:', err);
+    return res.redirect('/harga-dasar?gagal=1');
+  }
+});
+
+app.post('/harga-dasar/project/edit/:id', isAuthenticated, async (req, res) => {
+  try {
+    const { namaProject, biayaOperasional, biayaTransferBedaBank } = req.body;
+    const project = await ProjectHargaDasar.findById(req.params.id);
+    if (!project) return res.redirect('/harga-dasar?gagal=1');
+
+    project.namaProject = (namaProject || '').trim() || project.namaProject;
+    project.biayaOperasional = Math.max(0, Number(biayaOperasional) || 0);
+    project.biayaTransferBedaBank = Math.max(0, Number(biayaTransferBedaBank) || 0);
+    await project.save();
+
+    await HargaDasar.updateMany({ projectId: project._id }, { $set: { projectNama: project.namaProject } });
+    return res.redirect(`/harga-dasar/project/${project._id}?edit=1`);
+  } catch (err) {
+    console.error('Error edit project harga dasar:', err);
+    return res.redirect('/harga-dasar?gagal=1');
+  }
+});
+
+app.post('/harga-dasar/project/delete/:id', isAuthenticated, async (req, res) => {
+  try {
+    await HargaDasar.deleteMany({ projectId: req.params.id });
+    await ProjectHargaDasar.findByIdAndDelete(req.params.id);
+    return res.redirect('/harga-dasar?hapus=1');
+  } catch (err) {
+    console.error('Error hapus project harga dasar:', err);
+    return res.redirect('/harga-dasar?gagal=1');
   }
 });
 
@@ -1474,7 +1633,7 @@ app.get('/harga-dasar/detail/:id', async (req, res) => {
     if (!barang) {
       return res.status(404).send('Data harga dasar tidak ditemukan.');
     }
-    const backUrl = req.headers.referer || '/harga-dasar';
+    const backUrl = req.headers.referer || (barang.projectId ? `/harga-dasar/project/${barang.projectId}` : '/harga-dasar');
     res.render('harga-dasar-detail', { barang, backUrl });
   } catch (err) {
     console.error('Error detail harga dasar:', err);
@@ -1485,33 +1644,38 @@ app.get('/harga-dasar/detail/:id', async (req, res) => {
 app.post('/harga-dasar/add', uploadMultiple, async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
-    const { idBarang, namaBarang, namaMerk, spesifikasi, qty, harga, final, keterangan, status, tanggal } = req.body;
+    const { projectId, idBarang, namaBarang, namaMerk, spesifikasi, qty, harga, keterangan, tanggal } = req.body;
 
-    const existing = await HargaDasar.findOne({ idBarang });
-    if (existing) {
-      return res
-        .status(400)
-        .send(`<script>alert('Gagal! ID Barang "${idBarang}" sudah terdaftar.'); window.history.back();</script>`);
+    const qtyNum = Math.max(1, Number(qty) || 1);
+    const hargaNum = Math.max(0, Number(harga) || 0);
+    const finalNum = qtyNum * hargaNum;
+
+    let projectNama = '';
+    if (projectId && mongoose.Types.ObjectId.isValid(String(projectId))) {
+      const p = await ProjectHargaDasar.findById(projectId).lean();
+      if (p) projectNama = p.namaProject;
     }
 
     const fotoBarang = req.files ? req.files.map((f) => f.filename) : [];
     const newItem = new HargaDasar({
-      idBarang,
-      namaBarang,
-      namaMerk,
-      spesifikasi,
-      qty: Number(qty) || 1,
-      harga: Number(harga) || 0,
-      final: Number(final) || 0,
-      keterangan,
-      status: status || 'Pending',
+      projectId: projectId || null,
+      projectNama,
+      idBarang: (idBarang || '').trim(),
+      namaBarang: (namaBarang || '').trim(),
+      namaMerk: (namaMerk || '').trim(),
+      spesifikasi: (spesifikasi || '').trim(),
+      qty: qtyNum,
+      harga: hargaNum,
+      final: finalNum,
+      keterangan: (keterangan || '').trim(),
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
       diinputOleh: getNamaPenginput(req),
       gambar: fotoBarang,
     });
 
     await newItem.save();
-    res.redirect('/harga-dasar');
+    const tujuan = projectId ? `/harga-dasar/project/${projectId}?simpan=1` : '/harga-dasar?simpan=1';
+    res.redirect(tujuan);
   } catch (err) {
     console.error('Error tambah harga dasar:', err);
     res.status(500).send('Gagal menambah harga dasar: ' + err.message);
@@ -1521,26 +1685,30 @@ app.post('/harga-dasar/add', uploadMultiple, async (req, res) => {
 app.post('/harga-dasar/edit/:id', uploadMultiple, async (req, res) => {
   try {
     await syncReqFilesToGridFS(req);
-    const { idBarang, namaBarang, namaMerk, spesifikasi, qty, harga, final, keterangan, status, tanggal } = req.body;
+    const { idBarang, namaBarang, namaMerk, spesifikasi, qty, harga, keterangan, tanggal } = req.body;
+
+    const qtyNum = Math.max(1, Number(qty) || 1);
+    const hargaNum = Math.max(0, Number(harga) || 0);
+    const finalNum = qtyNum * hargaNum;
 
     const updateData = {
-      idBarang,
-      namaBarang,
-      namaMerk,
-      spesifikasi,
-      qty: Number(qty) || 1,
-      harga: Number(harga) || 0,
-      final: Number(final) || 0,
-      keterangan,
-      status: status || 'Pending',
+      idBarang: (idBarang || '').trim(),
+      namaBarang: (namaBarang || '').trim(),
+      namaMerk: (namaMerk || '').trim(),
+      spesifikasi: (spesifikasi || '').trim(),
+      qty: qtyNum,
+      harga: hargaNum,
+      final: finalNum,
+      keterangan: (keterangan || '').trim(),
       tanggal: tanggal ? new Date(tanggal) : Date.now(),
     };
     if (req.files && req.files.length > 0) {
       updateData.gambar = req.files.map((f) => f.filename);
     }
 
-    await HargaDasar.findByIdAndUpdate(req.params.id, updateData);
-    res.redirect('/harga-dasar');
+    const updated = await HargaDasar.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    const tujuan = updated && updated.projectId ? `/harga-dasar/project/${updated.projectId}?edit=1` : '/harga-dasar?edit=1';
+    res.redirect(tujuan);
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal memperbarui data.');
@@ -1549,8 +1717,9 @@ app.post('/harga-dasar/edit/:id', uploadMultiple, async (req, res) => {
 
 app.post('/harga-dasar/delete/:id', async (req, res) => {
   try {
-    await HargaDasar.findByIdAndDelete(req.params.id);
-    res.redirect('/harga-dasar');
+    const item = await HargaDasar.findByIdAndDelete(req.params.id);
+    const tujuan = item && item.projectId ? `/harga-dasar/project/${item.projectId}?hapus=1` : '/harga-dasar?hapus=1';
+    res.redirect(tujuan);
   } catch (err) {
     console.error(err);
     res.status(500).send('Gagal menghapus harga dasar.');
@@ -2946,36 +3115,142 @@ app.get('/user/vendor/:id', isUserAuthenticated, async (req, res) => {
 });
 
 // ============================================================
-//  RUTE: HARGA DASAR – USER
+//  RUTE: HARGA DASAR – USER (MULTI PROJECT)
 // ============================================================
-app.get('/harga-dasar-user', async (req, res) => {
-  try {
-    const items = await HargaDasar.find().sort({ tanggal: -1, _id: -1 }).lean();
-    const totalItem = items.length;
-    const totalReady = items.filter((i) => i.status === 'Ready').length;
-    const totalPending = items.filter((i) => i.status === 'Pending').length;
+app.get('/harga-dasar-user', (req, res) => renderHargaDasar(req, res, 'user', null));
+app.get('/harga-dasar-user/project/:idProject', (req, res) => renderHargaDasar(req, res, 'user', req.params.idProject));
 
-    // Kirim semua variabel yang dibutuhkan oleh view EJS
-    res.render('harga-dasar-user', {
-      items,
-      totalItem,
-      totalReady,
-      totalPending,
+app.post('/harga-dasar-user/project/add', async (req, res) => {
+  try {
+    const { namaProject, biayaOperasional, biayaTransferBedaBank } = req.body;
+    if (!namaProject || !namaProject.trim()) {
+      return res.redirect('/harga-dasar-user?gagal=1');
+    }
+    const newProject = await ProjectHargaDasar.create({
+      namaProject: namaProject.trim(),
+      biayaOperasional: Math.max(0, Number(biayaOperasional) || 0),
+      biayaTransferBedaBank: Math.max(0, Number(biayaTransferBedaBank) || 0),
+      diinputOleh: getNamaPenginput(req),
     });
+    return res.redirect(`/harga-dasar-user/project/${newProject._id}?simpan=1`);
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Gagal memuat data harga dasar: ' + err.message);
+    console.error('Error tambah project harga dasar user:', err);
+    return res.redirect('/harga-dasar-user?gagal=1');
   }
 });
 
-app.post('/harga-dasar-user/add', async (req, res) => {
+app.post('/harga-dasar-user/project/edit/:id', async (req, res) => {
   try {
-    const newItem = new HargaDasar({ ...req.body, diinputOleh: getNamaPenginput(req) });
+    const { namaProject, biayaOperasional, biayaTransferBedaBank } = req.body;
+    const project = await ProjectHargaDasar.findById(req.params.id);
+    if (!project) return res.redirect('/harga-dasar-user?gagal=1');
+
+    project.namaProject = (namaProject || '').trim() || project.namaProject;
+    project.biayaOperasional = Math.max(0, Number(biayaOperasional) || 0);
+    project.biayaTransferBedaBank = Math.max(0, Number(biayaTransferBedaBank) || 0);
+    await project.save();
+
+    await HargaDasar.updateMany({ projectId: project._id }, { $set: { projectNama: project.namaProject } });
+    return res.redirect(`/harga-dasar-user/project/${project._id}?edit=1`);
+  } catch (err) {
+    console.error('Error edit project harga dasar user:', err);
+    return res.redirect('/harga-dasar-user?gagal=1');
+  }
+});
+
+app.post('/harga-dasar-user/project/delete/:id', async (req, res) => {
+  try {
+    await HargaDasar.deleteMany({ projectId: req.params.id });
+    await ProjectHargaDasar.findByIdAndDelete(req.params.id);
+    return res.redirect('/harga-dasar-user?hapus=1');
+  } catch (err) {
+    console.error('Error hapus project harga dasar user:', err);
+    return res.redirect('/harga-dasar-user?gagal=1');
+  }
+});
+
+app.post('/harga-dasar-user/add', uploadMultiple, async (req, res) => {
+  try {
+    await syncReqFilesToGridFS(req);
+    const { projectId, idBarang, namaBarang, namaMerk, spesifikasi, qty, harga, keterangan, tanggal } = req.body;
+
+    const qtyNum = Math.max(1, Number(qty) || 1);
+    const hargaNum = Math.max(0, Number(harga) || 0);
+    const finalNum = qtyNum * hargaNum;
+
+    let projectNama = '';
+    if (projectId && mongoose.Types.ObjectId.isValid(String(projectId))) {
+      const p = await ProjectHargaDasar.findById(projectId).lean();
+      if (p) projectNama = p.namaProject;
+    }
+
+    const fotoBarang = req.files ? req.files.map((f) => f.filename) : [];
+    const newItem = new HargaDasar({
+      projectId: projectId || null,
+      projectNama,
+      idBarang: (idBarang || '').trim(),
+      namaBarang: (namaBarang || '').trim(),
+      namaMerk: (namaMerk || '').trim(),
+      spesifikasi: (spesifikasi || '').trim(),
+      qty: qtyNum,
+      harga: hargaNum,
+      final: finalNum,
+      keterangan: (keterangan || '').trim(),
+      tanggal: tanggal ? new Date(tanggal) : Date.now(),
+      diinputOleh: getNamaPenginput(req),
+      gambar: fotoBarang,
+    });
+
     await newItem.save();
-    res.redirect('/harga-dasar-user');
+    const tujuan = projectId ? `/harga-dasar-user/project/${projectId}?simpan=1` : '/harga-dasar-user?simpan=1';
+    res.redirect(tujuan);
+  } catch (err) {
+    console.error('Error tambah harga dasar user:', err);
+    res.status(500).send('Gagal menambah harga dasar: ' + err.message);
+  }
+});
+
+app.post('/harga-dasar-user/edit/:id', uploadMultiple, async (req, res) => {
+  try {
+    await syncReqFilesToGridFS(req);
+    const { idBarang, namaBarang, namaMerk, spesifikasi, qty, harga, keterangan, tanggal } = req.body;
+
+    const qtyNum = Math.max(1, Number(qty) || 1);
+    const hargaNum = Math.max(0, Number(harga) || 0);
+    const finalNum = qtyNum * hargaNum;
+
+    const updateData = {
+      idBarang: (idBarang || '').trim(),
+      namaBarang: (namaBarang || '').trim(),
+      namaMerk: (namaMerk || '').trim(),
+      spesifikasi: (spesifikasi || '').trim(),
+      qty: qtyNum,
+      harga: hargaNum,
+      final: finalNum,
+      keterangan: (keterangan || '').trim(),
+      tanggal: tanggal ? new Date(tanggal) : Date.now(),
+    };
+    if (req.files && req.files.length > 0) {
+      updateData.gambar = req.files.map((f) => f.filename);
+    }
+
+    const updated = await HargaDasar.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    const tujuan = updated && updated.projectId ? `/harga-dasar-user/project/${updated.projectId}?edit=1` : '/harga-dasar-user?edit=1';
+    res.redirect(tujuan);
   } catch (err) {
     console.error(err);
-    res.status(500).send('Gagal menambah harga dasar: ' + err.message);
+    res.status(500).send('Gagal memperbarui data.');
+  }
+});
+
+app.post('/harga-dasar-user/delete/:id', async (req, res) => {
+  try {
+    const item = await HargaDasar.findByIdAndDelete(req.params.id);
+    const tujuan = item && item.projectId ? `/harga-dasar-user/project/${item.projectId}?hapus=1` : '/harga-dasar-user?hapus=1';
+    res.redirect(tujuan);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Gagal menghapus harga dasar.');
   }
 });
 
@@ -2986,7 +3261,7 @@ app.get('/harga-dasar-user/detail/:id', async (req, res) => {
     if (!barang) {
       return res.status(404).send('Data harga dasar tidak ditemukan.');
     }
-    const backUrl = req.headers.referer || '/harga-dasar-user';
+    const backUrl = req.headers.referer || (barang.projectId ? `/harga-dasar-user/project/${barang.projectId}` : '/harga-dasar-user');
     res.render('harga-dasar-detail', { barang, backUrl });
   } catch (err) {
     console.error('Error detail harga dasar:', err);
@@ -4904,9 +5179,13 @@ app.get('/export-vendor-excel', async (req, res) => {
 // Ekspor Harga Dasar
 app.get('/export-harga-dasar-excel', async (req, res) => {
   try {
-    const dataHargaDasar = await HargaDasar.find({});
+    const filter = {};
+    if (req.query.projectId && mongoose.Types.ObjectId.isValid(String(req.query.projectId))) {
+      filter.projectId = req.query.projectId;
+    }
+    const dataHargaDasar = await HargaDasar.find(filter).sort({ tanggal: -1 });
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Data Harga Dasar');
+    const worksheet = workbook.addWorksheet('Data Harga Sampel');
 
     worksheet.columns = [
       { header: 'No', key: 'no', width: 8 },
@@ -4915,15 +5194,17 @@ app.get('/export-harga-dasar-excel', async (req, res) => {
       { header: 'Nama Merk', key: 'namaMerk', width: 20 },
       { header: 'Spesifikasi', key: 'spesifikasi', width: 30 },
       { header: 'Qty', key: 'qty', width: 10 },
-      { header: 'Harga', key: 'harga', width: 15 },
-      { header: 'Final', key: 'final', width: 15 },
-      { header: 'Status', key: 'status', width: 15 },
-      { header: 'Keterangan', key: 'keterangan', width: 25 },
-      { header: 'Tanggal', key: 'tanggal', width: 20 },
+      { header: 'Harga Satuan', key: 'harga', width: 16 },
+      { header: 'Total Harga', key: 'final', width: 18 },
+      { header: 'Waktu Produksi / Keterangan', key: 'keterangan', width: 30 },
+      { header: 'Tanggal', key: 'tanggal', width: 18 },
     ];
 
     dataHargaDasar.forEach((item, index) => {
       const formattedDate = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-';
+      const q = Number(item.qty) || 1;
+      const h = Number(item.harga) || 0;
+      const f = Number(item.final) || (q * h);
 
       worksheet.addRow({
         no: index + 1,
@@ -4931,10 +5212,9 @@ app.get('/export-harga-dasar-excel', async (req, res) => {
         namaBarang: item.namaBarang || '-',
         namaMerk: item.namaMerk || '-',
         spesifikasi: item.spesifikasi || '-',
-        qty: item.qty != null ? item.qty : 1,
-        harga: item.harga != null ? item.harga : 0,
-        final: item.final != null ? item.final : 0,
-        status: item.status || '-',
+        qty: q,
+        harga: h,
+        final: f,
         keterangan: item.keterangan || '-',
         tanggal: formattedDate,
       });
@@ -4948,7 +5228,7 @@ app.get('/export-harga-dasar-excel', async (req, res) => {
     headerRow.height = 24;
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=Data_Harga_Dasar_Kiosk.xlsx');
+    res.setHeader('Content-Disposition', 'attachment; filename=Data_Harga_Sampel.xlsx');
     await workbook.xlsx.write(res);
     return res.end();
   } catch (error) {
@@ -5338,22 +5618,11 @@ app.get('/guest/vendor/:id', async (req, res) => {
 });
 
 app.get('/guest/harga-dasar', async (req, res) => {
-  try {
-    const items = await HargaDasar.find().sort({ tanggal: -1, _id: -1 }).lean();
-    const totalItem = items.length;
-    const totalReady = items.filter((i) => i.status === 'Ready').length;
-    const totalPending = items.filter((i) => i.status === 'Pending').length;
+  return renderHargaDasar(req, res, 'guest');
+});
 
-    res.render('guest-harga-dasar', {
-      items,
-      totalItem,
-      totalReady,
-      totalPending,
-    });
-  } catch (err) {
-    console.error('Gagal memuat harga dasar guest:', err);
-    res.status(500).send('Gagal memuat data harga dasar: ' + err.message);
-  }
+app.get('/guest/harga-dasar/project/:idProject', async (req, res) => {
+  return renderHargaDasar(req, res, 'guest', req.params.idProject);
 });
 
 app.get('/guest/data-kain', async (req, res) => {
