@@ -1468,6 +1468,15 @@ function urlProjectHargaDasar(req, idProject) {
   return `${dasarUrlHargaDasar(req)}/project/${idProject}`;
 }
 
+// Total harga sampel dipakai bersama oleh kartu project dan kartu estimasi kasbon.
+function totalHargaSampelItems(items) {
+  return items.reduce((acc, i) => {
+    const final = Number(i.final);
+    const hitung = (Number(i.qty) || 0) * (Number(i.harga) || 0);
+    return acc + (Number.isFinite(final) && final > 0 ? final : hitung);
+  }, 0);
+}
+
 async function renderHargaDasar(req, res, role, idProject) {
   try {
     const isAdmin = role === 'admin';
@@ -1500,10 +1509,7 @@ async function renderHargaDasar(req, res, role, idProject) {
       const pItems = allItems.filter((i) => String(i.projectId) === String(project._id));
       project.totalItem = pItems.length;
       project.totalQty = pItems.reduce((acc, i) => acc + (Number(i.qty) || 0), 0);
-      project.totalHargaSampel = pItems.reduce(
-        (acc, i) => acc + (Number(i.final) || (Number(i.qty || 1) * Number(i.harga || 0))),
-        0
-      );
+      project.totalHargaSampel = totalHargaSampelItems(pItems);
       project.estimasiTotalKasbon =
         project.totalHargaSampel +
         (Number(project.biayaOperasional) || 0) +
@@ -1512,7 +1518,8 @@ async function renderHargaDasar(req, res, role, idProject) {
 
     const totalProject = projects.length;
     const totalQtyAll = projects.reduce((acc, p) => acc + p.totalQty, 0);
-    const estimasiTotalKasbonAll = projects.reduce((acc, p) => acc + p.estimasiTotalKasbon, 0);
+    // Kartu halaman awal: akumulasi estimasi kasbon dari seluruh project.
+    const estimasiTotalKasbonAll = projects.reduce((acc, p) => acc + (p.estimasiTotalKasbon || 0), 0);
 
     let projectAktif = null;
     let items = [];
@@ -1531,10 +1538,7 @@ async function renderHargaDasar(req, res, role, idProject) {
 
     const totalItemProject = items.length;
     const totalQtyProject = items.reduce((acc, i) => acc + (Number(i.qty) || 0), 0);
-    const totalHargaSampelProject = items.reduce(
-      (acc, i) => acc + (Number(i.final) || (Number(i.qty || 1) * Number(i.harga || 0))),
-      0
-    );
+    const totalHargaSampelProject = totalHargaSampelItems(items);
     const estimasiKasbonProject = projectAktif
       ? totalHargaSampelProject +
         (Number(projectAktif.biayaOperasional) || 0) +

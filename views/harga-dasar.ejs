@@ -513,23 +513,31 @@
       .modal {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
         justify-content: center;
         align-items: center;
+        padding: 16px;
         z-index: 1000;
       }
       .modal-content {
-        background: white;
-        padding: 30px;
-        border-radius: 12px;
-        width: 480px;
-        max-height: 85vh;
+        background: #ffffff;
+        padding: 26px 28px;
+        border-radius: 16px;
+        width: min(560px, 100%);
+        max-height: 88vh;
         overflow-y: auto;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+      }
+      .modal-title {
+        margin: 0 0 18px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eef0f4;
+        color: #7a1b1b;
+        font-size: 18px;
+        font-weight: 800;
       }
       .form-group {
         margin-bottom: 15px;
@@ -553,6 +561,49 @@
         color: #7a1b1b;
         font-weight: 700;
       }
+      .modal-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .modal-form-grid .form-group {
+        margin-bottom: 0;
+      }
+      .form-hint {
+        display: block;
+        margin-top: 5px;
+        font-size: 11px;
+        color: #64748b;
+        line-height: 1.4;
+      }
+      .auto-total-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin: 15px 0;
+      }
+      .auto-total-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #1e40af;
+      }
+      .auto-total-value {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1d4ed8;
+        text-align: right;
+      }
+      .auto-total-hint {
+        flex-basis: 100%;
+        font-size: 11px;
+        color: #64748b;
+      }
 
       textarea.input-lg {
         width: 100%;
@@ -575,14 +626,27 @@
         justify-content: flex-end;
         gap: 10px;
         margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid #f1f5f9;
       }
       .btn-cancel {
-        background: #e0e0e0;
+        background: #e2e8f0;
+        color: #334155;
         border: none;
-        padding: 10px 16px;
-        border-radius: 6px;
+        min-height: 40px;
+        padding: 9px 18px;
+        border-radius: 8px;
         cursor: pointer;
-        font-weight: 600;
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .btn-cancel:hover {
+        background: #cbd5e1;
+      }
+      .modal-actions .btn-add {
+        min-height: 40px;
+        padding: 9px 20px;
+        border-radius: 8px;
       }
 
       /* RESPONSIF */
@@ -688,13 +752,27 @@
         #itemTable tbody td:nth-child(9) {
           display: none;
         }
+        .modal {
+          padding: 10px;
+          align-items: flex-start;
+        }
+        .modal-content {
+          padding: 20px 18px;
+          border-radius: 12px;
+          max-height: 92vh;
+        }
+        .modal-form-grid {
+          grid-template-columns: 1fr;
+        }
+        .auto-total-value {
+          font-size: 16px;
+        }
       }
     </style>
     <link rel="stylesheet" href="/css/stat-cards.css" />
+    <link rel="stylesheet" href="/css/sidebar.css" />
   </head>
   <body>
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
     <%- include('partials/sidebar-admin', { activePage: 'harga-dasar' }) %>
 
     <main class="main-content">
@@ -811,7 +889,7 @@
           </div>
           <div class="card-footer">
             <span class="text-red">Akumulasi Kasbon</span>
-            <span>Total Sampel + Opr + Trf</span>
+            <span>Seluruh Project</span>
           </div>
         </div>
       </section>
@@ -939,7 +1017,7 @@
       <!-- MODAL EDIT PROJECT -->
       <div class="modal" id="editProjectModal">
         <div class="modal-content">
-          <h3 style="margin-bottom: 15px; color: #7a1b1b">Edit Project</h3>
+          <h3 class="modal-title">Edit Project</h3>
           <form id="editProjectForm" action="" method="POST">
             <div class="form-group">
               <label>Nama Project *</label>
@@ -1185,7 +1263,7 @@
       <!-- MODAL TAMBAH HARGA SAMPEL -->
       <div class="modal" id="itemModal">
         <div class="modal-content">
-          <h3 style="margin-bottom: 15px; color: #7a1b1b">Tambah Harga Sampel Baru</h3>
+          <h3 class="modal-title">Tambah Harga Sampel Baru</h3>
           <form action="/harga-dasar/add" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="projectId" value="<%= projectAktif._id %>" />
             <div class="form-group"><label>Tanggal</label><input type="date" name="tanggal" required /></div>
@@ -1193,17 +1271,21 @@
             <div class="form-group"><label>Nama Barang</label><input type="text" name="namaBarang" placeholder="Masukan Nama Barang" required /></div>
             <div class="form-group"><label>Merk</label><input type="text" name="namaMerk" placeholder="Nama Merk" required /></div>
             <div class="form-group"><label>Spesifikasi</label><input type="text" name="spesifikasi" placeholder="Ukuran / Bahan" /></div>
-            <div class="form-group">
-              <label>Qty</label>
-              <input type="number" id="addQty" name="qty" value="1" min="1" required oninput="hitungAddTotal()" />
+            <div class="modal-form-grid">
+              <div class="form-group">
+                <label>Qty</label>
+                <input type="number" id="addQty" name="qty" value="1" min="1" required oninput="hitungAddTotal()" />
+              </div>
+              <div class="form-group">
+                <label>Harga Satuan (Rp)</label>
+                <input type="number" id="addHarga" name="harga" placeholder="0" min="0" required oninput="hitungAddTotal()" />
+              </div>
             </div>
-            <div class="form-group">
-              <label>Harga Satuan (Rp)</label>
-              <input type="number" id="addHarga" name="harga" placeholder="0" min="0" required oninput="hitungAddTotal()" />
-            </div>
-            <div class="form-group">
-              <label>Total Harga (Otomatis: Qty &times; Harga Satuan)</label>
-              <input type="number" id="addFinal" name="final" placeholder="0" readonly />
+            <div class="auto-total-box">
+              <span class="auto-total-label">Total Harga Otomatis</span>
+              <span class="auto-total-value" id="addFinalText">Rp 0</span>
+              <span class="auto-total-hint">Dihitung otomatis dari Qty &times; Harga Satuan.</span>
+              <input type="hidden" id="addFinal" name="final" value="0" />
             </div>
             <div class="form-group">
               <label>Waktu Produksi / Keterangan</label>
@@ -1224,24 +1306,28 @@
       <!-- MODAL EDIT HARGA SAMPEL -->
       <div class="modal" id="editItemModal">
         <div class="modal-content">
-          <h3 style="margin-bottom: 15px; color: #7a1b1b">Edit Harga Sampel</h3>
+          <h3 class="modal-title">Edit Harga Sampel</h3>
           <form id="editForm" action="" method="POST" enctype="multipart/form-data">
             <div class="form-group"><label>Tanggal</label><input type="date" id="editTanggal" name="tanggal" required /></div>
             <div class="form-group"><label>ID Barang</label><input type="text" id="editIdBarang" name="idBarang" required /></div>
             <div class="form-group"><label>Nama Barang</label><input type="text" id="editNamaBarang" name="namaBarang" required /></div>
             <div class="form-group"><label>Merk</label><input type="text" id="editNamaMerk" name="namaMerk" required /></div>
             <div class="form-group"><label>Spesifikasi</label><input type="text" id="editSpesifikasi" name="spesifikasi" /></div>
-            <div class="form-group">
-              <label>Qty</label>
-              <input type="number" id="editQty" name="qty" min="1" required oninput="hitungEditTotal()" />
+            <div class="modal-form-grid">
+              <div class="form-group">
+                <label>Qty</label>
+                <input type="number" id="editQty" name="qty" min="1" required oninput="hitungEditTotal()" />
+              </div>
+              <div class="form-group">
+                <label>Harga Satuan (Rp)</label>
+                <input type="number" id="editHarga" name="harga" min="0" required oninput="hitungEditTotal()" />
+              </div>
             </div>
-            <div class="form-group">
-              <label>Harga Satuan (Rp)</label>
-              <input type="number" id="editHarga" name="harga" min="0" required oninput="hitungEditTotal()" />
-            </div>
-            <div class="form-group">
-              <label>Total Harga (Otomatis: Qty &times; Harga Satuan)</label>
-              <input type="number" id="editFinal" name="final" readonly />
+            <div class="auto-total-box">
+              <span class="auto-total-label">Total Harga Otomatis</span>
+              <span class="auto-total-value" id="editFinalText">Rp 0</span>
+              <span class="auto-total-hint">Dihitung otomatis dari Qty &times; Harga Satuan.</span>
+              <input type="hidden" id="editFinal" name="final" value="0" />
             </div>
             <div class="form-group">
               <label>Waktu Produksi / Keterangan</label>
@@ -1276,16 +1362,24 @@
         }
       }
 
+      function formatRupiahHargaSampel(nilai) {
+        return 'Rp ' + Number(nilai || 0).toLocaleString('id-ID', { maximumFractionDigits: 0 });
+      }
+
       function hitungAddTotal() {
         const qty = parseFloat(document.getElementById('addQty').value) || 0;
         const harga = parseFloat(document.getElementById('addHarga').value) || 0;
-        document.getElementById('addFinal').value = Math.round(qty * harga);
+        const total = qty * harga;
+        document.getElementById('addFinal').value = total;
+        document.getElementById('addFinalText').textContent = formatRupiahHargaSampel(total);
       }
 
       function hitungEditTotal() {
         const qty = parseFloat(document.getElementById('editQty').value) || 0;
         const harga = parseFloat(document.getElementById('editHarga').value) || 0;
-        document.getElementById('editFinal').value = Math.round(qty * harga);
+        const total = qty * harga;
+        document.getElementById('editFinal').value = total;
+        document.getElementById('editFinalText').textContent = formatRupiahHargaSampel(total);
       }
 
       function openModal() {
@@ -1317,6 +1411,7 @@
         document.getElementById('editQty').value = qty;
         document.getElementById('editHarga').value = harga;
         document.getElementById('editFinal').value = final;
+        document.getElementById('editFinalText').textContent = formatRupiahHargaSampel(final);
         document.getElementById('editKeterangan').value = keterangan || '';
         document.getElementById('editItemModal').style.display = 'flex';
       }
