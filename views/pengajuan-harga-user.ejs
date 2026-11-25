@@ -927,9 +927,25 @@
               </div>
               <div class="ph-grid">
                 <div class="ph-field ph-col-span-2">
-                  <label for="ph-spesifikasi">Spesifikasi Lengkap Barang</label>
-                  <textarea id="ph-spesifikasi" name="spesifikasi" class="ph-input" rows="4" placeholder="Warna: Matte black&#10;Ukuran: 20oz (270 ml)&#10;Fitur: Triple-insulated stainless steel"></textarea>
-                </div>
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px;">
+                    <label for="ph-spesifikasi" style="margin-bottom: 0;">Spesifikasi Lengkap Barang</label>
+                    <button type="button" onclick="sisipkanTemplateSpesifikasi('ph-spesifikasi')" style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 7px; border: 1px solid #e2e8f0; background: #f8fafc; color: #475569; font-size: 11px; font-weight: 700; cursor: pointer;">
+                      <!-- TARUH KODE SVG DI SINI -->
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                      </svg>
+                      <span>Sisipkan Template</span>
+                    </button>
+                  </div>
+                  <textarea id="ph-spesifikasi" name="spesifikasi" class="ph-input" rows="6" placeholder="Warna: Matte black
+                  Ukuran: 20oz (270 ml)
+                  Fitur: Triple-insulated stainless steel"></textarea>
+                  </div>
+               </div>
                 <div class="ph-field ph-col-span-2">
                   <label for="ph-keterangan">Keterangan / Catatan Tambahan</label>
                   <textarea id="ph-keterangan" name="keterangan" class="ph-input" rows="3" placeholder="Catatan khusus, ketentuan garansi, atau opsi sampel..."></textarea>
@@ -995,6 +1011,32 @@
     <% } %>
 
     <script>
+      var TEMPLATE_SPESIFIKASI_PH = [
+        'Brand: ',
+        'Jenis/Model: ',
+        'Kapasitas/Ukuran: ',
+        'Warna: ',
+        'Fitur: ',
+        'Branding: '
+      ].join('\n');
+
+      function sisipkanTemplateSpesifikasi(idTextarea) {
+        var el = document.getElementById(idTextarea);
+        if (!el) return;
+
+        var isiSaatIni = el.value.trim();
+        if (!isiSaatIni) {
+          el.value = TEMPLATE_SPESIFIKASI_PH;
+        } else if (isiSaatIni.indexOf('Brand:') === -1) {
+          el.value = el.value.replace(/\s*$/, '') + '\n\n' + TEMPLATE_SPESIFIKASI_PH;
+        }
+
+        el.focus();
+        var posisiKursor = el.value.indexOf('Brand: ') + 'Brand: '.length;
+        if (posisiKursor >= 'Brand: '.length && typeof el.setSelectionRange === 'function') {
+          el.setSelectionRange(posisiKursor, posisiKursor);
+        }
+      }
       var PH_DATA = <%- jsonUntukScriptPH(dataPH) %>;
       var PH_PROJECT = <%- jsonUntukScriptPH(projectPH ? {
         id: String(projectPH._id),

@@ -796,9 +796,16 @@
                   <label for="ph-qty">Jumlah (Qty) *</label>
                   <input type="number" id="ph-qty" name="qty" class="ph-input" min="1" value="1" required oninput="hitungLive()" />
                 </div>
-                <div class="ph-field">
+                 <div class="ph-field">
                   <label for="ph-satuan">Satuan *</label>
-                  <input type="text" id="ph-satuan" name="satuan" class="ph-input" value="pcs" required />
+                  <select id="ph-satuan" name="satuan" class="ph-input">
+                    <option value="Pcs">Pcs</option>
+                    <option value="Unit">Unit</option>
+                    <option value="Pasang">Pasang</option>
+                    <option value="Lusin">Lusin</option>
+                    <option value="Rim">Rim</option>
+                    <option value="Set">Set</option>
+                  </select>
                 </div>
                 <div class="ph-field">
                   <label for="ph-tim">Tim Produksi / Vendor *</label>
