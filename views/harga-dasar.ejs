@@ -4,7 +4,7 @@
     <%- include('partials/head') %>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard Admin - Rincian Harga Dasar</title>
+    <title>Dashboard Admin - Rincian Harga Sampel</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -808,7 +808,7 @@
             <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
         </button>
-        <h1>Rincian Harga Dasar</h1>
+        <h1>Rincian Harga Sampel</h1>
         <p>Kelola kalkulasi harga barang dan material dasar.</p>
       </header>
 
@@ -820,7 +820,7 @@
       <section class="card-grid">
         <div class="stat-card card-blue">
           <div class="card-header">
-            <span class="card-title">Total Item Harga Dasar</span>
+            <span class="card-title">Total Item Harga Sampel</span>
             <div class="icon-wrapper icon-blue">
               <svg
                 viewBox="0 0 24 24"
@@ -908,7 +908,7 @@
             placeholder="Cari barang..."
             onkeyup="filterItem()"
           />
-          <button class="btn-add" onclick="openModal()">+ Tambah Harga Dasar</button>
+          <button class="btn-add" onclick="openModal()">+ Tambah Harga Sampel</button>
           <a
             href="/export-harga-dasar-excel"
             style="
@@ -937,7 +937,7 @@
               <th>Nama Barang</th>
               <th>Merk</th>
               <th>Spesifikasi</th>
-              <th>Stok</th>
+              <th>Qty</th>
               <th>Harga</th>
               <th>Harga Satuan</th>
               <th>Final Price</th>
@@ -949,7 +949,7 @@
           <tbody>
             <% if (!items || items.length === 0) { %>
             <tr>
-              <td colspan="12" style="text-align: center; padding: 20px; color: #888">Belum ada data harga dasar.</td>
+              <td colspan="12" style="text-align: center; padding: 20px; color: #888">Belum ada data harga sampel.</td>
             </tr>
             <% } else { %>
             <% items.forEach(function(item) { %>
@@ -1038,7 +1038,7 @@
     <!-- MODAL TAMBAH HARGA DASAR -->
     <div class="modal" id="itemModal">
       <div class="modal-content">
-        <h3 style="margin-bottom: 15px; color: #7a1b1b">Tambah Harga Dasar Baru</h3>
+        <h3 style="margin-bottom: 15px; color: #7a1b1b">Tambah Harga Sampel Baru</h3>
 
         <!-- TAMBAHKAN enctype DI SINI -->
         <form action="/harga-dasar/add" method="POST" enctype="multipart/form-data">
@@ -1055,7 +1055,7 @@
           <div class="form-group"
             ><label>Spesifikasi</label><input type="text" name="spesifikasi" placeholder="Ukuran / Bahan"
           /></div>
-          <div class="form-group"><label>Stok</label><input type="number" name="qty" value="1" min="1" required /></div>
+          <div class="form-group"><label>Qty</label><input type="number" name="qty" value="1" min="1" required /></div>
           <div class="form-group"
             ><label>Harga (Satuan Dasar)</label><input type="number" name="harga" placeholder="0" required
           /></div>
@@ -1089,7 +1089,7 @@
     <!-- MODAL EDIT HARGA DASAR -->
     <div class="modal" id="editItemModal">
       <div class="modal-content">
-        <h3 style="margin-bottom: 15px; color: #7a1b1b">Edit Harga Dasar</h3>
+        <h3 style="margin-bottom: 15px; color: #7a1b1b">Edit Harga Sampel</h3>
 
         <!-- TAMBAHKAN enctype DI SINI DAN ACTION SESUAIKAN DENGAN ROUTE EDIT -->
         <form id="editForm" action="" method="POST" enctype="multipart/form-data">
@@ -1110,7 +1110,7 @@
             ><label>Spesifikasi</label><input type="text" id="editSpesifikasi" name="spesifikasi"
           /></div>
           <div class="form-group"
-            ><label>Stok</label><input type="number" id="editQty" name="qty" min="1" required
+            ><label>Qty</label><input type="number" id="editQty" name="qty" min="1" required
           /></div>
           <div class="form-group"
             ><label>Harga (Satuan Dasar)</label><input type="number" id="editHarga" name="harga" required
