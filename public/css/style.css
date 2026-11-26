@@ -1,0 +1,28 @@
+/* ============================================================
+   SCROLL HALUS — berlaku untuk seluruh website.
+   ============================================================ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Kontainer internal yang bisa scroll ikut halus juga. */
+.sidebar,
+.modal,
+.modal-content,
+.table-responsive-wrapper,
+.table-responsive-container {
+  scroll-behavior: smooth;
+}
+
+/* Hormati preferensi pengguna yang tidak ingin animasi. */
+@media (prefers-reduced-motion: reduce) {
+  html,
+  .sidebar,
+  .modal,
+  .modal-content,
+  .table-responsive-wrapper,
+  .table-responsive-container {
+    scroll-behavior: auto;
+  }
+}
