@@ -1252,20 +1252,17 @@
         color: #000000;
       }
     </style>
+    <link rel="stylesheet" href="/css/system-banner.css" />
   </head>
   <body>
-    <!-- SIDEBAR OVERLAY -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
     <!-- SIDEBAR NAVIGATION (ADMIN ONLY) -->
      <%- include('partials/sidebar-admin', { activePage: 'dashboard' }) %>
 
     <!-- MAIN DASHBOARD CONTENT -->
     <main class="main-content">
-      <!-- TOPBAR -->
-      <header class="topbar">
-        <div class="topbar-left">
-          <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
+      <header class="system-banner no-print">
+        <div class="banner-title-wrap">
+          <button type="button" class="banner-toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar" aria-label="Buka Sidebar">
             <svg
               width="20"
               height="20"
@@ -1281,13 +1278,14 @@
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
           </button>
-          <span class="topbar-badge">
-            <span class="dot-pulse"></span>
-            Admin Database System — Admin Master
-          </span>
+          <div class="banner-text">
+            <span>System Pengadaan &bull; Admin</span>
+            <h1>Dashboard Admin</h1>
+            <p>Ringkasan aktivitas dan akses cepat ke seluruh modul pengadaan.</p>
+          </div>
         </div>
 
-        <div class="topbar-right">
+        <div class="banner-actions">
           <div class="live-clock-badge" id="liveClockWrap">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>

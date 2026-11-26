@@ -1152,31 +1152,39 @@
   
     }
   </style>
+  <link rel="stylesheet" href="/css/system-banner.css" />
 
 </head>
 
 <body>
 
-  <!-- Overlay Latar Belakang Gelap untuk Menutup Sidebar -->
-  <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
-
   <!-- Sidebar Navigasi -->
   <%- include('partials/sidebar-user', { activePage: 'data-vendor' }) %>
 
-  <div class="header-container">
-    <button class="menu-btn" onclick="toggleSidebar()" title="Buka Sidebar">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-    </button>
-    <h1>Data Vendor</h1>
-    <p class="subtitle">
-      Kelola dan tambahkan data pemasok serta bahan baku dengan akurasi tinggi, <br>
-      kontrol penilaian kualitas, dan kepatuhan rantai pasok.
-    </p>
-  </div>
+  <header class="system-banner no-print">
+    <div class="banner-title-wrap">
+      <button type="button" class="banner-toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar" aria-label="Buka Sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="banner-text">
+        <span>System Pengadaan &bull; User</span>
+        <h1>Data Vendor</h1>
+        <p>Kelola pemasok, penilaian kualitas, dan kepatuhan rantai pasok.</p>
+      </div>
+    </div>
+    <div class="banner-actions">
+      <a href="/export-vendor-excel" class="ph-btn ph-btn-excel">
+        <i class="fa-solid fa-file-excel"></i> <span>Export Excel</span>
+      </a>
+      <button type="button" class="btn-banner-primary" onclick="openAddModal()">
+        <i class="fa-solid fa-plus"></i> <span>Tambah Vendor</span>
+      </button>
+    </div>
+  </header>
 
   <!-- Statistik Cards -->
   <div class="card-grid">
@@ -1261,21 +1269,6 @@
 
       <!-- Input pencarian langsung sejajar -->
       <input type="text" id="searchInput" class="search-input" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Cari vendor...">
-
-      <!-- Tombol Tambah Vendor -->
-      <button class="btn" onclick="openAddModal()" style="background-color: #7a1b1b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer;">+ Tambah Vendor</button>
-      <!-- Tombol Export Excel -->
-      <a href="/export-vendor-excel" style="padding: 10px 18px; background-color: #1d6f42; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">
-        Export Excel <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-type-xls">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-            <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" />
-            <path d="M4 15l4 6" />
-            <path d="M4 21l4 -6" />
-            <path d="M17 20.25c0 .414 .336 .75 .75 .75h1.25a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-1a1 1 0 0 1 -1 -1v-1a1 1 0 0 1 1 -1h1.25a.75 .75 0 0 1 .75 .75" />
-            <path d="M11 15v6h3" />
-          </svg>      
-      </a>
 
       <!-- Tombol & Panel Filter -->
       <div class="filter-container">
@@ -1483,7 +1476,7 @@
       // 1. Sidebar & Dropdown Script
       function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('overlay').classList.toggle('active');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
       }
 
       function toggleDropdown(element) {

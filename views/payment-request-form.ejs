@@ -113,18 +113,33 @@
         .pr-section { box-shadow: none; break-inside: avoid; }
       }
     </style>
+    <link rel="stylesheet" href="/css/system-banner.css" />
   </head>
   <body>
     <%- include('partials/sidebar-user', { activePage: 'payment-request' }) %>
 
     <main class="main-content">
-      <div class="pr-banner">
-        <div>
-          <h1>Payment Request (PR)</h1>
-          <p>PT. DIAN GIRI SAPUTRA</p>
+      <header class="system-banner no-print">
+        <div class="banner-title-wrap">
+          <button type="button" class="banner-toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar" aria-label="Buka Sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="banner-text">
+            <span>System Pengadaan &bull; User</span>
+            <h1>Payment Request (PR)</h1>
+            <p>PT. DIAN GIRI SAPUTRA</p>
+          </div>
         </div>
-        <a class="btn-kembali" href="/payment-request-user">← Kembali ke Daftar PR</a>
-      </div>
+        <div class="banner-actions">
+          <a href="/payment-request-user" class="ph-btn ph-btn-neutral">
+            <i class="fa-solid fa-arrow-left"></i> <span>Kembali ke Daftar PR</span>
+          </a>
+        </div>
+      </header>
 
       <% const hariIni = new Date().toISOString().slice(0, 10); %>
       <form class="pr-form" action="/payment-request-user/add" method="POST" enctype="multipart/form-data" id="formPR">

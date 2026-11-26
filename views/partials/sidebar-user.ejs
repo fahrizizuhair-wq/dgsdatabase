@@ -8,6 +8,7 @@
     : 'DG';
   var _stokActive = ['stok-masuk', 'stok-keluar', 'stok-opname', 'stok-gudang'].indexOf(_active) !== -1;
   var _laporanActive = ['laporan', 'surat-jalan', 'lpj'].indexOf(_active) !== -1;
+  var _masterActive = ['vendor', 'data-vendor', 'data-kain'].indexOf(_active) !== -1;
 %>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
@@ -59,7 +60,7 @@
           <span>Dashboard Utama</span>
         </a>
       </li>
-      <li class="nav-item <%= _active === 'vendor' ? 'active' : '' %>">
+      <li class="nav-item dropdown <%= _masterActive ? 'active' : '' %>">
         <a href="javascript:void(0)" class="dropdown-toggle" onclick="toggleDropdown(this)">
           <div class="dropdown-toggle-left">
             <svg
@@ -262,15 +263,6 @@
         </ul>
       </li>
 
-      <li class="nav-item <%= _active === 'data-kain' ? 'active' : '' %>">
-        <a href="/data-bahan-kain">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shirt preview-icon"><path 
-               d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
-          <span>Data Kain</span>
-        </a>
-      </li>
-
       <li class="nav-item <%= _active === 'materi-approval' ? 'active' : '' %>">
         <a href="/materi-approval-user">
           <svg
@@ -325,3 +317,22 @@
     </a>
   </div>
 </aside>
+
+<script>
+  // Fallback sidebar: dipakai jika halaman belum mendefinisikan fungsinya.
+  if (typeof window.toggleSidebar !== 'function') {
+    window.toggleSidebar = function () {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay') || document.getElementById('overlay');
+      if (sidebar) sidebar.classList.toggle('active');
+      if (overlay) overlay.classList.toggle('active');
+    };
+  }
+
+  if (typeof window.toggleDropdown !== 'function') {
+    window.toggleDropdown = function (element) {
+      const parent = element.closest('.nav-item.dropdown') || element.parentElement;
+      if (parent) parent.classList.toggle('active');
+    };
+  }
+</script>

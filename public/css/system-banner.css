@@ -1,0 +1,175 @@
+/* ============================================================
+   SYSTEM BANNER GLOBAL
+   Headbar standar yang dipakai halaman Harga Sampel dan halaman
+   utama lainnya agar tampilan konsisten.
+   ============================================================ */
+
+.system-banner {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 18px 22px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.banner-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.banner-toggle-btn {
+  width: 38px;
+  height: 38px;
+  font-size: 20px;
+  padding: 0;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin: 0 !important;
+}
+
+.banner-toggle-btn:hover {
+  background: #f1f5f9;
+  color: #7a1b1b;
+}
+
+.banner-text {
+  min-width: 0;
+}
+
+.banner-text span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.banner-text h1 {
+  margin: 2px 0 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.banner-text p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.btn-banner-primary {
+  background: #7a1b1b;
+  color: #ffffff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(122, 27, 27, 0.25);
+  text-decoration: none;
+  margin: 0;
+}
+
+.btn-banner-primary:hover {
+  background: #5c1414;
+  box-shadow: 0 6px 16px rgba(122, 27, 27, 0.35);
+}
+
+.ph-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 15px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+  margin: 0;
+}
+
+.ph-btn-neutral {
+  background: #ffffff;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.ph-btn-neutral:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.ph-btn-excel {
+  background: #1d6f42;
+  color: #ffffff;
+  border-color: #1d6f42;
+}
+
+.ph-btn-excel:hover {
+  background: #155d35;
+  border-color: #155d35;
+  color: #ffffff;
+}
+
+@media (max-width: 900px) {
+  .system-banner {
+    padding: 14px 16px;
+    border-radius: 14px;
+    gap: 12px;
+  }
+  .banner-text h1 {
+    font-size: 17px;
+  }
+  .banner-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+  .banner-actions > * {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+@media print {
+  .system-banner,
+  .banner-toggle-btn,
+  .btn-banner-primary,
+  .ph-btn {
+    display: none !important;
+  }
+}
