@@ -58,7 +58,9 @@
         }
       }
     </style>
-  </head>
+    <link rel="stylesheet" href="/css/global-background.css" />
+  <script src="/js/animate-numbers.js" defer></script>
+</head>
   <body data-halaman-detail="stok-gudang">
     <% if (peran === 'admin') { %>
       <%- include('partials/sidebar-admin', { activePage: 'stok-gudang', adminUser: adminUser }) %>

@@ -699,6 +699,8 @@
   </style>
 
     <link rel="stylesheet" href="/css/system-banner.css" />
+  <link rel="stylesheet" href="/css/global-background.css" />
+  <script src="/js/animate-numbers.js" defer></script>
 </head>
   <body>
 
@@ -855,7 +857,7 @@
                 <td><%= stokAwal %></td>
                 <td class="text-success">+<%= stokMasuk %></td>
                 <td class="text-danger">-<%= stokKeluar %></td>
-                <td class="<%= kelasWarna %>"><%= totalAkhir %></td>
+                <td class="<%= kelasWarna %>" data-animate-number><%= totalAkhir %></td>
                 <td><%= item.diinputOleh || '-' %></td>
               </tr>
               <% }); %>
