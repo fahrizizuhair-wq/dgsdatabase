@@ -896,25 +896,30 @@
     }
   </style>
 
+    <link rel="stylesheet" href="/css/system-banner.css" />
 </head>
 
 <body>
 
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
    <%- include('partials/sidebar-admin', { activePage: 'laporan' }) %>
 
   <main class="main-content">
-    <header class="header-section">
-      <button class="toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-      </button>
-      <h1>Pusat Laporan & Rekapitulasi</h1>
-      <p>Kelola, unggah, dan cetak dokumen laporan database.</p>
+    <header class="system-banner no-print">
+      <div class="banner-title-wrap">
+        <button type="button" class="banner-toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar" aria-label="Buka Sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div class="banner-text">
+          <span>System Pengadaan &bull; Admin</span>
+          <h1>Pusat Laporan &amp; Rekapitulasi</h1>
+          <p>Kelola, unggah, dan cetak dokumen laporan database.</p>
+        </div>
+      </div>
     </header>
 
     <%
@@ -1208,8 +1213,10 @@
     }
 
     function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('active');
-      document.getElementById('sidebarOverlay').classList.toggle('active');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay') || document.getElementById('overlay');
+      if (sidebar) sidebar.classList.toggle('active');
+      if (overlay) overlay.classList.toggle('active');
     }
 
     function toggleDropdown(el) {
