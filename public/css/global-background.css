@@ -1,14 +1,14 @@
 /* ============================================================
-   BACKGROUND GLOBAL — kanvas terang dengan bingkai marun halus.
-   Hanya mengubah background; layout, tipografi, dan komponen lain
-   sengaja tidak disentuh.
+   BACKGROUND GLOBAL — kanvas marun gelap di seluruh halaman.
+   Semakin ke bawah warna makin gelap. Area konten dashboard
+   tetap putih (lihat .dashboard-main di bawah).
    ============================================================ */
 
 :root {
-  --bg-canvas: #f3f5f8;
-  --frame-maroon-dark: #4e0c0c;
-  --frame-maroon-mid: #7a1b1b;
-  --frame-maroon-soft: #962828;
+  --bg-canvas: #560f0f;
+  --frame-maroon-dark: #2b0606;
+  --frame-maroon-mid: #4e0c0c;
+  --frame-maroon-soft: #7a1b1b;
 }
 
 body {
@@ -16,35 +16,35 @@ body {
   position: relative;
 }
 
+/* Marun gelap yang terus mendalam ke arah bawah. */
 body::before {
   content: "" !important;
   position: fixed !important;
   inset: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(78, 12, 12, 0.94) 0%,
-      rgba(122, 27, 27, 0.86) 24%,
-      rgba(243, 245, 248, 0.96) 52%,
-      rgba(243, 245, 248, 0.98) 100%
-    ) !important;
+  background: linear-gradient(
+    to bottom,
+    #560f0f 0%,
+    #2b0606 100%
+  ) !important;
   z-index: -1 !important;
   pointer-events: none !important;
 }
 
+/* Aksentuasi bingkai dalam tipis agar terasa rapi & terstruktur. */
 body::after {
   content: "" !important;
   position: fixed !important;
   inset: 12px !important;
   border-radius: 22px !important;
-  border: 1px solid rgba(122, 27, 27, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   z-index: -1 !important;
   pointer-events: none !important;
 }
 
-/* Dashboard: area dari headbar sampai bawah tetap putih. */
+/* Dashboard: area dari headbar sampai bawah berwarna putih.
+   Warna putih ini HANYA untuk isi dashboard, bukan background utama. */
 .dashboard-main {
   background: #ffffff !important;
   min-height: 100vh;
