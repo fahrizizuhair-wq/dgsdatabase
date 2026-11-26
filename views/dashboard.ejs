@@ -51,6 +51,7 @@
       color: var(--text-dark);
       display: flex;
       min-height: 100vh;
+      margin: 0;
       position: relative;
       background-color: #f4f6f9;
       -webkit-font-smoothing: antialiased;
@@ -64,9 +65,17 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: linear-gradient(135deg, rgba(88, 14, 14, 0.90) 0%, rgba(122, 27, 27, 0.45) 35%, rgba(244, 246, 249, 0.96) 80%),
-        url('/images/background.jpg') no-repeat center top fixed;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(88, 14, 14, 0.92) 0%,
+          rgba(122, 27, 27, 0.58) 38%,
+          rgba(244, 246, 249, 0.88) 78%,
+          rgba(244, 246, 249, 0.95) 100%
+        ),
+        url('/images/background.jpg') no-repeat center top;
       background-size: cover;
+      backdrop-filter: blur(3px);
       z-index: -1;
       pointer-events: none;
     }
