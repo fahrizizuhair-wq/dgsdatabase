@@ -59,25 +59,30 @@
       content: "" !important;
       position: fixed !important;
       inset: 0 !important;
-      z-index: 0 !important;
+      z-index: 1 !important;
       pointer-events: none !important;
       background:
-        /* 1. Titik pusat silau putih-emas terang di pojok kiri atas */
+        /* Silau cahaya putih-emas sangat terang di sudut kiri atas */
         radial-gradient(
-          circle at 0% 0%,
-          rgba(255, 252, 240, 1) 0%,
-          rgba(255, 224, 178, 0.85) 14%,
-          rgba(225, 110, 95, 0.45) 30%,
-          transparent 55%
+          circle at -2% -2%,
+          rgba(255, 250, 240, 0.98) 0%,
+          rgba(255, 218, 175, 0.82) 12%,
+          rgba(232, 105, 85, 0.45) 26%,
+          transparent 48%
         ),
-        /* 2. Pendaran cahaya merah cerah meluas ke kanan dan bawah */
+        /* Pendaran merah cerah yang menyebar ke area kiri atas */
         radial-gradient(
-          circle at 12% 12%,
-          rgba(210, 55, 55, 0.75) 0%,
-          transparent 60%
+          ellipse at 10% 10%,
+          rgba(215, 52, 52, 0.78) 0%,
+          transparent 52%
         ),
-        /* 3. Dasar marun gelap */
-        linear-gradient(145deg, #470a0a 0%, #681212 45%, #380707 100%) !important;
+        /* Gradasi dasar marun gelap */
+        linear-gradient(
+          145deg,
+          #4a0b0b 0%,
+          #681212 42%,
+          #340606 100%
+        ) !important;
     }
 
     /* SIDEBAR OVERLAY */
@@ -1370,16 +1375,10 @@
     .footer-logo {
       color: #7a1b1b;
     }
-    .dashboard-wrapper {
-      background-color: #fafafff9;
-      max-width: 1200px;       /* Sesuaikan dengan lebar maksimal kontainer saat ini */
-      margin: 0 auto;          /* Posisi tengah */
-      padding: 24px;           /* Jarak antara tepi putih dengan card di dalamnya */
-      border-radius: 24px;     /* Lengkungan sudut luar */
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;               /* Jarak antar baris section di dalam wrapper */
+   .dashboard-wrapper {
+      background-color: #f8fafc !important;
+      position: relative;
+      z-index: 2;
     }
 
     /* Opsional: Beri warna abu-abu sangat terang / border pada card di dalamnya agar tetap kontras */
@@ -1398,8 +1397,7 @@
       box-shadow: 0 6px 14px rgba(122, 27, 27, 0.08);
       transition: all 0.2s ease;
     }
-
-  </style>
+ </style>
   <link rel="stylesheet" href="/css/system-banner.css" />
   <link rel="stylesheet" href="/css/global-background.css" />
   <script src="/js/animate-numbers.js" defer></script>
