@@ -1383,11 +1383,20 @@
     }
 
     /* Opsional: Beri warna abu-abu sangat terang / border pada card di dalamnya agar tetap kontras */
-    .dashboard-wrapper .card,
+    .dashboard-wrapper .dashboard-header,
     .dashboard-wrapper .welcome-banner,
-    .dashboard-wrapper .dashboard-header {
-      background-color: #f8fafc; 
-      border: 1px solid #e2e8f0;
+    .dashboard-wrapper .stat-card,
+    .dashboard-wrapper .system-status,
+    .dashboard-wrapper .quick-card {
+      background-color: #f8fafc; /* Abu-abu lembut agar terpisah dari latar putih wrapper */
+      border: 1px solid #cbd5e1; /* Garis tepi tegas (Slate-300) */
+      border-radius: 16px;       /* Samakan atau sesuaikan radius sudut card */
+    }
+    .dashboard-wrapper .quick-card:hover {
+      background-color: #ffffff;
+      border-color: #7a1b1b;
+      box-shadow: 0 6px 14px rgba(122, 27, 27, 0.08);
+      transition: all 0.2s ease;
     }
 
   </style>
