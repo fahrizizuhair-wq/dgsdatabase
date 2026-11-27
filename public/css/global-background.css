@@ -1,7 +1,6 @@
 /* ============================================================
-   BACKGROUND GLOBAL — kanvas marun gelap di seluruh halaman.
-   Semakin ke bawah warna makin gelap. Area konten dashboard
-   tetap putih (lihat .dashboard-main di bawah).
+   BACKGROUND GLOBAL — marun gelap di seluruh halaman, termasuk dashboard.
+   Semakin ke bawah warna makin gelap. Tidak ada area putih.
    ============================================================ */
 
 :root {
@@ -41,14 +40,6 @@ body::after {
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   z-index: -1 !important;
   pointer-events: none !important;
-}
-
-/* Dashboard: area dari headbar sampai bawah berwarna putih.
-   Warna putih ini HANYA untuk isi dashboard, bukan background utama. */
-.dashboard-main {
-  background: #ffffff !important;
-  min-height: 100vh;
-  box-sizing: border-box;
 }
 
 @media print {
