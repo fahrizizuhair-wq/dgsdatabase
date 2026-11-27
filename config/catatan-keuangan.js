@@ -48,8 +48,16 @@ const META_KATEGORI = {
 const KATEGORI_DEFAULT = 'Lainnya';
 
 const PALETTE_WARNA = [
-  '#7a1b1b', '#c9933b', '#2c4c70', '#b84a39', '#0f766e',
-  '#881337', '#d97706', '#334155', '#9e2a2b', '#64748b',
+  '#0ea5e9', // Sky Blue (belum dipakai di META_KATEGORI)
+  '#f97316', // Warm Orange (memperkaya spektrum hangat)
+  '#14b8a6', // Teal (seimbang di antara hijau & biru)
+  '#ec4899', // Rose Pink (pembeda jelas dari ungu & merah)
+  '#6366f1', // Indigo
+  '#a855f7', // Purple
+  '#84cc16', // Lime
+  '#06b6d4', // Cyan
+  '#d97706', // Amber
+  '#64748b', // Slate
 ];
 
 let penunjukWarna = 0;
