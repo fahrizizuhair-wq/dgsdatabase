@@ -38,9 +38,9 @@ const META_KATEGORI = {
   'Anggaran Kasbon': { warna: '#33a849', ikon: 'banknote' },
   'Pencairan Kembali': { warna: '#e8df37', ikon: 'rotate-ccw' },
   'Makan & Minum': { warna: 'rgb(91, 77, 161)', ikon: 'utensils' },
-  Transportasi: { warna: '#a229b7', ikon: 'car' },
-  Belanja: { warna: '#c32d2d', ikon: 'shopping-bag' },
-  Tagihan: { warna: 'rgb(255, 226, 37)', ikon: 'receipt' },
+  Transportasi: { warna: '#dfe82e', ikon: 'car' },
+  Belanja: { warna: '#2fe162', ikon: 'shopping-bag' },
+  Tagihan: { warna: 'rgb(232, 52, 52)', ikon: 'receipt' },
   'Gaji/Pendapatan': { warna: '#3fc34d', ikon: 'wallet' },
   Lainnya: { warna: '#56595e', ikon: 'ellipsis' },
 };
