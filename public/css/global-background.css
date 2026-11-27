@@ -15,18 +15,27 @@ body {
   position: relative;
 }
 
-/* Marun gelap yang terus mendalam ke arah bawah. */
+/* Marun gelap yang terus mendalam ke arah bawah, dengan silau cahaya
+   hangat di pojok kiri atas. */
 body::before {
   content: "" !important;
   position: fixed !important;
   inset: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  background: linear-gradient(
-    to bottom,
-    #560f0f 0%,
-    #2b0606 100%
-  ) !important;
+  background:
+    radial-gradient(
+      ellipse 58% 48% at 0% 0%,
+      rgba(255, 244, 224, 0.42) 0%,
+      rgba(255, 205, 160, 0.20) 24%,
+      rgba(201, 147, 59, 0.07) 50%,
+      rgba(86, 15, 15, 0) 78%
+    ),
+    linear-gradient(
+      to bottom,
+      #560f0f 0%,
+      #2b0606 100%
+    ) !important;
   z-index: -1 !important;
   pointer-events: none !important;
 }
