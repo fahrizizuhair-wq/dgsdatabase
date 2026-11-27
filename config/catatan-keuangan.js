@@ -36,11 +36,11 @@ const BERSAMA = [
 // Warna & ikon opsional. Tidak wajib diisi untuk kategori baru.
 const META_KATEGORI = {
   'Anggaran Kasbon': { warna: '#7a1b1b', ikon: 'banknote' },
-  'Pencairan Kembali': { warna: '#8b5cf6', ikon: 'rotate-ccw' },
-  'Makan & Minum': { warna: '#f59e0b', ikon: 'utensils' },
-  Transportasi: { warna: '#3b82f6', ikon: 'car' },
-  Belanja: { warna: '#ec4899', ikon: 'shopping-bag' },
-  Tagihan: { warna: '#a855f7', ikon: 'receipt' },
+  'Pencairan Kembali': { warna: '#0f9f6e', ikon: 'rotate-ccw' },
+  'Makan & Minum': { warna: '#b84a39', ikon: 'utensils' },
+  Transportasi: { warna: '#2c4c70', ikon: 'car' },
+  Belanja: { warna: '#991b1b', ikon: 'shopping-bag' },
+  Tagihan: { warna: '#c9933b', ikon: 'receipt' },
   'Gaji/Pendapatan': { warna: '#059669', ikon: 'wallet' },
   Lainnya: { warna: '#64748b', ikon: 'ellipsis' },
 };
@@ -48,8 +48,8 @@ const META_KATEGORI = {
 const KATEGORI_DEFAULT = 'Lainnya';
 
 const PALETTE_WARNA = [
-  '#0ea5e9', '#14b8a6', '#f97316', '#6366f1', '#84cc16',
-  '#e11d48', '#0891b2', '#d97706', '#7c3aed', '#65a30d',
+  '#7a1b1b', '#c9933b', '#2c4c70', '#b84a39', '#0f766e',
+  '#881337', '#d97706', '#334155', '#9e2a2b', '#64748b',
 ];
 
 let penunjukWarna = 0;
