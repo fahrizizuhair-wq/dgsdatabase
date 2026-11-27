@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= pageTitle || 'Cetak Payment Request' %></title>
     <style>
+      html,
       body {
         margin: 0;
+        background: #fff !important;
+      }
+      body::before,
+      body::after {
+        display: none !important;
       }
       .no-print {
         padding: 10px 14px;
