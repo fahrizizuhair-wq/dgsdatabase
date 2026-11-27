@@ -57,28 +57,38 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Ambient Luxury Background */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background:
-        linear-gradient(
-          145deg,
-          rgba(88, 14, 14, 0.92) 0%,
-          rgba(122, 27, 27, 0.58) 38%,
-          rgba(244, 246, 249, 0.88) 78%,
-          rgba(244, 246, 249, 0.95) 100%
-        ),
-        url('/images/background.jpg') no-repeat center top;
-      background-size: cover;
-      backdrop-filter: blur(3px);
-      z-index: -1;
-      pointer-events: none;
-    }
+   /* Ambient Luxury Background dengan Cahaya Silau Pojok Kiri Atas */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background:
+          /* 1. Inti cahaya silau hangat (emas-putih lembut) tepat di sudut kiri atas */
+          radial-gradient(
+            circle at 0% 0%,
+            rgba(255, 232, 205, 0.42) 0%,
+            rgba(212, 110, 95, 0.24) 22%,
+            transparent 48%
+          ),
+          /* 2. Pendaran cahaya merah marun cerah yang menyebar ke area sekitar */
+          radial-gradient(
+            ellipse at 14% 10%,
+            rgba(175, 45, 45, 0.55) 0%,
+            transparent 58%
+          ),
+          /* 3. Gradasi dasar merah marun mewah */
+          linear-gradient(
+            145deg,
+            #4a0b0b 0%,
+            #6e1515 35%,
+            #3d0909 100%
+          );
+        z-index: -1;
+        pointer-events: none;
+      }
 
     /* SIDEBAR OVERLAY */
     .sidebar-overlay {
