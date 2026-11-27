@@ -10,8 +10,15 @@
   --frame-maroon-soft: #7a1b1b;
 }
 
-body {
+/* Warna dasar marun ada di html, bukan di body. Body sengaja dibuat
+   transparan supaya layer silau (body::before, z-index:-1) tidak tertutup
+   oleh background opaque—termasuk di dashboard. */
+html {
   background-color: var(--bg-canvas) !important;
+}
+
+body {
+  background-color: transparent !important;
   position: relative;
 }
 
@@ -52,6 +59,10 @@ body::after {
 }
 
 @media print {
+  html,
+  body {
+    background: #ffffff !important;
+  }
   body::before,
   body::after {
     display: none !important;
