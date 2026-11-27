@@ -347,6 +347,28 @@
         color: #fca5a5;
       }
 
+      /* GLASS WRAPPER - lapisan kaca transparan di atas background maroon, membungkus semua card */
+      .glass-wrapper {
+        position: relative;
+        z-index: 1;
+        padding: 24px;
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(14px) saturate(130%);
+        -webkit-backdrop-filter: blur(14px) saturate(130%);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow:
+          0 20px 50px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      }
+
+      @media (max-width: 768px) {
+        .glass-wrapper {
+          padding: 12px;
+          border-radius: 20px;
+        }
+      }
+
       /* MAIN CONTENT */
       .main-content {
         flex: 1;
@@ -1255,6 +1277,35 @@
     <link rel="stylesheet" href="/css/system-banner.css" />
     <link rel="stylesheet" href="/css/global-background.css" />
   <script src="/js/animate-numbers.js" defer></script>
+  <!-- Hilangkan garis/frame di belakang panel kaca (override setelah CSS eksternal) -->
+  <style>
+    html body main.main-content,
+    html body main.main-content::before,
+    html body main.main-content::after,
+    html::before, html::after,
+    body::after {
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    html body main.main-content::before,
+    html body main.main-content::after,
+    html::before, html::after,
+    body::after {
+      content: none !important;
+      display: none !important;
+    }
+
+    html body main.main-content {
+      background: transparent !important;
+      border-radius: 0 !important;
+    }
+
+    html, body {
+      overflow-x: hidden !important;
+    }
+  </style>
 </head>
   <body>
     <!-- SIDEBAR NAVIGATION (ADMIN ONLY) -->
@@ -1262,6 +1313,8 @@
 
     <!-- MAIN DASHBOARD CONTENT -->
     <main class="main-content">
+      <!-- GLASS WRAPPER (membungkus headbar, ucapan, total, status & pintasan cepat) -->
+      <div class="glass-wrapper">
       <header class="system-banner no-print">
         <div class="banner-title-wrap">
           <button type="button" class="banner-toggle-btn" onclick="toggleSidebar()" title="Buka Sidebar" aria-label="Buka Sidebar">
@@ -1647,6 +1700,8 @@
           </a>
         </section>
       </section>
+      </div>
+      <!-- /GLASS WRAPPER -->
 
       <!-- FOOTER UTAMA DASHBOARD -->
       <footer class="site-footer">
